@@ -1,0 +1,35 @@
+<template>
+    <lightning-layout>
+        <template if:true={myWrapper._children}>
+            <template if:true={isExpanded}>
+                <lightning-layout-item>
+                    <lightning-button-icon icon-name="utility:dash" variant="border" size="xx-small" class="slds-p-around_xx-small" alternative-text="Collapse" title="Collapse" onclick={toggleView}></lightning-button-icon>
+                </lightning-layout-item>
+            </template>
+            <template if:false={isExpanded}>
+                <lightning-layout-item>
+                    <lightning-button-icon icon-name="utility:add" variant="border" size="xx-small" class="slds-p-around_xx-small" alternative-text="Expand" title="Expand" onclick={toggleView}></lightning-button-icon>
+                </lightning-layout-item>               
+            </template>
+        </template>
+        <template if:false={myWrapper.selectable}>
+            <lightning-layout-item>
+                <div>
+                    <p class="slds-p-around_xx-small">{myWrapper.Name}</p>
+                </div>
+                 <!-- <lightning-badge label={myWrapper.name} class="slds-badge_lightest"></lightning-badge> -->
+            </lightning-layout-item>
+        </template>
+    </lightning-layout>   
+    <template if:true={isExpanded}>
+        <template if:true={myWrapper._children}>
+            <template for:each={myWrapper._children} for:item="data">
+                <lightning-layout key={data.ukey}>
+                    <lightning-layout-item  class="slds-p-left_large">
+                        <c-summary-child-hierarchy my-wrapper={data}></c-summary-child-hierarchy>
+                    </lightning-layout-item>
+                </lightning-layout>
+            </template>
+        </template>
+    </template>
+</template>

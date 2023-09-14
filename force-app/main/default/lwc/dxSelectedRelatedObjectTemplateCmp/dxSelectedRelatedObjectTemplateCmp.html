@@ -1,0 +1,33 @@
+<template>
+<div class="runtime_platform_actionsQuickActionWrapper">
+		<!-- <header class="slds-modal__header">
+			<h2 class="slds-modal__title">Template Selector</h2>
+		</header> -->
+		<div class="quick-actions-panel">
+			<div class="slds-modal__content slds-p-around--medium">
+				<div class="forceChatterPublisherPresentationPanel forceChatterPublisherQuickAction">
+					<div class="container  activeState" style="min-height:300px; max-height:480px; overflow-y:auto">
+						<div class="slds-grid slds-wrap">
+							<div class="slds-col slds-size_1-of-2">
+								<template if:true={showTemplateSelector}>
+									<c-multi-lookup-component label-name={searchlabel} object-api-name={relatedObject}
+										field-api-names="Id,Name" filter-field-api-name="Name" icon-name="standard:account"
+										onsinglepill={selectItemEventHandler} onremovepill={updateItemEventHandler} has-multi-select="false"
+										>
+									</c-multi-lookup-component>
+								</template>
+								<template if:true={showTemplate}>
+									<c-dx-show-selected-template template-id={recordId} object-record-id={selectedObjectId} object-name={relatedObject}></c-dx-show-selected-template>
+								</template>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+		<footer class="slds-modal__footer">
+			<lightning-button variant="brand" label="Save" title="Template Selector" onclick={selectedTemplateHandler}></lightning-button>
+			<lightning-button variant="brand" label="Close" title="Template Selector" onclick={selectedTemplateHandler}></lightning-button>
+		</footer>
+	</div>
+</template>

@@ -1,0 +1,17 @@
+<!--Changes for the auto generation of PDF by Rahul-->
+
+<template>
+	<div class="slds-hidden" data-id='header'>
+		<table>
+			<thead>
+				<tr>
+					<template for:each={tableHeaderDuplicate} for:item="headval">
+						<th scope="col" key={headval} contenteditable="true" style={headerElementStyle} word-wrap='break-word;'>
+							<div title={headval}>{headval}</div>
+						</th>
+					</template>
+				</tr>
+			</thead>
+		</table>
+	</div>
+</template>

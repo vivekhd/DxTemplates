@@ -1,0 +1,66 @@
+<template>
+	<div class="dxt">
+		<div class="slds-grid slds-wrap dx-w-100p">
+			<div class="slds-col">
+				<div class="ag_lp_base dx-customleftmenufixer">
+					<div class="slds-col sidenavleft">
+						<!-- <lightning-combobox class="" name="Filter by SObject" label="Filter by SObject" value={templateRelatedTo}
+					placeholder="All" options={relatedTypeOptions} onchange={handleFilterSelection}>
+				</lightning-combobox> -->
+
+						<!-- Changes by Kapil - fix for SObj Filters -->
+						<c-menu-setup if:true={documentsExist} grid-data={docGridData} is-template='true' template-value={templateRelatedTo}
+							placeholder-text="Search Template..." onactive={handleTemplateSelection} related-type-option-data={relatedTypeOptions} 
+							onnewtemplate={handleNewTemplateCreationscreen} onfilteredvalue={handleFilterSelection}>
+						</c-menu-setup>
+					</div>
+				</div>
+			</div>
+			<!-- <div class="slds-col slds-form-element">
+				
+			</div> -->
+			<div class="slds-col dx-p-left_200 ">
+				<template if:true={showUpdatedTemplate}>
+					<c-template-designer-c-m-p record-id={selectedDocumentId} relatedto-type-obj-name={relatedtoTypeObj}
+						ondoccreated={handleNewTemplateCreation} ondeletetemplate={deleteTemplateHandler}
+						ondocedited={editTemplateHandler}>
+					</c-template-designer-c-m-p>
+				</template>
+			</div>
+		</div>
+
+		<c-modal>
+			<template if:true={showAddNewTemplate}>
+				<span slot="header">Add New Template</span>
+				<div class="slds-modal__content slds-p-around_small dx-lrf-std-cstm-1" style="min-height: 240px;">
+					<lightning-record-edit-form object-api-name="DxCPQ__Document_Template__c"
+						onsubmit={handleCreateSubmit}>
+						<div class="slds-grid slds-wrap">
+							<div class="slds-col slds-size_1-of-1 slds-medium-size_6-of-12">
+								<lightning-input-field field-name="Name" required> </lightning-input-field>
+							</div>
+							<div class="slds-col slds-size_1-of-1 slds-medium-size_6-of-12">
+								<lightning-input-field field-name="DxCPQ__Related_To_Type__c"
+									onchange={handleRelatedToTypeChange} required> </lightning-input-field>
+							</div>
+							<div class="slds-col slds-size_1-of-1 slds-medium-size_6-of-12">
+								<lightning-input-field field-name="DxCPQ__Version_Number__c" value="1" read-only="true">
+								</lightning-input-field>
+							</div>
+							<div class="slds-col slds-size_1-of-1 slds-medium-size_6-of-12">
+								<lightning-input-field field-name="DxCPQ__Description__c"> </lightning-input-field>
+							</div>
+						</div>
+
+						<div class="slds-text-align_right">
+							<lightning-button class="slds-m-top_small" type="submit" label="Save" variant="brand">
+							</lightning-button>
+						</div>
+					</lightning-record-edit-form>
+				</div>
+				<footer class="slds-modal__footer"> </footer>
+			</template>
+		</c-modal>
+
+	</div>
+</template>

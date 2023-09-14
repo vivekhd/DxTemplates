@@ -1,0 +1,35 @@
+<template>
+	<lightning-card>
+		<b class="slds-p-horizontal_small">	The Selected Condition is: {conditionExpression}</b>
+		<div class="slds-size_1-of-4 slds-p-horizontal_small">
+			<lightning-combobox name="takeActionWhen" label="Take Action When" value={selectedGlobalValue} placeholder="Select Action" options={globalExpressionOptions}
+				onchange={handleGlobalExpressionOptions} read-only={readOnly}></lightning-combobox>
+		</div>
+		<template if:true={fieldWrapper}>
+			<template if:true={lstOfCondition}>
+				<template for:each={lstOfCondition} for:item="row" for:index="index">
+					<template if:false={index}>
+						<c-condition-rowcmp key={row.uKey} label-variant={showLabel} row={row}
+							field-wrapper={fieldWrapper} selected-global-value={selectedGlobalValue}
+							ondeleterow={deleteCondition} onaddnewrow={addNewConditionHandler}
+							ondxcpqconditionchange={rowDataChangeHandler} ondxcpqaddnewgroup={addNewGroupHandler}
+							ondxcpqtakeaction={updateActionHandler} ondxcpqtakeactionforgroup={updateActionForGroup} read-only={readOnly}>
+						</c-condition-rowcmp>
+					</template>
+					<template if:true={index}>
+						<c-condition-rowcmp key={row.uKey} label-variant={labelHidden} row={row}
+							field-wrapper={fieldWrapper} selected-global-value={selectedGlobalValue}
+							ondeleterow={deleteCondition} onaddnewrow={addNewConditionHandler}
+							ondxcpqconditionchange={rowDataChangeHandler} ondxcpqaddnewgroup={addNewGroupHandler}
+							ondxcpqtakeaction={updateActionHandler} ondxcpqtakeactionforgroup={updateActionForGroup} read-only={readOnly}>
+						</c-condition-rowcmp>
+					</template>
+				</template>
+			</template>
+		</template>
+
+		<!-- <lightning-button class="slds-p-right_large slds-float_right" variant="brand" label="Save" title="Save"
+			onclick={getRuleExpression}></lightning-button> -->
+
+	</lightning-card>
+</template>

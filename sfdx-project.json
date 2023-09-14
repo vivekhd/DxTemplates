@@ -1,0 +1,25 @@
+{
+  "packageDirectories": [
+    {
+      "path": "force-app",
+      "default": true,
+      "package": "DxTemplates",
+      "versionName": "ver 0.1",
+      "versionNumber": "0.2.0.NEXT",
+      "versionDescription": "",
+      "postInstallScript": "PostInstallDataCreation"
+    }
+  ],
+  "name": "DxTemplates",
+  "namespace": "DxCPQ",
+  "sfdcLoginUrl": "https://login.salesforce.com",
+  "sourceApiVersion": "58.0",
+  "packageAliases": {
+    "DxTemplates": "0HoQm0000000001KAA",
+    "DxTemplates@0.1.0-1": "04tQm0000000c6vIAA",
+    "DxTemplates@0.1.0-2": "04tQm0000000cGbIAI",
+    "DxTemplates@0.1.0-3": "04tQm0000001qfhIAA",
+    "DxTemplates@0.1.0-4": "04tQm0000002b1vIAA",
+    "DxTemplates@0.2.0-1": "04tQm00000038QrIAI"
+  }
+}

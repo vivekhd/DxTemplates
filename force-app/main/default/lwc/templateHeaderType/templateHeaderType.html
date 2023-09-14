@@ -1,0 +1,84 @@
+<template>
+	<div if:true={showText}>
+		{HeaderAlignmentType}
+		<lightning-input-rich-text value={richtextVal} formats={formats} onchange={handleRichTextArea}
+			aria-placeholder="Enter Text here" disabled={isDisabled}>
+			<lightning-rich-text-toolbar-button-group slot="toolbar" aria-label="Template Button Group">
+
+				<!-- Commented by Rahul - Merge Fields -->
+				 <lightning-rich-text-toolbar-button icon-name="utility:merge" icon-alternative-text="Add Merge Field"
+					onclick={handlemergefieldadd} disabled={isDisabled}>
+				</lightning-rich-text-toolbar-button> 
+				
+
+				<lightning-rich-text-toolbar-button icon-name="utility:image" icon-alternative-text="Add Image"
+					onclick={handleAddImage} disabled={isDisabled}>
+				</lightning-rich-text-toolbar-button>
+			</lightning-rich-text-toolbar-button-group>
+		</lightning-input-rich-text>
+	</div>
+
+	<c-modal>
+		<template if:true={showmergefield}>
+			<span slot="header">Merge Field(s)</span>
+			<div class="slds-modal__content slds-p-around_small dx-lrf-std-cstm-1" style="min-height: 240px;">
+				<c-dx-lookup-fields-displaycmp selection-object={objectName}></c-dx-lookup-fields-displaycmp>
+				<!-- <c-dx-lookup-fields-displaycmp></c-dx-lookup-fields-displaycmp> -->
+			</div>
+			<footer class="slds-modal__footer">
+				<div class="slds-text-align_right">
+					<lightning-button variant="brand" label="insert" title="insert" onclick={getMergeField}>
+					</lightning-button>
+					<lightning-button variant="brand" label="CopyToClipboard" title="insert"
+						onclick={getMergeFieldCopy}></lightning-button>
+				</div>
+			</footer>
+
+		</template>
+		<template if:true={isModalOpen}>
+			<span slot="header">Select Image</span>
+			<div class="slds-modal__content slds-p-around_small dx-lrf-std-cstm-1" style="min-height: 240px;">
+				<template if:true={showimages}>
+					<template if:true={imagesfound}>
+						<div class="slds-grid slds-wrap slds-p-around_xx-small slds-border_bottom"
+							style="border: 1px solid rgb(229, 229, 229); border-radius: 5px; background: rgb(243, 243, 243);">
+							<div
+								class="slds-col slds-size_1-of-1 slds-medium-size_4-of-12 slds-large-size_4-of-12 slds-m-bottom_xx-small">
+								<lightning-input if:true={showimages} name="enter-search" label="Search" type="search"
+									onchange={handleSearch}></lightning-input>
+							</div>
+						</div>
+					</template>
+					<div class="slds-grid slds-wrap slds-p-top_small">
+						<template if:true={imagesfound}>
+							<template for:each={imageUrls} for:item="image" for:index="index">
+
+								<div class="slds-col slds-size_1-of-1 slds-large-size_3-of-12 slds-text-align_center"
+									key={image.Id}>
+									<div class="slds-box slds-box_small  slds-m-bottom_small" key={image.Id}
+										data-id={image.Id} onclick={handleselectedImage} disabled={isDisabled}>
+
+										<img key={image.Id} src={image.URL} alt="User Image" height="100px" width="100px"/>
+										<br key={image.Id}/>
+										<br key={image.Id}/>
+										<lightning-formatted-text value={image.title} key={image.Id}
+											disabled={isDisabled}></lightning-formatted-text>
+
+									</div>
+									<!--<lightning-button key={image.Id} data-id={image.Id} variant="brand" label="Select" title="titleName" 
+                        onclick={handleselectedImage} disabled={isDisabled}></lightning-button>-->
+								</div>
+
+							</template>
+						</template>
+					</div>
+					<template if:false={imagesfound}>
+						<p>No Images found, Please upload the images under Files & try again</p>
+					</template>
+				</template>
+
+			</div>
+			<footer class="slds-modal__footer"></footer>
+		</template>
+	</c-modal>
+</template>

@@ -1,0 +1,83 @@
+<template>
+	<template if:true={showdetails}>
+
+		<div class="slds-grid slds-wrap slds-m-bottom_small slds-p-around_small slds-border_bottom"
+			style="border:1px solid #e5e5e5; border-radius:5px; background: rgb(243 243 243);">
+
+			<div class="slds-col slds-size_1-of-1 slds-medium-size_4-of-12 slds-large-size_4-of-12">
+				<lightning-input type="text" disabled={isDisabled} variant="standard" name="name" label="Name"
+					value={Recorddetailsnew.Name} onchange={handlename} placeholder="Type Section Name Here..." required>
+				</lightning-input>
+			</div>
+
+			<template if:true={showclausescreen}>
+				<div class="slds-col slds-size_1-of-1 slds-medium-size_4-of-12 slds-large-size_4-of-12 slds-p-left_small">
+					<c-multi-lookup-component label-name="*Document Clause" object-api-name="DxCPQ__Document_Clause__c"
+						field-api-names="Id,Name,DxCPQ__Body__c" filter-field-api-name="Name"
+						icon-name="standard:account" onsinglepill={selectItemEventHandler}
+						onremovepill={updateItemEventHandler} has-multi-select="false" read-only={isDisabled}
+						where-clause={whereClause}>
+					</c-multi-lookup-component>
+				</div>
+			</template>
+
+			<div class="slds-col slds-size_1-of-1 slds-medium-size_2-of-12 slds-large-size_2-of-12 slds-p-left_small">
+				<!--<button type="save" disabled={disableButton} class="slds-button slds-button_brand slds-var-m-top_medium slds-float_right" onclick={handlesectionsave}>save</button>-->
+				<label class="slds-form-element__label">&nbsp;</label>
+				<lightning-button disabled={disableButton} variant="brand" label="Update" title="titleName"
+					onclick={handlesectionsave}>
+				</lightning-button>
+			</div>
+			
+			<div class="slds-col slds-size_1-of-1 slds-medium-size_2-of-12 slds-large-size_2-of-12 slds-p-top_x-large slds-float_right">
+				<lightning-input type="checkbox" data-id="newpage" label="New Page" name="New Page"
+					class="slds-list_horizontal" onchange={handlechange} value={newpage} disabled={isDisabled}>
+				</lightning-input>
+			</div>
+		</div>
+
+		<div class="slds-m-horizontal_large">
+			<div if:true={isLoaded} class="slds-is-relative">
+				<lightning-spinner alternative-text="Loading..." variant="brand">
+				</lightning-spinner>
+			</div>
+		</div>
+
+		<div class="slds-col slds-size_12-of-12">
+			<lightning-input-rich-text value={richtextVal} formats={formats} onchange={handleRichTextArea}
+				aria-placeholder="Enter Text here" disabled={isDisabled}>
+				<lightning-rich-text-toolbar-button-group slot="toolbar" aria-label="Template Button Group">
+					<lightning-rich-text-toolbar-button icon-name="utility:merge"
+						icon-alternative-text="Add Merge Field" onclick={handlemergefieldadd} disabled={isDisabled}>
+					</lightning-rich-text-toolbar-button>
+				</lightning-rich-text-toolbar-button-group>
+			</lightning-input-rich-text>
+		</div>
+
+		<div class="slds-col slds-size_12-of-12 slds-text-align_right slds-p-top_small">
+			<lightning-button class="slds-m-left_small" disabled={disabledeleteButton} variant="neutral" label="Delete"
+				title="titleName" onclick={handlesectionDelete}>
+			</lightning-button>
+			<lightning-button class="slds-m-left_small" disabled={disableButton} variant="brand" label="Save"
+				title="titleName" onclick={handlesectionsave}>
+			</lightning-button>
+		</div>
+
+		<c-modal>
+			<span slot="header">Merge Field(s)</span>
+			<div class="slds-modal__content slds-p-around_medium" style="min-height: 240px;">
+				<c-dx-lookup-fields-displaycmp selection-object={selectedObjectName}></c-dx-lookup-fields-displaycmp>
+			</div>
+
+			<footer class="slds-modal__footer">
+				<div class="slds-text-align_right">
+					<lightning-button variant="brand" label="insert" title="insert" onclick={getMergeField}>
+					</lightning-button>
+					<lightning-button variant="brand" label="CopyToClipboard" title="insert"
+						onclick={getMergeFieldCopy}></lightning-button>
+				</div>
+			</footer>
+		</c-modal>
+
+	</template>
+</template>

@@ -1,0 +1,189 @@
+<template>
+
+	<lightning-layout>
+		<lightning-layout-item size=2 class="slds-p-horizontal_small slds-p-bottom_small">
+			<lightning-combobox name="objectName" variant={labelVariant} label="Object Name"
+				value={row.selectedObject} placeholder="Select Object" options={row.objectName}
+			onchange={selectedSObjectEventHandler} read-only={readOnly}>
+			</lightning-combobox>
+		</lightning-layout-item>
+		<lightning-layout-item size=2 class="slds-p-horizontal_small slds-p-bottom_small">
+			<lightning-combobox name="fieldName" variant={labelVariant} label="Field Name" value={row.selectedField}
+			placeholder="Select Field" options={row.fieldName} onchange={selectedFieldEventHandler} read-only={readOnly}>
+			</lightning-combobox>
+		</lightning-layout-item>
+		<lightning-layout-item size=2 class="slds-p-horizontal_small slds-p-bottom_small">
+			<lightning-combobox name="operator" variant={labelVariant} label="Operator" value={row.operator}
+			placeholder="Select Operator" options={operatorOptions} onchange={selectedOperatorEventHandler} read-only={readOnly}>
+			</lightning-combobox>
+		</lightning-layout-item>
+		<lightning-layout-item size=2 class="slds-p-horizontal_small slds-p-bottom_small">
+
+			<template if:true={row.isText}>
+				<lightning-input label="Value" value={row.value} variant={labelVariant} name="Enter-Value"
+				placeholder="Select / Enter Value..." type="text" onchange={assignedValueEventHandler} read-only={readOnly}>
+				</lightning-input>
+			</template>
+			<template if:true={row.isCurrency}>
+				<lightning-input label="Value" value={row.value} variant={labelVariant} name="Enter-Value"
+					placeholder="Select / Enter Value..." type="search" formatter="currency" step=".01"
+				onchange={assignedValueEventHandler} read-only={readOnly}>
+				</lightning-input>
+			</template>
+			<template if:true={row.isCheckbox}>
+				<lightning-input label="Value" checked ={row.value} variant={labelVariant} name="Enter-Value"
+				placeholder="Select / Enter Value..." type="checkbox" onclick={assignedCheckboxValueEventHandler} read-only={readOnly}>
+				</lightning-input>
+			</template>
+			<template if:true={row.isDate}>
+				<lightning-input label="Value" value={row.value} variant={labelVariant} name="Enter-Value"
+				placeholder="Select / Enter Value..." type="date" onchange={assignedValueEventHandler} read-only={readOnly}>
+				</lightning-input>
+			</template>
+			<template if:true={row.ispicklist}>
+				<lightning-combobox label="Value" value={row.value} variant={labelVariant} name="value"
+				placeholder="Select" options={row.picklistValues} onchange={assignedValueEventHandler} read-only={readOnly}>
+				</lightning-combobox>
+			</template>
+			<template if:true={row.isLongText}>
+				<lightning-textarea label="Value" value={row.value} variant={labelVariant} name="value"
+				onchange={assignedValueEventHandler} read-only={readOnly}>
+				</lightning-textarea>
+			</template>
+			<template if:true={row.isNumber}>
+				<lightning-input label="Value" value={row.value} variant={labelVariant} name="select-attribute"
+				placeholder="Select / Enter Value..." type="number" onchange={assignedValueEventHandler} read-only={readOnly}>
+				</lightning-input>
+			</template>
+			<template if:true={row.isPercent}>
+				<lightning-input label="Value" value={row.value} variant={labelVariant} name="select-attribute"
+					placeholder="Select / Enter Value..." type="number" formatter="percent" step="0.01"
+				onchange={assignedValueEventHandler} read-only={readOnly}>
+				</lightning-input>
+			</template>
+			<template if:true={row.isLookup}>
+
+				<div>
+					<div class="slds-form-element ">
+						<div class="slds-form-element__control ">
+							<div class="slds-combobox_container">
+								<div class={row.lookupDetailsboxClass} aria-expanded="true" aria-haspopup="listbox"
+									role="combobox">
+									<div class="slds-combobox__form-element slds-input-has-icon slds-input-has-icon_right"
+										role="none">
+										<template if:true={row.lookupDetailsisValueSelected}>
+
+											<lightning-icon class="slds-combobox__input-entity-icon"
+												icon-name="standard:hierarchy" alternative-text="Group"
+												title={row.lookupDetailsselectedName}></lightning-icon>
+											<button type="button" class="slds-input_faux slds-combobox__input slds-combobox__input-value" aria-labelledby="combobox-label-id-33 combobox-id-5-selected-value"  aria-controls="listbox-id-5" aria-expanded="false"
+																									aria-haspopup="listbox">
+																							<span class="slds-truncate" >{row.lookupDetailsselectedName}</span>
+																							</button>
+											<button  class="slds-button slds-button_icon slds-input__icon slds-input__icon_right" onclick={handleRemovePill} title="Remove selected option">
+																							<lightning-icon icon-name="utility:close" alternative-text="close" size="x-small" title="close"></lightning-icon>
+																							<span class="slds-assistive-text">Remove selected option</span>
+											</button>
+										</template>
+										<template if:false={row.lookupDetailsisValueSelected}>
+											<div>
+												<lightning-input label="Value" name="value"
+													class={row.lookupDetailsinputClass} type="search"
+													onclick={handleClick} onchange={lookupEventHandler}
+													variant={labelVariant} autocomplete="off" placeholder="Search">
+												</lightning-input>
+											</div>
+										</template>
+									</div>
+									<div class="slds-dropdown slds-dropdown_length-with-icon-7 slds-dropdown_fluid"
+										role="listbox">
+										<ul class="slds-listbox slds-listbox_vertical" role="presentation">
+											<template for:each={row.lookupDetailsdata} for:item="record">
+												<li key={record.Id} onclick={onSelect} data-id={record.Id}
+													role="presentation" data-name={record.Name}>
+													<span class="slds-lookup__item-action slds-lookup__item-action--label" role="option">
+											<lightning-icon class="slds-icon slds-icon--small slds-icon-text-default" icon-name={row.lookupDetailsiconName}  size="small"></lightning-icon>
+											<span class="slds-truncate">{record.Name}</span>
+													</span>
+												</li>
+											</template>
+										</ul>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+
+			</template>
+		</lightning-layout-item>
+		<lightning-layout-item size=2 class="slds-p-horizontal_small slds-p-bottom_small">
+			<lightning-combobox name="action" label="Take Action" value={row.action} variant={labelVariant}
+			placeholder="" options={actions} onchange={selectedActionEventHandler} disabled={row.disableActionValue} read-only={readOnly}></lightning-combobox>
+		</lightning-layout-item>
+		<lightning-layout-item size=2 class="slds-align-bottom">
+			<lightning-layout>
+				<lightning-layout-item
+					class="slds-p-horizontal_small slds-p-bottom_small">
+					<lightning-button-icon data-id={row._index} icon-name="utility:ad_set" label="add"
+					alternative-text="add" title="addGroup" onclick={addNewGroupHandler} disabled={readOnly}>
+					</lightning-button-icon>
+				</lightning-layout-item>
+				<lightning-layout-item
+					class="slds-p-left_small slds-p-bottom_small">
+					<lightning-button-icon data-id={row._index} icon-name="utility:add" label="add"
+					alternative-text="add" title="add" onclick={addNewConditionRowHandler} disabled={readOnly}>
+					</lightning-button-icon>
+				</lightning-layout-item>
+				<lightning-layout-item
+					class="slds-p-horizontal_small slds-p-bottom_small">
+					<lightning-button-icon data-id={row._index} icon-name="utility:delete" label="delete"
+					alternative-text="Delete" title="Delete" onclick={deleteConditionRowHandler} disabled={readOnly}>
+					</lightning-button-icon>
+				</lightning-layout-item>
+			</lightning-layout>
+		</lightning-layout-item>
+
+	</lightning-layout>
+	<template if:true={row.children}>
+		<div class="slds-box_border slds-m-left_small slds-m-bottom_x-small slds-m-right_xx-small" style="border-left:2px solid #1b1ec2;background: rgba(0,0,0,0.02);">
+			<div class="slds-grid slds-gutters slds-p-horizontal_small slds-p-bottom_small">
+				<div class="slds-col slds-size_1-of-6">
+					<lightning-combobox name="takeActionWhen" label="Take Action When" value={row.selectedGlobalValue}
+						placeholder="Select Action" options={row.actionOptions} onchange={handleGlobalExpressionOptionsForGroups}>
+					</lightning-combobox>
+				</div>
+				<div class="slds-col slds-align-bottom slds-size_1-of-6">
+					<lightning-combobox name="action" label="Take Action" value={row.childAction} variant={labelVariant}
+						placeholder="" options={actions} onchange={selectedChildActionEventHandler}
+						disabled={row.disableActionValueForChild}>
+					</lightning-combobox>
+				</div>
+			</div>
+			<template for:each={row.children} for:item="childrow" for:index="index">
+				<div key={childrow.uKey} class="slds-box_border slds-m-left_small slds-m-bottom_x-small slds-m-right_xx-small" style=" border: 1px solid rgb(161, 161, 161, 0.4); border-top:2px solid #4194f9!important;">
+					<div class="slds-size_1-of-6 slds-p-horizontal_small slds-p-bottom_small">
+						<lightning-combobox data-id={index} name="takeActionWhen" label="Take Action When" value={childrow.selectedGlobalValue}
+							placeholder="Select Action" options={childrow.actionOptions}
+							onchange={handleGlobalExpressionOptionsForRow}>
+						</lightning-combobox>
+					</div>
+					<template for:each={childrow.group} for:item="condition">
+						<div key={condition.uKey}>
+							<div style="padding-left:0px">
+								<c-condition-rowcmp  label-variant={labelHidden} row={condition}
+									field-wrapper={fieldWrapper}></c-condition-rowcmp>
+							</div>
+						</div>
+					</template>
+					<div class="slds-size_1-of-8 slds-p-left_small slds-p-bottom_small">
+						<lightning-combobox data-id={index} name="action" label="Take Action" value={childrow.action} variant={labelVariant}
+							placeholder="" options={actions} onchange={selectedGroupActionEventHandler}
+							disabled={childrow.disableActionValue}>
+						</lightning-combobox>
+					</div>
+				</div>
+			</template>
+		</div>
+	</template>
+</template>

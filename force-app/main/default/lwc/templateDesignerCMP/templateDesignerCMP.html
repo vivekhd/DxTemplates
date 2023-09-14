@@ -1,0 +1,334 @@
+<template>
+	<div class="dxqt">
+
+		<div class="lgc-bg slds-text-align_left dx-box1 slds-box slds-m-horizontal_xx-small">
+			<div class="slds-grid slds-wrap">
+				<div class="slds-col slds-text-align_left" style="padding-top:2px;">
+					<lightning-button-group>
+						<!-- <lightning-button icon-name="utility:back" label="Back To List"></lightning-button> -->
+						<!-- <lightning-button label="Edit Settings" onclick={handleeditsettings}></lightning-button> -->
+						<lightning-button label={activateTemplateLabel} onclick={handleActiveTemplate}>
+						</lightning-button>
+						<lightning-button label="Clone Template" onclick={handleCloneTemplate}></lightning-button>
+						<!--<lightning-button label="Test Template"></lightning-button>-->
+						<lightning-button label="Delete Template" onclick={handleDeleteTemplateHandler}>
+						</lightning-button>
+						<lightning-button label="Refresh Template" onclick={handleRefreshTemplateHandler}>
+						</lightning-button>
+						<template if:true={showPreview}>
+							<lightning-button label="Preview Template" title="preview" onclick={handlePreview}>
+							</lightning-button>
+						</template>
+					</lightning-button-group>
+					<!-- Changes by Kapil - Added margin to badge -->
+					<lightning-badge label={relatedtoTypeObjName} class="slds-badge_inverse slds-m-left_medium">
+					</lightning-badge>
+				</div>
+
+				<div class="slds-col slds-text-align_right">
+					<lightning-layout class="slds-grid slds-grid_align-end">
+						<div data-id='section menu' class="slds-col slds-grid_align-end"></div>
+
+						<lightning-button-group data-id='section menu items' class="slds-button-group" role="group">
+							<lightning-button-icon icon-name="utility:snippet" alternative-text="Section : Context"
+								title="Section : Context" onclick={handleNewContext} disabled={disableEditing}>
+							</lightning-button-icon>
+							<lightning-button-icon icon-name="utility:strategy"
+								alternative-text="Section : Related Objects" title="Section : Related Objects"
+								onclick={handleNewRelatedObjects} disabled={disableEditing}></lightning-button-icon>
+							<lightning-button-icon icon-name="utility:task" alternative-text="Section : Clause"
+								title="Section : Clause" onclick={handleNewClause} disabled={disableEditing}>
+							</lightning-button-icon>
+							<!-- <lightning-button-icon icon-name="utility:table"  alternative-text="Section : Table" 
+							title="Section : Table" onclick={handleNewTable}></lightning-button-icon>  -->
+							<span style="line-height:32px"> &nbsp; - &nbsp; </span>
+							<lightning-button-icon icon-name="utility:edit" alternative-text="Edit Template"
+								title="Edit Template" onclick={handleEditTemplate} disabled={disableEditing}>
+							</lightning-button-icon>
+						</lightning-button-group>
+					</lightning-layout>
+				</div>
+
+			</div>
+		</div>
+		<!-- <div slot="header">
+			<lightning-button-icon icon-name="utility:add"  alternative-text="Add New Template" title="Add New Template" onclick={createNewTemplateHandler}></lightning-button-icon>
+			<lightning-button-icon icon-name="utility:edit"  alternative-text="Edit Template" title="Edit Template"></lightning-button-icon>
+		</div> -->
+		<div class="dx-box1bot slds-box">
+
+			<div class="slds-grid slds-wrap">
+
+				<div class="slds-col slds-size_9-of-12">
+					<div class="slds-grid slds-wrap slds-p-right_small">
+
+						<div class="slds-col slds-size_12-of-12">
+							<c-template-header showheaderdetails={showheaderdetails}
+								selected-object-name={relatedtoTypeObjChild} recordidvalueprop={recordIDValueprop}
+								rowcount={header.rowCount} sectiontype={header.Type}
+								ondeletesectiondata={handledeletesectiondata} onsavesectiondata={handlesavedheaderdata}
+								recordidtoedit={recordidtoedit} sectionrecordid={header.Id}
+								documenttemplaterecord={doctemplatedetails}>
+							</c-template-header>
+
+							<c-template-content-details showdetails={showcontextdetails}
+								selected-object-name={relatedtoTypeObjChild} recordidvalueprop={recordIDValueprop}
+								rowcount={rowCount} sectiontype={SectionTypename}
+								onsavesectiondata={handlesavedsectiondata} ondeletesectiondata={handledeletesectiondata}
+								showclausescreen={showclausescreen} recordidtoedit={recordidtoedit}
+								sectionrecordid={selectedSectionRecordID} documenttemplaterecord={doctemplatedetails}>
+							</c-template-content-details>
+
+							<!-- <c-template-table-details showtabledetails={showtabledetails}
+								selected-object-name={relatedtoTypeObjChild} recordidvalueprop={recordIDValueprop}
+								rowcount={rowCount} sectiontype={SectionTypename}
+								onsavesectiondata={handlesavedsectiondata} ondeletesectiondata={handledeletesectiondata}
+								recordidtoedit={recordidtoedit} sectionrecordid={selectedSectionRecordID}
+								documenttemplaterecordid={doctemplatedetails.Id}
+								documenttemplaterecord={doctemplatedetails}>
+							</c-template-table-details> -->
+
+							<c-template-related-objects showrelatedobjectdetails={showrelatedobjectdetails}
+								selected-object-name={relatedtoTypeObjChild} recordidvalueprop={recordIDValueprop}
+								rowcount={rowCount} sectiontype={SectionTypename}
+								onsavesectiondata={handlesavedsectiondata} ondeletesectiondata={handledeletesectiondata}
+								recordidtoedit={recordidtoedit} sectionrecordid={selectedSectionRecordID}
+								documenttemplaterecordid={doctemplatedetails.Id}
+								documenttemplaterecord={doctemplatedetails}>
+							</c-template-related-objects>
+
+							<c-template-footer showfooterdetails={showfooterdetails}
+								selected-object-name={relatedtoTypeObjChild} recordidvalueprop={recordIDValueprop}
+								rowcount={footer.rowCount} sectiontype={footer.Type}
+								ondeletesectiondata={handledeletesectiondata} onsavesectiondata={handlesavedfooterdata}
+								recordidtoedit={recordidtoedit} sectionrecordid={footer.Id}
+								documenttemplaterecord={doctemplatedetails}>
+							</c-template-footer>
+						</div>
+					</div>
+				</div>
+
+				<div class="slds-col slds-size_3-of-12">
+					<div class="slds-align_absolute-center slds-box slds-p-top_small">
+						<strong>TEMPLATE SECTIONS</strong>
+					</div>
+					<div class="">
+						<div if:true={isLoaded2} class="slds-is-relative">
+							<lightning-spinner alternative-text="Loading..." variant="brand">
+							</lightning-spinner>
+						</div>
+					</div>
+					<template if:true={opensection}>
+						<div class="container2" aria-multiselectable="true"
+							style="width: 100%; display:flex; flex-flow:column;">
+
+							<div class="">
+								<div if:true={isLoaded} class="slds-is-relative">
+									<lightning-spinner alternative-text="Loading..." variant="brand">
+									</lightning-spinner>
+								</div>
+							</div>
+
+							<!-- HEADER START -->
+							<template if:true={header}>
+								<div class="grabable" key={header.Id} id={header.Id} data-drag-id={header.Id}
+									data-onload='templateHeader' onclick={handleHeaderClick} data-index={header.Id}
+									data-id={header.Id}>
+									<div scope="col" class="slds-grid slds-wrap"
+										style="padding:10px 10px 10px 10px; width:100%; box-shadow:0px 0px 2px rgb(229, 229, 229)">
+										<lightning-icon icon-name="utility:drag_and_drop" size="small"></lightning-icon>
+										<div scope="col" class="slds-col" hidden>{header.Id}</div>
+										<div scope="col" class="slds-col">
+											<div
+												style="font-size:12px;line-height:14px; position:absolute; margin-top:-4px; font-style:italic;">
+												{header.Type}
+											</div>
+											<div id={header.Id}
+												style="font-size:14px;margin: 8px 0px -8px 10px; font-weight:600;"
+												key={header.Id}>
+												{header.sectionNameEntered}
+											</div>
+										</div>
+									</div>
+								</div>
+							</template>
+							<!-- HEADER STOP -->
+
+							<template if:true={sections}>
+								<template for:each={sections} for:item="section" for:index="index">
+									<div class="grabable" key={section.Id} id={section.Id} draggable="true"
+										data-drag-id={index} ondragstart={onDragStart} ondragover={onDragOver}
+										ondrop={onDrop} onclick={handleSectionClick} data-index={index} data-id={index}>
+
+										<div scope="col" class="slds-grid slds-wrap"
+											style="padding:10px 10px 10px 10px; width:100%; box-shadow:0px 0px 2px rgb(229, 229, 229)">
+											<lightning-icon icon-name="utility:drag_and_drop" size="small">
+											</lightning-icon>
+											<div scope="col" class="slds-col myId" hidden>{section.Id}</div>
+											<div scope="col" class="slds-col">
+												<div
+													style="font-size:12px;line-height:14px; position:absolute; margin-top:-4px; font-style:italic;">
+													{section.Type}
+												</div>
+												<div id={section.Id}
+													style="font-size:14px;margin: 8px 0px -8px 10px; font-weight:600;"
+													key={section.Id}>
+													{section.sectionNameEntered}
+												</div>
+											</div>
+											<div scope="col"
+												class="slds-col slds-float_right slds-text-align_right myIndex" hidden>
+												{index}
+											</div>
+										</div>
+
+									</div>
+								</template>
+							</template>
+							<template if:false={sections}>No rows found.</template>
+
+							<!-- FOOTER START -->
+							<template if:true={footer}>
+								<div class="grabable" key={footer.Id} id={footer.Id} data-drag-id={footer.Id}
+									data-onload='templateFooter' onclick={handleFooterClick} data-index={footer.Id}
+									data-id={footer.Id}>
+									<div scope="col" class="slds-grid slds-wrap"
+										style="padding:10px 10px 10px 10px; width:100%; box-shadow:0px 0px 2px rgb(229, 229, 229)">
+										<lightning-icon icon-name="utility:drag_and_drop" size="small"></lightning-icon>
+										<div scope="col" class="slds-col" hidden>{footer.Id}</div>
+										<div scope="col" class="slds-col">
+											<div
+												style="font-size:12px;line-height:14px; position:absolute; margin-top:-4px; font-style:italic;">
+												{footer.Type}
+											</div>
+											<div id={footer.Id}
+												style="font-size:14px;margin: 8px 0px -8px 10px; font-weight:600;"
+												key={footer.Id}>
+												{footer.sectionNameEntered}
+											</div>
+										</div>
+									</div>
+								</div>
+							</template>
+							<!-- FOOTER STOP -->
+
+						</div>
+					</template>
+				</div>
+			</div>
+
+			<!-- <template if:true={isModalOpen}>
+				<section role="dialog" tabindex="-1" aria-labelledby="modal-heading-01" aria-modal="true"
+					aria-describedby="modal-content-id-1" class="slds-modal slds-fade-in-open">
+					<div class="slds-modal__container">
+
+						<button class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse"
+							title="Close" onclick={closeModal}>
+							<lightning-icon icon-name="utility:close" alternative-text="close" variant="inverse"
+								size="small"></lightning-icon>
+							<span class="slds-assistive-text">Close</span>
+						</button>
+
+						<div class="slds-modal__content slds-p-around_medium" id="modal-content-id-1">
+							<p><b></b></p>
+							<lightning-radio-group label="Select Section Type " options={options}
+								onchange={handleSelectedValue} required>
+							</lightning-radio-group>
+						</div>
+					</div>
+				</section>
+				<div class="slds-backdrop slds-backdrop_open"></div>
+			</template> -->
+
+			<c-modal>
+				<template if:true={previewModal}>
+					<span slot="header"> Preview Template </span>
+
+					<div class="slds-modal__content slds-p-around_medium" style="min-height: 240px;">
+						<c-multi-lookup-component label-name={previewLabel} object-api-name={relatedtoTypeObjName}
+							field-api-names="Id,Name" filter-field-api-name="Name" icon-name="standard:account"
+							onsinglepill={selectItemEventHandler} onremovepill={updateItemEventHandler}
+							has-multi-select="false" where-clause="">
+						</c-multi-lookup-component>
+					</div>
+
+					<footer class="slds-modal__footer">
+						<div class="slds-text-align_right">
+							<lightning-button class="slds-p-right_x-small" variant="brand" label="Preview"
+								title="preview" disabled={navigateToPreview} onclick={showpreviewtemplate}></lightning-button>
+							<lightning-button class="slds-p-right_x-small" variant="brand" label="Cancel" 
+								onclick={closePreviewModal}></lightning-button>
+						</div>
+					</footer>
+				</template>
+
+				<template if:true={showTemplate}>
+					<span slot="header"> Preview </span>
+					<div class="slds-modal__content slds-p-around_medium">
+						<div style="overflow-y:auto; height:calc(100vh - 200px)">
+							<c-dx-show-selected-template template-id={templateId} object-record-id={previewRecordId}
+								object-name={relatedtoTypeObjName}>
+							</c-dx-show-selected-template>
+						</div>
+					</div>
+
+					<footer class="slds-modal__footer">
+						<div class="slds-text-align_right">
+							<lightning-button class="slds-m-left_small" variant="brand" label="Back" onclick={handlePreviewBackButton}>
+							</lightning-button>
+							<lightning-button class="slds-m-left_small" variant="brand" label="Cancel" onclick={closePreviewModal}>
+							</lightning-button>
+						</div>
+					</footer>
+				</template>
+
+				<template if:true={showCloneTemplate}>
+					<span slot="header">Clone Template</span>
+					<div class="slds-modal__content slds-p-around_medium" style="min-height: 240px;">
+						<c-clone-document-cmp record-id={recordId} object-api-name="DxCPQ__Document_Template__c"
+							parent-template-related-to-type={relatedtoTypeObjName} ondoccreated={cloneTemplateHandler}>
+						</c-clone-document-cmp>
+					</div>
+				</template>
+
+				<template if:true={showDeleteTemplate}>
+					<span slot="header">Delete Template</span>
+					<div class="slds-modal__content slds-p-around_medium" style="min-height: 140px;">
+						<div class="slds-align_absolute-center">
+							<br><br><br><br><br><br>
+							<span slot="header">Are you sure, you want to permanantly delete this template ?</span>
+						</div>
+					</div>
+
+					<footer class="slds-modal__footer">
+						<div class="slds-text-align_right">
+							<lightning-button class="slds-m-left_small" label="Cancel" variant="neutral"
+								onclick={cancelDeleteHandler}></lightning-button>
+							<lightning-button class="slds-m-left_small" label="Delete" variant="brand"
+								onclick={permanantDeleteHandler}></lightning-button>
+						</div>
+					</footer>
+				</template>
+
+				<template if:true={editTemplate}>
+					<span slot="header">Edit Template</span>
+					<div class="slds-modal__content slds-p-around_medium" style="min-height: 240px;">
+						<lightning-record-edit-form record-id={documenttemplaterecordid}
+							object-api-name="DxCPQ__Document_Template__c" onsuccess={handleEditSuccess}>
+							<lightning-input-field field-name="Name"> </lightning-input-field>
+							<!--<lightning-input-field field-name="DxCPQ__IsActive__c"> </lightning-input-field> -->
+							<lightning-output-field field-name="DxCPQ__Related_To_Type__c"> </lightning-output-field>
+							<lightning-input-field field-name="DxCPQ__Description__c"> </lightning-input-field>
+							<lightning-output-field field-name="DxCPQ__Version_Number__c"> </lightning-output-field>
+							<div class="slds-text-align_right">
+								<lightning-button class="slds-m-top_small" type="submit" label="Save" variant="brand">
+								</lightning-button>
+							</div>
+						</lightning-record-edit-form>
+					</div>
+					<footer class="slds-modal__footer"></footer>
+				</template>
+			</c-modal>
+		</div>
+	</div>
+</template>

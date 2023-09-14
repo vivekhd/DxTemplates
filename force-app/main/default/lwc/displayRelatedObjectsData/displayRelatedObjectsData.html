@@ -1,0 +1,116 @@
+<template>
+	<!-- Child Table: for displaying the table before previewing the pdf after selecting the Template-->
+	<div id="childtable" lwc:dom="manual"></div>
+
+	<template if:true={showSpinner}>
+		<div>
+			<lightning-spinner alternative-text="Loading" size="large"></lightning-spinner>
+		</div>
+	</template>
+
+	<template if:true={showtablecontent}>
+		<div data-id={index} hidden style="page-break-after: always">
+			<table class={className} data-id="Arrowtabledata"
+				style="border:1px solid black; width:100%;word-break:break-all;">
+				<thead>
+					<tr>
+						<template for:each={tableheaders} for:item="headval">
+							<th scope="col" key={headval} contenteditable="true" style={HeadStyle}
+								word-wrap='break-word;'>
+								<div title={headval}>{headval}</div>
+							</th>
+						</template>
+					</tr>
+				</thead>
+
+				<tbody>
+					<template for:each={tablerows} for:item="rowvar">
+						<!-- <tr key={rowvar.rownumber} style={rowvar.style}> -->
+						<tr key={rowvar.rownumber}>
+							<template for:each={rowvar.columns} for:item="colvar">
+								<td scope="col" key={colvar} style={colvar.style} colspan={colvar.colspan}
+									max-width={colvar.width}>
+
+									<template if:true={colvar.imgcell}>
+										<img src={colvar.value} style='max-height:100% ; max-width:100%; height:40px; width:40px;'>
+					                </template>
+
+									<template if:false={colvar.imgcell}>
+										{colvar.value}
+									</template>
+											<!--
+											<template if:false={colvar.attr}>
+												{colvar.value}
+											</template>
+
+											<template if:true={colvar.attr}>
+												<p style='font-size: 12px;'>{colvar.value}</p>
+
+												<template if:false={orderAttr}>
+													<ul key={rowvar} style="list-style:disc; margin-left: 15px;">
+														<template for:each={colvar.data} for:item="rowvar">
+															<li key={rowvar} style="white-space:nowrap; word-wrap:normal"> {rowvar} </li>
+															<li key={rowvar} style=""> {rowvar} </li>
+														</template>
+													</ul>
+												</template>
+
+												<template if:true={orderAttr}>
+													<ol key={rowvar}>
+														<template for:each={colvar.data} for:item="rowvar">
+															<li key={rowvar} style="white-space:nowrap; word-wrap:normal"> {rowvar} </li>
+															<li key={rowvar} style=""> {rowvar} </li>
+														</template>
+													</ol>
+												</template>
+
+											</template> -->
+								</td>
+							</template>
+						</tr>
+					</template>
+				</tbody>
+			</table>
+			</br>
+			<template if:true={displayChart}>
+				<table width="100%" height="auto" class={chartClass}>
+					<tr>
+						<td width="75%" style="text-align: center;">
+							<h4>{chartLabel}</h4>
+						</td>
+					</tr>
+					<tr>
+						<td>
+							<div class="chart_vbar">
+								<table class="innerbase" style="width:96.8%">
+									<tr>
+										<td style="width:3%; text-align:center; writing-mode:vertical-rl; text-orientation:upright;">
+											{selGraphvalue}
+										</td>
+										<template for:each={chartList} for:item="chart">
+											<td class="itembase" valign="bottom" key={chart.label} style={chart.width}>
+												<div class="itemtitle" key={chart.label}>{chart.label}</div>
+												<div class="itemvalueout" key={chart.label}>{chart.percent}</div>
+												<div class="itembar" style={chart.height} key={chart.label}>
+													<div class="itemvaluein" key={chart.label} style="padding:10px 5px 5px; color:#ffffff">
+														{chart.value}
+													</div>
+												</div>
+											</td>
+										</template>
+									</tr>
+								</table>
+							</div>
+						</td>
+					</tr>
+					<tr>
+						<td style="text-align: center;">
+							Categories
+						</td>
+					</tr>
+				</table>
+			</template>
+		</div>
+
+	</template>
+</template>

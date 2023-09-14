@@ -1,0 +1,22 @@
+<template>
+	<template if:true={lstOfObjects}>
+		
+		<div class="slds-grid slds-wrap slds-gutters">
+			<template for:each={lstOfObjects} for:item="obj">
+				<div key={obj.uKey} class="slds-col slds-size_1-of-2 slds-medium-size_4-of-12 slds-large-size_4-of-12 slds-p-around_x-small dx-step_count">
+					<div class="title"></div>
+					<form data-id={obj.uKey} action="/action_page.php">
+						<select name="car" data-id={obj.index} onchange={handleSelectedField} multiple style="width:100%; height:150px;border:1px solid #999999;">
+                            <template for:each={obj.fieldList} for:item="field">
+                                <option key={field.value} value={field.value} style="font-size:12px; padding:3px 6px;" title={field.label}>{field.label}</option>
+                            </template>
+					    </select>
+					</form>
+				</div>
+			</template>
+		</div>
+	<template if:true={showStatement}>
+        <p>{selectedField}</p>
+	</template>
+	</template>
+</template>
