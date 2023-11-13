@@ -1,4 +1,4 @@
-global with sharing class DisplayPDFController 
+public with sharing class DisplayPDFController 
 {
     public static Safely safe = new Safely();
     
@@ -21,7 +21,9 @@ global with sharing class DisplayPDFController
         displaypagesequence =false;
         String inputparam = apexpages.currentpage().getparameters().get('documentid');
         //String inputparam = 'a04DH000003t5M3YAI';
-        system.debug('inputparam-'+inputparam);
+        system.debug('inputparam-before -'+inputparam);
+        inputparam = ESAPI.encoder().SFDC_HTMLENCODE(inputparam);
+        system.debug('inputparam-after -'+inputparam);
         Document__c docrec=[select id,Document_Body__c,Document_Content__c from Document__c where id=:inputparam WITH SECURITY_ENFORCED];
         
         if(inputparam!=null){

@@ -11,22 +11,22 @@ global with sharing class PdfDisplay {
     }
     
     @AuraEnabled 
-    public static ObjectDetails getObjectDetails(Id recordId)
-    {   
+    public static ObjectDetails getObjectDetails(Id recordId) {   
+        String objectName;
+        String objectLabel;
         try{    
-            String objectName = recordId.getSObjectType().getDescribe().getName();
-            String objectLabel = recordId.getSObjectType().getDescribe().getLabel();
+            objectName = recordId.getSObjectType().getDescribe().getName();
+            objectLabel = recordId.getSObjectType().getDescribe().getLabel();
             System.debug('Object Name: ' + objectName);
             System.debug('Object Label: ' + objectLabel);
-            return new ObjectDetails(objectName, objectLabel);
         }
         catch (Exception ex) {
             LogHandler.createLog((Id) null,'PdfDisplay.getObjectDetails()','recordId -> '+recordId+' '+ex.getLineNumber()+ex.getStackTraceString()+ex.getCause(),ex.getMessage(),'Exception');
-            throw new AuraHandledException(ex.getMessage());
         }  
+        return new ObjectDetails(objectName, objectLabel);
     }
     
-    @AuraEnabled(cacheable=true)
+    @AuraEnabled
     public static String getDomainUrl() {
         String domainUrl = URL.getSalesforceBaseUrl().toExternalForm();
         System.debug('domain url '+domainUrl);

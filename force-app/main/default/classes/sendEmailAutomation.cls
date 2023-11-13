@@ -22,8 +22,7 @@ global class sendEmailAutomation implements Queueable,Database.AllowsCallouts {
     }
     
     public void execute(QueueableContext context) {
-        try {
-            
+        try {            
             /* .pdf version of the Document__c record Content */
             Pagereference pg = Page.renderAsPdfLWC;
             pg.getParameters().put('documentId',documentRecordInserted);

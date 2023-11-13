@@ -1,26 +1,25 @@
 public with sharing class MultiSelectLookupController {
     @AuraEnabled(cacheable=true)
     public static List<SObjectQueryResult> retrieveRecords(String objectName, String fieldAPINames, String filterFieldAPIName, String strInput, String whereClause, String whereClauseTwo){
-        try{
-            List<SObjectQueryResult> lstReturnResult = new List<SObjectQueryResult>();
-            if(strInput.equals('*')){
+        List<SObjectQueryResult> lstReturnResult = new List<SObjectQueryResult>();
+        try {
+            if (strInput.equals('*')) {
                 strInput = '';
             }
             String str = '%' +strInput+ '%';
             String strQueryField = '';
             List<String> fieldList = fieldAPINames.split(',');
 
-            if(!fieldList.contains('Id')){
+            if(!fieldList.contains('Id')) {
                 fieldList.add('Id');
                 strQueryField = String.join(fieldList, ',');
-            }else {
+            } else {
                 strQueryField = fieldAPINames;
-            }
-            
+            }            
             String strQuery = 'SELECT ' + String.escapeSingleQuotes(strQueryField) +
                             + ' FROM '+ String.escapeSingleQuotes(objectName)
                             + ' WHERE '+ (String.isEmpty(whereClauseTwo)?' ':(String.valueOf(whereClauseTwo)) + ' AND ') + String.escapeSingleQuotes(filterFieldAPIName) + ' LIKE :str'
-                            +(String.isEmpty(whereClause)?' ':' AND '+whereClause)
+                            +   (String.isEmpty(whereClause)?' ':' AND '+whereClause)
                             + ' WITH SECURITY_ENFORCED LIMIT 50';
             
             List<SObject> lstResult = database.query(strQuery);
@@ -31,12 +30,11 @@ public with sharing class MultiSelectLookupController {
                 result.recordObject = sobj;
                 lstReturnResult.add(result);  
             }
-            return lstReturnResult;
         }
         catch (Exception ex) {
             LogHandler.createLog((Id) null,'MultiSelectLookupController.retrieveRecords()','objectName -> '+objectName+' '+ex.getLineNumber()+ex.getStackTraceString()+ex.getCause(),ex.getMessage(),'Exception');
-            throw new AuraHandledException(ex.getMessage());
-        }  
+        }
+        return lstReturnResult;  
     }
 
     public class SObjectQueryResult {

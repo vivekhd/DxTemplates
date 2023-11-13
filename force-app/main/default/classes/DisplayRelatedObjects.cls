@@ -22,9 +22,9 @@ public with sharing class DisplayRelatedObjects {
         List<sObject> childRecords=new List<sObject>();
         try
         {
-            System.debug('templatesectionid >> ' + templatesectionid);
+            //System.debug('templatesectionid >> ' + templatesectionid);
             Document_Template_Section__c dsrec=[select id,Section_Content__c from Document_Template_Section__c where id=:templatesectionid WITH SECURITY_ENFORCED];
-            System.debug('dsrec >> ' + dsrec);
+            //System.debug('dsrec >> ' + dsrec);
             Map<string,Object> jsonMap = (Map<string,Object>)JSON.deserializeUntyped(dsrec.Section_Content__c);
                         
             String objectName = 'Document_Template_Section__c';
@@ -275,7 +275,6 @@ public with sharing class DisplayRelatedObjects {
         }
         catch(Exception ex)
         {
-            System.debug('No Values to assign ' + ex.getLineNumber());
             LogHandler.createLog((Id) templatesectionid,'DisplayRelatedObjects.getsectionData()','Template Id- '+currTemplate+' '+ex.getLineNumber()+ex.getStackTraceString()+ex.getCause(),ex.getMessage(),'Exception');   
         }
         return '';

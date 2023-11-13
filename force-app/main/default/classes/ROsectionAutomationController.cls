@@ -7,7 +7,7 @@
 * Last Modified Date: 08/11/2023
 */
 
-public class ROsectionAutomationController {
+public with sharing class ROsectionAutomationController {
 
     /* User Selected Styles from Template Builder */
     public static String dateFormat;
@@ -525,7 +525,8 @@ public class ROsectionAutomationController {
     /* Header Content Stored on the RO Template Section Record - called from Automation Class */
     public static String getHeaderContent(Id ROTemplateSectionId)  {
         try {
-            Document_Template_Section__c ROTemplateSection = [Select Header_Content__c from Document_Template_Section__c where Id =: ROTemplateSectionId];
+            String query = 'Select Header_Content__c from Document_Template_Section__c where Id =\'' + ROTemplateSectionId +'\' limit 1';
+            Document_Template_Section__c ROTemplateSection = Database.query(query);
             return ROTemplateSection.Header_Content__c;
         }
         catch(Exception ex)  {

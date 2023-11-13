@@ -5,7 +5,7 @@
 * Description		: This class creates the HTML content for Document Record Generation and passes it to the Queueable Class.
 * Last Modified Date: 08/13/2023
 */
-public class documentAutomationController {
+public with sharing class documentAutomationController {
     public static Safely safe = new Safely();
     private static Savepoint sp1;
     public class SafeClassException extends Exception {  }

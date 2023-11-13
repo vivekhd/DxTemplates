@@ -1,4 +1,4 @@
-global with sharing class RelatedObjectsClass {
+public with sharing class RelatedObjectsClass {
     
     public static Safely safe = new Safely();
 	private static Savepoint sp1;
@@ -156,10 +156,13 @@ global with sharing class RelatedObjectsClass {
     public static Id cloneRulesFromParentTemplate(Id parentTempSecId){
         try{
             System.debug('parentTempSecId'+parentTempSecId);
-            Id docRule = [Select ruleId__c from document_template_section__c where id=:parentTempSecId limit 1].ruleId__c;
+            
+            Id docRule = [Select ruleId__c from document_template_section__c where id=:parentTempSecId WITH SECURITY_ENFORCED limit 1].ruleId__c;
             System.debug('docRule'+docRule);
-            Rule__c tempRule = [Select Id, Rule_Expression__c,Rule_Description__c, (Select Condition_Field__c,ConditionIndex__c,DataType__c,Evaluation_Object__c,Value__c,Name,Operator__c from Rule_Conditions__r) from rule__c where Id=:docRule];
+            
+            Rule__c tempRule = [Select Id, Rule_Expression__c,Rule_Description__c, (Select Condition_Field__c,ConditionIndex__c,DataType__c,Evaluation_Object__c,Value__c,Name,Operator__c from Rule_Conditions__r) from rule__c where Id=:docRule WITH SECURITY_ENFORCED];
             System.debug('tempRule'+tempRule.Rule_Conditions__r);
+            
             List<Map<String,Object>> condsArr = new List<Map<String,Object>> {};
             for(Rule_Condition__c item : tempRule.Rule_Conditions__r)
             {
@@ -206,7 +209,16 @@ global with sharing class RelatedObjectsClass {
                     Rule__c newRule = new Rule__c();
                     newRule.Rule_Expression__c = ruleExpression;
                     newRule.Rule_Description__c = 'Template Filtering Rule';
-                    insert newRule;                    
+                    //insert newRule;      
+
+                    Database.SaveResult[] srLst1 = safe.doInsert(new List<Rule__C> {newRule});
+                    List<String> errorList1 = Safely.safeClassExceptionHandlerInsert(srLst1);
+                    if(errorList1.size()>0){
+                        throw new SafeClassException(String.join( errorList1, ', ' ));
+                    } else{
+                        newRule.Id = srLst1[0].Id;
+                    }
+                
                 
                     tempruleId = newRule.Id;
                     //Rule__c arr = [Select Name from Rule__c where Id=:tempruleId WITH SECURITY_ENFORCED];
@@ -216,14 +228,28 @@ global with sharing class RelatedObjectsClass {
                 else{
                     Rule__c arr = [Select Name,Rule_Expression__c from Rule__c where Id=:tempruleId WITH SECURITY_ENFORCED];
                     arr.Rule_Expression__c = ruleExpression;
-                    update arr;
+                    //update arr;
+
+                    Database.SaveResult[] srLst1 = safe.doUpdate(new List<Rule__c> {arr});
+                    List<String> errorList1 = Safely.safeClassExceptionHandlerInsert(srLst1);
+                    if(errorList1.size()>0){
+                        throw new SafeClassException(String.join( errorList1, ', ' ));
+                    }
                 }
             }
             else{
                 Rule__c newRule = new Rule__c();
                 newRule.Rule_Expression__c = ruleExpression;
                 newRule.Rule_Description__c = 'Template Filtering Rule';
-                insert newRule;
+                //insert newRule;
+                
+                Database.SaveResult[] srLst1 = safe.doInsert(new List<Rule__C> {newRule});
+                List<String> errorList1 = Safely.safeClassExceptionHandlerInsert(srLst1);
+                if(errorList1.size()>0){
+                    throw new SafeClassException(String.join( errorList1, ', ' ));
+                } else{
+                    newRule.Id = srLst1[0].Id;
+                }
                 
                 tempruleId = newRule.Id;
                 //Rule__c arr = [Select Name from Rule__c where Id=:tempruleId WITH SECURITY_ENFORCED];

@@ -27,9 +27,11 @@
 		<members>SaveDocumentTemplate</members>
 		<members>SaveDocumentTemplatesection</members>
 		<members>documentAutomationController</members>
+		<members>PostInstallDataCreation</members>
 		<members>sendEmailAutomation</members>
 		<members>DisplayPDFController_Test</members>
 		<members>DisplayRelatedController_Test</members>
+		<members>PostInstallDataCreation_Test</members>
 		<name>ApexClass</name>
 	</types>
 	<types>

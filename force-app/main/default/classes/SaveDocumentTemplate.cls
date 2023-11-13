@@ -51,7 +51,7 @@ public with sharing class SaveDocumentTemplate {
     @AuraEnabled
     public static Document_Template__c cloneDocumentTemplate(Document_Template__c docTemp, Id docTempId){
         try{
-            List<Document_Template_Section__c> docTempSec = [SELECT ID, Name, IsActive__c, New_Page__c, Section_Content__c, Sequence__c, Section_Details__c, Type__c, Document_Clause__c, ruleId__c FROM Document_Template_Section__c WHERE Document_Template__c=:docTempId WITH SECURITY_ENFORCED limit 50000];
+            List<Document_Template_Section__c> docTempSec = [SELECT ID, Name, IsActive__c, New_Page__c, Section_Content__c, Sequence__c, Section_Details__c, Type__c, Document_Clause__c, ruleId__c, Header_Content__c FROM Document_Template_Section__c WHERE Document_Template__c=:docTempId WITH SECURITY_ENFORCED limit 50000];
             List<Document_Template__c> docTempList = [SELECT ID, Name,Version_Number__c FROM Document_Template__c WHERE Parent_Template__c= :docTemp.Parent_Template__c OR ID=:docTemp.Parent_Template__c WITH SECURITY_ENFORCED limit 50000];
             System.debug(docTempList);
             
@@ -100,7 +100,8 @@ public with sharing class SaveDocumentTemplate {
                 docSec.Section_Details__c = dts.Section_Details__c;
                 docSec.Type__c = dts.Type__c;
                 docSec.Document_Clause__c = dts.Document_Clause__c;                
-                docSec.New_Page__c = dts.New_Page__c;
+                docSec.New_Page__c = dts.New_Page__c;                
+                docSec.Header_content__c = dts.Header_content__c;
                 docSec.Document_Template__c = docTemp.Id;
                 if(dts.ruleId__c != null)
                 {
@@ -253,7 +254,7 @@ public with sharing class SaveDocumentTemplate {
                 throw new SafeClassException(String.join( errorList, ', ' ));
             }
             return docTemp;
-        } 
+        }
         catch (Exception ex) {
             LogHandler.createLog((Id) null,'SaveDocumentTemplate.createDocumentTemplate()','Template Id- '+docTempId+' '+ex.getLineNumber()+ex.getStackTraceString()+ex.getCause(),ex.getMessage(),'Exception');
             throw new AuraHandledException(ex.getMessage());
@@ -263,11 +264,10 @@ public with sharing class SaveDocumentTemplate {
     //Filtering by Related to type in Template
     @AuraEnabled
     public static List<AggregateResult> getRelatedToTypeOptions(){
-        List<AggregateResult> relatedTypeOptions = [SELECT Related_To_Type__c FROM Document_Template__c group by Related_To_Type__c];
+        String queryString = 'SELECT Related_To_Type__c FROM Document_Template__c group by Related_To_Type__c';
+        List<AggregateResult> relatedTypeOptions = Database.query(queryString);
         return relatedTypeOptions;
     }
 
-    public class SafeClassException extends Exception{
-            
-    }
+    public class SafeClassException extends Exception   { }
 }

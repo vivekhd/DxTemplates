@@ -2,16 +2,31 @@
   "packageDirectories": [
     {
       "path": "force-app",
-      "default": true,
-      "package": "DxTemplates",
+      "package": "DxTemplates_Unlocked",
       "versionName": "ver 0.1",
-      "versionNumber": "0.2.0.NEXT",
+      "versionNumber": "0.1.0.NEXT",
+      "default": false,
       "versionDescription": "",
-      "postInstallScript": "PostInstallDataCreation"
+      "postInstallScript": "PostInstallDataCreation",
+      "apexTestAccess": {
+        "permissionSets": [
+          "Dx_Template_Access"
+        ]
+      }
     },
     {
       "path": "force-app",
-      "package": "DxTemplates_Unlocked",
+      "package": "Dx_Templates",
+      "versionName": "ver 0.1",
+      "versionNumber": "0.1.2.NEXT",
+      "default": true,
+      "versionDescription": "",
+      "postInstallScript": "PostInstallDataCreation",
+      "ancestorVersion": "HIGHEST"
+    },
+    {
+      "path": "force-app",
+      "package": "DxTemplates",
       "versionName": "ver 0.1",
       "versionNumber": "0.1.0.NEXT",
       "default": false,
@@ -23,13 +38,15 @@
   "sfdcLoginUrl": "https://login.salesforce.com",
   "sourceApiVersion": "58.0",
   "packageAliases": {
-    "DxTemplates": "0HoQm0000000001KAA",
-    "DxTemplates@0.1.0-1": "04tQm0000000c6vIAA",
-    "DxTemplates@0.1.0-2": "04tQm0000000cGbIAI",
-    "DxTemplates@0.1.0-3": "04tQm0000001qfhIAA",
-    "DxTemplates@0.1.0-4": "04tQm0000002b1vIAA",
-    "DxTemplates@0.2.0-1": "04tQm00000038QrIAI",
     "DxTemplates_Unlocked": "0HoQm00000000UfKAI",
-    "DxTemplates_Unlocked@0.1.0-1": "04tQm000000NzVpIAK"
+    "DxTemplates_Unlocked@0.1.0-1": "04tQm000000NzVpIAK",
+    "DxTemplates_Unlocked@0.1.0-2": "04tQm000000O6YvIAK",
+    "Dx_Templates": "0HoQm00000000WHKAY",
+    "Dx_Templates@0.1.0-1": "04tQm000000O7TNIA0",
+    "Dx_Templates@0.1.0-2": "04tQm000000O7bRIAS",
+    "Dx_Templates@0.1.1-1": "04tQm000000O81FIAS",
+    "Dx_Templates@0.1.2-1": "04tQm000000OisjIAC",
+    "DxTemplates": "0HoQm00000000ZVKAY",
+    "DxTemplates@0.1.0-1": "04tQm000000PKJhIAO"
   }
 }
