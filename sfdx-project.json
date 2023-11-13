@@ -30,7 +30,13 @@
       "versionName": "ver 0.1",
       "versionNumber": "0.1.0.NEXT",
       "default": false,
-      "versionDescription": ""
+      "versionDescription": "",
+      "postInstallScript": "PostInstallDataCreation",
+      "apexTestAccess": {
+        "permissionSets": [
+          "Dx_Template_Access"
+        ]
+      }
     }
   ],
   "name": "DxTemplates",
