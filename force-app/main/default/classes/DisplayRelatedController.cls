@@ -1,4 +1,4 @@
-public with sharing class DisplayRelatedController {
+global with sharing class DisplayRelatedController {
     
     public String displayText{  get;  set;  }
     

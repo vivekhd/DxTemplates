@@ -1,4 +1,4 @@
-public with sharing class RelatedObjectsClass {
+global with sharing class RelatedObjectsClass {
     
     public static Safely safe = new Safely();
 	private static Savepoint sp1;

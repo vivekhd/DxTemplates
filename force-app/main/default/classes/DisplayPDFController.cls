@@ -1,4 +1,4 @@
-public with sharing class DisplayPDFController 
+global with sharing class DisplayPDFController 
 {
     public static Safely safe = new Safely();
     
@@ -22,7 +22,7 @@ public with sharing class DisplayPDFController
         String inputparam = apexpages.currentpage().getparameters().get('documentid');
         //String inputparam = 'a04DH000003t5M3YAI';
         system.debug('inputparam-before -'+inputparam);
-        inputparam = ESAPI.encoder().SFDC_HTMLENCODE(inputparam);
+        inputparam = SFDC_HTMLENCODE(inputparam); //Added by Vivek
         system.debug('inputparam-after -'+inputparam);
         Document__c docrec=[select id,Document_Body__c,Document_Content__c from Document__c where id=:inputparam WITH SECURITY_ENFORCED];
         
@@ -84,6 +84,26 @@ public with sharing class DisplayPDFController
             displayText = 'ID not found';
         }      
     }
+
+    //Added by Vivek - Start
+    private static final String[] HTML_DECODED  = new String[]{ '&', '<', '>', '"', '\''};
+	private static final String[] HTML_ENCODED  = new String[]{ '&amp;', '&lt;', '&gt;', '&quot;', '&#39;' };
+
+    private String ENCODE(String input, String[] fromArr, String[] toArr) {
+		if (input == null || input.length() == 0)
+			return input;
+
+		for (Integer i = 0; i < fromArr.size(); ++i) {
+			input = input.replace(fromArr[i], toArr[i]);
+		}
+		
+		return input;
+	}
+
+    public String SFDC_HTMLENCODE(String input) {
+		return ENCODE(input, HTML_DECODED, HTML_ENCODED);
+	}
+    //Added by Vivek- End
     
     @AuraEnabled
     public static string generateDocument(ID templateId, String quoteId, String pdfbody, String pdfheaderfooter){
