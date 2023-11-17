@@ -8,6 +8,8 @@
 */
 
 global class PostInstallDataCreation implements InstallHandler {
+    public static Safely safe = new Safely();
+
     global void onInstall(InstallContext context) {
         try {
             if(!context.isUpgrade()) {            
@@ -17,8 +19,9 @@ global class PostInstallDataCreation implements InstallHandler {
                     Related_To_Type__c = 'Account',
                     Version_Number__c = 1
                 );
-                Database.SaveResult[] srList = Database.insert(new Document_Template__c[] {newDocTemplate},false);        
-                
+
+                /*
+                Database.SaveResult[] srList = Database.insert(new Document_Template__c[] {newDocTemplate},false);     
                 for (Database.SaveResult sr : srList) {
                     if (sr.isSuccess()) {
                         System.debug('Successfully inserted Template with Id: ' + sr.getId());                        
@@ -31,6 +34,20 @@ global class PostInstallDataCreation implements InstallHandler {
                         }
                     }
                 }
+                */
+
+                List<Database.SaveResult> insertResult = safe.doInsert(new Document_Template__c[] {newDocTemplate});
+                for(Integer i=0;i<sResult.size();i++){
+                    if (sResult.get(i).isSuccess()){
+                        String successBody = 'Hello Team, DxCPQ Template Package Installation was successfull. This mail is for the comnfirmation purpose.';
+                        statusOfTheInstallation('Post Install Script run was Successfull - DxCPQ Package',successBody,context.installerId());
+                    }   else if (!sResult.get(i).isSuccess())   {
+                        Database.Error err = sResult.get(i).getErrors().get(0);
+
+                        String errorBody = 'Hello Team, an error occured when creating a Template record through Apex transaction. Please review the following details.' + '\nError Details \nError Status : ' + err.getStatusCode() + '\nError Message : ' + err.getMessage() + '\nError Fields : ' + err.getFields() + '\nError Severity : Minor';
+                        statusOfTheInstallation('Template record creation was unsuccessfull, Please create it.',errorBody,context.installerId());
+                    }            
+                }
             }
         }
         catch(Exception error){
@@ -41,7 +58,7 @@ global class PostInstallDataCreation implements InstallHandler {
     }
 
     global void statusOfTheInstallation(String mailSubject,String messageBody, Id userId){
-        String installerEmailAddress = [Select Email from User where Id =: userId].Email;
+        String installerEmailAddress = [Select Email from User where Id =: userId WITH SECURITY_ENFORCED].Email;
         Messaging.SingleEmailMessage emailDraft = new Messaging.SingleEmailMessage();
         emailDraft.toAddresses = new String[] { installerEmailAddress };
         emailDraft.optOutPolicy = 'FILTER';

@@ -264,7 +264,7 @@ public with sharing class SaveDocumentTemplate {
     //Filtering by Related to type in Template
     @AuraEnabled
     public static List<AggregateResult> getRelatedToTypeOptions(){
-        String queryString = 'SELECT Related_To_Type__c FROM Document_Template__c group by Related_To_Type__c';
+        String queryString = 'SELECT Related_To_Type__c FROM Document_Template__c WITH SECURITY_ENFORCED group by Related_To_Type__c limit 5000';
         List<AggregateResult> relatedTypeOptions = Database.query(queryString);
         return relatedTypeOptions;
     }
