@@ -42,6 +42,11 @@
     </fieldPermissions>
     <fieldPermissions>
         <editable>true</editable>
+        <field>Document_Template_Section__c.Header_Content__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>true</editable>
         <field>Document_Template_Section__c.IsActive__c</field>
         <readable>true</readable>
     </fieldPermissions>
