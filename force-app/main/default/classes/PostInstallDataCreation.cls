@@ -36,7 +36,7 @@ global class PostInstallDataCreation implements InstallHandler {
                 }
                 */
 
-                List<Database.SaveResult> insertResult = safe.doInsert(new Document_Template__c[] {newDocTemplate});
+                List<Database.SaveResult> sResult = safe.doInsert(new Document_Template__c[] {newDocTemplate});
                 for(Integer i=0;i<sResult.size();i++){
                     if (sResult.get(i).isSuccess()){
                         String successBody = 'Hello Team, DxCPQ Template Package Installation was successfull. This mail is for the comnfirmation purpose.';
