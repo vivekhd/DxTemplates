@@ -25,7 +25,7 @@ global class PostInstallDataCreation implements InstallHandler {
                 for (Database.SaveResult sr : srList) {
                     if (sr.isSuccess()) {
                         System.debug('Successfully inserted Template with Id: ' + sr.getId());                        
-                        String successBody = 'Hello Team, DxCPQ Template Package Installation was successfull. This mail is for the comnfirmation purpose.';
+                        String successBody = 'Hello Team, DxCPQ Template Package Installation was successfull. This mail is for the confirmation purpose.';
                         statusOfTheInstallation('Post Install Script run was Successfull - DxCPQ Package',successBody,context.installerId());
                     } else {
                         for(Database.Error err : sr.getErrors()) {
@@ -39,7 +39,7 @@ global class PostInstallDataCreation implements InstallHandler {
                 List<Database.SaveResult> insertResult = safe.doInsert(new Document_Template__c[] {newDocTemplate});
                 for(Integer i=0;i<sResult.size();i++){
                     if (sResult.get(i).isSuccess()){
-                        String successBody = 'Hello Team, DxCPQ Template Package Installation was successfull. This mail is for the comnfirmation purpose.';
+                        String successBody = 'Hello Team, DxCPQ Template Package Installation was successfull. This mail is for the confirmation purpose.';
                         statusOfTheInstallation('Post Install Script run was Successfull - DxCPQ Package',successBody,context.installerId());
                     }   else if (!sResult.get(i).isSuccess())   {
                         Database.Error err = sResult.get(i).getErrors().get(0);
