@@ -1,5 +1,5 @@
 public with sharing class MultiSelectLookupController {
-    @AuraEnabled(cacheable=true)
+    @AuraEnabled
     public static List<SObjectQueryResult> retrieveRecords(String objectName, String fieldAPINames, String filterFieldAPIName, String strInput, String whereClause, String whereClauseTwo){
         List<SObjectQueryResult> lstReturnResult = new List<SObjectQueryResult>();
         try {
