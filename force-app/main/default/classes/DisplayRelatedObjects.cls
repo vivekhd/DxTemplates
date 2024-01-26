@@ -49,6 +49,7 @@ public with sharing class DisplayRelatedObjects {
             Boolean chartNewPage = (Boolean) jsonMap.get('chartNewPage');
             String grpby = String.valueof(jsonMap.get('grouping'));
             String childObject = String.valueof(jsonMap.get('mainChildObject'));
+            String barChartColor = String.valueOf(jsonMap.get('chartBarColor'));
             
             // Where Clause in the Query
             String whereClauseinQuery = '';
@@ -261,6 +262,7 @@ public with sharing class DisplayRelatedObjects {
             masterWrapper.numberFormat = numberFormat;
             masterWrapper.currencyFormat = currencyFormat;
             masterWrapper.phoneFormat = phoneFormat;
+            masterWrapper.barChartColor = barChartColor;
             
             masterWrapper.selGraphvalue = selGraphvalue;
             masterWrapper.displayChart = displayChart;
@@ -302,6 +304,7 @@ public with sharing class DisplayRelatedObjects {
         public String numberFormat;
         public String currencyFormat;
         public String phoneFormat;
+        public String barChartColor;
         
         // Chart Params
         public Boolean chartNewPage;

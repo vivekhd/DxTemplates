@@ -30,7 +30,7 @@ public with sharing class FooterClass {
         }
         catch (Exception ex) {
             LogHandler.createLog((Id) null,'FooterClass.getSearchedContentVersions()','searchlabel -> '+searchlabel+' '+ex.getLineNumber()+ex.getStackTraceString()+ex.getCause(),ex.getMessage(),'Exception');
-            throw new AuraHandledException(ex.getMessage());
+            return null;
         }
         return cvs;
     }

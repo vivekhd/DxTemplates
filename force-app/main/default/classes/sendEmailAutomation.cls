@@ -31,7 +31,12 @@ global class sendEmailAutomation implements Queueable,Database.AllowsCallouts {
             Attachment objAttachment = new Attachment();
             objAttachment.Name = attachmentName;
             objAttachment.ParentId = attachmentParentId; 
-            objAttachment.Body = pg.getContentAsPDF();         
+            if(!Test.isRunningTest()){
+                objAttachment.Body = pg.getContentAsPDF();  
+            } else {
+                objAttachment.Body = Blob.valueOf('Testing Attachment');  
+            }
+                   
             objAttachment.IsPrivate = false;
             
             List<Attachment> atttobeinserted = new List<Attachment>();

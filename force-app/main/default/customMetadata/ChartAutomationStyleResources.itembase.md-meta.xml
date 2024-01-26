@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomMetadata xmlns="http://soap.sforce.com/2006/04/metadata" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+    <label>itembase</label>
+    <protected>true</protected>
+    <values>
+        <field>Style_Composition__c</field>
+        <value xsi:type="xsd:string">width:auto; height:280px; padding:0px 5px 0px 5px; border:0px; background: transparent; text-align: center; margin: 3px auto;</value>
+    </values>
+</CustomMetadata>

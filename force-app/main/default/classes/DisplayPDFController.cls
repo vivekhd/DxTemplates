@@ -141,7 +141,7 @@ global with sharing class DisplayPDFController
             return inserteddocId;
         } catch (Exception ex) {
             LogHandler.createLog((Id) null,'DisplayPDFController.generateDocument()','Template Id- '+templateId+' '+ex.getLineNumber()+ex.getStackTraceString()+ex.getCause(),ex.getMessage(),'Exception');
-            throw new AuraHandledException(ex.getMessage());
+            return 'Error';
         }     
     }
     
@@ -193,7 +193,7 @@ global with sharing class DisplayPDFController
         }
         catch (Exception ex) {
             LogHandler.createLog((Id) null,'DisplayPDFController.generatePDFAttachment()','documentid ->  '+documentid+' '+ex.getLineNumber()+ex.getStackTraceString()+ex.getCause(),ex.getMessage(),'Exception');
-            throw new AuraHandledException(ex.getMessage());
+            return 'Error';
         }        
     }
     
@@ -242,7 +242,7 @@ global with sharing class DisplayPDFController
             return String.Valueof(insertedattachmentId);
         } catch (Exception ex) {
             LogHandler.createLog((Id) null,'DisplayPDFController.SavePDFtoQuote()','documentid ->  '+documentid+' '+ex.getLineNumber()+ex.getStackTraceString()+ex.getCause(),ex.getMessage(),'Exception');
-            throw new AuraHandledException(ex.getMessage());
+            return 'Error';
         }       
     }    
     
@@ -255,7 +255,7 @@ global with sharing class DisplayPDFController
         }
         catch (Exception ex) {
             LogHandler.createLog((Id) null,'DisplayPDFController.getTemplateSections()','templateId ->  '+templateId+' '+ex.getLineNumber()+ex.getStackTraceString()+ex.getCause(),ex.getMessage(),'Exception');
-            throw new AuraHandledException(ex.getMessage());
+            return null;
         }  
     }
         
