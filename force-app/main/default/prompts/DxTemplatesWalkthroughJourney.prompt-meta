@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Prompt xmlns="http://soap.sforce.com/2006/04/metadata">
+    <masterLabel>DxTemplates Walkthrough Journey</masterLabel>
+    <promptVersions>
+        <body>&lt;p&gt;Welcome to the DxTemplates Application, you can start creating the template from this template building console. &lt;/p&gt;&lt;p&gt;You can draft and save the section as per your requirement and then activate the template for generating the pdf.&lt;/p&gt;&lt;p&gt;&lt;br&gt;&lt;/p&gt;&lt;p&gt;Tip : Not sure about how this content renders on the pdf, you can use the preview template option and check how it renders on the pdf for the record you&apos;ve selected.&lt;/p&gt;</body>
+        <customApplication>standard__LightningSales</customApplication>
+        <delayDays>1</delayDays>
+        <description>DxTemplates walkthrough steps for iN App guidance for the users.</description>
+        <displayType>DockedComposer</displayType>
+        <header>Hi There!</header>
+        <isPublished>true</isPublished>
+        <masterLabel>DxTemplates Walkthrough Journey Step 1</masterLabel>
+        <publishedDate>2024-01-19</publishedDate>
+        <shouldDisplayActionButton>false</shouldDisplayActionButton>
+        <shouldIgnoreGlobalDelay>false</shouldIgnoreGlobalDelay>
+        <startDate>2024-01-11</startDate>
+        <stepNumber>1</stepNumber>
+        <targetPageKey1>DxTemplates</targetPageKey1>
+        <targetPageType>standard__navItemPage</targetPageType>
+        <timesToDisplay>1</timesToDisplay>
+        <title>DxTemplates</title>
+        <userAccess>Everyone</userAccess>
+        <userProfileAccess>Everyone</userProfileAccess>
+        <versionNumber>1</versionNumber>
+    </promptVersions>
+    <promptVersions>
+        <body>&lt;p&gt;For creating a new template, click on this button and select the SObject type for which you want to generate the pdf.&lt;/p&gt;</body>
+        <customApplication>standard__LightningSales</customApplication>
+        <displayType>DockedComposer</displayType>
+        <header>DX Templates</header>
+        <isPublished>false</isPublished>
+        <masterLabel>DxTemplates Walkthrough Journey Step 2</masterLabel>
+        <shouldDisplayActionButton>false</shouldDisplayActionButton>
+        <shouldIgnoreGlobalDelay>false</shouldIgnoreGlobalDelay>
+        <stepNumber>2</stepNumber>
+        <targetPageKey1>DxTemplates</targetPageKey1>
+        <targetPageType>standard__navItemPage</targetPageType>
+        <title>Create a New Template</title>
+        <userAccess>Everyone</userAccess>
+        <userProfileAccess>Everyone</userProfileAccess>
+        <versionNumber>1</versionNumber>
+    </promptVersions>
+    <promptVersions>
+        <body>&lt;p&gt;You can add different section types from the top right corner, three sections indicate Context, Related Objects and Clause (from left to right).&lt;/p&gt;</body>
+        <customApplication>standard__LightningSales</customApplication>
+        <displayType>DockedComposer</displayType>
+        <header>DX Templates</header>
+        <isPublished>false</isPublished>
+        <masterLabel>DxTemplates Walkthrough Journey Step 3</masterLabel>
+        <shouldDisplayActionButton>false</shouldDisplayActionButton>
+        <shouldIgnoreGlobalDelay>false</shouldIgnoreGlobalDelay>
+        <stepNumber>3</stepNumber>
+        <targetPageKey1>DxTemplates</targetPageKey1>
+        <targetPageType>standard__navItemPage</targetPageType>
+        <title>Create Section</title>
+        <userAccess>Everyone</userAccess>
+        <userProfileAccess>Everyone</userProfileAccess>
+        <versionNumber>1</versionNumber>
+    </promptVersions>
+    <promptVersions>
+        <body>&lt;p&gt;There is an option for deleting the template.&lt;/p&gt;&lt;p&gt;Once you delete the template, you will not have option to revert it back.&lt;/p&gt;</body>
+        <customApplication>standard__LightningSales</customApplication>
+        <displayType>DockedComposer</displayType>
+        <header>DX Templates</header>
+        <isPublished>false</isPublished>
+        <masterLabel>DxTemplates Walkthrough Journey Step 4</masterLabel>
+        <shouldDisplayActionButton>false</shouldDisplayActionButton>
+        <shouldIgnoreGlobalDelay>false</shouldIgnoreGlobalDelay>
+        <stepNumber>4</stepNumber>
+        <targetPageKey1>DxTemplates</targetPageKey1>
+        <targetPageType>standard__navItemPage</targetPageType>
+        <title>Delete Template</title>
+        <userAccess>Everyone</userAccess>
+        <userProfileAccess>Everyone</userProfileAccess>
+        <versionNumber>1</versionNumber>
+    </promptVersions>
+    <promptVersions>
+        <body>&lt;p&gt;If you want to use the template, then template need to be activated. and any template can be cloned.&lt;/p&gt;&lt;p&gt;&lt;br&gt;&lt;/p&gt;&lt;p&gt;You also have the option for preview the template. once you save the sections.&lt;/p&gt;</body>
+        <customApplication>standard__LightningSales</customApplication>
+        <displayType>DockedComposer</displayType>
+        <header>DX Templates</header>
+        <isPublished>false</isPublished>
+        <masterLabel>DxTemplates Walkthrough Journey Step 5</masterLabel>
+        <shouldDisplayActionButton>false</shouldDisplayActionButton>
+        <shouldIgnoreGlobalDelay>false</shouldIgnoreGlobalDelay>
+        <stepNumber>5</stepNumber>
+        <targetPageKey1>DxTemplates</targetPageKey1>
+        <targetPageType>standard__navItemPage</targetPageType>
+        <title>Activate Template</title>
+        <userAccess>Everyone</userAccess>
+        <userProfileAccess>Everyone</userProfileAccess>
+        <versionNumber>1</versionNumber>
+    </promptVersions>
+</Prompt>
