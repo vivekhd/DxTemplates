@@ -2,7 +2,7 @@
 <Prompt xmlns="http://soap.sforce.com/2006/04/metadata">
     <masterLabel>DxTemplates Walkthrough Journey</masterLabel>
     <promptVersions>
-        <body>&lt;p&gt;Welcome to the DxTemplates Application, you can start creating the template from this template building console. &lt;/p&gt;&lt;p&gt;You can draft and save the section as per your requirement and then activate the template for generating the pdf.&lt;/p&gt;&lt;p&gt;&lt;br&gt;&lt;/p&gt;&lt;p&gt;Tip : Not sure about how this content renders on the pdf, you can use the preview template option and check how it renders on the pdf for the record you&apos;ve selected.&lt;/p&gt;</body>
+        <body>&lt;p&gt;&lt;strong style=&quot;color: rgb(14, 16, 26);&quot;&gt;Get Started using the DxTemplates.&lt;/strong&gt;&lt;span style=&quot;color: rgb(14, 16, 26);&quot;&gt;&amp;nbsp;&lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot;color: rgb(14, 16, 26);&quot;&gt;You can now create a Template using this Template-building console. Start Drafting and saving the section as you need. Lastly, activate the template to generate the PDF.&amp;nbsp;&amp;nbsp;&lt;/span&gt;&lt;/p&gt;&lt;p&gt;&amp;nbsp;&lt;/p&gt;&lt;p&gt;&lt;strong style=&quot;color: rgb(14, 16, 26);&quot;&gt;Tip:&amp;nbsp;&lt;/strong&gt;&lt;span style=&quot;color: rgb(14, 16, 26);&quot;&gt;Are you unsure how this content renders on the PDF? &amp;nbsp;&lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot;color: rgb(14, 16, 26);&quot;&gt;Don&apos;t worry! You can use the &quot;PREVIEW TEMPLATE&quot; option and check how it renders on the PDF for the selected record.&lt;/span&gt;&lt;/p&gt;</body>
         <customApplication>standard__LightningSales</customApplication>
         <delayDays>1</delayDays>
         <description>DxTemplates walkthrough steps for iN App guidance for the users.</description>
@@ -10,7 +10,7 @@
         <header>Hi There!</header>
         <isPublished>true</isPublished>
         <masterLabel>DxTemplates Walkthrough Journey Step 1</masterLabel>
-        <publishedDate>2024-01-19</publishedDate>
+        <publishedDate>2024-02-02</publishedDate>
         <shouldDisplayActionButton>false</shouldDisplayActionButton>
         <shouldIgnoreGlobalDelay>false</shouldIgnoreGlobalDelay>
         <startDate>2024-01-11</startDate>
@@ -24,7 +24,7 @@
         <versionNumber>1</versionNumber>
     </promptVersions>
     <promptVersions>
-        <body>&lt;p&gt;For creating a new template, click on this button and select the SObject type for which you want to generate the pdf.&lt;/p&gt;</body>
+        <body>&lt;p&gt;To create a new template, click &quot;SObject Filter&quot; and select the &quot;SObject type&quot; for which you want to generate the PDF.&amp;nbsp;&lt;/p&gt;</body>
         <customApplication>standard__LightningSales</customApplication>
         <displayType>DockedComposer</displayType>
         <header>DX Templates</header>
@@ -41,7 +41,7 @@
         <versionNumber>1</versionNumber>
     </promptVersions>
     <promptVersions>
-        <body>&lt;p&gt;You can add different section types from the top right corner, three sections indicate Context, Related Objects and Clause (from left to right).&lt;/p&gt;</body>
+        <body>&lt;p&gt;&lt;strong style=&quot;color: rgb(14, 16, 26);&quot;&gt;Here&apos;s how to create a &apos;Section&apos;:&lt;/strong&gt;&lt;span style=&quot;color: rgb(14, 16, 26);&quot;&gt;&amp;nbsp;&lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot;color: rgb(14, 16, 26);&quot;&gt;Add different section types from the top right corner; three sections -&amp;nbsp;&amp;nbsp;&lt;/span&gt;&lt;/p&gt;&lt;ol&gt;&lt;li&gt;&lt;span style=&quot;color: rgb(14, 16, 26);&quot;&gt;Context,&amp;nbsp;&amp;nbsp;&lt;/span&gt;&lt;/li&gt;&lt;li&gt;&lt;span style=&quot;color: rgb(14, 16, 26);&quot;&gt;Related Objects and&amp;nbsp;&amp;nbsp;&lt;/span&gt;&lt;/li&gt;&lt;li&gt;&lt;span style=&quot;color: rgb(14, 16, 26);&quot;&gt;Clause (from left to right)&amp;nbsp;&lt;/span&gt;&lt;/li&gt;&lt;/ol&gt;</body>
         <customApplication>standard__LightningSales</customApplication>
         <displayType>DockedComposer</displayType>
         <header>DX Templates</header>
@@ -58,7 +58,7 @@
         <versionNumber>1</versionNumber>
     </promptVersions>
     <promptVersions>
-        <body>&lt;p&gt;There is an option for deleting the template.&lt;/p&gt;&lt;p&gt;Once you delete the template, you will not have option to revert it back.&lt;/p&gt;</body>
+        <body>&lt;p&gt;&lt;strong&gt;You can Delete a Template!&lt;/strong&gt;&amp;nbsp;&lt;/p&gt;&lt;p&gt;&lt;br&gt;&lt;/p&gt;&lt;p&gt;Use the option &quot;DELETE TEMPLATE&quot; to permanently delete a template. Once a template is deleted, it can never be retrieved back.&amp;nbsp;&lt;/p&gt;</body>
         <customApplication>standard__LightningSales</customApplication>
         <displayType>DockedComposer</displayType>
         <header>DX Templates</header>
@@ -75,7 +75,7 @@
         <versionNumber>1</versionNumber>
     </promptVersions>
     <promptVersions>
-        <body>&lt;p&gt;If you want to use the template, then template need to be activated. and any template can be cloned.&lt;/p&gt;&lt;p&gt;&lt;br&gt;&lt;/p&gt;&lt;p&gt;You also have the option for preview the template. once you save the sections.&lt;/p&gt;</body>
+        <body>&lt;p&gt;&lt;strong style=&quot;color: rgb(14, 16, 26);&quot;&gt;Activate the Template and use it!&lt;/strong&gt;&lt;span style=&quot;color: rgb(14, 16, 26);&quot;&gt;&amp;nbsp;&amp;nbsp;&lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot;color: rgb(14, 16, 26);&quot;&gt;Click &quot;ACTIVATE TEMPLATE&quot; before you would like to use a Template. Later, you&apos;re free to use the options to either &quot;CLONE TEMPLATE&quot; (reuse a template and add extra sections) or &quot;PREVIEW TEMPLATE&quot; (to view a template) after saving the sections of a Template.&amp;nbsp;&amp;nbsp;&lt;/span&gt;&lt;/p&gt;</body>
         <customApplication>standard__LightningSales</customApplication>
         <displayType>DockedComposer</displayType>
         <header>DX Templates</header>
