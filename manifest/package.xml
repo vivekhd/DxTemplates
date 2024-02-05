@@ -184,8 +184,12 @@
 		<name>ListView</name>
 	</types>
 	<types>	
-	        <members>Generate_Document_from_Template</members>
+	    <members>Generate_Document_from_Template</members>
 		<name>Flow</name>
 	</types>
-	<version>55.0</version>
+	<types>
+		<members>DxTemplatesWalkthroughJourney</members>
+		<name>Prompt</name>
+	</types>
+	<version>59.0</version>
 </Package>
