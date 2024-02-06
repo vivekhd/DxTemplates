@@ -182,7 +182,7 @@ export default class DxtemplateSelectorCmp extends NavigationMixin(LightningElem
             const event4 = new ShowToastEvent({
                 title: 'Success',
                 message:
-                'PDF is saved under Quote Successfully',
+                'Saved as attachment to the record!',
                 variant: 'success',
                 });
 
