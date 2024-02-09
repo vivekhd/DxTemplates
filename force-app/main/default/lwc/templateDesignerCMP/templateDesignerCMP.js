@@ -52,7 +52,6 @@ export default class TemplateDesignerCMP extends NavigationMixin(LightningElemen
   allConstants({ error, data }) {
     if (data) {
       this.popUpMessage = data;
-      console.log('Success');
     } else {
       this.error = error;
     }
@@ -84,13 +83,11 @@ export default class TemplateDesignerCMP extends NavigationMixin(LightningElemen
     this.relatedtoTypeObjChild = objName;
     this.template.querySelector("c-template-content-details").handleObjectNameSelection(this.relatedtoTypeObjName);
     this.template.querySelector("c-template-related-objects").handleObjectNameSelection(this.relatedtoTypeObjName);
-    /* Commented by Rahul -> Merge Fields in Header and Footer */
     // this.template.querySelector("c-template-footer-type").handleObjectNameSelection(this.relatedtoTypeObjName);
     // this.template.querySelector("c-template-header-type").handleObjectNameSelection(this.relatedtoTypeObjName);
   }
 
   handlechildcomponents(selectedOption, isNewSection, sectionid) {
-    console.log('selectedOption in function-' + selectedOption);
     if (selectedOption == 'Clause') {
       this.showclausescreen = true;
       this.showtabledetails = false;
@@ -179,7 +176,6 @@ export default class TemplateDesignerCMP extends NavigationMixin(LightningElemen
       this.showtabledetails = false;
       this.showrelatedobjectdetails = false;
       this.SectionTypename = 'Header';
-      console.log('Option selected with value: ' + selectedOption);
       this.opensection = true;
       //this.isModalOpen = false;
       this.showcontextdetails = false;
@@ -443,6 +439,7 @@ export default class TemplateDesignerCMP extends NavigationMixin(LightningElemen
                   if (this.doctemplatedetails.DxCPQ__IsActive__c == true) {
                     this.activateTemplateLabel = 'Deactivate Template';
                     this.showPreview = true;
+                    ;
                   }
                 }
                 this.rowCount = val.DxCPQ__Sequence__c;
@@ -453,14 +450,14 @@ export default class TemplateDesignerCMP extends NavigationMixin(LightningElemen
             });
             this.sections = this.optionsList;
             this.isLoaded2 = false;
-            this.opensection = true;
+            this.opensection = true; 
             this.connectedCallbackHandler();
             if (this.firstsectionrecord) {
               this.displaysectionbasedontype(this.firstsectionrecord.Id, this.firstsectionrecord.DxCPQ__Type__c);
             }
           }
 
-          // On load header section loading - by Rahul
+          //// On load header section loading - by Rahul
           if (result.length < 1) {
             this.handlechildcomponents('Header', true, null);
             var _this = this;
@@ -546,7 +543,6 @@ export default class TemplateDesignerCMP extends NavigationMixin(LightningElemen
   }
 
   connectedCallbackHandler() {
-    console.log('connectedCallbackHandler');
     if (!!this.sections) {
       this.sectionMap = new Map();
       let tempArray = JSON.parse(JSON.stringify(this.sections));
@@ -749,7 +745,6 @@ export default class TemplateDesignerCMP extends NavigationMixin(LightningElemen
 
   permanantDeleteHandler() {
     deleteTemplate({ templateId: this.documenttemplaterecordid }).then(result => {
-      console.log('successful');
       const toastEvt = new ShowToastEvent({
         title: 'Success',
         message: 'Template ' + this.popUpMessage.TEMPLATE_DESIGN_DELETED,//'Deleted Successfully',
@@ -811,7 +806,6 @@ export default class TemplateDesignerCMP extends NavigationMixin(LightningElemen
   }
 
   onDragStart(evt) {
-    console.log('onDragStart');
     this.dragMap = new Map();
     let eventRowDataId = evt.currentTarget.dataset.dragId;
     evt.dataTransfer.setData("dragId", eventRowDataId);

@@ -250,6 +250,16 @@ public with sharing class ROsectionAutomationController {
                 String chartContent = '<div> <table width="100%" height="auto"' + newPageHtmlSnippet + '> <tr> <td width="75%" style="text-align: center;"> <h4>' + chartLabel + '</h4> </td> </tr>';
                 chartContent += '<tr> <td> <div style="border:1px solid #666666; width:100%; height:300px;"> <table class="innerbase" style="width:calc(96% - 20px); height:280px; margin:10px; padding:0px 5px 0px 5px; border-bottom:2px solid #666666; background: repeating-linear-gradient( 180deg, #cccccc 0, #cccccc 1px, transparent 1px, transparent 20% );">';
                 chartContent += '<tbody> <tr> <td style="width: 3%; text-align: center; writing-mode: vertical-rl; text-orientation: upright;">' + chartYAxis + '</td>';
+                
+                /*
+                Map<String,String> chartStaticResourceStyle = new Map<String,String> {
+                    'itembase' => 'width:auto; height:280px; padding:0px 5px 0px 5px; border:0px; background: transparent; text-align: center; margin: 3px auto;',
+                    'itemtitle' => 'font-style: italic;font-size:8px;',
+                    'itemvalueout' => 'font-style: italic;font-size:8px; font-weight: bold;',
+                    'itembar' => 'width:100%; height:100%; border-radius: 3px 3px 0px 0px; background: #007CBA; bottom:0;',
+                    'itemvaluein' => 'font-style: italic;font-size:8px; font-weight: bold; top:50%; left: 50%; transform: translate(-50% -50%);'
+                };
+                */
                 Map<String,String> chartStaticResourceStyle = new Map<String,String> {};
                 for(DxCPQ__ChartAutomationStyleResources__mdt chartStyleAttribute :  [SELECT Id,Label,DxCPQ__Style_Composition__c FROM DxCPQ__ChartAutomationStyleResources__mdt]){
                     chartStaticResourceStyle.put(chartStyleAttribute.label,chartStyleAttribute.DxCPQ__Style_Composition__c );

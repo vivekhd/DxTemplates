@@ -54,17 +54,7 @@ public with sharing class SaveDocumentTemplate {
             List<Document_Template__c> docCloneTemplate = [SELECT ID, Name,Version_Number__c FROM Document_Template__c WHERE Parent_Template__c= :docTemp.Parent_Template__c WITH SECURITY_ENFORCED order by Version_Number__c desc limit 1];
             
             if(docTemp!=null){
-                Decimal version=0;
-                for(Document_Template__c dct : docTempList){
-                    if(dct.Version_Number__c >= version){
-                        version=dct.Version_Number__c+1;
-                    }
-                }
-                
-                System.debug('version is'+version);
-                docTemp.Version_Number__c=version;
-                List<Document_Template__c> listtobecreated=new List<Document_Template__c>();
-                listtobecreated.add(docTemp);                
+                docTemp.Version_Number__c = (docTemp.Parent_Template__c != docTempId) ? docCloneTemplate[0].Version_Number__c + 1 : 1;                
                 if (sp1 == null) sp1 = Database.setSavepoint();
                 Database.SaveResult[] urListsave = safe.doInsert(new List<Document_Template__c> {docTemp});
                 
@@ -107,7 +97,8 @@ public with sharing class SaveDocumentTemplate {
                 }
                 docTempSecCloneList.add(docSec);
             }
-if(docTempSecCloneList!=null && docTempSecCloneList.size()>0){
+
+            if(docTempSecCloneList!=null && docTempSecCloneList.size()>0)	{
                 if (sp1 == null) sp1 = Database.setSavepoint();
                 Database.SaveResult[] urListsave = safe.doInsert(docTempSecCloneList);
                 List<String> errorList2 = Safely.safeClassExceptionHandlerInsert(urListsave);
@@ -136,19 +127,17 @@ if(docTempSecCloneList!=null && docTempSecCloneList.size()>0){
     @AuraEnabled
     public static Document_Template__c activateTemplate(Id templateId, String parentId, Boolean isActive){
         try{
-            System.debug('template id is '+templateId);
-            System.debug('parent id is '+parentId);
-            Map<Id,Document_Template__c> docTempMap = new Map<Id,Document_Template__c>([SELECT Id, Name,isactive__c, Previously_Active__c, Parent_Template__c FROM Document_Template__c WHERE id=:templateId OR Parent_Template__c=:parentId WITH SECURITY_ENFORCED limit 50000]);
-            System.debug('these are initial doctemp values'+docTempMap.values());
-            Document_Template__c docTemp = docTempMap.get(templateId);
+            
             List<Document_Template__c> docTempList = new List<Document_Template__c>();
-            if(isActive==true){
-                if(docTemp.Previously_Active__c==false){
-                    docTemp.Previously_Active__c=true;
-                }
-                for(Document_Template__c dct : docTempMap.values()){
-                    if(dct.Id!=templateId){
-                        dct.isactive__c=false;
+            Map<Id,Document_Template__c> docTempMap = new Map<Id,Document_Template__c>([SELECT Id, Name, IsActive__c, Previously_Active__c, Version_Number__c, Parent_Template__c FROM Document_Template__c WHERE Id=:templateId OR Parent_Template__c=:parentId WITH SECURITY_ENFORCED limit 50000]);
+            Document_Template__c docTemp = docTempMap.get(templateId);
+            
+            if(isActive){
+                docTemp.Previously_Active__c = (!docTemp.Previously_Active__c) ? true: false ;
+                
+                for(Document_Template__c dct : docTempMap.values()) {
+                    if(dct.Id != templateId) {
+                        dct.IsActive__c = false;
                         docTempList.add(dct);
                     }
                 }

@@ -18,7 +18,6 @@ export default class DxSearchCategory extends LightningElement {
     mapOfValueLabel;
 
     connectedCallback() {
-        //window.alert('The options in it are: '+JSON.stringify(this.options));
         this.mapOfValueLabel = new Map();
         this.showDropdown = false;
         var optionData = this.options ? (JSON.parse(JSON.stringify(this.options))) : null;
@@ -42,7 +41,6 @@ export default class DxSearchCategory extends LightningElement {
 
     filterOptions(event) {
         this.searchString = event.target.value;
-        console.log('The option data finally is: '+JSON.stringify(this.optionData));
         if (this.searchString && this.searchString.length > 0) {
             this.message = '';
             if (this.searchString.length >= this.minChar) {

@@ -41,6 +41,7 @@ export default class DisplayRelatedObjectsData extends LightningElement {
     displayChart = false;
     HeadStyle = "border: 1px solid black; text-align: center";
     styleRowNum = 1;
+    barChartColor;
    
 
     /**
@@ -59,6 +60,7 @@ export default class DisplayRelatedObjectsData extends LightningElement {
                     this.selGraphvalue = parsedjson.selGraphvalue;
                     this.chartLabel = parsedjson.chartLabel;
                     this.displayChart = parsedjson.displayChart;
+                    this.barChartColor = parsedjson.barChartColor;
                     this.currencyLabel = "USD"
                     parsedjson.headers.forEach((element) => {
                         this.tableheaders.push(element);
@@ -283,7 +285,7 @@ export default class DisplayRelatedObjectsData extends LightningElement {
         let index = this.tableheaders.indexOf(this.selGraphvalue);
         for (let i = 0; i < this.subtotalLabel.length; i++) {
             let percent = (Number(this.subtotalVal[i][index]) / this.grandTotalVals[index]) * 100;
-            let chartVal = { 'label': this.subtotalLabel[i], 'percent': Math.round(percent, 2) + '%', 'height': 'height :' + Number(Number(Math.round(percent, 2)) + Number(6)) + '%;', 'width': 'width : ' + (95) / this.subtotalLabel.length + '%;', 'value': Math.round(Number(this.subtotalVal[i][index])) };
+            let chartVal = { 'label': this.subtotalLabel[i], 'percent': Math.round(percent, 2) + '%', 'height': 'height :' + Number(Number(Math.round(percent, 2)) + Number(6)) + `%; background : ${this.barChartColor}`, 'width': 'width : ' + (95) / this.subtotalLabel.length + '%;', 'value': Math.round(Number(this.subtotalVal[i][index])) };
             this.chartList.push(chartVal);
         }
     }

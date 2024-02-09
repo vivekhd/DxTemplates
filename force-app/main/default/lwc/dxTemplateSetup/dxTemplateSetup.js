@@ -24,7 +24,6 @@ export default class DxTemplateSetup extends LightningElement {
     allConstants({ error, data }) {
         if (data) {
             this.popUpMessage = data;
-            console.log('Success');
         } else {
             this.error = error;
         }
@@ -46,8 +45,8 @@ export default class DxTemplateSetup extends LightningElement {
                     data.forEach(option => {
                         optionList.push({'label':option.DxCPQ__Related_To_Type__c,'value':option.DxCPQ__Related_To_Type__c});
                     })
+                    optionList.push({'label':'All','value':null});
                     this.relatedTypeOptions = optionList ;
-                   // alert('relatedTypeOptions >> ', this.relatedTypeOptions);
                 }
             })
             .catch(error => {
@@ -202,7 +201,7 @@ export default class DxTemplateSetup extends LightningElement {
                 }
                 const toastEvt = new ShowToastEvent({
                     title: 'Success!',
-                    message: 'Template "' + docTempObj.Name + '" was Created',//this.popUpMessage.DXTEMPLATESETUP_CREATED,//'Created Successfully',
+                    message: 'Template "' + docTempObj.Name + '" was Created',
                     variant: 'Success',
                 });
                 this.dispatchEvent(toastEvt);

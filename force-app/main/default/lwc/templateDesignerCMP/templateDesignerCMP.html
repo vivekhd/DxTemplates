@@ -1,28 +1,21 @@
 <template>
 	<div class="dxqt">
-
 		<div class="lgc-bg slds-text-align_left dx-box1 slds-box slds-m-horizontal_xx-small">
 			<div class="slds-grid slds-wrap">
+				
 				<div class="slds-col slds-text-align_left" style="padding-top:2px;">
+
 					<lightning-button-group>
-						<!-- <lightning-button icon-name="utility:back" label="Back To List"></lightning-button> -->
-						<!-- <lightning-button label="Edit Settings" onclick={handleeditsettings}></lightning-button> -->
-						<lightning-button label={activateTemplateLabel} onclick={handleActiveTemplate}>
-						</lightning-button>
+						<lightning-button label={activateTemplateLabel} onclick={handleActiveTemplate}></lightning-button>
 						<lightning-button label="Clone Template" onclick={handleCloneTemplate}></lightning-button>
-						<!--<lightning-button label="Test Template"></lightning-button>-->
-						<lightning-button label="Delete Template" onclick={handleDeleteTemplateHandler}>
-						</lightning-button>
-						<lightning-button label="Refresh Template" onclick={handleRefreshTemplateHandler}>
-						</lightning-button>
+						<lightning-button label="Delete Template" onclick={handleDeleteTemplateHandler}></lightning-button>
+						<!-- <lightning-button label="Refresh Template" onclick={handleRefreshTemplateHandler}></lightning-button> -->
 						<template if:true={showPreview}>
-							<lightning-button label="Preview Template" title="preview" onclick={handlePreview}>
-							</lightning-button>
+							<lightning-button label="Preview Template" title="preview" onclick={handlePreview}></lightning-button>
 						</template>
 					</lightning-button-group>
-					<!-- Changes by Kapil - Added margin to badge -->
-					<lightning-badge label={relatedtoTypeObjName} class="slds-badge_inverse slds-m-left_medium">
-					</lightning-badge>
+
+					<lightning-badge label={relatedtoTypeObjName} class="slds-badge_inverse slds-m-left_medium"></lightning-badge>
 				</div>
 
 				<div class="slds-col slds-text-align_right">
@@ -51,14 +44,9 @@
 
 			</div>
 		</div>
-		<!-- <div slot="header">
-			<lightning-button-icon icon-name="utility:add"  alternative-text="Add New Template" title="Add New Template" onclick={createNewTemplateHandler}></lightning-button-icon>
-			<lightning-button-icon icon-name="utility:edit"  alternative-text="Edit Template" title="Edit Template"></lightning-button-icon>
-		</div> -->
+
 		<div class="dx-box1bot slds-box">
-
 			<div class="slds-grid slds-wrap">
-
 				<div class="slds-col slds-size_9-of-12">
 					<div class="slds-grid slds-wrap slds-p-right_small">
 
@@ -217,29 +205,6 @@
 				</div>
 			</div>
 
-			<!-- <template if:true={isModalOpen}>
-				<section role="dialog" tabindex="-1" aria-labelledby="modal-heading-01" aria-modal="true"
-					aria-describedby="modal-content-id-1" class="slds-modal slds-fade-in-open">
-					<div class="slds-modal__container">
-
-						<button class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse"
-							title="Close" onclick={closeModal}>
-							<lightning-icon icon-name="utility:close" alternative-text="close" variant="inverse"
-								size="small"></lightning-icon>
-							<span class="slds-assistive-text">Close</span>
-						</button>
-
-						<div class="slds-modal__content slds-p-around_medium" id="modal-content-id-1">
-							<p><b></b></p>
-							<lightning-radio-group label="Select Section Type " options={options}
-								onchange={handleSelectedValue} required>
-							</lightning-radio-group>
-						</div>
-					</div>
-				</section>
-				<div class="slds-backdrop slds-backdrop_open"></div>
-			</template> -->
-
 			<c-modal>
 				<template if:true={previewModal}>
 					<span slot="header"> Preview Template </span>
@@ -255,8 +220,9 @@
 					<footer class="slds-modal__footer">
 						<div class="slds-text-align_right">
 							<lightning-button class="slds-p-right_x-small" variant="brand" label="Preview"
-								title="preview" disabled={navigateToPreview} onclick={showpreviewtemplate}></lightning-button>
-							<lightning-button class="slds-p-right_x-small" variant="brand" label="Cancel" 
+								title="preview" disabled={navigateToPreview} onclick={showpreviewtemplate}>
+							</lightning-button>
+							<lightning-button class="slds-p-right_x-small" variant="brand" label="Cancel"
 								onclick={closePreviewModal}></lightning-button>
 						</div>
 					</footer>
@@ -274,9 +240,11 @@
 
 					<footer class="slds-modal__footer">
 						<div class="slds-text-align_right">
-							<lightning-button class="slds-m-left_small" variant="brand" label="Back" onclick={handlePreviewBackButton}>
+							<lightning-button class="slds-m-left_small" variant="brand" label="Back"
+								onclick={handlePreviewBackButton}>
 							</lightning-button>
-							<lightning-button class="slds-m-left_small" variant="brand" label="Cancel" onclick={closePreviewModal}>
+							<lightning-button class="slds-m-left_small" variant="brand" label="Cancel"
+								onclick={closePreviewModal}>
 							</lightning-button>
 						</div>
 					</footer>
@@ -316,13 +284,11 @@
 						<lightning-record-edit-form record-id={documenttemplaterecordid}
 							object-api-name="DxCPQ__Document_Template__c" onsuccess={handleEditSuccess}>
 							<lightning-input-field field-name="Name"> </lightning-input-field>
-							<!--<lightning-input-field field-name="DxCPQ__IsActive__c"> </lightning-input-field> -->
 							<lightning-output-field field-name="DxCPQ__Related_To_Type__c"> </lightning-output-field>
 							<lightning-input-field field-name="DxCPQ__Description__c"> </lightning-input-field>
 							<lightning-output-field field-name="DxCPQ__Version_Number__c"> </lightning-output-field>
 							<div class="slds-text-align_right">
-								<lightning-button class="slds-m-top_small" type="submit" label="Save" variant="brand">
-								</lightning-button>
+								<lightning-button class="slds-m-top_small" type="submit" label="Save" variant="brand"></lightning-button>
 							</div>
 						</lightning-record-edit-form>
 					</div>

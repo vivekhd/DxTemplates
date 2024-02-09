@@ -7,6 +7,24 @@ export default class CloneDocumentCmp extends LightningElement {
     @api objectApiName;
     @api parentTemplateRelatedToType;
     @track resultObj;
+    cloneTypeOptionSelectedByUser = 'New_Version';
+    editDisabled = true;
+
+    get templateCloneOptions() {
+        return [
+            { label: 'New Version', value: 'New_Version' },
+            { label: 'New Template', value: 'New_Template' },
+        ];
+    }
+
+    get checkForCloneType() {
+        return this.cloneTypeOptionSelectedByUser == 'New_Version' ? true : false;
+    }
+
+    handleCloneTypeSelection(event){
+        this.cloneTypeOptionSelectedByUser = event.detail.value;
+        this.editDisabled = (this.cloneTypeOptionSelectedByUser == 'New_Version' ? true : false);
+    }
 
     connectedCallback() {
        window.clearTimeout(this.delayTimeout);
@@ -20,11 +38,18 @@ export default class CloneDocumentCmp extends LightningElement {
     handleSubmit(event) {
         event.preventDefault();
         let docTempObj ={'sobjectType':'DxCPQ__Document_Template__c'};
+        
         const fields = event.detail.fields;
-        docTempObj.Name=fields.Name;
-        docTempObj.DxCPQ__Related_To_Type__c = this.parentTemplateRelatedToType;
-        docTempObj.DxCPQ__Description__c = fields.DxCPQ__Description__c;
-        docTempObj.DxCPQ__Parent_Template__c=fields.DxCPQ__Parent_Template__c;
+            docTempObj.Name = fields.Name;
+            docTempObj.DxCPQ__Related_To_Type__c = this.parentTemplateRelatedToType;
+            docTempObj.DxCPQ__Description__c = fields.DxCPQ__Description__c;
+            docTempObj.DxCPQ__Parent_Template__c = fields.DxCPQ__Parent_Template__c;
+            
+            if(this.cloneTypeOptionSelectedByUser == 'New_Template') {
+                docTempObj.DxCPQ__Parent_Template__c = this.recordId;
+                docTempObj.DxCPQ__Version_Number__c = 1;
+            }
+        
         cloneDocumentTemplate({docTemp:docTempObj, docTempId:this.recordId}).then(result=>{
             if(result){
                 this.resultObj = JSON.parse(JSON.stringify(result));
