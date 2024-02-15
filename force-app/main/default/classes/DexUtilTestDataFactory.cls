@@ -128,9 +128,7 @@
         for(Integer i=0; i< numToInsert; i++){
             Rule__c rl = new Rule__c();
             rl.Name = 'R1' + i;
-            rl.Rule_Type__c = 'Qualification';
             rl.Rule_Expression__c = 'C1';
-            rl.Evaluation_Object__c = 'Opportunity';
             ruleToInsert.add(rl);
         }
         return createRecords(ruleToInsert, doInsert, attributes);
@@ -143,6 +141,7 @@
             rc.Name = 'C1' + i;
             rc.Condition_Field__c= 'StageName';
             rc.Value__c = 'Value Proposition';
+            rc.Evaluation_Object__c = 'Opportunity';
             ruleConditionToInsert.add(rc);
         }
         return createRecords(ruleConditionToInsert, doInsert, attributes);
@@ -214,7 +213,6 @@
         for(Integer i=0; i< numToInsert; i++){
             Document_Template_Section__c docTemplateSection = new Document_Template_Section__c();
             docTemplateSection.DisplaySectionName__c = true;
-            docTemplateSection.ChildObject__c = 'Test';
             docTemplateSection.IsActive__c = true;
             docTemplateSection.IsEditable__c = true;
             docTemplateSection.Section_Content__c = 'test section content';

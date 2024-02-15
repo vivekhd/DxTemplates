@@ -22,31 +22,7 @@ private class DisplayPDFController_Test {
         }
         Test.stopTest();
     }
-    
-    @isTest 
-    static void testPdfMode() {
-        Test.startTest();
-        User us = DexUtilTestDataFactory.CreateTestUser();
-        System.runAs(us){
-            Map<String, String> testWrapperData = new Map<String, String>{'pdfModes1' => 'A4'};
-            String result = DisplayPDFController.pdfMode(testWrapperData);
-            System.assertEquals('A4', result);
-        }
-        Test.stopTest();
-    }
-    
-    @isTest 
-    static void testPdfObjectName() {
-        Test.startTest();
-        User us = DexUtilTestDataFactory.CreateTestUser();
-        System.runAs(us){
-            Opportunity testOpportunity = new Opportunity(Name = 'Test Opportunity', StageName = 'Prospecting', CloseDate = Date.today());
-            insert testOpportunity;
-            String result = DisplayPDFController.pdfObjectName(testOpportunity.Id);
-            System.assertEquals('ObjectName is Returned', result);
-        }
-        Test.stopTest();
-    }
+
     
     @isTest 
     static void testGeneratePDFAttachment() {

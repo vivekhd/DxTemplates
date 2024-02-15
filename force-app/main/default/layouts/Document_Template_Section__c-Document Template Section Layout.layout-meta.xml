@@ -43,10 +43,6 @@
         <layoutColumns>
             <layoutItems>
                 <behavior>Edit</behavior>
-                <field>ChildObject__c</field>
-            </layoutItems>
-            <layoutItems>
-                <behavior>Edit</behavior>
                 <field>Document_Clause__c</field>
             </layoutItems>
             <layoutItems>
@@ -60,10 +56,6 @@
             <layoutItems>
                 <behavior>Edit</behavior>
                 <field>Sequence__c</field>
-            </layoutItems>
-            <layoutItems>
-                <behavior>Edit</behavior>
-                <field>Parent_Section__c</field>
             </layoutItems>
             <layoutItems>
                 <behavior>Edit</behavior>

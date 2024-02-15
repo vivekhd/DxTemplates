@@ -8,12 +8,12 @@ public with sharing class LogHandler {
     
     public static Safely safe = new Safely();
     /**
-    * This method can be called from any component.It is used to create a record in TransactionLog__c
-    * in case of any exception in the code.
-    *
-    * @param ipInput recordid,ClassName, Exception, LogData
-    * @param Output  Void
-    */
+* This method can be called from any component.It is used to create a record in TransactionLog__c
+* in case of any exception in the code.
+*
+* @param ipInput recordid,ClassName, Exception, LogData
+* @param Output  Void
+*/
     public static void createException(Id recordId,String className,String exceptionMessage,String LogData)
     {  
         try {
@@ -44,12 +44,12 @@ public with sharing class LogHandler {
         
     }
     /**
-    * This method can be called from any component.It is used to create a record in TransactionLog__c,
-    * it can be an exception or just the transaction information.
-    * 
-    * @param ipInput recordid,ClassName, Exception, LogData, LogType
-    * @param Output  Void
-    */
+* This method can be called from any component.It is used to create a record in TransactionLog__c,
+* it can be an exception or just the transaction information.
+* 
+* @param ipInput recordid,ClassName, Exception, LogData, LogType
+* @param Output  Void
+*/
     @AuraEnabled
     public static void createLog(Id recordId,String className,String exceptionMessage,String LogData, String logType)
     {
@@ -82,12 +82,12 @@ public with sharing class LogHandler {
     }
     
     /**
-    * This method can be called from any component.It is used to create multiple records in TransactionLog__c,
-    * it can be an exception or just the transaction information.
-    * 
-    * @param ipInput List of TransactionLog__c records
-    * @param Output  Void
-    */
+* This method can be called from any component.It is used to create multiple records in TransactionLog__c,
+* it can be an exception or just the transaction information.
+* 
+* @param ipInput List of TransactionLog__c records
+* @param Output  Void
+*/
     public static void createMultipleLogs(List<TransactionLog__c> listrecords)
     {
         try {
@@ -109,12 +109,12 @@ public with sharing class LogHandler {
     }
     
     /**
-    * This method can be called from any component.It will create an instance of TransactionLog__c record & returns it,
-    * it can be an exception or just the transaction information.
-    * 
-    * @param ipInput recordid,ClassName, Exception, LogData, LogType
-    * @param Output  TransactionLog__c
-    */
+* This method can be called from any component.It will create an instance of TransactionLog__c record & returns it,
+* it can be an exception or just the transaction information.
+* 
+* @param ipInput recordid,ClassName, Exception, LogData, LogType
+* @param Output  TransactionLog__c
+*/
     public static TransactionLog__c getLog(Id recordId,String className,String exceptionMessage,String logData,String logType)
     {
         TransactionLog__c logRecord = new TransactionLog__c(RecordId__c = recordId, 

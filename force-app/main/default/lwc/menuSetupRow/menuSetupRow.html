@@ -1,47 +1,49 @@
 <template>
-    <li class={myWrapper.selected}  data-id="uMenuList" key={myWrapper.id} data-value={myWrapper.Name} data-index={myWrapper._index}  data-catid={myWrapper.Id} onclick={chooseWrapper}>
+    <li class={myWrapper.selected} data-id="uMenuList" key={myWrapper.id} data-value={myWrapper.Name}
+        data-index={myWrapper._index} data-catid={myWrapper.Id} onclick={chooseWrapper}>
         <a class="" title={myWrapper.label}>
-        <span class="type">
-            <div class="slds-truncate">
-                <lightning-layout>
-                    <template if:true={myWrapper._children}>
-                        <template if:true={isExpanded}>
-                            <lightning-layout-item>
+            <span class="type">
+                <div class="slds-truncate">
+                    <lightning-layout>
+                    <!-- 
+                        <template if:true={myWrapper._children}>
+                            <template if:true={isExpanded}>
+                                <lightning-layout-item>
+                                    <div class="slds-show_inline" style="margin-left:-15px">
+                                        <lightning-icon icon-name="utility:right" size="xx-small" onclick={toggleView}
+                                            alternative-text="Collapse" title="Collapse"
+                                            class="dx-icon-row_exp_nor"></lightning-icon>
+                                    </div>
+                                </lightning-layout-item>
+                            </template>
+                            <template if:false={isExpanded}>
                                 <div class="slds-show_inline" style="margin-left:-15px">
                                     <lightning-icon icon-name="utility:right" size="xx-small" onclick={toggleView}
-                                    alternative-text="Collapse" title="Collapse" class="dx-icon-row_exp_nor"></lightning-icon>
+                                        alternative-text="Expand" class="dx-icon-row_exp_atv"></lightning-icon>
                                 </div>
-                            </lightning-layout-item>
-                        </template>
-                        <template if:false={isExpanded}>
-                            <div class="slds-show_inline" style="margin-left:-15px">
-                                <lightning-icon  icon-name="utility:right" size="xx-small" onclick={toggleView}
-                                    alternative-text="Expand" class="dx-icon-row_exp_atv"></lightning-icon>
-                            </div>              
-                        </template>
-                    </template>
-                    <lightning-layout-item>
-                        <div  data-paddingindex='0' class="slds-truncate slds-show_inline " data-index={myWrapper._index}  data-catid={myWrapper.Id}>
-                            {myWrapper.label} 
-                        </div>
-                        <!-- <div>
-                            <p class="slds-p-around_xx-small">{myWrapper.Name}</p>
-                        </div> -->
-                    </lightning-layout-item>
-                </lightning-layout>
-            </div>
-        </span>  
-    </a> 
-        <template if:true={isExpanded}>
+                            </template>
+                        </template> 
+                    -->
+                        <lightning-layout-item>
+                            <div data-paddingindex='0' class="slds-truncate slds-show_inline "
+                                data-index={myWrapper._index} data-catid={myWrapper.Id}>
+                                {myWrapper.label}
+                            </div>
+                        </lightning-layout-item>
+                    </lightning-layout>
+                </div>
+            </span>
+        </a>
+        <!-- <template if:true={isExpanded}>
             <template if:true={myWrapper._children}>
                 <template for:each={myWrapper._children} for:item="data">
                     <lightning-layout key={data.ukey}>
-                        <lightning-layout-item  class="slds-p-left_large">
+                        <lightning-layout-item class="slds-p-left_large">
                             <c-summary-child-hierarchy my-wrapper={data}></c-summary-child-hierarchy>
                         </lightning-layout-item>
                     </lightning-layout>
                 </template>
             </template>
-        </template>
+        </template> -->
     </li>
 </template>

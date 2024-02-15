@@ -308,7 +308,6 @@ private class ProductSetupCtrl_Test {
         system.debug('documentTemplate[0]'+documentTemplate[0]);
         Document_Template_Section__c docTemplateSection = new Document_Template_Section__c();
         docTemplateSection.DisplaySectionName__c = true;
-        docTemplateSection.ChildObject__c = 'Test';
         docTemplateSection.IsActive__c = true;
         docTemplateSection.IsEditable__c = true;
         docTemplateSection.Section_Content__c = 'test section content';
@@ -327,7 +326,6 @@ private class ProductSetupCtrl_Test {
         newlst.add(docTemplateSection);
         Document_Template_Section__c docTemplateSection1 = new Document_Template_Section__c();
         docTemplateSection1.DisplaySectionName__c = true;
-        docTemplateSection1.ChildObject__c = 'Test';
         docTemplateSection1.IsActive__c = true;
         docTemplateSection1.IsEditable__c = true;
         docTemplateSection1.Section_Content__c = 'test section content';
@@ -384,9 +382,9 @@ private class ProductSetupCtrl_Test {
         List<Document_Template__c> documentTemplate = DexUtilTestDataFactory.createDocumentTemplate(1, true, null);
         
         List<Document_Clause__c> docClause = DexUtilTestDataFactory.createDocumentClause(1, true, null);
-        String jsonString='{\"Name\":\"tst\",\"Id\":\"\",\"Document_Template__c\":\"'+documentTemplate[0].Id+'\",\"DisplaySectionName__c\":true,\"ChildObject__c\":\"Test\",\"IsActive__c\":true,\"IsEditable__c\":true,\"Section_Content__c\":\"testsectioncontent\",\"Section_Details__c\":\"testsectiondetails\",\"Sequence__c\":1,\"Type__c\":\"Header\",\"Document_Clause__c\":\"'+docClause[0].Id+'\"}';
+        String jsonString='{\"Name\":\"tst\",\"Id\":\"\",\"Document_Template__c\":\"'+documentTemplate[0].Id+'\",\"DisplaySectionName__c\":true,\"IsActive__c\":true,\"IsEditable__c\":true,\"Section_Content__c\":\"testsectioncontent\",\"Section_Details__c\":\"testsectiondetails\",\"Sequence__c\":1,\"Type__c\":\"Header\",\"Document_Clause__c\":\"'+docClause[0].Id+'\"}';
         Document_Template_Section__c registerForm=(Document_Template_Section__c) JSON.deserialize(jsonString,Document_Template_Section__c.class);
-        String jsonString1='{\"Name\":\"tst\",\"Id\":\"\",\"Document_Template__c\":\"'+documentTemplate[0].Id+'\",\"DisplaySectionName__c\":true,\"ChildObject__c\":\"Test\",\"IsActive__c\":true,\"IsEditable__c\":true,\"Section_Content__c\":\"testsectioncontent\",\"Section_Details__c\":\"testsectiondetails\",\"Sequence__c\":1,\"Type__c\":\"Footer\",\"Document_Clause__c\":\"'+docClause[0].Id+'\"}';
+        String jsonString1='{\"Name\":\"tst\",\"Id\":\"\",\"Document_Template__c\":\"'+documentTemplate[0].Id+'\",\"DisplaySectionName__c\":true,\"IsActive__c\":true,\"IsEditable__c\":true,\"Section_Content__c\":\"testsectioncontent\",\"Section_Details__c\":\"testsectiondetails\",\"Sequence__c\":1,\"Type__c\":\"Footer\",\"Document_Clause__c\":\"'+docClause[0].Id+'\"}';
         Document_Template_Section__c registerForm1=(Document_Template_Section__c) JSON.deserialize(jsonString1,Document_Template_Section__c.class);
         
         Test.startTest();
@@ -425,7 +423,6 @@ private class ProductSetupCtrl_Test {
         String myJSON = JSON.serialize(jsonMap);
         Document_Template_Section__c docTemplateSection = new Document_Template_Section__c();
         docTemplateSection.DisplaySectionName__c = true;
-        docTemplateSection.ChildObject__c = 'Test';
         docTemplateSection.IsActive__c = true;
         docTemplateSection.IsEditable__c = true;
         docTemplateSection.Section_Content__c = myJSON;
@@ -440,7 +437,6 @@ private class ProductSetupCtrl_Test {
         
         Document_Template_Section__c docTemplateSection1 = new Document_Template_Section__c();
         docTemplateSection1.DisplaySectionName__c = true;
-        docTemplateSection1.ChildObject__c = 'Test';
         docTemplateSection1.IsActive__c = true;
         docTemplateSection1.IsEditable__c = true;
         docTemplateSection1.Section_Content__c = mainstr;
@@ -474,9 +470,9 @@ private class ProductSetupCtrl_Test {
         System.runAs(us){
         List<Document_Template__c> documentTemplate = DexUtilTestDataFactory.createDocumentTemplate(1, true, null);
         List<Document_Clause__c> docClause = DexUtilTestDataFactory.createDocumentClause(1, true, null);
-        String jsonString='{\"Name\":\"tst\",\"Id\":\"\",\"Document_Template__c\":\"'+documentTemplate[0].Id+'\",\"DisplaySectionName__c\":true,\"ChildObject__c\":\"Test\",\"IsActive__c\":true,\"IsEditable__c\":true,\"Section_Content__c\":\"testsectioncontent\",\"Section_Details__c\":\"testsectiondetails\",\"Sequence__c\":1,\"Type__c\":\"Header\",\"Document_Clause__c\":\"'+docClause[0].Id+'\"}';
+        String jsonString='{\"Name\":\"tst\",\"Id\":\"\",\"Document_Template__c\":\"'+documentTemplate[0].Id+'\",\"DisplaySectionName__c\":true,\"IsActive__c\":true,\"IsEditable__c\":true,\"Section_Content__c\":\"testsectioncontent\",\"Section_Details__c\":\"testsectiondetails\",\"Sequence__c\":1,\"Type__c\":\"Header\",\"Document_Clause__c\":\"'+docClause[0].Id+'\"}';
         Document_Template_Section__c registerForm=(Document_Template_Section__c) JSON.deserialize(jsonString,Document_Template_Section__c.class);
-        String jsonString1='{\"Name\":\"tst\",\"Id\":\"\",\"Document_Template__c\":\"'+documentTemplate[0].Id+'\",\"DisplaySectionName__c\":true,\"ChildObject__c\":\"Test\",\"IsActive__c\":true,\"IsEditable__c\":true,\"Section_Content__c\":\"testsectioncontent\",\"Section_Details__c\":\"testsectiondetails\",\"Sequence__c\":1,\"Type__c\":\"Header\",\"Document_Clause__c\":\"'+docClause[0].Id+'\"}';
+        String jsonString1='{\"Name\":\"tst\",\"Id\":\"\",\"Document_Template__c\":\"'+documentTemplate[0].Id+'\",\"DisplaySectionName__c\":true,\"IsActive__c\":true,\"IsEditable__c\":true,\"Section_Content__c\":\"testsectioncontent\",\"Section_Details__c\":\"testsectiondetails\",\"Sequence__c\":1,\"Type__c\":\"Header\",\"Document_Clause__c\":\"'+docClause[0].Id+'\"}';
         Document_Template_Section__c registerForm1=(Document_Template_Section__c) JSON.deserialize(jsonString1,Document_Template_Section__c.class);
         Test.startTest();
         try{
@@ -495,9 +491,9 @@ private class ProductSetupCtrl_Test {
         System.runAs(us){
         List<Document_Template__c> documentTemplate = DexUtilTestDataFactory.createDocumentTemplate(1, true, null);
         List<Document_Clause__c> docClause = DexUtilTestDataFactory.createDocumentClause(1, true, null);
-        String jsonString='{\"Name\":\"tst\",\"Id\":\"\",\"Header_Content__c\":\"tst\",\"Document_Template__c\":\"'+documentTemplate[0].Id+'\",\"DisplaySectionName__c\":true,\"ChildObject__c\":\"Test\",\"IsActive__c\":true,\"IsEditable__c\":true,\"Section_Content__c\":\"testsectioncontent\",\"Section_Details__c\":\"testsectiondetails\",\"Sequence__c\":1,\"Type__c\":\"Header\",\"Document_Clause__c\":\"'+docClause[0].Id+'\"}';
+        String jsonString='{\"Name\":\"tst\",\"Id\":\"\",\"Header_Content__c\":\"tst\",\"Document_Template__c\":\"'+documentTemplate[0].Id+'\",\"DisplaySectionName__c\":true,\"IsActive__c\":true,\"IsEditable__c\":true,\"Section_Content__c\":\"testsectioncontent\",\"Section_Details__c\":\"testsectiondetails\",\"Sequence__c\":1,\"Type__c\":\"Header\",\"Document_Clause__c\":\"'+docClause[0].Id+'\"}';
         Document_Template_Section__c registerForm=(Document_Template_Section__c) JSON.deserialize(jsonString,Document_Template_Section__c.class);
-        String jsonString1='{\"Name\":\"tst\",\"Id\":\"\",\"Header_Content__c\":\"tst\",\"Document_Template__c\":\"'+documentTemplate[0].Id+'\",\"DisplaySectionName__c\":true,\"ChildObject__c\":\"Test\",\"IsActive__c\":true,\"IsEditable__c\":true,\"Section_Content__c\":\"testsectioncontent\",\"Section_Details__c\":\"testsectiondetails\",\"Sequence__c\":1,\"Type__c\":\"Header\",\"Document_Clause__c\":\"'+docClause[0].Id+'\"}';
+        String jsonString1='{\"Name\":\"tst\",\"Id\":\"\",\"Header_Content__c\":\"tst\",\"Document_Template__c\":\"'+documentTemplate[0].Id+'\",\"DisplaySectionName__c\":true,\"IsActive__c\":true,\"IsEditable__c\":true,\"Section_Content__c\":\"testsectioncontent\",\"Section_Details__c\":\"testsectiondetails\",\"Sequence__c\":1,\"Type__c\":\"Header\",\"Document_Clause__c\":\"'+docClause[0].Id+'\"}';
         Document_Template_Section__c registerForm1=(Document_Template_Section__c) JSON.deserialize(jsonString1,Document_Template_Section__c.class);
         Test.startTest();
         try{

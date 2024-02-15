@@ -15,7 +15,6 @@ global with sharing class DisplayPDFController
     public String centerfootertext {get; set;}
     public String rightfootertext {get; set;}
     
-    public static String pageSize {get;set;}
     public DisplayPDFController() 
     {
         displaypagesequence =false;
@@ -257,27 +256,6 @@ global with sharing class DisplayPDFController
             LogHandler.createLog((Id) null,'DisplayPDFController.getTemplateSections()','templateId ->  '+templateId+' '+ex.getLineNumber()+ex.getStackTraceString()+ex.getCause(),ex.getMessage(),'Exception');
             return null;
         }  
-    }
-        
-    @AuraEnabled
-    public static string pdfMode(Map<String,String> wrapperdata){
-       pageSize = wrapperdata.get('pdfModes1');
-       DisplayPDFController.setName();
-       return pageSize;
-    }
-    
-    @AuraEnabled
-    public static string setName(){
-        return 'pageSize'+pageSize;
-    }
-    
-    @AuraEnabled 
-    public static string pdfObjectName(string id){
-        return 'ObjectName is Returned';
-    }
-    
-    public class DisplayPDF{
-        @AuraEnabled public String pdfModes1 {get; set;}
     }
     
     public class SafeClassException extends Exception{}

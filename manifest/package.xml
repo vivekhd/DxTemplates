@@ -43,11 +43,11 @@
 		<name>AuraDefinitionBundle</name>
 	</types>
 	<types>
+		<members>ChartAutomationStyleResources__mdt.Style_Composition__c</members>
 		<members>Document_Clause__c.Body__c</members>
 		<members>Document_Clause__c.Category__c</members>
 		<members>Document_Clause__c.IsActive__c</members>
 		<members>Document_Clause__c.Status__c</members>
-		<members>Document_Template_Section__c.ChildObject__c</members>
 		<members>Document_Template_Section__c.DisplaySectionName__c</members>
 		<members>Document_Template_Section__c.Document_Clause__c</members>
 		<members>Document_Template_Section__c.Document_Template__c</members>
@@ -55,7 +55,6 @@
 		<members>Document_Template_Section__c.IsActive__c</members>
 		<members>Document_Template_Section__c.IsEditable__c</members>
 		<members>Document_Template_Section__c.New_Page__c</members>
-		<members>Document_Template_Section__c.Parent_Section__c</members>
 		<members>Document_Template_Section__c.RuleId__c</members>
 		<members>Document_Template_Section__c.Section_Content__c</members>
 		<members>Document_Template_Section__c.Section_Details__c</members>
@@ -75,19 +74,11 @@
 		<members>Rule_Condition__c.Condition_Field__c</members>
 		<members>Rule_Condition__c.DataType__c</members>
 		<members>Rule_Condition__c.Evaluation_Object__c</members>
-		<members>Rule_Condition__c.External_Id__c</members>
-		<members>Rule_Condition__c.Is_Cart_Item_Condition__c</members>
 		<members>Rule_Condition__c.Operator__c</members>
-		<members>Rule_Condition__c.Parent_Evaluation_Object__c</members>
 		<members>Rule_Condition__c.Rule__c</members>
 		<members>Rule_Condition__c.Value__c</members>
-		<members>Rule__c.Evaluation_Object__c</members>
-		<members>Rule__c.External_Id__c</members>
 		<members>Rule__c.Rule_Description__c</members>
 		<members>Rule__c.Rule_Expression__c</members>
-		<members>Rule__c.Rule_Service__c</members>
-		<members>Rule__c.Rule_Type__c</members>
-		<members>Rule__c.Service__c</members>
 		<members>TransactionLog__c.LogData__c</members>
 		<members>TransactionLog__c.LogMessage__c</members>
 		<members>TransactionLog__c.LogType__c</members>
@@ -96,7 +87,7 @@
 		<name>CustomField</name>
 	</types>
 	<types>
-        <members>ChartAutomationStyleResources.itembar</members>
+		<members>ChartAutomationStyleResources.itembar</members>
 		<members>ChartAutomationStyleResources.itembase</members>
 		<members>ChartAutomationStyleResources.itemtitle</members>
 		<members>ChartAutomationStyleResources.itemvaluein</members>
@@ -124,7 +115,6 @@
 	<types>
 		<members>Document_Template_Record_Page</members>
 		<members>Document_Template_Section_Record_Page</members>
-		<members>LightningSales_UtilityBar</members>
 		<name>FlexiPage</name>
 	</types>
 	<types>
@@ -159,7 +149,6 @@
 		<members>modal</members>
 		<members>multiLookupComponent</members>
 		<members>searchCategory</members>
-		<members>summaryChildHierarchy</members>
 		<members>templateContentDetails</members>
 		<members>templateDesignerCMP</members>
 		<members>templateFooter</members>
@@ -180,13 +169,10 @@
 		<name>ListView</name>
 	</types>
 	<types>
-		<members>Dx_Template_Access</members>
+		<members>DX_Template_Access</members>
 		<name>PermissionSet</name>
 	</types>
 	<types>
-		<members>Template_iconattributeoption1</members>
-		<members>Template_iconattributeoption2</members>
-		<members>Template_iconattributeoption3</members>
 		<members>dexcpqcartstyles</members>
 		<members>dexcpqfonts</members>
 		<members>dexcpqstyles</members>
