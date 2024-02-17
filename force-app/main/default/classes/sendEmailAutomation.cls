@@ -46,16 +46,12 @@ global class sendEmailAutomation implements Queueable {
             Database.SaveResult[] urListsave = safe.doInsert(atttobeinserted);
             List<String> errorList1 = Safely.safeClassExceptionHandlerInsert(urListsave);
             if(errorList1.size()>0){
-                System.debug('Attachment Insertion Failed');
                 Database.rollback(sp1);
                 throw new SafeClassException(String.join( errorList1, ', ' ));
             }
         }
         catch(Exception ex) {
             LogHandler.createLog((Id) null,'sendEmailAutomation.execute() Queueable Class','Document Id- '+ documentRecordInserted + ' ' + ex.getLineNumber() + ex.getStackTraceString() + ex.getCause(),ex.getMessage(),'Exception');
-            System.debug('Error Type : '+ ex.getTypeName());
-            System.debug('Error Message : ' + ex.getMessage());
-            System.debug('Error Line Number : ' + ex.getLineNumber());
         }
     }
 }

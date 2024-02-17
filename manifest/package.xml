@@ -3,6 +3,7 @@
 	<types>
 		<members>CanTheUser</members>
 		<members>CanTheUser_Tests</members>
+		<members>DeleteTransactionLogRecords</members>
 		<members>DexUtilTestDataFactory</members>
 		<members>DisplayPDFController</members>
 		<members>DisplayPDFController_Test</members>

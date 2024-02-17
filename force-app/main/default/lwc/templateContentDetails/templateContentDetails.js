@@ -35,7 +35,7 @@ export default class TemplateContentDetails extends LightningElement {
   @track Recorddetailsnew = {
     Name: '',
     DxCPQ__Section_Content__c: '',
-    DxCPQ__DisplaySectionName__c: false,
+    //DxCPQ__DisplaySectionName__c: false,
     DxCPQ__New_Page__c: false,
     DxCPQ__Document_Template__c: '',
     DxCPQ__Sequence__c: 0,
@@ -94,9 +94,7 @@ export default class TemplateContentDetails extends LightningElement {
           this.Recorddetailsnew.Name = result.Name;
         }
       })
-      .catch(error => {
-        console.log('Content Section Error', error);
-      })
+      .catch(error => { })
   }
 
   @api handleObjectNameSelection(objName) {
@@ -172,9 +170,7 @@ export default class TemplateContentDetails extends LightningElement {
             this.dispatchEvent(firecustomevent);
           }
         })
-        .catch(error => {
-          console.log('Error in saving this section ' + JSON.stringify(error));
-        })
+        .catch(error => { })
       this.clickedfirsttime = true;
     }
     else {
@@ -198,54 +194,13 @@ export default class TemplateContentDetails extends LightningElement {
     } else {
       this.Recorddetailsnew.DxCPQ__New_Page__c = false;
     }
-
+    /*
     if (mystring.includes('Display Section Name')) {
       this.Recorddetailsnew.DxCPQ__DisplaySectionName__c = true;
     } else {
       this.Recorddetailsnew.DxCPQ__DisplaySectionName__c = false;
-    }
+    }*/
   }
-
-
-  /* @wire(getSobjectFields, {selectedObject: this.selectedObjectName}) 
- // @wire(getSobjectFields, {selectedObject: this.documenttemplaterecord.Related_To_Type__c}) 
-    wiredSobjectfields({ error, data }) {
-      if (data) {
-          this.data = data;
-          this.error = undefined;
-      } else if (error) {
-          this.error = error;
-          console.log('occured error is '+ JSON.stringify(this.error));
-      }
-  }  */
-
-  /*
-  @wire(getSobjectFields, { selectedObject: '$selectedObjectName' })
-  wiredSobjectfields({ error, data }) {
-    if (data) {
-      console.log('date ****' + data);
-      this.data = data;
-      this.error = undefined;
-    } else if (error) {
-      this.error = error;
-      console.log('occured error is ' + JSON.stringify(this.error));
-    }
-  }
-
-  get selectedObject() {
-    return this.selectedObjectName;
-  }
-
-  get fieldOptions() {
-    var returnOptions = [];
-    if (this.data) {
-      this.data.forEach(ele => {
-        returnOptions.push({ label: ele, value: ele });
-      });
-    }
-    return returnOptions;
-  }
-  */
 
   handlemergefieldselection(event) {
     this.mergefieldname = '{!' + this.documenttemplaterecord.DxCPQ__Related_To_Type__c + '.' + event.detail.value + '}';
@@ -299,9 +254,7 @@ export default class TemplateContentDetails extends LightningElement {
             this.dispatchEvent(firecustomevent);
           }
         })
-        .catch(error => {
-          console.log('section deletion failed' + JSON.stringify(error));
-        })
+        .catch(error => { })
     }
   }
 
@@ -310,7 +263,7 @@ export default class TemplateContentDetails extends LightningElement {
     this.ukey = (new Date()).getTime();
     this.Recorddetailsnew.Id = '';
     this.Recorddetailsnew.Name = '';
-    this.Recorddetailsnew.DxCPQ__DisplaySectionName__c = '';
+    //this.Recorddetailsnew.DxCPQ__DisplaySectionName__c = '';
     this.richtextVal = '';
     this.clauseId = '';
     this.Recorddetailsnew.DxCPQ__New_Page__c = false;
@@ -365,15 +318,14 @@ export default class TemplateContentDetails extends LightningElement {
             if (result.DxCPQ__New_Page__c == true) {
               this.value.push('New Page');
             }
-            if (result.DxCPQ__DisplaySectionName__c == true) {
+            /*if (result.DxCPQ__DisplaySectionName__c == true) {
               this.value.push('Display Section Name');
-            }
+            }*/
           });
         }
       })
       .catch(error => {
         this.isLoaded = false;
-        console.log('Error while fetching data ' + JSON.stringify(error));
       })
   }
 }

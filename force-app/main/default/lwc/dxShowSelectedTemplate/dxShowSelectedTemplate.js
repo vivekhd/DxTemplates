@@ -42,7 +42,6 @@ export default class DxShowSelectedTemplate extends LightningElement {
         allConstants ({error, data}) {
             if (data) {
                 this.popUpMessage = data;
-                console.log('Success');
             } else {
                 this.error = error;
             }
@@ -50,7 +49,6 @@ export default class DxShowSelectedTemplate extends LightningElement {
 
     connectedCallback() {
         this.isLoaded=true;
-        console.log('objectRecordId-',this.objectRecordId);
         getTemplateSections({templateId : this.templateId, recordId:this.objectRecordId, objectApiName: this.objectName}).then((result) => {
             this.isLoaded=false;
 
@@ -163,7 +161,6 @@ export default class DxShowSelectedTemplate extends LightningElement {
             }
         }).catch((err) => {
             this.isLoaded=false;
-            console.log('Error Section Contentes'+ JSON.stringify(err));
         });
     }
 
@@ -195,22 +192,17 @@ export default class DxShowSelectedTemplate extends LightningElement {
         var headfooterstr=JSON.stringify(this.headerfooter);
 
         generateDocument({templateId : this.templateId, quoteId:this.objectRecordId, pdfbody:container.innerHTML,pdfheaderfooter:headfooterstr}).then((result) => {
-            
-            console.log('this is result'+JSON.parse(JSON.stringify(result)));
-            console.log('this is result',result);
             if(result && result.length>0){
                 this.handleAttachment(result);
             }
             
         }).catch((err) => {
             this.isLoaded2=false;
-            console.log('this is error handlePDF',err);
         });
         
     }
 
-    handleAttachment(documentid)
-    {
+    handleAttachment(documentid) {
         generatePDFAttachment({documentid : documentid, quoteId:this.objectRecordId}).then((result) => {
            if(result && result.length>0){
                 this.isLoaded=false;
@@ -232,7 +224,6 @@ export default class DxShowSelectedTemplate extends LightningElement {
             }
             
         }).catch((err) => {
-            console.log('this is error handleAttachment',err);
         });
     }
 
@@ -244,20 +235,6 @@ export default class DxShowSelectedTemplate extends LightningElement {
     }  
 
     /* Commented by Rahul - not intended in this release */
-    handleClauseContent(event){
-        /*let elediv = this.template.querySelector('.clause');
-        var productClausesMap={};
-        productClausesMap = (event.detail.content);
-        productClausesMap.forEach( (val,index) => {
-            console.log('this.val======',val);
-            elediv.innerHTML+= '<b>'+val.name+'</b><br/>';
-
-            var clausebody=[];
-            clausebody = val.bodycontent;
-            clausebody.forEach( (val,index) => {
-                elediv.innerHTML+= clausebody[index];
-            });
-        });*/
-    } 
+    handleClauseContent(event){ } 
 
 }

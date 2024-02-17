@@ -296,7 +296,6 @@ public with sharing class ROsectionAutomationController {
             return ROHtmlContent;
         }
         catch(Exception ex) {
-            System.debug('No Values to assign ' + ex.getLineNumber());
             LogHandler.createLog((Id) templatesectionid,'ROsectionAutomationController.getsectionData()','Template Id- '+ relatedObjectSectionID + ' ' + ex.getLineNumber() + ex.getStackTraceString() + ex.getCause(),ex.getMessage(),'Exception');   
         }
         return '';
@@ -453,16 +452,10 @@ public with sharing class ROsectionAutomationController {
         catch(Exception ex) {
             if(errorTypeCaught==null) {
                 errorTypeCaught = ex.getTypeName();
-                System.debug(errorTypeCaught);
                 LogHandler.createLog((Id) null,'ROsectionAutomationController.dataFetchFromCurrentRecord()','Template Id- '+ relatedObjectSectionID + ' ' + ex.getLineNumber() + ex.getStackTraceString() + ex.getCause(),ex.getMessage(),'Exception');
             }
             else if(ex.getTypeName()!=errorTypeCaught) {
                 LogHandler.createLog((Id) null,'ROsectionAutomationController.dataFetchFromCurrentRecord()','Template Id- '+ relatedObjectSectionID + ' ' + ex.getLineNumber() + ex.getStackTraceString() + ex.getCause(),ex.getMessage(),'Exception');
-            }
-            else { // same error repeating multiple times
-                System.debug('Error Type : '+ ex.getTypeName());
-                System.debug('Error Message : ' + ex.getMessage());
-                System.debug('Error Line Number : ' + ex.getLineNumber());
             }
         }
     }
@@ -556,8 +549,6 @@ public with sharing class ROsectionAutomationController {
             }
         }
         catch(Exception ex)  {
-            System.debug('Exception occured at ' + ex.getLineNumber());
-            System.debug('Error Message : ' + ex.getMessage());
             throw new AuraHandledException(ex.getMessage());
         }
         return '';

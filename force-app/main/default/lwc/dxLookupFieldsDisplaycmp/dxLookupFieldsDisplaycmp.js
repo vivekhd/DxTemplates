@@ -31,7 +31,7 @@ export default class DxLookupFieldsDisplaycmp extends LightningElement {
                     }
                 }
             }).catch(error => {
-                console.log('error while retrieving the fields' + JSON.stringify(error));
+                console.log('Error in LWC_dxLookupFieldsDisplayCMP' + JSON.stringify(error));
             })
     }
 
@@ -66,7 +66,6 @@ export default class DxLookupFieldsDisplaycmp extends LightningElement {
                                     this.lstOfObjects.push(tempObj);
                                 }
                             }).catch(error => {
-                                console.log('error while retrieving the fields' + error)
                             })
                         } else {
                             let tempstr;

@@ -54,14 +54,14 @@ export default class CloneDocumentCmp extends LightningElement {
             if(result){
                 this.resultObj = JSON.parse(JSON.stringify(result));
                 const newDocTempEvt = new CustomEvent('doccreated', {
-                detail: {id: result.Id,name:result.Name,templateObj:this.resultObj} ,bubbles: true
+                    detail: {id: result.Id,name:result.Name,templateObj:this.resultObj} ,bubbles: true
                 });
                 this.dispatchEvent(newDocTempEvt);
                 this.dispatchEvent(new CloseActionScreenEvent());
             }
         
         }).catch(error=>{
-            console.log(error);
+            console.log('Error in LWC_CloneDocumentCMP' + JSON.stringify(error));
         })
     }
 }

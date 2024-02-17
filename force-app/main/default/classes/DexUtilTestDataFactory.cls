@@ -212,7 +212,6 @@
         List<Document_Template_Section__c> docTemplateSectionToInsert = New List<Document_Template_Section__c>();
         for(Integer i=0; i< numToInsert; i++){
             Document_Template_Section__c docTemplateSection = new Document_Template_Section__c();
-            docTemplateSection.DisplaySectionName__c = true;
             docTemplateSection.IsActive__c = true;
             docTemplateSection.IsEditable__c = true;
             docTemplateSection.Section_Content__c = 'test section content';

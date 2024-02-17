@@ -32,7 +32,7 @@ export default class TemplateFooter extends LightningElement {
   @track Recorddetailsnew = {
     Name: '',
     DxCPQ__Section_Content__c: '',
-    DxCPQ__DisplaySectionName__c: false,
+    //DxCPQ__DisplaySectionName__c: false,
     DxCPQ__New_Page__c: false,
     DxCPQ__Document_Template__c: '',
     DxCPQ__Sequence__c: 0,
@@ -141,7 +141,7 @@ export default class TemplateFooter extends LightningElement {
     this.footerSectionsMap = [];
     this.value = [];
     this.Recorddetailsnew = {
-      Name: '', DxCPQ__Section_Content__c: '', DxCPQ__DisplaySectionName__c: false,
+      Name: '', DxCPQ__Section_Content__c: '', //DxCPQ__DisplaySectionName__c: false,
       DxCPQ__New_Page__c: false,
       DxCPQ__Document_Template__c: '',
       DxCPQ__Sequence__c: 0,
@@ -177,9 +177,7 @@ export default class TemplateFooter extends LightningElement {
           });
         }
       })
-      .catch(error => {
-        console.log('error loadsectionvaluesforedit footer' + JSON.stringify(error));
-      })
+      .catch(error => { })
   }
 
   handlesectionsave(event) {
@@ -225,9 +223,7 @@ export default class TemplateFooter extends LightningElement {
             this.dispatchEvent(firecustomevent);
           }
         })
-        .catch(error => {
-          console.log('Footer Saving Error' + JSON.stringify(error));
-        })
+        .catch(error => { })
     }
     else {
       const Errormsg = new ShowToastEvent({

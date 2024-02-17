@@ -7,7 +7,6 @@ global with sharing class RelatedObjectsClass {
     @AuraEnabled
     public static map<string,string> getRelatedObjects(string selectedObject){
         try{
-            system.debug('Selected Parent SObject Name '+ selectedObject);
             map<string,string> relatedObjectsMap = new map<string,string>();
             list<Schema.Childrelationship> relatedObjectsList = Schema.getGlobalDescribe().get(selectedObject).getdescribe().getChildRelationships();
             for (Schema.Childrelationship relatedObject : relatedObjectsList) 
@@ -48,7 +47,6 @@ global with sharing class RelatedObjectsClass {
             reqFields.add(String.ValueOf(field));
             reqFieldsMap.put(String.ValueOf(field),String.Valueof(F.getLabel()));
         }
-        System.debug(reqFields);
         return reqFieldsMap;
     }
     catch (Exception ex) {
@@ -87,7 +85,6 @@ global with sharing class RelatedObjectsClass {
                     reqFields.put(fieldName,lst);
                 }        	
             }
-            System.debug(reqFields);
             return reqFields;
         }
         catch (Exception ex) {
@@ -100,7 +97,6 @@ global with sharing class RelatedObjectsClass {
     @AuraEnabled	
     public static List<ConditionObjectWrapper> getSObjectListFiltering(String selectedChildObjectLabel){        	
         List<ConditionObjectWrapper> conditionObjectList = new List<ConditionObjectWrapper>();	
-        System.debug(selectedChildObjectLabel);
         ConditionObjectWrapper cWrap =  new ConditionObjectWrapper();	
                 cWrap.objectLabelName = selectedChildObjectLabel;	
                 cWrap.objectAPIName = selectedChildObjectLabel;	
@@ -134,7 +130,6 @@ global with sharing class RelatedObjectsClass {
                     strList.add(wmp);
                 }
             }
-            System.debug(strList);
             return strList;   
         }
         catch (Exception ex) {
@@ -168,7 +163,6 @@ global with sharing class RelatedObjectsClass {
                 condsArr.add(condMap);
             }
             String condString = JSON.serializePretty(condsArr);
-            System.debug(condString);
             String cloneRule = createRuleCondition(condString, tempRule.Rule_Expression__c, null, null);
             return cloneRule;
         }
@@ -181,11 +175,9 @@ global with sharing class RelatedObjectsClass {
     @AuraEnabled
     public static String createRuleCondition(String ruleConditions, String ruleExpression, List<Id> deleteIds , String sectionrecordid){
         try{
-            System.debug(deleteIds);
             Id RuleId;
             Id tempruleId;
             String ruleName;
-            //System.debug(deleteIds.size());
             if(deleteIds != null && deleteIds.size() > 0){
                 RuleSelector.deleteRuleConditions(deleteIds); 
             }
@@ -253,7 +245,6 @@ global with sharing class RelatedObjectsClass {
             String jsonStr = ruleConditions;
             
             JSONParser conditionParser = JSON.createParser(jsonStr);
-            System.debug('ConditionParser is:'+conditionParser);
             while (conditionParser.nextToken() != null) {
                 if (conditionParser.getCurrentToken() == JSONToken.START_OBJECT) {
                     RuleConditionWrapper ruleCondition = (RuleConditionWrapper)conditionParser.readValueAs(RuleConditionWrapper.class);
@@ -275,7 +266,6 @@ global with sharing class RelatedObjectsClass {
                     conditions.add(condition);
                 }
             }
-            System.debug(conditions);
             if(conditions.size()>0){
                 for(Rule_Condition__c rulCond : conditions) {
                     if (rulCond.Id==null) {                                        
@@ -303,7 +293,6 @@ global with sharing class RelatedObjectsClass {
                     }
                 }
             }
-            System.debug('The rule condition list is: '+conditions);
             return ruleName;
         }
         catch (Exception ex) {

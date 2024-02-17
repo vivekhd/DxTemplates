@@ -21,7 +21,6 @@ public with sharing class FooterClass {
         searchlabel = '%' + searchlabel + '%';
         List<contentversion> cvs = new List<contentversion>();
         String query = String.escapeSingleQuotes('select id,FileExtension,title from contentversion where FileExtension in (\'jpg\', \'jpeg\', \'png\') and title LIKE \'' + searchlabel + '\' WITH SECURITY_ENFORCED order by title asc');
-        System.debug(query);
         try{
             if(Test.isRunningTest()){
                 query = query + '372';                

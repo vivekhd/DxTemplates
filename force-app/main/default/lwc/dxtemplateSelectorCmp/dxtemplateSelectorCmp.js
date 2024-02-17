@@ -59,6 +59,9 @@ export default class DxtemplateSelectorCmp extends NavigationMixin(LightningElem
     connectedCallback() {
         window.clearTimeout(this.delayTimeout);
         this.delayTimeout = setTimeout(() => { }, 0);
+
+        let dateKey = new Date().toLocaleString().split(', ');
+        this.modifiedPDFName = 'DX-' + this.objectLabel + '-' + dateKey[0].replaceAll('/','') + dateKey[1].split(' ')[0].replaceAll(':','');
     }
 
     selectItemEventHandler(event) {
@@ -87,7 +90,6 @@ export default class DxtemplateSelectorCmp extends NavigationMixin(LightningElem
     handlePDF() {
         this.isLoaded = true;
         this.template.querySelector('c-dx-show-selected-template').handlePDF();
-        this.modifiedPDFName = this.recordId;
     }
 
     handlepdfgeneration(event) {
@@ -100,20 +102,16 @@ export default class DxtemplateSelectorCmp extends NavigationMixin(LightningElem
     }
 
     previewPDF() {
-        var url = this.downloadURL; // get from processing apex response
-        window.open(url, "_blank");
+        window.open(this.downloadURL, "_blank");
     }
 
     savePDFtoQuote() {
-        if (this.modifiedPDFName == " " || this.modifiedPDFName == null || this.modifiedPDFName.split(' ').length - 1 == this.modifiedPDFName.length) {
-            this.modifiedPDFName = this.recordId;
-        }
         SavePDFtoQuote({ documentid: this.pdfdocumentid, quoteId: this.recordId, pdfName: this.modifiedPDFName })
             .then((result) => {
                 this.downloadURL = '/servlet/servlet.FileDownload?file=' + result;
                 const event4 = new ShowToastEvent({
                     title: 'Success',
-                    message: 'Saved as attachment to the record!',
+                    message: `PDF document is saved under ${this.objectLabel} successfully!`,
                     variant: 'success',
                 });
                 this.dispatchEvent(event4);
@@ -121,8 +119,13 @@ export default class DxtemplateSelectorCmp extends NavigationMixin(LightningElem
                 this.showsendemail = true;
             })
             .catch((err) => {
-                console.log('Error while saving the Attachment', err);
-            });
+                const event4 = new ShowToastEvent({
+                    title: 'Error',
+                    message: `An Error occurred while saving the PDF document. Please contact the System Administrator.`,
+                    variant: 'error',
+                });
+                this.dispatchEvent(event4);
+            })
     }
 
     handlePDFRename(event) {

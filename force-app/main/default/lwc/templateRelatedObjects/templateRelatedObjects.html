@@ -41,7 +41,7 @@
 		<div class="slds-grid  slds-wrap slds-p-bottom_small slds-gutters">
 		  <div class="slds-col slds-size_4-of-12 objclass">
 			<template if:true={renderedData}>
-			  <c-search-category has-multi-select="false" data-id="childObject" options={objectTypeOptions} label='Select the Reated Object' searchtext="Select the Related Object" onselectedcategoryvalues={handleObjectselection} disabled={isDisabled}></c-search-category>
+			  <c-search-category has-multi-select="false" data-id="childObject" options={objectTypeOptions} label='Select the Related Object' searchtext="Select the Related Object" onselectedcategoryvalues={handleObjectselection} disabled={isDisabled}></c-search-category>
 			</template>
 		  </div>
 		  <div class="slds-col slds-size_4-of-12 pickclass">
@@ -56,11 +56,11 @@
 		  <div class="slds-col slds-size_12-of-12 slds-medium-size_8-of-12 slds-large-size_8-of-12">
 			<div class="slds-grid slds-wrap">
 			  <div class="slds-col slds-grid slds-wrap slds-gutters" style="width:100%; max-width:95%;">
-				<template if:true={lstOfObjects}>
-				  <template for:each={lstOfObjects} for:item="obj">
+				<template if:true={listOfRelatedObjects}>
+				  <template for:each={listOfRelatedObjects} for:item="obj">
 					<div class="slds-col" style="width:100%; max-width:50%;" key={obj.uKey}>
 					  <div class="title">&nbsp;</div>
-					  <select name="car" data-id={obj.index} onchange={handleSelectedField} multiple style="width:100%; height:150px;border:1px solid #999999;">
+					  <select data-id={obj.index} onchange={handleSelectedField} multiple style="width:100%; height:150px;border:1px solid #999999;">
 						<template for:each={obj.fieldList} for:item="field">
 						  <option key={field.value} value={field.value} style="font-size:12px; padding:3px 6px;" title={field.label}>{field.label}</option>
 						</template>
@@ -81,8 +81,8 @@
 				<div class="slds-col">
 				  <div class="title"></div>
 				  <div>&nbsp;</div>
-				  <select name="field" key={lstofaddedfields.value} data-id={lstofaddedfields.label} onchange={handleSelectedFieldsBox} multiple style="width:100%; height:150px;border:1px solid #999999;">
-					<template for:each={lstofaddedfields} for:item="field">
+				  <select name="field" key={listOfAddedFields.value} data-id={listOfAddedFields.label} onchange={handleSelectedFieldsBox} multiple style="width:100%; height:150px;border:1px solid #999999;">
+					<template for:each={listOfAddedFields} for:item="field">
 					  <option key={field.value} value={field.value} style="font-size:12px; padding:3px 6px;" title={field.label}>{field.label}</option>
 					</template>
 				  </select>
@@ -127,7 +127,7 @@
 				  <lightning-combobox name="Currency format" label="Currency format" title="Currency format" value={curFormatvalue} placeholder={curFormatvalue} options={curformats} onchange={handlecurFormat} disabled={isDisabled}></lightning-combobox>
 				</template>
 				<template lwc:if={showChartBox}>
-				  <lightning-input data-id="chartBox" type="checkbox" name="Configure Chart" class="slds-p-top_large" label="Configure Chart" title="Include Chart in PDF" value={displayChart} onchange={handleDisplayChart} disabled={isDisabled}></lightning-input>
+				  <lightning-input data-id="chartBox" type="checkbox" name="Configure Chart" class="slds-p-top_large" label="Configure Chart" title="Include Chart in PDF" value={displayChartSection} onchange={handleDisplayChart} disabled={isDisabled}></lightning-input>
 				  <lightning-input type="color" name="input-color" label="Fill Color" title="Chart Color" value={selectedBarChartColor} onchange={handleBarChartColorChange} disabled={isDisabled}></lightning-input>
 				</template>
 			  </div>
@@ -140,7 +140,7 @@
 				</div>
 				<div class="slds-col slds-p-horizontal_small">
 				  <template for:each={allNumericalFields} for:item="val">
-					<lightning-pill key={val} name={val} label={val} class="slds-p-horizontal_xx-small" onremove={handleRemovenumField} disabled={isDisabled}></lightning-pill>
+					<lightning-pill key={val} name={val} label={val} class="slds-p-horizontal_xx-small" onremove={handleNumericFieldRemoval} disabled={isDisabled}></lightning-pill>
 				  </template>
 				</div>
 				<!-- </div> -->
@@ -152,7 +152,7 @@
 			<table class="mytable" style="border: 1px solid black;">
 			  <thead class='tableHeader'>
 				<tr>
-				  <template for:each={tableheaders} for:item="headval">
+				  <template for:each={tableHeaders} for:item="headval">
 					<th scope="col" key={headval} data-id={headval} style="text-align:center; height: 7vh">
 					  <lightning-input-rich-text onchange={handleRichTextArea} onclick={getSelectedTableRowHandler} formats={formats} class="slds-align_absolute-center TableRowClass" value={headval} key={headval} data-id={headval} title={headval} disabled={isDisabled} contenteditable='true'>
 						<div data-id={headval} hidden> {headval} </div>
@@ -195,16 +195,12 @@
 		<div class="title">&nbsp;</div>
 		<div class="borderdiv slds-col slds-size_12-of-12" data-id="ChartSection1">
 		  <div class="slds-card dx-rte_toolbar slds-no-print">
-			<template if:true={displayChart}>
+			<template if:true={displayChartSection}>
 			  <div class="slds-grid slds-grid_vertical slds-nowrap">
 				<h4 class="slds-form-element__label slds-align_absolute-center">CHART SECTION</h4>
 				<div role="group" class="slds-rich-text-editor__toolbar slds-shrink-none">
 				  <div class="slds-col slds-size_12-of-12">
 					<div class="slds-grid slds-wrap slds-gutters">
-					  <!-- Commented Previously  -->
-					  <!-- <div class="slds-col slds-size_12-of-12 slds-medium-size_4-of-12 slds-large-size_4-of-12"><lightning-input type="text" label="Enter the chart Label"
-								value={chartLabel} onchange={handleChartLabel} disabled={isDisabled}></lightning-input></br></div> -->
-					  <!-- Commented Previously  -->
 					  <div class="slds-col slds-size_12-of-12 slds-medium-size_6-of-12 slds-large-size_6-of-12">
 						<lightning-combobox data-id="subtotalFieldValue" name="Select field to generate a graph" label="Select a field to generate a graph" value={subtotalFieldValue} placeholder="Select a field to generate the chart" options={subtotalField} onchange={chartValueChange} disabled={isDisabled}></lightning-combobox>
 					  </div>

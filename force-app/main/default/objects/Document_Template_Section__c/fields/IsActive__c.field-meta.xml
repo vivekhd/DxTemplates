@@ -3,7 +3,7 @@
     <fullName>IsActive__c</fullName>
     <defaultValue>false</defaultValue>
     <externalId>false</externalId>
-    <label>IsActive</label>
+    <label>Is Active</label>
     <trackTrending>false</trackTrending>
     <type>Checkbox</type>
 </CustomField>

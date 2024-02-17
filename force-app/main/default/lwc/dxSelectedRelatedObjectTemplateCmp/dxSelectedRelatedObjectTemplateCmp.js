@@ -15,14 +15,12 @@ export default class DxSelectedRelatedObjectTemplateCmp extends LightningElement
             getRelatedObjectForSelectedDocumentTemplate({docTempId:this.recordId}).then(result=>{
                if(result){
                    this.relatedObject=result.DxCPQ__Related_To_Type__c;
-                //    this.searchlabel = 'Search '+this.relatedObject
                 this.searchlabel = 'Search Record';
                    if(this.relatedObject){
                        this.showTemplateSelector=true;
                    }
                }
             }).catch(error=>{
-                console.log('error'+error);
             })
         }, 0);
     }

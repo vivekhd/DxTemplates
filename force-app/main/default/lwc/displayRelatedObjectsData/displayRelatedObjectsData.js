@@ -199,7 +199,6 @@ export default class DisplayRelatedObjectsData extends LightningElement {
                 }
             })
             .catch(error => {
-                console.log('error-', (error));
                 this.showSpinner = false;               
                 let tempError = error.toString();
                 createLog({recordId:this.templatesectionid, className:'displayRelatedObjectsData LWC Component', exceptionMessage:error.message, LogData:tempError, logType:'Exception'})

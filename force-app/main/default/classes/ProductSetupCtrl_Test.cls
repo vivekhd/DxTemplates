@@ -305,9 +305,7 @@ private class ProductSetupCtrl_Test {
         System.runAs(us){
              try{
         List<Document_Template__c> documentTemplate = DexUtilTestDataFactory.createDocumentTemplate(1, true, null);
-        system.debug('documentTemplate[0]'+documentTemplate[0]);
         Document_Template_Section__c docTemplateSection = new Document_Template_Section__c();
-        docTemplateSection.DisplaySectionName__c = true;
         docTemplateSection.IsActive__c = true;
         docTemplateSection.IsEditable__c = true;
         docTemplateSection.Section_Content__c = 'test section content';
@@ -325,7 +323,6 @@ private class ProductSetupCtrl_Test {
         List<Document_Template_Section__c> newlst=new List<Document_Template_Section__c>();
         newlst.add(docTemplateSection);
         Document_Template_Section__c docTemplateSection1 = new Document_Template_Section__c();
-        docTemplateSection1.DisplaySectionName__c = true;
         docTemplateSection1.IsActive__c = true;
         docTemplateSection1.IsEditable__c = true;
         docTemplateSection1.Section_Content__c = 'test section content';
@@ -382,9 +379,9 @@ private class ProductSetupCtrl_Test {
         List<Document_Template__c> documentTemplate = DexUtilTestDataFactory.createDocumentTemplate(1, true, null);
         
         List<Document_Clause__c> docClause = DexUtilTestDataFactory.createDocumentClause(1, true, null);
-        String jsonString='{\"Name\":\"tst\",\"Id\":\"\",\"Document_Template__c\":\"'+documentTemplate[0].Id+'\",\"DisplaySectionName__c\":true,\"IsActive__c\":true,\"IsEditable__c\":true,\"Section_Content__c\":\"testsectioncontent\",\"Section_Details__c\":\"testsectiondetails\",\"Sequence__c\":1,\"Type__c\":\"Header\",\"Document_Clause__c\":\"'+docClause[0].Id+'\"}';
+        String jsonString='{\"Name\":\"tst\",\"Id\":\"\",\"Document_Template__c\":\"'+documentTemplate[0].Id+'\",\"IsActive__c\":true,\"IsEditable__c\":true,\"Section_Content__c\":\"testsectioncontent\",\"Section_Details__c\":\"testsectiondetails\",\"Sequence__c\":1,\"Type__c\":\"Header\",\"Document_Clause__c\":\"'+docClause[0].Id+'\"}';
         Document_Template_Section__c registerForm=(Document_Template_Section__c) JSON.deserialize(jsonString,Document_Template_Section__c.class);
-        String jsonString1='{\"Name\":\"tst\",\"Id\":\"\",\"Document_Template__c\":\"'+documentTemplate[0].Id+'\",\"DisplaySectionName__c\":true,\"IsActive__c\":true,\"IsEditable__c\":true,\"Section_Content__c\":\"testsectioncontent\",\"Section_Details__c\":\"testsectiondetails\",\"Sequence__c\":1,\"Type__c\":\"Footer\",\"Document_Clause__c\":\"'+docClause[0].Id+'\"}';
+        String jsonString1='{\"Name\":\"tst\",\"Id\":\"\",\"Document_Template__c\":\"'+documentTemplate[0].Id+'\",\"IsActive__c\":true,\"IsEditable__c\":true,\"Section_Content__c\":\"testsectioncontent\",\"Section_Details__c\":\"testsectiondetails\",\"Sequence__c\":1,\"Type__c\":\"Footer\",\"Document_Clause__c\":\"'+docClause[0].Id+'\"}';
         Document_Template_Section__c registerForm1=(Document_Template_Section__c) JSON.deserialize(jsonString1,Document_Template_Section__c.class);
         
         Test.startTest();
@@ -422,7 +419,6 @@ private class ProductSetupCtrl_Test {
         jsonMap.put('childLookupfieldAPIname','DxCPQ__Parent_Template__c');
         String myJSON = JSON.serialize(jsonMap);
         Document_Template_Section__c docTemplateSection = new Document_Template_Section__c();
-        docTemplateSection.DisplaySectionName__c = true;
         docTemplateSection.IsActive__c = true;
         docTemplateSection.IsEditable__c = true;
         docTemplateSection.Section_Content__c = myJSON;
@@ -436,7 +432,6 @@ private class ProductSetupCtrl_Test {
         String mainstr='<p>Hello<spanstyle=\"color:rgb(68,68,68);\">{!DxCPQ__Document_Template__c.Id},</span></p><p><br></p><p><spanstyle=\"color:rgb(68,68,68);\">{!DxCPQ__Document_Template__c.DxCPQ__Related_To_Type__c}</span></p><p>Status:<spanstyle=\"color:rgb(68,68,68);\">{!DxCPQ__Document_Template__c.Owner.Id}</span></p><p><br></p>';
         
         Document_Template_Section__c docTemplateSection1 = new Document_Template_Section__c();
-        docTemplateSection1.DisplaySectionName__c = true;
         docTemplateSection1.IsActive__c = true;
         docTemplateSection1.IsEditable__c = true;
         docTemplateSection1.Section_Content__c = mainstr;
@@ -451,8 +446,6 @@ private class ProductSetupCtrl_Test {
             SaveDocumentTemplatesection.saveDocumentTemplateSectionDetails(docTemplateSection1);
         DisplayRelatedObjects.getsectionData(documentTemplate[0].Id,docTemplateSection.Id);
         MergeFieldsClass.mergefieldsMethod(newlst,documentTemplate[0].Id);
-        //MergeFieldsClass.mergefieldsMethod(newlst,documentTemplate[0].Id,'Document_Template__c');
-        //MergeFieldsClass.mergefieldsMethod(newlst,documentTemplate[0].Id,documentTemplate[0].Id);
         List<MergeFieldsClass.FieldWrap> fields=MergeFieldsClass.getFields('DxCPQ__Document_Template__c');
         MergeFieldsClass.toTitleCase('hello test MergeFieldsClass');
         //Account res=MergeFieldsClass.createTestButtonInsert('Test Acc');
@@ -470,9 +463,9 @@ private class ProductSetupCtrl_Test {
         System.runAs(us){
         List<Document_Template__c> documentTemplate = DexUtilTestDataFactory.createDocumentTemplate(1, true, null);
         List<Document_Clause__c> docClause = DexUtilTestDataFactory.createDocumentClause(1, true, null);
-        String jsonString='{\"Name\":\"tst\",\"Id\":\"\",\"Document_Template__c\":\"'+documentTemplate[0].Id+'\",\"DisplaySectionName__c\":true,\"IsActive__c\":true,\"IsEditable__c\":true,\"Section_Content__c\":\"testsectioncontent\",\"Section_Details__c\":\"testsectiondetails\",\"Sequence__c\":1,\"Type__c\":\"Header\",\"Document_Clause__c\":\"'+docClause[0].Id+'\"}';
+        String jsonString='{\"Name\":\"tst\",\"Id\":\"\",\"Document_Template__c\":\"'+documentTemplate[0].Id+'\",\"IsActive__c\":true,\"IsEditable__c\":true,\"Section_Content__c\":\"testsectioncontent\",\"Section_Details__c\":\"testsectiondetails\",\"Sequence__c\":1,\"Type__c\":\"Header\",\"Document_Clause__c\":\"'+docClause[0].Id+'\"}';
         Document_Template_Section__c registerForm=(Document_Template_Section__c) JSON.deserialize(jsonString,Document_Template_Section__c.class);
-        String jsonString1='{\"Name\":\"tst\",\"Id\":\"\",\"Document_Template__c\":\"'+documentTemplate[0].Id+'\",\"DisplaySectionName__c\":true,\"IsActive__c\":true,\"IsEditable__c\":true,\"Section_Content__c\":\"testsectioncontent\",\"Section_Details__c\":\"testsectiondetails\",\"Sequence__c\":1,\"Type__c\":\"Header\",\"Document_Clause__c\":\"'+docClause[0].Id+'\"}';
+        String jsonString1='{\"Name\":\"tst\",\"Id\":\"\",\"Document_Template__c\":\"'+documentTemplate[0].Id+'\",\"IsActive__c\":true,\"IsEditable__c\":true,\"Section_Content__c\":\"testsectioncontent\",\"Section_Details__c\":\"testsectiondetails\",\"Sequence__c\":1,\"Type__c\":\"Header\",\"Document_Clause__c\":\"'+docClause[0].Id+'\"}';
         Document_Template_Section__c registerForm1=(Document_Template_Section__c) JSON.deserialize(jsonString1,Document_Template_Section__c.class);
         Test.startTest();
         try{
@@ -491,9 +484,9 @@ private class ProductSetupCtrl_Test {
         System.runAs(us){
         List<Document_Template__c> documentTemplate = DexUtilTestDataFactory.createDocumentTemplate(1, true, null);
         List<Document_Clause__c> docClause = DexUtilTestDataFactory.createDocumentClause(1, true, null);
-        String jsonString='{\"Name\":\"tst\",\"Id\":\"\",\"Header_Content__c\":\"tst\",\"Document_Template__c\":\"'+documentTemplate[0].Id+'\",\"DisplaySectionName__c\":true,\"IsActive__c\":true,\"IsEditable__c\":true,\"Section_Content__c\":\"testsectioncontent\",\"Section_Details__c\":\"testsectiondetails\",\"Sequence__c\":1,\"Type__c\":\"Header\",\"Document_Clause__c\":\"'+docClause[0].Id+'\"}';
+        String jsonString='{\"Name\":\"tst\",\"Id\":\"\",\"Header_Content__c\":\"tst\",\"Document_Template__c\":\"'+documentTemplate[0].Id+'\",\"IsActive__c\":true,\"IsEditable__c\":true,\"Section_Content__c\":\"testsectioncontent\",\"Section_Details__c\":\"testsectiondetails\",\"Sequence__c\":1,\"Type__c\":\"Header\",\"Document_Clause__c\":\"'+docClause[0].Id+'\"}';
         Document_Template_Section__c registerForm=(Document_Template_Section__c) JSON.deserialize(jsonString,Document_Template_Section__c.class);
-        String jsonString1='{\"Name\":\"tst\",\"Id\":\"\",\"Header_Content__c\":\"tst\",\"Document_Template__c\":\"'+documentTemplate[0].Id+'\",\"DisplaySectionName__c\":true,\"IsActive__c\":true,\"IsEditable__c\":true,\"Section_Content__c\":\"testsectioncontent\",\"Section_Details__c\":\"testsectiondetails\",\"Sequence__c\":1,\"Type__c\":\"Header\",\"Document_Clause__c\":\"'+docClause[0].Id+'\"}';
+        String jsonString1='{\"Name\":\"tst\",\"Id\":\"\",\"Header_Content__c\":\"tst\",\"Document_Template__c\":\"'+documentTemplate[0].Id+'\",\"IsActive__c\":true,\"IsEditable__c\":true,\"Section_Content__c\":\"testsectioncontent\",\"Section_Details__c\":\"testsectiondetails\",\"Sequence__c\":1,\"Type__c\":\"Header\",\"Document_Clause__c\":\"'+docClause[0].Id+'\"}';
         Document_Template_Section__c registerForm1=(Document_Template_Section__c) JSON.deserialize(jsonString1,Document_Template_Section__c.class);
         Test.startTest();
         try{
@@ -514,5 +507,34 @@ private class ProductSetupCtrl_Test {
             SaveDocumentTemplate.getRelatedToTypeOptions();
         }
         System.Assert(true);
+    }
+
+    @TestSetup 
+    static void createTransactionLogRecords() {
+        List<TransactionLog__c> errRecordsInsert=new List<TransactionLog__c>();
+        for(Integer i=0;i<12;i++) {
+            errRecordsInsert.add(new TransactionLog__c());
+        }
+        
+        if(!errRecordsInsert.isEmpty())
+            insert errRecordsInsert;
+        System.assertEquals(errRecordsInsert.size()>0, true);
+    }
+    
+    @istest 
+    static void executeTransacationLogsBatchToDelete(){
+        for(TransactionLog__c rec:[select id,createddate from TransactionLog__c]) {
+            Test.setCreatedDate(rec.Id, system.now()-31);
+        }
+
+        Test.startTest(); 
+            String sch = '0 0 23 L * ?';
+            DeleteTransactionLogRecords batchable=new DeleteTransactionLogRecords();
+            system.schedule('Test ErrorClearence Class', sch, batchable);  
+            Database.executeBatch(batchable);
+        Test.stopTest(); 
+
+        List<TransactionLog__c> afterRecords=new List<TransactionLog__c>([select id,createddate from TransactionLog__c]);
+        System.assertEquals(afterRecords.size(), 0);
     }
 }

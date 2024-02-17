@@ -174,9 +174,7 @@ export default class TemplateHeaderType extends LightningElement {
                     this.imagesfound = true;
                 }
             }
-        } else if (error) {
-            console.log('error in Content Versions Fetch' + JSON.stringify(error));
-        }
+        } else if (error) {  }
     }
 
     handleSearch(event) {
@@ -193,9 +191,6 @@ export default class TemplateHeaderType extends LightningElement {
                 })
                 .catch(error => {
                     this.searchData = undefined;
-                    if (error) {
-                        console.log('templateheadertype handleSearch' + JSON.stringify(error));
-                    }
                 })
         } else {
             this.imageUrls = this.mainimageUrls;

@@ -171,8 +171,8 @@ export default class DxSearchCategory extends LightningElement {
             detail: eventData
         });
         this.dispatchEvent(selectedEvent);
-        console.log('Event-->' + this.values);
     }
+    
     clearSelectedItem(){
         for (var i = 0; i < this.optionData.length; i++) {
             this.optionData[i].selected = false;

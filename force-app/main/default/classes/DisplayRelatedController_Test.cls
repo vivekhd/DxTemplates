@@ -46,10 +46,9 @@ private class DisplayRelatedController_Test {
                 Contact testContact = new Contact(AccountId = testAccount.Id, LastName = 'Test Contact');
                 insert testContact;
                 List<String> fieldList = new List<String>{ 'Name', 'CreatedDate', 'Contact.LastName', 'Contact.Account.Name' };
-                    DisplayRelatedObjects.getObjectFieldTypeMap('Account', fieldList);
+                DisplayRelatedObjects.getObjectFieldTypeMap('Account', fieldList);
             }
-            catch(exception ex)
-            {	//System.debug('ex.getmsg() >> in testgetobjfieldmap1' + ex.getMessage());
+            catch(exception ex){	
                 System.assert(ex.getMessage().contains('Assertion Failed: Expected: datetime, Actual: DATETIME'));
             }
         }

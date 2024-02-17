@@ -3,24 +3,23 @@ public with sharing class SaveDocumentTemplatesection {
     private static Savepoint sp1;
     @AuraEnabled
     public static List<Document_Template_Section__c> getAllDocumentTemplateSections(Id docTempId){
-        List<Document_Template_Section__c> allSections=new List<Document_Template_Section__c>([select id,Sequence__c,Section_Content__c,Name,DisplaySectionName__c,
+        List<Document_Template_Section__c> allSections=new List<Document_Template_Section__c>([select id,Sequence__c,Section_Content__c,Name,
                                                                                                Document_Clause__c,Document_Template__c,IsActive__c,IsEditable__c,New_Page__c,Document_Template__r.Name,
                                                                                                Type__c,Document_Template__r.Related_To_Type__c,Document_Template__r.Parent_Template__c,Document_Template__r.Previously_Active__c,Document_Template__r.IsActive__c,Document_Template__r.Version_Number__c
                                                                                                from Document_Template_Section__c where Document_Template__c=:docTempId WITH SECURITY_ENFORCED
                                                                                                order by Sequence__c asc limit 1000 ]);
         return allSections;
     }
+    
     @AuraEnabled
     public static string saveDocumentTemplateSectionSequences(List<Document_Template_Section__c> allSectionRecords){
         String recId='';
         try{
-            system.debug('allSectionRecords-'+allSectionRecords);
             List<id> allSectionIds=new List<id>();
             Map<id,Decimal> sectionSeqMap=new Map<id,Decimal>();
             List<Document_Template_Section__c> allSectionsTobeUpdated=new List<Document_Template_Section__c>();
-            for(Document_Template_Section__c rec:allSectionRecords)
-            {
-                system.debug('rec-'+rec);
+            
+            for(Document_Template_Section__c rec:allSectionRecords) {
                 allSectionIds.add(rec.id);
                 sectionSeqMap.put(rec.id,rec.Sequence__c);
                 recId=rec.id;
@@ -76,12 +75,9 @@ public with sharing class SaveDocumentTemplatesection {
                 DocTempsec.ID = Recorddetails.Id;
                 DocTempsec.Name = Recorddetails.Name;
                 DocTempsec.Section_Content__c = Recorddetails.Section_Content__c;
-                DocTempsec.DisplaySectionName__c = Recorddetails.DisplaySectionName__c;
                 DocTempsec.New_Page__c = Recorddetails.New_Page__c;
                 DocTempsec.Type__c = Recorddetails.Type__c;
                 DocTempsec.New_Page__c = Recorddetails.New_Page__c;
-                DocTempsec.DisplaySectionName__c = Recorddetails.DisplaySectionName__c;
-                system.debug('--'+Recorddetails.Document_Clause__c);
                 DocTempsec.Document_Clause__c = Recorddetails.Document_Clause__c;
                 DocTempsec.Section_Details__c = String.Valueof(Recorddetails.Section_Details__c);
                 DocTempsec.RuleId__c = Recorddetails.RuleId__c ;
@@ -103,9 +99,6 @@ public with sharing class SaveDocumentTemplatesection {
                 if(Recorddetails.Section_Content__c  != null){
                     DocTempsec.Section_Content__c = Recorddetails.Section_Content__c ;
                 }
-                if(Recorddetails.DisplaySectionName__c != null){
-                    DocTempsec.DisplaySectionName__c = Recorddetails.DisplaySectionName__c ;
-                }
                 if(Recorddetails.New_Page__c !=null){
                     DocTempsec.New_Page__c = Recorddetails.New_Page__c ;
                 }
@@ -117,10 +110,7 @@ public with sharing class SaveDocumentTemplatesection {
                 }
                 if(Recorddetails.Type__c!=null){
                     DocTempsec.Type__c = Recorddetails.Type__c ;
-                }            
-                if(Recorddetails.DisplaySectionName__c!=null){
-                    DocTempsec.DisplaySectionName__c = Recorddetails.DisplaySectionName__c ;
-                }            
+                }                   
                 if(Recorddetails.Document_Clause__c!=null){
                     DocTempsec.Document_Clause__c = Recorddetails.Document_Clause__c ;
                 }
@@ -203,7 +193,7 @@ public with sharing class SaveDocumentTemplatesection {
         try{
             Decimal deletedsectionindex;
             List<Document_Template_Section__c> sectionstobeupdated=new List<Document_Template_Section__c>();
-            Map<id,Document_Template_Section__c> allSectionsMap=new Map<id,Document_Template_Section__c>([select id,Sequence__c,Section_Content__c,Name,DisplaySectionName__c,
+            Map<id,Document_Template_Section__c> allSectionsMap=new Map<id,Document_Template_Section__c>([select id,Sequence__c,Section_Content__c,Name,
                                                                                                             Document_Clause__c,Document_Template__c,IsActive__c,IsEditable__c,New_Page__c,
                                                                                                             Type__c from Document_Template_Section__c where Document_Template__c=:doctemplateid WITH SECURITY_ENFORCED
                                                                                                             order by Sequence__c asc limit 1000 ]);
@@ -252,7 +242,7 @@ public with sharing class SaveDocumentTemplatesection {
     @AuraEnabled
     public static Document_Template_Section__c gettemplatesectiondata(String editrecordid){
         Document_Template_Section__c recorddata = new Document_Template_Section__c();
-        recorddata =[SELECT Section_Details__c,DisplaySectionName__c,Document_Clause__c,Document_Clause__r.name,Id,Name,New_Page__c,Section_Content__c,Sequence__c,Type__c,RuleId__r.Name,RuleId__r.Rule_Expression__c
+        recorddata =[SELECT Section_Details__c,Document_Clause__c,Document_Clause__r.name,Id,Name,New_Page__c,Section_Content__c,Sequence__c,Type__c,RuleId__r.Name,RuleId__r.Rule_Expression__c
                      FROM Document_Template_Section__c where id =:editrecordid WITH SECURITY_ENFORCED];
         return recorddata;
     }
@@ -271,7 +261,6 @@ public with sharing class SaveDocumentTemplatesection {
 
     @AuraEnabled
     public static void saveData(String dataFrom, Id recordId){
-        System.debug(dataFrom);
         Document_Template_Section__c  arr = new Document_Template_Section__c() ;
         arr.Id = recordId;
         arr.Header_Content__c = dataFrom;

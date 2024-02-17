@@ -67,12 +67,6 @@ public with sharing class SaveDocumentTemplate {
                 for (Database.SaveResult sr : urListsave) {
                     if (sr.isSuccess()) {
                         docTemp.Id = sr.getId();
-                    } else {
-                        for(Database.Error err : sr.getErrors()) {
-                            System.debug('The following error has occurred.');                    
-                            System.debug(err.getStatusCode() + ': ' + err.getMessage());
-                            System.debug('fields that affected this error: ' + err.getFields());
-                        }
                     }
                 }
             }

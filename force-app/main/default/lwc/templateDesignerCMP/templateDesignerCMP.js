@@ -148,36 +148,12 @@ export default class TemplateDesignerCMP extends NavigationMixin(LightningElemen
         this.showPreview = true;
       }
     }
-    // Commented by Rahul - Template Table Details not considered in this release.
-    /*else if (selectedOption == 'Table') {
-      this.showclausescreen = false;
-      this.showtabledetails = true;
-      this.showrelatedobjectdetails = false;
-      this.SectionTypename = 'Table';
-      this.opensection = true;
-      //this.isModalOpen = false;
-      this.showcontextdetails = false;
-      this.showheaderdetails = false;
-      this.showfooterdetails = false;
-      console.log('isNewSection' + isNewSection);
-      if (isNewSection == true) {
-        this.rowCount += 1;
-        this.optionsList.push({ Id: selectedOption + 'NotSaved', Type: selectedOption, rowCount: this.rowCount });
-        this.selectedSectionRecordID = selectedOption + 'NotSaved';
-        this.connectedCallback();
-      } else {
-        this.template.querySelector("c-template-table-details").loadsectionsectionvaluesforedit(sectionid);
-        this.showPreview = true;
-
-      }
-    }*/
     else if (selectedOption == 'Header') {
       this.showclausescreen = false;
       this.showtabledetails = false;
       this.showrelatedobjectdetails = false;
       this.SectionTypename = 'Header';
       this.opensection = true;
-      //this.isModalOpen = false;
       this.showcontextdetails = false;
       this.showheaderdetails = true;
       this.showfooterdetails = false;
@@ -585,14 +561,11 @@ export default class TemplateDesignerCMP extends NavigationMixin(LightningElemen
       if (result != null) {
         this.disableEditing = result.DxCPQ__Previously_Active__c;
       }
-    }).catch(error => {
-      console.log('error activation', error);
-    })
+    }).catch(error => {  })
   }
 
   disableEditingHandler(isActive) {
     this.template.querySelector('c-template-content-details').handleActivateTemplate(isActive, this.relatedtoTypeObjName);
-    //this.template.querySelector('c-template-table-details').handleActivateTemplate(isActive, this.relatedtoTypeObjName);
     this.template.querySelector('c-template-related-objects').handleActivateTemplate(isActive, this.relatedtoTypeObjName);
     this.template.querySelector('c-template-header').handleActivateTemplate(isActive, this.relatedtoTypeObjName);
     this.template.querySelector('c-template-footer').handleActivateTemplate(isActive, this.relatedtoTypeObjName);
@@ -699,32 +672,6 @@ export default class TemplateDesignerCMP extends NavigationMixin(LightningElemen
     this.template.querySelector('c-modal').hide();
   }
 
-/*
-  handleSuccess(event) {
-    let createdDocumentTemplateId = event.detail.id;
-    let name = event.detail.fields.Name.value;
-    let tempObj = {};
-    tempObj.Id = createdDocumentTemplateId;
-    tempObj.Name = event.detail.fields.Name.value;
-    tempObj.DxCPQ__Related_To_Type__c = event.detail.fields.DxCPQ__Related_To_Type__c.value;
-    this.relatedtoTypeObjName = event.detail.fields.DxCPQ__Related_To_Type__c.value;
-    this.relatedtoTypeObjChild = this.relatedtoTypeObjName;
-    tempObj.DxCPQ__IsActive__c = event.detail.fields.DxCPQ__IsActive__c.value;
-    tempObj.DxCPQ__Version_Number__c = event.detail.fields.DxCPQ__Version_Number__c.value
-    const newDocTempEvt = new CustomEvent('doccreated', {
-      detail: { id: createdDocumentTemplateId, name: name, templateObj: tempObj, templateObjName: this.relatedtoTypeObjChild }, bubbles: true
-    });
-    this.dispatchEvent(newDocTempEvt);
-    const toastEvt = new ShowToastEvent({
-      title: 'Success!',
-      message: name + ' was Created',
-      variant: 'Success',
-    });
-    this.dispatchEvent(toastEvt);
-    this.template.querySelector('c-modal').hide();
-  }
-*/
-
   cloneTemplateHandler(event) {
     const newDocTempEvt = new CustomEvent('doccreated', {
       detail: { id: event.detail.id, name: event.detail.name, templateObj: event.detail.templateObj }, bubbles: true
@@ -756,9 +703,7 @@ export default class TemplateDesignerCMP extends NavigationMixin(LightningElemen
       });
       this.dispatchEvent(delEvt);
       this.template.querySelector('c-modal').hide();
-    }).catch(error => {
-      console.log('error handleDeleteTemplateHandler', JSON.stringify(error));
-    })
+    }).catch(error => {  })
   }
 
   renderedCallback() {
@@ -768,7 +713,7 @@ export default class TemplateDesignerCMP extends NavigationMixin(LightningElemen
       loadStyle(this, dexcpqcartstylesCSS),
     ])
       .then(() => { })
-      .catch(error => { console.log(error.body.message); });
+      .catch(error => { });
   }
 
   handleSubmit() {

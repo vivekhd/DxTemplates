@@ -364,7 +364,6 @@ export default class DxCpqConditioncmp extends LightningElement {
             if(childArr instanceof Array && childArr.length > 0){
                 childArr.push({"group":[tempObj], "uKey":((new Date()).getTime() + ":" + groupIndex), "selectedGlobalValue" :'allConditionsAreMet', "actionOptions": this.globalExpressionOptions, "action": action, "disableActionValue": disableAction});
             }else if(childArr instanceof Object){
-                console.log('this is child arr'+JSON.stringify(childArr));
                 childArr["children"] = [{"group":[tempObj], "uKey":((new Date()).getTime() + ":" + groupIndex), "selectedGlobalValue" :'allConditionsAreMet', "actionOptions": this.globalExpressionOptions, "action": action, "disableActionValue" : disableAction}];
             }            
         }       

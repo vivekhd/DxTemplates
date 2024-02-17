@@ -32,7 +32,6 @@ export default class DxMultiLookupComponent extends LightningElement {
                 this.selectedRecord = JSON.parse(JSON.stringify(this.globalItems));
             }
         }
-        console.log('The multi select feature is: ' + this.hasMultiSelect);
     }
 
     @api

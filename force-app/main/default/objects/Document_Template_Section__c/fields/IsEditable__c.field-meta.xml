@@ -3,7 +3,7 @@
     <fullName>IsEditable__c</fullName>
     <defaultValue>false</defaultValue>
     <externalId>false</externalId>
-    <label>IsEditable</label>
+    <label>Is Editable</label>
     <trackTrending>false</trackTrending>
     <type>Checkbox</type>
 </CustomField>

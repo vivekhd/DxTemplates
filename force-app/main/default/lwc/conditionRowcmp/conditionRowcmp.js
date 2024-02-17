@@ -234,7 +234,7 @@ export default class DxCpqConditionRowcmp extends LightningElement {
                 let changeEvent = new CustomEvent('dxcpqconditionchange',{detail:[{index: this.row._index, fieldName: 'lookupDetailsdata', value:lookupDetailsdata}], bubbles: true, composed : true});
                 this.dispatchEvent(changeEvent); 
             }).catch((error) => {
-                console.log(error);
+                console.log('Error in LWC_ConditionRowCMP' + JSON.stringify(error));
             });
         }
         

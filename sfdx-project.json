@@ -10,13 +10,13 @@
       "postInstallScript": "PostInstallDataCreation",
       "apexTestAccess": {
         "permissionSets": [
-          "Dx_Template_Access"
+          "DX_Template_Access"
         ]
       }
     },
     {
       "path": "force-app",
-      "package": "Dx_Templates",
+      "package": "DX_Templates",
       "versionName": "ver 0.1",
       "versionNumber": "0.1.2.NEXT",
       "default": true,
@@ -25,7 +25,7 @@
       "ancestorVersion": "HIGHEST"
     }
   ],
-  "name": "DxTemplates",
+  "name": "DXTemplates",
   "namespace": "DxCPQ",
   "sfdcLoginUrl": "https://login.salesforce.com",
   "sourceApiVersion": "58.0",

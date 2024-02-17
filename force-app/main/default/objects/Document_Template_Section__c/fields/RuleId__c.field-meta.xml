@@ -3,7 +3,7 @@
     <fullName>RuleId__c</fullName>
     <deleteConstraint>SetNull</deleteConstraint>
     <externalId>false</externalId>
-    <label>Rule Id</label>
+    <label>Rule</label>
     <referenceTo>Rule__c</referenceTo>
     <relationshipLabel>Document Template Sections</relationshipLabel>
     <relationshipName>Document_Template_Sections</relationshipName>

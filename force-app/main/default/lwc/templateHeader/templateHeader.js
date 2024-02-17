@@ -20,7 +20,7 @@ export default class TemplateHeader extends LightningElement {
   popUpMessage;
   oldHeaderColumnList = {};
   Recorddetailsnew = {
-    Name: '', DxCPQ__Section_Content__c: '', DxCPQ__DisplaySectionName__c: false,
+    Name: '', DxCPQ__Section_Content__c: '', //DxCPQ__DisplaySectionName__c: false,
     DxCPQ__New_Page__c: false,
     DxCPQ__Document_Template__c: '',
     DxCPQ__Sequence__c: 0,
@@ -120,7 +120,7 @@ export default class TemplateHeader extends LightningElement {
     this.headerSectionsMap = [];
 
     this.Recorddetailsnew = {
-      Name: '', DxCPQ__Section_Content__c: '', DxCPQ__DisplaySectionName__c: false,
+      Name: '', DxCPQ__Section_Content__c: '', //DxCPQ__DisplaySectionName__c: false,
       DxCPQ__New_Page__c: false,
       DxCPQ__Document_Template__c: '',
       DxCPQ__Sequence__c: 0,
@@ -149,9 +149,7 @@ export default class TemplateHeader extends LightningElement {
           this.handlecolumnsClass(this.columnvalue);
         }
       })
-      .catch(error => {
-        console.log('error loadsectionsectionvaluesforedit header' + JSON.stringify(error));
-      })
+      .catch(error => { })
   }
 
   handlesectionsave(event) {
@@ -196,10 +194,7 @@ export default class TemplateHeader extends LightningElement {
             this.dispatchEvent(firecustomevent);
           }
         })
-        .catch(error => {
-          console.log('Header Save Event Error', JSON.stringify(error));
-        })
+        .catch(error => { })
     }
-    //this.template.querySelector('c-template-designer-cmp').showPreview = true;
   }
 }

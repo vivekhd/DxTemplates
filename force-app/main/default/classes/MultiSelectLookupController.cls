@@ -22,7 +22,6 @@ public with sharing class MultiSelectLookupController {
                             + ' WHERE '+ (String.isEmpty(whereClauseTwo)?' ':(String.valueOf(whereClauseTwo)) + ' AND ') + String.escapeSingleQuotes(filterFieldAPIName) + ' LIKE :str'
                             +   (String.isEmpty(whereClause)?' ':' AND '+String.escapeSingleQuotes(whereClause))
                             + ' WITH USER_MODE LIMIT 50';
-            system.debug('----Query-->'+strQuery);
             List<SObject> lstResult = database.query(strQuery);
             for(SObject sobj : lstResult){
                 SObjectQueryResult result = new SObjectQueryResult();

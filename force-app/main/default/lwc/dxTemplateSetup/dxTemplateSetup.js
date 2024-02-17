@@ -50,7 +50,6 @@ export default class DxTemplateSetup extends LightningElement {
                 }
             })
             .catch(error => {
-                console.log('Error -> relatedToTypeOptions' + JSON.stringify(error));
             })
 
     }
@@ -75,7 +74,6 @@ export default class DxTemplateSetup extends LightningElement {
             }
         })
         .catch(error => {
-            console.log('error' + error);
         })
     }
 
@@ -166,8 +164,6 @@ export default class DxTemplateSetup extends LightningElement {
         if (createdoccheck == true) {
             this.showAddNewTemplate = true;
             this.template.querySelector('c-modal').show();
-        } else {
-            console.log('ELSE handleNewTemplateCreationscreen');
         }
     }
 
@@ -192,13 +188,10 @@ export default class DxTemplateSetup extends LightningElement {
                 this.handleNewTemplateCreationwithoutEvent(result.Id, result.Name, result.DxCPQ__Related_To_Type__c, result);
                 if (this.relatedtoTypeObj != null || this.relatedtoTypeObj != undefined) {
                     this.showUpdatedTemplate = true;
-                    //this.template.querySelector('c-template-designer-c-m-p').resetallvaluesonAllcmp();
                     this.template.querySelector('c-template-designer-c-m-p').passingObject(this.relatedtoTypeObj);
                     this.showAddNewTemplate = false;
                 }
-                else {
-                    console.log("Error occured in template loading");
-                }
+
                 const toastEvt = new ShowToastEvent({
                     title: 'Success!',
                     message: 'Template "' + docTempObj.Name + '" was Created',
