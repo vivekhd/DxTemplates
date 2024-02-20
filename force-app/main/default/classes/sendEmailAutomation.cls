@@ -47,20 +47,20 @@ public class sendEmailAutomation implements Queueable,Database.AllowsCallouts{
             } */
             
             Attachment objAttachment = new Attachment();
-            objAttachment.parentID = '001Em00000BMBD2IAP';
+            objAttachment.parentID = '001KS000002zGWfYAM';
             objAttachment.Name = 'Automation Document'+System.today()+'.pdf'; 
             objAttachment.Body = pg.getContentAsPDF();
             objAttachment.IsPrivate = false;            
             insert objAttachment;
 
             if(emailStructure != null) {
-                Messaging.EmailFileAttachment attachmentToInsert = new Messaging.EmailFileAttachment();
+                /* Messaging.EmailFileAttachment attachmentToInsert = new Messaging.EmailFileAttachment();
                     attachmentToInsert.setFileName(attachmentName+'.pdf');
-                    attachmentToInsert.setBody(pg.getContentAsPDF());
+                    attachmentToInsert.setBody(pg.getContentAsPDF()); */
                 documentAutomationController.emailWrapper emailToBeSent = (documentAutomationController.emailWrapper) JSON.deserialize(emailStructure ,documentAutomationController.emailWrapper.class);
 
                 Messaging.SingleEmailMessage emailContent = new Messaging.SingleEmailMessage();
-                emailContent.setFileAttachments(new Messaging.EmailFileAttachment[] {attachmentToInsert});
+                //emailContent.setFileAttachments(new Messaging.EmailFileAttachment[] {attachmentToInsert});
                 if(emailToBeSent.emailTemplateId != null) { emailContent.setOrgWideEmailAddressId(emailToBeSent.fromAddress); }
                 emailContent.setToAddresses(emailToBeSent.toAddresses); 
                 emailContent.setCcAddresses(emailToBeSent.toCCAddresses);
@@ -68,7 +68,9 @@ public class sendEmailAutomation implements Queueable,Database.AllowsCallouts{
                 emailContent.setSubject(emailToBeSent.emailSubject);
                 emailContent.setHTMLBody(emailToBeSent.emailBody);
                 if(emailToBeSent.emailTemplateId != null) { emailContent.setTemplateId(emailToBeSent.emailTemplateId); }
-                Messaging.SendEmailResult [] emailSentStatus = Messaging.sendEmail(new List<Messaging.SingleEmailMessage> {emailContent});
+                LogHandler.createLog((Id) null,'Email Framework Structure','Document Id- '+ documentRecordInserted + ' ' + JSON.serialize(emailContent),'','Exception');
+
+                //Messaging.SendEmailResult [] emailSentStatus = Messaging.sendEmail(new List<Messaging.SingleEmailMessage> {emailContent});
             }
         }
         catch(Exception ex) {

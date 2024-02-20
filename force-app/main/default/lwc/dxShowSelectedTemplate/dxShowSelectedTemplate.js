@@ -52,125 +52,8 @@ export default class DxShowSelectedTemplate extends LightningElement {
     connectedCallback() {
         this.isLoaded=true;
         console.log('objectRecordId-',this.objectRecordId);
-        // getTemplateSections({templateId : this.templateId, recordId:this.objectRecordId, objectApiName: this.objectName}).then((result) => {
-            // this.isLoaded=false;
-
-            // if(result && result.length>0){
-            //     result.forEach(tempSec=>{
-                    
-            //         if(tempSec.DxCPQ__Type__c=='Context' || tempSec.DxCPQ__Type__c=='Table' || tempSec.DxCPQ__Type__c=='Clause' ){
-                        
-            //             let tempObj={};
-            //             tempObj.index = tempSec.DxCPQ__Sequence__c;
-            //             tempObj.isRelated=false;
-            //             tempObj.isContext=true;
-            //             tempObj.content=tempSec.DxCPQ__Section_Content__c;
-            //             this.sectionContentArr.push(tempObj);
-            //         }else if(tempSec.DxCPQ__Type__c=='Related Objects')
-            //         {
-            //             let tempObj={};
-            //             tempObj.index = tempSec.DxCPQ__Sequence__c;
-            //             tempObj.isRelated=true;
-            //             tempObj.isContext=false;
-            //             tempObj.templatesectionid=tempSec.Id;
-            //             this.sectionContentArr.push(tempObj);
-            //         }
-            //         else if(tempSec.DxCPQ__Type__c=='Header')
-            //         {
-            //             let index;
-            //             this.showHeader = true;
-            //             var seccon= JSON.parse(tempSec.DxCPQ__Section_Content__c);
-            //             this.headerArr = seccon.sectionsContent;
-                        
-            //             setTimeout(() => {
-            //             let allHeaders = this.template.querySelectorAll('[data-indexhead]');
-            //             let count =0;
-            //             let lst =[];
-            //             lst.push('');
-            //             lst.push('');
-            //             lst.push('');
-            //             for(let i=0;i<seccon.sectionsContent.length;i++)
-            //             {
-            //                 if(seccon.sectionsContent[i].value=='')
-            //                 {
-            //                     index = seccon.sectionsContent[i].indexvar;
-            //                     lst[index]='<p> </p>';
-            //                 }
-            //                  else
-            //                  {
-            //                     index = seccon.sectionsContent[i].indexvar;
-            //                     lst[index] = seccon.sectionsContent[i].value;
-            //                  }
-            //                 count++;
-            //             }
-            //             while(count<3)
-            //             {
-            //                 lst[count]='<p> </p>';
-            //                 count++;
-            //             }
-            //             let allHeaders1 = this.template.querySelector('[data-indexhead1]');
-            //             let allHeaders2 = this.template.querySelector('[data-indexhead2]');
-            //             let allHeaders3 = this.template.querySelector('[data-indexhead3]');
-                        
-                        
-            //             allHeaders1.innerHTML =lst[0];
-            //             allHeaders2.innerHTML =lst[1];
-            //             allHeaders3.innerHTML =lst[2];
-            //             }, 100);
-            //             this.headerfooter.header = seccon;
-            //         }
-            //         else if(tempSec.DxCPQ__Type__c=='Footer')
-            //         {
-            //             var seccon= JSON.parse(tempSec.DxCPQ__Section_Content__c);
-            //             this.showFooter = true;
-            //             var obj = {};
-            //             obj.footertext=seccon.footertext;
-            //             obj.displaypagesequence = seccon.displaypagesequence;
-            //             this.footerArr =  seccon.sectionsContent;
-                        
-            //             setTimeout(() => {
-                        
-            //             let count =0;
-            //             let lst =[];
-            //             lst.push('');
-            //             lst.push('');
-            //             lst.push('');
-            //             for(let i=0;i<seccon.sectionsContent.length;i++) {
-            //                 if (seccon.sectionsContent[i].value == '') {
-            //                     let index = seccon.sectionsContent[i].indexvar;
-            //                     lst[index] ='<p> </p>';
-            //                 }
-            //                 else {
-            //                     let index = seccon.sectionsContent[i].indexvar;
-            //                     lst[index] =seccon.sectionsContent[i].value;
-            //                 }
-            //                 count++;
-            //             }
-            //             while(count<3) {
-            //                 lst[count]='<p> </p>';
-            //                 count++;
-            //             }
-            //             let allFotter1 = this.template.querySelector('[data-indexfoot1]');
-            //             let allFotter2 = this.template.querySelector('[data-indexfoot2]');
-            //             let allFotter3 = this.template.querySelector('[data-indexfoot3]');
-                        
-            //             allFotter1.innerHTML =lst[0];
-            //             allFotter2.innerHTML =lst[1];
-            //             allFotter3.innerHTML =lst[2];
-            //             }, 100);
-            //             this.headerfooter.footer= seccon;
-            //         }
-            //     })                                
-            // }
-        // }).catch((err) => {
-        //     // this.isLoaded=false;
-        //     console.log('Error Section Contentes'+ JSON.stringify(err));
-        // });
-        let recordIdLst = ['a08Em00000AjzMZIAZ', 'a08Em00000AjzMaIAJ', 'a08Em00000AlUY1IAN', 'a08Em00000AlUY2IAN', 'a08Em00000AlUY3IAN', 'a08Em00000AlUY4IAN', 'a08Em00000AlUY5IAN', 'a08Em00000AlZxTIAV', 'a08Em00000AlZxUIAV', 'a08Em00000AlZxVIAV', 'a08Em00000Alqx6IAB'];
-        //let recordIdLst = ['a08Em00000AlZxUIAV', 'a08Em00000AlZxVIAV'];
-        getTemplateSectionsMulRecords({templateId : this.templateId, recordIdLst: recordIdLst, objectApiName: this.objectName}).then((result) => {
-            console.log('result getting template sections for multiple record Ids --> ', result);
-             this.isLoaded=false;
+        getTemplateSections({templateId : this.templateId, recordId:this.objectRecordId, objectApiName: this.objectName}).then((result) => {
+            this.isLoaded=false;
 
             if(result && result.length>0){
                 result.forEach(tempSec=>{
@@ -183,7 +66,8 @@ export default class DxShowSelectedTemplate extends LightningElement {
                         tempObj.isContext=true;
                         tempObj.content=tempSec.DxCPQ__Section_Content__c;
                         this.sectionContentArr.push(tempObj);
-                    } else if(tempSec.DxCPQ__Type__c=='Related Objects') {
+                    }else if(tempSec.DxCPQ__Type__c=='Related Objects')
+                    {
                         let tempObj={};
                         tempObj.index = tempSec.DxCPQ__Sequence__c;
                         tempObj.isRelated=true;
@@ -191,7 +75,8 @@ export default class DxShowSelectedTemplate extends LightningElement {
                         tempObj.templatesectionid=tempSec.Id;
                         this.sectionContentArr.push(tempObj);
                     }
-                    else if(tempSec.DxCPQ__Type__c=='Header') {
+                    else if(tempSec.DxCPQ__Type__c=='Header')
+                    {
                         let index;
                         this.showHeader = true;
                         var seccon= JSON.parse(tempSec.DxCPQ__Section_Content__c);
@@ -211,11 +96,11 @@ export default class DxShowSelectedTemplate extends LightningElement {
                                 index = seccon.sectionsContent[i].indexvar;
                                 lst[index]='<p> </p>';
                             }
-                            else
-                            {
+                             else
+                             {
                                 index = seccon.sectionsContent[i].indexvar;
                                 lst[index] = seccon.sectionsContent[i].value;
-                            }
+                             }
                             count++;
                         }
                         while(count<3)
@@ -234,7 +119,8 @@ export default class DxShowSelectedTemplate extends LightningElement {
                         }, 100);
                         this.headerfooter.header = seccon;
                     }
-                    else if(tempSec.DxCPQ__Type__c=='Footer') {
+                    else if(tempSec.DxCPQ__Type__c=='Footer')
+                    {
                         var seccon= JSON.parse(tempSec.DxCPQ__Section_Content__c);
                         this.showFooter = true;
                         var obj = {};
@@ -277,10 +163,9 @@ export default class DxShowSelectedTemplate extends LightningElement {
                 })                                
             }
         }).catch((err) => {
-            this.isLoaded=false;
-            console.log('Error getting template sections for multiple record Ids'+ JSON.stringify(err));
+            // this.isLoaded=false;
+            console.log('Error Section Contentes'+ JSON.stringify(err));
         });
-
     }
 
     renderedCallback(){
