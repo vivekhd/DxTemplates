@@ -27,7 +27,7 @@ global with sharing class DisplayPDFController
         Document__c docrec=[select id,Document_Body__c,Document_Content__c from Document__c where id=:inputparam WITH SECURITY_ENFORCED];
         
         if(inputparam!=null){
-            displayText = String.escapeSingleQuotes(docrec.Document_Body__c);        
+            displayText = String.escapeSingleQuotes(docrec.Document_Body__c).replace('\\', '');
         }else{
             displayText = 'ID not found ' + inputparam;
         }
