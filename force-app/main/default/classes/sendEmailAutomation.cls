@@ -55,9 +55,9 @@ global class sendEmailAutomation implements Queueable,Database.AllowsCallouts{
             }            
 
             if(emailStructure != null) {
-                /* Messaging.EmailFileAttachment attachmentToInsert = new Messaging.EmailFileAttachment();
-                    attachmentToInsert.setFileName(attachmentName+'.pdf');
-                    attachmentToInsert.setBody(pg.getContentAsPDF()); */
+                 Messaging.EmailFileAttachment attachmentToInsert = new Messaging.EmailFileAttachment();
+                attachmentToInsert.setFileName(attachmentName+'.pdf');
+                attachmentToInsert.setBody(pg.getContentAsPDF()); 
                 documentAutomationController.emailWrapper emailToBeSent = (documentAutomationController.emailWrapper) JSON.deserialize(emailStructure ,documentAutomationController.emailWrapper.class);
 
                 Messaging.SingleEmailMessage emailContent = new Messaging.SingleEmailMessage();
