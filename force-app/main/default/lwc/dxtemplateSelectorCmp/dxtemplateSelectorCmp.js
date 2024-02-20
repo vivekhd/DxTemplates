@@ -155,18 +155,6 @@ export default class DxtemplateSelectorCmp extends NavigationMixin(LightningElem
         this.pdfSize();
     }
 
-    pdfSize()
-    {
-        console.log('kkk',this.pdf);
-        pdfModefun({wrapperdata: this.pdf})
-        .then(kushik => {             
-            console.log('send Data',kushik);  
-        })
-        .catch(error =>{
-            console.log('error in JS',error);
-        });
-    }
-
     savePDFtoQuote()
     {
         console.log('savePDFtoQuote-',this.pdfdocumentid);

@@ -74,7 +74,8 @@ export default class TemplateContentDetails extends LightningElement {
   selectItemEventHandler(event) {
     this.clauseId = event.detail.selectedRecord.recordId;
     this.selectedClauseId = event.detail.selectedRecord.recordId;
-    this.richtextVal = event.detail.selectedRecord.recordObject.DxCPQ__Body__c;
+    this.richtextVal = '<div style="font-family: sans-serif;">' + event.detail.selectedRecord.recordObject.DxCPQ__Body__c +'</div>';
+    console.log('printing richtextVal in templatecontentdetails >> ', this.richtextVal);
     this.Recorddetailsnew.Name = event.detail.selectedRecord.recordName;
   }
 
@@ -90,7 +91,7 @@ export default class TemplateContentDetails extends LightningElement {
     ClauseBody({ inputparam: clauseIdstring })
       .then(result => {
         if (result != null) {
-          this.richtextVal = result.DxCPQ__Body__c;
+          this.richtextVal = '<div style="font-family: sans-serif;">' + result.DxCPQ__Body__c +'</div>';;
           this.Recorddetailsnew.Name = result.Name;
         }
       })

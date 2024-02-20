@@ -258,6 +258,20 @@ global with sharing class DisplayPDFController
             throw new AuraHandledException(ex.getMessage());
         }  
     }
+    
+    //getting the template sections for the Multiple recordIds
+    @AuraEnabled
+    public static List<Document_Template_Section__c> getTemplateSectionsMulRecords(ID templateId, List<String> recordIdLst, String objectApiName){ 
+        try{
+            List<Document_Template_Section__c> selectedTemplateContents=[select id,Section_Content__c, Type__c, New_Page__c, Sequence__c from Document_Template_Section__c where Document_Template__c=:templateId WITH SECURITY_ENFORCED ORDER BY Sequence__c ASC];
+            selectedTemplateContents = MergeFieldsClass.mergefieldsMethodMultiple(selectedTemplateContents,recordIdLst);
+            return selectedTemplateContents;
+        }
+        catch (Exception ex) {
+            LogHandler.createLog((Id) null,'DisplayPDFController.getTemplateSections()','templateId ->  '+templateId+' '+ex.getLineNumber()+ex.getStackTraceString()+ex.getCause(),ex.getMessage(),'Exception');
+            throw new AuraHandledException(ex.getMessage());
+        }  
+    }
         
     @AuraEnabled
     public static string pdfMode(Map<String,String> wrapperdata){

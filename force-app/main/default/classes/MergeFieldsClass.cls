@@ -149,5 +149,132 @@ public with sharing class MergeFieldsClass {
         public String sObjectName{get;set;}
         @AuraEnabled
         public String relationshipName{get;set;}
-    }    
+    }  
+    
+    
+    public static List<Document_Template_Section__c> mergefieldsMethodMultiple(List<Document_Template_Section__c> selectedTemplateContents, List<String> recordIds) {   
+        try{
+            List<Document_Template_Section__c> docsTempLst = new List<Document_Template_Section__c>();
+				String objectName = ((Id)recordIds[0]).getSObjectType().getDescribe().getName();
+				String mainstr;
+				for(Document_Template_Section__c sec: selectedTemplateContents) {
+					if(mainstr==null){
+						mainstr=sec.Section_Content__c;
+					}else{
+						mainstr=mainstr+sec.Section_Content__c;
+					}
+				}
+				String mainObject=objectName;
+				
+				Pattern p = Pattern.compile('\\{!.+?\\}');
+				Matcher m = p.matcher(mainstr);
+				String mainfields;
+				Set<String> mainfieldsList = new Set<String>();
+            System.debug('mainstr before while >> '+ mainstr + ' m.find() >> '+ m.find());
+				while(m.find()) {
+					String strReplace = '{!'+mainObject+'.';
+					String str = m.group(0).replace(strReplace,'').replace('}',', ');
+					String str1 = str.replace(',','');
+					mainfieldsList.add(str1);
+				}
+				for(String str : mainfieldsList){
+					if(mainfields==null){
+						mainfields=str;
+					}else{
+						mainfields = mainfields+', '+str;  
+					}
+				}
+            System.debug('mainfields >>' + mainfields);
+            	Integer executeHeadFoot = 0;
+            	string mainSOQL='Select '+String.escapeSingleQuotes(mainfields)+' from '+String.escapeSingleQuotes(mainObject)+' where Id IN :recordIds WITH SECURITY_ENFORCED';
+            	System.debug('mainSOQL >> '+ mainSOQL);
+            for(Sobject qrec : Database.query(mainSOQL)){
+                    
+                    Boolean executeVar = false;
+                    if(mainfields!=null) {
+                        System.debug('mainfields >>' + mainfields);
+                        mainfields = mainfields.removeEnd(', ');
+                        Map<String, Object> mainMap = (Map<String, Object>) JSON.deserializeUntyped(JSON.serialize(qrec));
+                        System.debug('mainMap inside for loop > '+ mainMap);
+                        System.debug('selectedTemplateContents before loop >> '+ selectedTemplateContents);
+                        
+                        for(Document_Template_Section__c sec: selectedTemplateContents) {
+                            Document_Template_Section__c tempSec = (Document_Template_Section__c) JSON.deserialize(JSON.serialize(sec), Document_Template_Section__c.class);
+                            System.debug('tempSec >> ' + tempSec);
+                            if(executeHeadFoot == 0){
+                                System.debug('inside eceuteFood 0 >> '+ tempSec.DxCPQ__Type__c);
+                                executeVar = true;
+                            }
+                            else{
+                                System.debug('inside eceuteFood else >> '+ tempSec.DxCPQ__Type__c);
+                                if(!tempSec.DxCPQ__Type__c.equals('Header')  &&	 !tempSec.DxCPQ__Type__c.equals('Footer')  ){
+                                    System.debug('inside eceuteFood else if>> '+ tempSec.DxCPQ__Type__c);
+                                	executeVar = true;
+                            	}
+                                else{
+                                    System.debug('inside eceuteFood else else>> '+ tempSec.DxCPQ__Type__c);
+                                    executeVar = false;
+                                }
+                            }
+                            if(executeVar){
+                                System.debug('inside executeevar >> executeHeadFoot ' + executeHeadFoot +' >> '+ tempSec.DxCPQ__Type__c);
+                                for(String str:mainfieldsList)  {
+                                    str = str.replaceAll('(\\s+)', '');
+                                    if(mainMap.containskey(str)) {
+                                        string mergefieldsyntax='{!'+mainObject+'.'+str+'}';
+                                        tempSec.Section_Content__c=tempSec.Section_Content__c.replace(mergefieldsyntax, String.valueOf(mainMap.get(str)));
+                                    } else {
+                                        String finalvalue;
+                                        if(str.contains('.')){
+                                            List<String> strList = new List<string>();
+                                            strList=str.split('\\.');
+                                            Map<String, Object> tempObj=new Map<String, Object>();
+                                            tempObj=mainMap;
+                                            String resVal; 
+                                            for(Integer j=0; j<strList.size(); j++) {
+                                                if(tempObj.containskey(strList[j]))  {
+                                                    if(j==strList.size()-1)   {
+                                                        finalvalue=String.valueOf(tempObj.get(strList[j]));
+                                                    }else  {
+                                                        tempObj=(Map<String, Object>)tempObj.get(strList[j]);                                            
+                                                    }
+                                                }
+                                            }
+                                        }
+                                        if(finalvalue!=null)  {
+                                            string mergefieldsyntax='{!'+mainObject+'.'+str+'}';
+                                            tempSec.Section_Content__c=tempSec.Section_Content__c.replace(mergefieldsyntax, finalvalue); 
+                                        }
+                                        else{
+                                            string mergefieldsyntax='{!'+mainObject+'.'+str+'}';
+                                            tempSec.Section_Content__c=tempSec.Section_Content__c.replace(mergefieldsyntax, ''); 
+                                        }
+                                    }
+                                }
+                                docsTempLst.add(tempSec);
+                                System.debug('sec after assisgning tempSec >> '+ sec);
+                            }
+                            executeVar = false;
+                            
+                        }   
+                        
+                    } 
+                   executeHeadFoot = executeHeadFoot + 1; 
+                } 
+                mainstr = '';
+                System.debug('before exiting big for loop >>' + mainstr);
+                System.debug('docsTempLst final >> '+ docsTempLst);
+            	//List<Document_Template_Section__c> reversedLst = new List<Document_Template_Section__c>();
+                //for(Integer i = docsTempLst.size() - 1; i >= 0; i--){
+                //    reversedLst.add(docsTempLst[i]);
+                //}
+            //System.debug('reversedLst before assigning >> '+ reversedLst);
+            selectedTemplateContents = docsTempLst;
+            System.debug('final selectedTemplateContents >> '+ selectedTemplateContents);
+        } catch(Exception ex) {
+            LogHandler.createLog((Id) null,'MergeFieldsClass Error',ex.getLineNumber()+ex.getStackTraceString()+ex.getCause(),ex.getMessage(),'Exception');
+        }        
+        return selectedTemplateContents;
+    }
+  
 }

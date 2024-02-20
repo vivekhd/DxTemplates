@@ -2,6 +2,7 @@ public with sharing class MultiSelectLookupController {
     @AuraEnabled
     public static List<SObjectQueryResult> retrieveRecords(String objectName, String fieldAPINames, String filterFieldAPIName, String strInput, String whereClause, String whereClauseTwo){
         List<SObjectQueryResult> lstReturnResult = new List<SObjectQueryResult>();
+        String strQuery;
         try {
             if (strInput.equals('*')) {
                 strInput = '';
@@ -16,12 +17,12 @@ public with sharing class MultiSelectLookupController {
             } else {
                 strQueryField = fieldAPINames;
             }            
-            String strQuery = 'SELECT ' + String.escapeSingleQuotes(strQueryField) +
+            strQuery = 'SELECT ' + String.escapeSingleQuotes(strQueryField) +
                             + ' FROM '+ String.escapeSingleQuotes(objectName)
-                            + ' WHERE '+ (String.isEmpty(whereClauseTwo)?' ':(String.escapeSingleQuotes(whereClauseTwo)) + ' AND ') + String.escapeSingleQuotes(filterFieldAPIName) + ' LIKE :str'
+                            + ' WHERE '+ (String.isEmpty(whereClauseTwo)?' ':(String.valueOf(whereClauseTwo)) + ' AND ') + String.escapeSingleQuotes(filterFieldAPIName) + ' LIKE :str'
                             +   (String.isEmpty(whereClause)?' ':' AND '+String.escapeSingleQuotes(whereClause))
                             + ' WITH USER_MODE LIMIT 50';
-            
+            system.debug('----Query-->'+strQuery);
             List<SObject> lstResult = database.query(strQuery);
             for(SObject sobj : lstResult){
                 SObjectQueryResult result = new SObjectQueryResult();
@@ -32,7 +33,7 @@ public with sharing class MultiSelectLookupController {
             }
         }
         catch (Exception ex) {
-            LogHandler.createLog((Id) null,'MultiSelectLookupController.retrieveRecords()','objectName -> '+objectName+' '+ex.getLineNumber()+ex.getStackTraceString()+ex.getCause(),ex.getMessage(),'Exception');
+            LogHandler.createLog((Id) null,'MultiSelectLookupController.retrieveRecords()','objectName -> '+objectName+' '+strQuery+ex.getLineNumber()+ex.getStackTraceString()+ex.getCause(),ex.getMessage(),'Exception');
         }
         return lstReturnResult;  
     }
