@@ -31,7 +31,7 @@ global with sharing class documentAutomationController {
                     } else {
                         documentContent = documentContent + '<table class="tableMainClass">' + ROsectionAutomationController.getHeaderContent(singleDataSection.Id).replace('<table>','').replace('</table>','');
                     }                    
-                    documentContent = documentContent + ROsectionAutomationController.getSectionDataAsHTML(recordId, singleDataSection.Id) + '</table>';
+                    documentContent = documentContent + ROsectionAutomationController.getSectionDataAsHTML(recordIds[0], singleDataSection.Id) + '</table>';
                 }
             }
             
