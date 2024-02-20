@@ -17,7 +17,7 @@
       "path": "force-app",
       "package": "Dx_Templates",
       "versionName": "ver 0.1",
-      "versionNumber": "0.1.3.NEXT",
+      "versionNumber": "0.1.7.NEXT",
       "default": true,
       "versionDescription": "",
       "postInstallScript": "PostInstallDataCreation",
