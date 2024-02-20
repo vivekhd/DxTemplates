@@ -47,7 +47,7 @@ global class sendEmailAutomation implements Queueable,Database.AllowsCallouts{
             } */
             if(!Test.isRunningTest()){
                 Attachment objAttachment = new Attachment();
-                objAttachment.parentID = '001KS000002zGWfYAM';
+                objAttachment.parentID = '001IS000002OC2kYAG';
                 objAttachment.Name = 'Automation Document'+System.today()+'.pdf'; 
                 objAttachment.Body = pg.getContentAsPDF();
                 objAttachment.IsPrivate = false;            

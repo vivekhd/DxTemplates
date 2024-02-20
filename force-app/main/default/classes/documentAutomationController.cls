@@ -68,6 +68,7 @@ global with sharing class documentAutomationController {
         }
     }
 
+    @JsonAccess(serializable='always' deserializable='always')
     global class emailWrapper{
         global List<String> toAddresses; 
         global List<String> toCCAddresses;
