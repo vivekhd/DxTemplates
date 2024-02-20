@@ -183,5 +183,9 @@
 		<members>TransactionLog__c.All</members>
 		<name>ListView</name>
 	</types>
+	<types>	
+	    <members>Generate_Document_from_Template</members>
+		<name>Flow</name>
+	</types>
 	<version>55.0</version>
 </Package>
