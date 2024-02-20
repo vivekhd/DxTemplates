@@ -5,7 +5,7 @@
 * Description		: This class renders the pdf from Document__c record content and generated the pdf version.
 * Last Modified Date: 08/10/2023
 */
-public class sendEmailAutomation implements Queueable{
+public class sendEmailAutomation implements Queueable,Database.AllowsCallouts{
     String attachmentName;
     Id documentRecordInserted;
     private static Savepoint sp1;  
