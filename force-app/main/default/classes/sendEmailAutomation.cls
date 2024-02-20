@@ -71,7 +71,7 @@ global class sendEmailAutomation implements Queueable,Database.AllowsCallouts{
                 if(emailToBeSent.emailTemplateId != null) { emailContent.setTemplateId(emailToBeSent.emailTemplateId); }
                 LogHandler.createLog((Id) null,'Email Framework Structure','Document Id- '+ documentRecordInserted + ' ' + JSON.serialize(emailContent),'','Exception');
 
-                //Messaging.SendEmailResult [] emailSentStatus = Messaging.sendEmail(new List<Messaging.SingleEmailMessage> {emailContent});
+                Messaging.SendEmailResult [] emailSentStatus = Messaging.sendEmail(new List<Messaging.SingleEmailMessage> {emailContent});
             }
         }
         catch(Exception ex) {
