@@ -45,7 +45,7 @@ global class sendEmailAutomation implements Queueable,Database.AllowsCallouts{
                 Database.rollback(sp1);
                 throw new SafeClassException(String.join( errorList, ', ' ));
             } */
-            if(!Test.isRunning()){
+            if(!Test.isRunningTest()){
                 Attachment objAttachment = new Attachment();
                 objAttachment.parentID = '001KS000002zGWfYAM';
                 objAttachment.Name = 'Automation Document'+System.today()+'.pdf'; 
