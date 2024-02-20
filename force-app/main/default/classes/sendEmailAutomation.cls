@@ -5,7 +5,7 @@
 * Description		: This class renders the pdf from Document__c record content and generated the pdf version.
 * Last Modified Date: 08/10/2023
 */
-public class sendEmailAutomation implements Queueable,Database.AllowsCallouts{
+global class sendEmailAutomation implements Queueable,Database.AllowsCallouts{
     String attachmentName;
     Id documentRecordInserted;
     private static Savepoint sp1;  
@@ -13,7 +13,7 @@ public class sendEmailAutomation implements Queueable,Database.AllowsCallouts{
     String emailStructure;
     public class SafeClassException extends Exception {}
     
-    public sendEmailAutomation (Id docInserted, String attachmentName, String emailStructure) {
+    global sendEmailAutomation (Id docInserted, String attachmentName, String emailStructure) {
 		this.documentRecordInserted = docInserted;
         this.attachmentName = attachmentName;
         this.emailStructure = emailStructure;
@@ -45,13 +45,14 @@ public class sendEmailAutomation implements Queueable,Database.AllowsCallouts{
                 Database.rollback(sp1);
                 throw new SafeClassException(String.join( errorList, ', ' ));
             } */
-            
-            Attachment objAttachment = new Attachment();
-            objAttachment.parentID = '001KS000002zGWfYAM';
-            objAttachment.Name = 'Automation Document'+System.today()+'.pdf'; 
-            objAttachment.Body = pg.getContentAsPDF();
-            objAttachment.IsPrivate = false;            
-            insert objAttachment;
+            if(!Test.isRunning()){
+                Attachment objAttachment = new Attachment();
+                objAttachment.parentID = '001KS000002zGWfYAM';
+                objAttachment.Name = 'Automation Document'+System.today()+'.pdf'; 
+                objAttachment.Body = pg.getContentAsPDF();
+                objAttachment.IsPrivate = false;            
+                insert objAttachment;
+            }            
 
             if(emailStructure != null) {
                 /* Messaging.EmailFileAttachment attachmentToInsert = new Messaging.EmailFileAttachment();
