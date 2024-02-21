@@ -82,6 +82,8 @@ global with sharing class documentAutomationController {
         global String emailSubject;
         global String emailBody;
         global Id emailTemplateId;
+        global List<Id> contentDocumentIds;
+        global Map<Id,String> contentFugitiveMap;
     }
 
     /* This wrapper is to be deprecated.*/
