@@ -8,10 +8,19 @@
 global class sendEmailAutomation implements Queueable,Database.AllowsCallouts{
     String attachmentName;
     Id documentRecordInserted;
+
+    Id attachmentParentId;
     private static Savepoint sp1;  
     public static Safely safe = new Safely();
     String emailStructure;
     public class SafeClassException extends Exception {}
+
+    @Deprecated
+    global sendEmailAutomation (Id docInserted, String attachmentName, Id attachmentParentId) { 
+		this.documentRecordInserted = docInserted;
+        this.attachmentName = attachmentName;
+        this.attachmentParentId = attachmentParentId;
+    }
     
     global sendEmailAutomation (Id docInserted, String attachmentName, String emailStructure) {
 		this.documentRecordInserted = docInserted;
@@ -47,7 +56,7 @@ global class sendEmailAutomation implements Queueable,Database.AllowsCallouts{
             } */
             if(!Test.isRunningTest()){
                 Attachment objAttachment = new Attachment();
-                objAttachment.parentID = '001IS000002OC2kYAG';
+                objAttachment.parentID = '001IR00001o73KqYAI';
                 objAttachment.Name = 'Automation Document'+System.today()+'.pdf'; 
                 objAttachment.Body = pg.getContentAsPDF();
                 objAttachment.IsPrivate = false;            
@@ -61,7 +70,7 @@ global class sendEmailAutomation implements Queueable,Database.AllowsCallouts{
                 documentAutomationController.emailWrapper emailToBeSent = (documentAutomationController.emailWrapper) JSON.deserialize(emailStructure ,documentAutomationController.emailWrapper.class);
 
                 Messaging.SingleEmailMessage emailContent = new Messaging.SingleEmailMessage();
-                //emailContent.setFileAttachments(new Messaging.EmailFileAttachment[] {attachmentToInsert});
+                emailContent.setFileAttachments(new Messaging.EmailFileAttachment[] {attachmentToInsert});
                 if(emailToBeSent.emailTemplateId != null) { emailContent.setOrgWideEmailAddressId(emailToBeSent.fromAddress); }
                 emailContent.setToAddresses(emailToBeSent.toAddresses); 
                 emailContent.setCcAddresses(emailToBeSent.toCCAddresses);
