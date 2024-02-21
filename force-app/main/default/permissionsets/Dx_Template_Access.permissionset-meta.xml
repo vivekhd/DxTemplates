@@ -264,10 +264,6 @@
         <visibility>Visible</visibility>
     </tabSettings>
     <tabSettings>
-        <tab>Document_Template__c</tab>
-        <visibility>Visible</visibility>
-    </tabSettings>
-    <tabSettings>
         <tab>TransactionLog__c</tab>
         <visibility>Visible</visibility>
     </tabSettings>

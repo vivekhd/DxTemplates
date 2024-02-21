@@ -19,14 +19,14 @@ global with sharing class PdfDisplay {
             objectLabel = recordId.getSObjectType().getDescribe().getLabel();
         }
         catch (Exception ex) {
-            LogHandler.createLog((Id) null,'PdfDisplay.getObjectDetails()','recordId -> '+recordId+' '+ex.getLineNumber()+ex.getStackTraceString()+ex.getCause(),ex.getMessage(),'Exception');
+            LogHandler.createLog((Id) null,'PdfDisplay.getObjectDetails()','recordId : '+recordId+' '+ex.getLineNumber()+ex.getStackTraceString()+ex.getCause(),ex.getMessage(),'Exception');
         }  
         return new ObjectDetails(objectName, objectLabel);
     }
     
     @AuraEnabled
     public static String getDomainUrl() {
-        return URL.getSalesforceBaseUrl().toExternalForm();
+        return URL.getOrgDomainUrl().toExternalForm();
     }
     
 }
