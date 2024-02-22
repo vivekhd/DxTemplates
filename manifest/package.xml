@@ -109,7 +109,7 @@
 		<members>Document_Clause__c</members>
 		<members>Document_Template__c</members>
 		<members>Document__c</members>
-		<members>DxTemplates</members>
+		<members>DXTemplates</members>
 		<members>TransactionLog__c</members>
 		<name>CustomTab</name>
 	</types>
