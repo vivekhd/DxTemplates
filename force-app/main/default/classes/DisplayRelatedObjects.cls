@@ -11,7 +11,7 @@ public with sharing class DisplayRelatedObjects {
     public static Map<String,Decimal> currencyFieldTotals; 
     public static String errType = null;
     public static Id currTemplate;
-    public static String ROHtmlContent = '<tbody>';
+    public static String rOHtmlContent = '<tbody>';
     
     @AuraEnabled
     public static string getsectionData(String recordid,String templatesectionid){
@@ -24,14 +24,13 @@ public with sharing class DisplayRelatedObjects {
             Document_Template_Section__c dsrec=[select id,Section_Content__c from Document_Template_Section__c where id=:templatesectionid WITH SECURITY_ENFORCED];
             Map<string,Object> jsonMap = (Map<string,Object>)JSON.deserializeUntyped(dsrec.Section_Content__c);
                         
-            String objectName = 'Document_Template_Section__c';
+            
             List<Object> fieldsObjList = (List<Object>) jsonMap.get('tablelistValues');
             List<Object> fieldsObjListValues = (List<Object>) jsonMap.get('tablelistLabels');
             Map<String,Object> tableStyleList = (Map<String,Object>) jsonMap.get('style');
             
             // User Selected fields for Subtotal Calculation
             List<Object> subTotFieldNames = (List<Object>) jsonMap.get('subTotal');
-            list<string> productIds = new list<String>();
             
             Boolean newPage = (Boolean) jsonMap.get('newPage');
             Boolean serialNumber = (Boolean) jsonMap.get('SerialNumber');
@@ -112,7 +111,6 @@ public with sharing class DisplayRelatedObjects {
                 Map<Object, List<SObject>> recordCategoryMap = new Map<Object, List<SObject>>();
                 String ptrfield = (String) grpby;
                 for(Sobject ptrRecord : ChildRecords){
-                    Map<String, Object> maprec = (Map<String, Object>) JSON.deserializeUntyped(JSON.serialize(ptrRecord));
                     
                     if(!recordCategoryMap.containsKey(ptrRecord.get(ptrfield)) && ptrRecord.get(ptrfield)!=null){
                         List<SObject> recordList = new  List<SObject>();
@@ -151,7 +149,7 @@ public with sharing class DisplayRelatedObjects {
                     for(Integer i=0; i<count; i++){
                         Sobject currRecord = (Sobject) recordListofKey[i];
                         //Function Call
-                        RowWrapper recType = RecordDataWrapperCreation(fieldsObjList, currRecord, fieldNameType);
+                        RowWrapper recType = recordDataWrapperCreation(fieldsObjList, currRecord, fieldNameType);
                         //Function Call
                         rowWrapperList.add(recType);
                     }
@@ -199,13 +197,12 @@ public with sharing class DisplayRelatedObjects {
                 ChildRecords = Database.query(recordsQuery);
                 for(Sobject currRecord: ChildRecords) {
                     //qliRecIds.add(currRecord.get('Id'));
-                    ROHtmlContent += '<tr>';
-                    Map<String, Object> maprec = (Map<String, Object>) JSON.deserializeUntyped(JSON.serialize(currRecord));                    
+                    rOHtmlContent += '<tr>';                   
                     //Function Call
-                    RowWrapper recType = RecordDataWrapperCreation(fieldsObjList, currRecord, fieldNameType);
+                    RowWrapper recType = recordDataWrapperCreation(fieldsObjList, currRecord, fieldNameType);
                     //Function Call
                     rowWrapperList.add(recType);
-                    ROHtmlContent += '</tr>';
+                    rOHtmlContent += '</tr>';
                 }
                 //Adding GrandTotals to WrapperList
                 RowWrapper totType = new RowWrapper();
@@ -254,7 +251,7 @@ public with sharing class DisplayRelatedObjects {
             masterWrapper.chartNewPage = chartNewPage;
               
             string jsonstring = JSON.serialize(masterWrapper);
-            ROHtmlContent += '</tbody>';
+            rOHtmlContent += '</tbody>';
             return jsonstring;
         }
         catch(Exception ex)
@@ -328,14 +325,14 @@ public with sharing class DisplayRelatedObjects {
                         String objNameLkp = getLkpObjectApi(objName,tempfield[0]);
                         
                         tempfield.remove(0);
-                        Map<String,String> FieldnameTypeLookup = getObjectFieldTypeMap(objNameLkp,tempfield);
-                        fieldNameType.put(selfield,FieldnameTypeLookup.get(tempfield[0]));
+                        Map<String,String> fieldnameTypeLookup = getObjectFieldTypeMap(objNameLkp,tempfield);
+                        fieldNameType.put(selfield,fieldnameTypeLookup.get(tempfield[0]));
                     }
                     else{
                         List<String> tempfield = selfield.split('\\.');
                         tempfield.remove(0);
-                        Map<String,String> FieldnameTypeLookup = getObjectFieldTypeMap('User',tempfield);
-                        fieldNameType.put(selfield,FieldnameTypeLookup.get(tempfield[0]));
+                        Map<String,String> fieldnameTypeLookup = getObjectFieldTypeMap('User',tempfield);
+                        fieldNameType.put(selfield,fieldnameTypeLookup.get(tempfield[0]));
                     }
                 }
                 else{
@@ -364,10 +361,10 @@ public with sharing class DisplayRelatedObjects {
         return '';
     }
     
-    public Static RowWrapper RecordDataWrapperCreation(List<Object> fieldsObjList, Sobject currRecord, Map<String,String> fieldNameType){
+    public Static RowWrapper recordDataWrapperCreation(List<Object> fieldsObjList, Sobject currRecord, Map<String,String> fieldNameType){
         RowWrapper recType = new RowWrapper();
         recType.type='Record';
-        TransactionLog__c[] logList = new TransactionLog__c[] {};
+       
         	try{
                 for(Object field : fieldsObjList){
                     String fieldStr = (String) field;
@@ -422,17 +419,17 @@ public with sharing class DisplayRelatedObjects {
                             currencyFieldSubTotals.put(fieldStr, tempValueSubTotal);
                         } 
                     }
-                    ROHtmlContent = ROHtmlContent + '<td scope="col" style="border: 1px solid black; text-align: center;">' + recVal + '</td>';
+                    rOHtmlContent = rOHtmlContent + '<td scope="col" style="border: 1px solid black; text-align: center;">' + recVal + '</td>';
                     recType.addValue(recVal);
                 }
             }
         Catch(Exception ex) {
             if(errType==null){
                 errType = ex.getTypeName();
-                LogHandler.createLog((Id) null,'DisplayRelatedObjects.RecordDataWrapperCreation()','Template Id- '+currTemplate+' '+ex.getLineNumber()+ex.getStackTraceString()+ex.getCause(),ex.getMessage(),'Exception');
+                LogHandler.createLog((Id) null,'DisplayRelatedObjects.recordDataWrapperCreation()','Template Id- '+currTemplate+' '+ex.getLineNumber()+ex.getStackTraceString()+ex.getCause(),ex.getMessage(),'Exception');
             }
             else if(ex.getTypeName()!=errType) {
-                LogHandler.createLog((Id) null,'DisplayRelatedObjects.RecordDataWrapperCreation()','Template Id- '+currTemplate+' '+ex.getLineNumber()+ex.getStackTraceString()+ex.getCause(),ex.getMessage(),'Exception');
+                LogHandler.createLog((Id) null,'DisplayRelatedObjects.recordDataWrapperCreation()','Template Id- '+currTemplate+' '+ex.getLineNumber()+ex.getStackTraceString()+ex.getCause(),ex.getMessage(),'Exception');
             }
         }
         return recType;

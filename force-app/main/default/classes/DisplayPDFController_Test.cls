@@ -17,7 +17,7 @@ private class DisplayPDFController_Test {
         }
         Test.stopTest();
         Assert.areEqual(1, result.size(), 'Expected one section');
-        Assert.areEqual('<p>Test Section Content</p>', result[0].Section_Content__c); 
+        Assert.areEqual('<p>Test Section Content</p>', result[0].Section_Content__c,'Content Matched'); 
     }
 
     @IsTest 
@@ -224,9 +224,9 @@ private class DisplayPDFController_Test {
             documentRecordCountAfter = [Select Id from Document__c].size();
         }
         Test.stopTest();       
-        Assert.areNotEqual(attchCountBefore,[Select Id from Attachment].size());
-        Assert.areNotEqual(documentRecordCountBefore,documentRecordCountAfter);
-        Assert.areNotEqual(asyncJobCountBefore,asyncJobCountAfter);
+        Assert.areNotEqual(attchCountBefore,[Select Id from Attachment].size(),'DML is performed on Attachment');
+        Assert.areNotEqual(documentRecordCountBefore,documentRecordCountAfter,'DML is performed on Document__c');
+        Assert.areNotEqual(asyncJobCountBefore,asyncJobCountAfter,'Queued Job is ran');
     }
 
 
@@ -261,8 +261,8 @@ private class DisplayPDFController_Test {
             documentRecordCountAfter = [Select Id from Document__c].size();                
         }
         Test.stopTest();
-        Assert.areNotEqual(documentRecordCountBefore,documentRecordCountAfter);
-        Assert.areNotEqual(asyncJobCountBefore,asyncJobCountAfter);
+        Assert.areNotEqual(documentRecordCountBefore,documentRecordCountAfter,'DML is done on Document__c');
+        Assert.areNotEqual(asyncJobCountBefore,asyncJobCountAfter,'Job is Queued and Executed');
     }
     
     @IsTest
@@ -276,7 +276,7 @@ private class DisplayPDFController_Test {
             ROsectionAutomationController.getReferenceObjectAPIName('Account', '');
         }
         Test.stopTest();
-        Assert.isTrue(true);
+        Assert.isTrue(true,'Code Coverage Only');
     }
     
     @IsTest
@@ -293,10 +293,10 @@ private class DisplayPDFController_Test {
             insert testSection; 
             Account testAccount = new Account(Name = 'Test Account');
             insert testAccount;
-            String result = ROsectionAutomationController.getSectionDataAsHTML(testAccount.Id, testSection.Id);
+            ROsectionAutomationController.getSectionDataAsHTML(testAccount.Id, testSection.Id);
         }
         Test.stopTest();
-        Assert.isTrue(true);
+        Assert.isTrue(true,'Code Coverage Only');
     }	
     
     @IsTest
@@ -313,15 +313,14 @@ private class DisplayPDFController_Test {
             insert testSection; 
             Opportunity testOpportunity = new Opportunity(Name = 'Test Opportunity', StageName = 'Prospecting', CloseDate = Date.today());
             insert testOpportunity; 
-            String result = ROsectionAutomationController.getSectionDataAsHTML(testOpportunity.Id, testSection.Id);
+            ROsectionAutomationController.getSectionDataAsHTML(testOpportunity.Id, testSection.Id);
             String createdDate = String.valueOf([SELECT CreatedDate FROM Opportunity WHERE Id = :testOpportunity.Id].CreatedDate);
             List<String> dateStr = createdDate.split(' ')[0].split('-');
             String timeStr = createdDate.split(' ')[1];
-            Integer valKey = 0;
-            String formattedDateTime = ROsectionAutomationController.handleDateTimeFormatAsSelectedbyUser(dateStr, timeStr, valKey);
+            ROsectionAutomationController.handleDateTimeFormatAsSelectedbyUser(dateStr, timeStr, 0);
         }
         Test.stopTest();
-        Assert.isTrue(true);
+        Assert.isTrue(true,'Code Coverage Only');
     }
     
     
@@ -339,15 +338,14 @@ private class DisplayPDFController_Test {
             insert testSection; 
             Opportunity testOpportunity = new Opportunity(Name = 'Test Opportunity', StageName = 'Prospecting', CloseDate = Date.today());
             insert testOpportunity; 
-            String result = ROsectionAutomationController.getSectionDataAsHTML(testOpportunity.Id, testSection.Id);
+            ROsectionAutomationController.getSectionDataAsHTML(testOpportunity.Id, testSection.Id);
             String createdDate = String.valueOf([SELECT CreatedDate FROM Opportunity WHERE Id = :testOpportunity.Id].CreatedDate);
             List<String> dateStr = createdDate.split(' ')[0].split('-');
             String timeStr = createdDate.split(' ')[1];
-            Integer valKey = -1;
-            String formattedDateTime = ROsectionAutomationController.handleDateTimeFormatAsSelectedbyUser(dateStr, timeStr, valKey);
+            ROsectionAutomationController.handleDateTimeFormatAsSelectedbyUser(dateStr, timeStr, -1);
         }
         Test.stopTest();
-        Assert.isTrue(true);
+        Assert.isTrue(true,'Code Coverage Only');
     }
     
     @IsTest
@@ -364,15 +362,14 @@ private class DisplayPDFController_Test {
             insert testSection; 
             Opportunity testOpportunity = new Opportunity(Name = 'Test Opportunity', StageName = 'Prospecting', CloseDate = Date.today());
             insert testOpportunity; 
-            String result = ROsectionAutomationController.getSectionDataAsHTML(testOpportunity.Id, testSection.Id);
+            ROsectionAutomationController.getSectionDataAsHTML(testOpportunity.Id, testSection.Id);
             String createdDate = String.valueOf([SELECT CreatedDate FROM Opportunity WHERE Id = :testOpportunity.Id].CreatedDate);
             List<String> dateStr = createdDate.split(' ')[0].split('-');
             String timeStr = createdDate.split(' ')[1];
-            Integer valKey = 1;
-            String formattedDateTime = ROsectionAutomationController.handleDateTimeFormatAsSelectedbyUser(dateStr, timeStr, valKey);
+            ROsectionAutomationController.handleDateTimeFormatAsSelectedbyUser(dateStr, timeStr, 1);
         }
         Test.stopTest();
-        Assert.isTrue(true);
+        Assert.isTrue(true,'Code Coverage Only');
     }
     
     @IsTest
@@ -389,15 +386,13 @@ private class DisplayPDFController_Test {
             insert testSection; 
             Opportunity testOpportunity = new Opportunity(Name = 'Test Opportunity', StageName = 'Prospecting', CloseDate = Date.today());
             insert testOpportunity; 
-            String result = ROsectionAutomationController.getSectionDataAsHTML(testOpportunity.Id, testSection.Id);
+            ROsectionAutomationController.getSectionDataAsHTML(testOpportunity.Id, testSection.Id);
             String createdDate = String.valueOf([SELECT CreatedDate FROM Opportunity WHERE Id = :testOpportunity.Id].CreatedDate);
             List<String> dateStr = createdDate.split(' ')[0].split('-');
-            String timeStr = createdDate.split(' ')[1];
-            Integer valKey = 1;
-            String formattedDateTime = ROsectionAutomationController.handleDateTimeFormatAsSelectedbyUser(dateStr, '', valKey);
+            ROsectionAutomationController.handleDateTimeFormatAsSelectedbyUser(dateStr, '', 1);
         }
         Test.stopTest();
-        Assert.isTrue(true);
+        Assert.isTrue(true,'Code Coverage Only');
     }
     
     @IsTest
@@ -414,15 +409,11 @@ private class DisplayPDFController_Test {
             insert testSection; 
             Opportunity testOpportunity = new Opportunity(Name = 'Test Opportunity', StageName = 'Prospecting', CloseDate = Date.today());
             insert testOpportunity; 
-            String result = ROsectionAutomationController.getSectionDataAsHTML(testOpportunity.Id, testSection.Id);
-            String createdDate = String.valueOf([SELECT CreatedDate FROM Opportunity WHERE Id = :testOpportunity.Id].CreatedDate);
-            List<String> dateStr = createdDate.split(' ')[0].split('-');
-            String timeStr = createdDate.split(' ')[1];
-            Integer valKey = null;
-            String formattedDateTime = ROsectionAutomationController.handleDateTimeFormatAsSelectedbyUser(null, null, null);
+            ROsectionAutomationController.getSectionDataAsHTML(testOpportunity.Id, testSection.Id);
+            ROsectionAutomationController.handleDateTimeFormatAsSelectedbyUser(null, null, null);
         }
         Test.stopTest();
-        Assert.isTrue(true);
+        Assert.isTrue(true,'Code Coverage Only');
     }
     
     
@@ -434,15 +425,13 @@ private class DisplayPDFController_Test {
             Decimal value = 123.45678;
             String roundPattern = '2';
             String stringValue = String.valueOf(value);
-            Decimal expected = value.setScale(Integer.valueOf(roundPattern));
             ROsectionAutomationController.handleCurrencyNumberFormat(stringValue, roundPattern);
-
             stringValue = 'invalid_value';
             roundPattern = '2';
             ROsectionAutomationController.handleCurrencyNumberFormat(stringValue, roundPattern);
         }
         Test.stopTest();
-        Assert.isTrue(true);
+        Assert.isTrue(true,'Code Coverage Only');
     }
     
     @IsTest
@@ -500,20 +489,16 @@ private class DisplayPDFController_Test {
             Opportunity testOpportunity2 = new Opportunity(Name = 'Test Opportunity', StageName = 'Prospecting', CloseDate = Date.today(),Type = 'New Customer',
                                                            Amount = 21244, AccountId = testAccount.Id);
             insert testOpportunity2;  
-            String result = ROsectionAutomationController.getSectionDataAsHTML(testAccount.Id, testSection.Id);
+            ROsectionAutomationController.getSectionDataAsHTML(testAccount.Id, testSection.Id);
             ROsectionAutomationController.dataFetchFromCurrentRecord(
                 new List<Object>{ 'Name' }, 
                 testAccount,        
                 new Map<String, String>{ 'Name' => 'STRING' } 
-            );
-            String createdDate = String.valueOf([SELECT CreatedDate FROM Account WHERE Id = :testAccount.Id].CreatedDate);
-            List<String> dateStr = createdDate.split(' ')[0].split('-');
-            String timeStr = createdDate.split(' ')[1];
-            Integer valKey = null;
-            String formattedDateTime = ROsectionAutomationController.handleDateTimeFormatAsSelectedbyUser(null, null, null);
+            );            
+            ROsectionAutomationController.handleDateTimeFormatAsSelectedbyUser(null, null, null);
         }
         Test.stopTest();
-        Assert.isTrue(true);
+        Assert.isTrue(true,'Code Coverage Only');
     }
     
     @IsTest
@@ -536,20 +521,16 @@ private class DisplayPDFController_Test {
                                                           Amount = 244244, AccountId = testAccount.Id);
             insert testOpportunity; 
 
-            String result = ROsectionAutomationController.getSectionDataAsHTML(testAccount.Id, testSection.Id);
+            ROsectionAutomationController.getSectionDataAsHTML(testAccount.Id, testSection.Id);
             ROsectionAutomationController.dataFetchFromCurrentRecord(
                 new List<Object>{ 'Name' }, 
                 testAccount,        
                 new Map<String, String>{ 'Name' => 'STRING' } 
             );
-            String createdDate = String.valueOf([SELECT CreatedDate FROM Account WHERE Id = :testAccount.Id].CreatedDate);
-            List<String> dateStr = createdDate.split(' ')[0].split('-');
-            String timeStr = createdDate.split(' ')[1];
-            Integer valKey = null;
-            String formattedDateTime = ROsectionAutomationController.handleDateTimeFormatAsSelectedbyUser(null, null, null);
+            ROsectionAutomationController.handleDateTimeFormatAsSelectedbyUser(null, null, null);
         }
         Test.stopTest();
-        Assert.isTrue(true);
+        Assert.isTrue(true,'Code Coverage Only');
     }
     
     
@@ -571,20 +552,16 @@ private class DisplayPDFController_Test {
             Opportunity testOpportunity = new Opportunity(Name = 'Test Opportunity', StageName = 'Prospecting', CloseDate = Date.today(),Type = 'New Customer', Amount = 244244, AccountId = testAccount.Id);
             insert testOpportunity; 
             
-            String result = ROsectionAutomationController.getSectionDataAsHTML(testAccount.Id, testSection.Id);
+            ROsectionAutomationController.getSectionDataAsHTML(testAccount.Id, testSection.Id);
             ROsectionAutomationController.dataFetchFromCurrentRecord(
                 new List<Object>{ 'Name' }, 
                 testAccount,        
                 new Map<String, String>{ 'Name' => 'STRING' } 
             );
-            String createdDate = String.valueOf([SELECT CreatedDate FROM Account WHERE Id = :testAccount.Id].CreatedDate);
-            List<String> dateStr = createdDate.split(' ')[0].split('-');
-            String timeStr = createdDate.split(' ')[1];
-            Integer valKey = null;
-            String formattedDateTime = ROsectionAutomationController.handleDateTimeFormatAsSelectedbyUser(null, null, null);
+            ROsectionAutomationController.handleDateTimeFormatAsSelectedbyUser(null, null, null);
         }
         Test.stopTest();
-        Assert.isTrue(true);
+        Assert.isTrue(true,'Code Coverage Only');
     }
     
     @IsTest
@@ -602,7 +579,7 @@ private class DisplayPDFController_Test {
             SaveDocumentTemplatesection.saveDocumentTemplateSectionDetails(testSection);
         }
         Test.stopTest();
-        Assert.isTrue(true);
+        Assert.isTrue(true,'Code Coverage Only');
     }
     
     @IsTest
@@ -621,7 +598,7 @@ private class DisplayPDFController_Test {
             SaveDocumentTemplatesection.saveDocumentTemplateSectionDetails(testSection);
         }
         Test.stopTest();
-        Assert.isTrue(true);
+        Assert.isTrue(true,'Code Coverage Only');
     }
     
     @IsTest
@@ -655,6 +632,6 @@ private class DisplayPDFController_Test {
             SaveDocumentTemplate.cloneDocumentTemplate(testTemplate, null);                
         }
         Test.stopTest();
-        Assert.isTrue(true);
+        Assert.isTrue(true,'Code Coverage Only');
     }
 }

@@ -70,7 +70,7 @@ private class DisplayRelatedController_Test {
     
     
     @isTest
-    static void testGetLkpObjectApi_ExceptionHandling() {
+    static void testGetLkpObjectApiExceptionHandling() {
         Test.startTest();
         User us = DexUtilTestDataFactory.CreateTestUser();
         System.runAs(us){

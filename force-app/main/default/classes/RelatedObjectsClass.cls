@@ -39,11 +39,11 @@ global with sharing class RelatedObjectsClass {
         Map <String,Schema.SObjectType> gd = Schema.getGlobalDescribe();
         Schema.SObjectType sobjType = gd.get(selectedObject);
         Schema.DescribeSObjectResult r = sobjType.getDescribe();
-        Map<String, Schema.SObjectField> MapofField = r.fields.getMap();        
+        Map<String, Schema.SObjectField> mapOfField = r.fields.getMap();        
         
-        for(String fieldName : MapofField.keySet()) {
-            Schema.SObjectField field = MapofField.get(fieldName);
-            Schema.DescribeFieldResult F = field.getDescribe();
+        for(String fieldName : mapOfField.keySet()) {
+            Schema.SObjectField field = mapOfField.get(fieldName);
+            Schema.DescribeFieldResult f = field.getDescribe();
             reqFields.add(String.ValueOf(field));
             reqFieldsMap.put(String.ValueOf(field),String.Valueof(F.getLabel()));
         }
@@ -68,18 +68,18 @@ global with sharing class RelatedObjectsClass {
             Map <String,Schema.SObjectType> gd = Schema.getGlobalDescribe();
             Schema.SObjectType sobjType = gd.get(selectedObject);
             Schema.DescribeSObjectResult r = sobjType.getDescribe();
-            Map<String, Schema.SObjectField> MapofField = r.fields.getMap();
-            for(String fieldName : MapofField.keySet()) {
-                Schema.SObjectField field = MapofField.get(fieldName);
-                Schema.DescribeFieldResult F = field.getDescribe();
+            Map<String, Schema.SObjectField> mapOfField = r.fields.getMap();
+            for(String fieldName : mapOfField.keySet()) {
+                Schema.SObjectField field = mapOfField.get(fieldName);
+                Schema.DescribeFieldResult f = field.getDescribe();
                 if(f.getType()+''=='PICKLIST')
                 {                
                     List<Object> lst = new List<Object>();
-                    for(Integer i=0;i<F.getPicklistValues().size();i++)
+                    for(Integer i=0;i<f.getPicklistValues().size();i++)
                     {
                         Map<String,String> mp = new Map<String,String>();
-                        mp.put('label',F.getPicklistValues()[i].getLabel());
-                        mp.put('value',F.getPicklistValues()[i].getValue());
+                        mp.put('label',f.getPicklistValues()[i].getLabel());
+                        mp.put('value',f.getPicklistValues()[i].getValue());
                         lst.add(mp);
                     }
                     reqFields.put(fieldName,lst);
@@ -175,7 +175,6 @@ global with sharing class RelatedObjectsClass {
     @AuraEnabled
     public static String createRuleCondition(String ruleConditions, String ruleExpression, List<Id> deleteIds , String sectionrecordid){
         try{
-            Id RuleId;
             Id tempruleId;
             String ruleName;
             if(deleteIds != null && deleteIds.size() > 0){

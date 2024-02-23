@@ -51,7 +51,7 @@ public with sharing class MergeFieldsClass {
                                 strList=str.split('\\.');
                                 Map<String, Object> tempObj=new Map<String, Object>();
                                 tempObj=mainMap;
-                                String resVal; 
+                                
                                 for(Integer j=0; j<strList.size(); j++) {
                                     if(tempObj.containskey(strList[j]))  {
                                         if(j==strList.size()-1)   {

@@ -148,12 +148,12 @@
     }
 
     public static List<TransactionLog__c> createTransactionLog(Integer numToInsert, Boolean doInsert, Map<String, Object> attributes){
-        List<TransactionLog__c> TransactionLogToInsert = new List<TransactionLog__c>();
+        List<TransactionLog__c> transactionLogToInsert = new List<TransactionLog__c>();
         for(Integer i=0; i< numToInsert; i++){
             TransactionLog__c trn = new TransactionLog__c();
-            TransactionLogToInsert.add(trn);
+            transactionLogToInsert.add(trn);
         }
-        return createRecords(TransactionLogToInsert, doInsert, attributes);
+        return createRecords(transactionLogToInsert, doInsert, attributes);
     }
 
     /* Method  : createDocumentTemplate
@@ -223,7 +223,7 @@
         return createRecords(docTemplateSectionToInsert, doInsert, attributes);
     }
 
-    public static User CreateTestUser(){
+    public static User createTestUser(){
         List<user> lstuser = new List<User>();
         String uniqueUserName = 'dxcpq' + DateTime.now().getTime() + '@testorg.com';
         Profile prof = [select id from profile where name LIKE '%System Administrator%'];
@@ -233,14 +233,14 @@
         TimeZoneSidKey='America/Los_Angeles',
         UserName=uniqueUserName);
         lstuser.add(u);
-        set<Id> UserId = new set<Id>();
+        set<Id> userId = new set<Id>();
         List<user> retUser = createRecords(lstuser, true, new Map<String, Object>());
-        UserId.add(retUser[0].Id);
-        AssignPermissionSetToUsers(UserId);
+        userId.add(retUser[0].Id);
+        assignPermissionSetToUsers(userId);
         return retUser[0];
     }
 
-    public static void AssignPermissionSetToUsers (Set<Id> usersId) {
+    public static void assignPermissionSetToUsers (Set<Id> usersId) {
         List<PermissionSetAssignment> permissionSetList = new List<PermissionSetAssignment>();
         List<PermissionSet> permissionstobeassigned = [SELECT Id, Label FROM PermissionSet WHERE Name IN ('Dx_Template_Access')];
         for (User u : [Select Id, Name FROM User Where Id IN : usersId]){
@@ -251,7 +251,7 @@
                 permissionSetList.add(psa);
             }
         }
-        List<Database.upsertResult> uResults = Database.upsert(permissionSetList,false);
+       Database.upsert(permissionSetList,false);
     }
 
     public class SafeClassException extends Exception{

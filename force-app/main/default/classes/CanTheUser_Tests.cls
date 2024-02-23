@@ -178,7 +178,6 @@ private inherited sharing class CanTheUser_Tests {
     
     @isTest
     static void canFLSDocumentPositive() {
-        List<SObject> arr = new List<SObject> {new Document__c()};
         System.assertEquals(
             CanTheUser.flsAccessible('Document__c','Id'),false
         );

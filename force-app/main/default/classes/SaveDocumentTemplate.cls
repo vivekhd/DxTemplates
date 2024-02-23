@@ -3,19 +3,19 @@ public with sharing class SaveDocumentTemplate {
     private static Savepoint sp1;
     
     @AuraEnabled
-    public static String saveDocumentTemplatedetails(Document_Template__c Recorddetails , String hasRecordId){
+    public static String saveDocumentTemplatedetails(Document_Template__c recordDetails , String hasRecordId){
         String insertedID = '';
-        String Updatedrecord = '';
+        String updatedRecord = '';
         try{
-            Document_Template__c DocTemp = new Document_Template__c();
+            Document_Template__c docTemp = new Document_Template__c();
             if( hasRecordId ==''){
                 
-                DocTemp.Name = Recorddetails.Name;
-                DocTemp.Description__c = Recorddetails.Description__c;
-                DocTemp.Related_To_Type__c = Recorddetails.Related_To_Type__c;
+                docTemp.Name = recordDetails.Name;
+                docTemp.Description__c = recordDetails.Description__c;
+                docTemp.Related_To_Type__c = recordDetails.Related_To_Type__c;
                 
                 List<Document_Template__c> listtobecreated=new List<Document_Template__c>();
-                listtobecreated.add(DocTemp);
+                listtobecreated.add(docTemp);
                 if (sp1 == null) sp1 = Database.setSavepoint();
                 Database.SaveResult[] urListsave = safe.doInsert(listtobecreated);
                 List<String> errorList1 = Safely.safeClassExceptionHandlerInsert(urListsave);
@@ -23,13 +23,13 @@ public with sharing class SaveDocumentTemplate {
                     Database.rollback(sp1);
                     throw new SafeClassException(String.join( errorList1, ', ' ));
                 }
-                insertedID = DocTemp.ID;
+                insertedID = docTemp.ID;
             }
             else if (hasRecordId != null && hasRecordId != ''){
-                DocTemp.ID = hasRecordId;
-                DocTemp.Description__c = Recorddetails.Description__c;
+                docTemp.ID = hasRecordId;
+                docTemp.Description__c = recordDetails.Description__c;
                 List<Document_Template__c> listtobeupdated=new List<Document_Template__c>();
-                listtobeupdated.add(DocTemp);
+                listtobeupdated.add(docTemp);
                 if (sp1 == null) sp1 = Database.setSavepoint();
                 Database.SaveResult[] urList2 = safe.doUpdate(listtobeupdated);
                 List<String> errorList2 = Safely.safeClassExceptionHandlerInsert(urList2);
@@ -37,9 +37,9 @@ public with sharing class SaveDocumentTemplate {
                     Database.rollback(sp1);
                     throw new SafeClassException(String.join( errorList2, ', ' ));
                 }
-                Updatedrecord = 'Record updated Succesfuly';
+                updatedRecord = 'Record updated Succesfuly';
             }
-            return (insertedID !=null && insertedID !='') ? insertedID : Updatedrecord;
+            return (insertedID !=null && insertedID !='') ? insertedID : updatedRecord;
         }
         catch (Exception ex) {
             LogHandler.createLog((Id) null,'SaveDocumentTemplate.saveDocumentTemplatedetails()','Template Id- '+insertedID+' '+ex.getLineNumber()+ex.getStackTraceString()+ex.getCause(),ex.getMessage(),'Exception');

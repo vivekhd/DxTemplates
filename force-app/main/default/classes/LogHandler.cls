@@ -11,24 +11,24 @@ public with sharing class LogHandler {
 * This method can be called from any component.It is used to create a record in TransactionLog__c
 * in case of any exception in the code.
 *
-* @param ipInput recordid,ClassName, Exception, LogData
+* @param ipInput recordid,ClassName, Exception, logData
 * @param Output  Void
 */
-    public static void createException(Id recordId,String className,String exceptionMessage,String LogData)
+    public static void createException(Id recordId,String className,String exceptionMessage,String logData)
     {  
         try {
             if(exceptionMessage.length() > 131072) {
                 exceptionMessage = exceptionMessage.SubString(0,131072);
             }
             
-            if(LogData.length() > 131072) {
+            if(logData.length() > 131072) {
                 exceptionMessage = exceptionMessage.SubString(0,131072);
             }
             
             TransactionLog__c exceptionLog = new TransactionLog__c(RecordId__c = recordId, 
                                                                    Process_Name__c = className,
                                                                    LogMessage__c = exceptionMessage,
-                                                                   LogData__c=LogData,
+                                                                   LogData__c=logData,
                                                                    LogType__c='Exception');
             Savepoint sp = Database.setSavepoint();
             Database.SaveResult[] srList = safe.doInsert(exceptionLog);
@@ -51,7 +51,7 @@ public with sharing class LogHandler {
 * @param Output  Void
 */
     @AuraEnabled
-    public static void createLog(Id recordId,String className,String exceptionMessage,String LogData, String logType)
+    public static void createLog(Id recordId,String className,String exceptionMessage,String logData, String logType)
     {
         try {
             if(exceptionMessage.length() > 131072)
@@ -59,7 +59,7 @@ public with sharing class LogHandler {
                 exceptionMessage = exceptionMessage.SubString(0,131072);
             }
             
-            if(LogData.length() > 131072)
+            if(logData.length() > 131072)
             {
                 exceptionMessage = exceptionMessage.SubString(0,131072);
             }
@@ -67,7 +67,7 @@ public with sharing class LogHandler {
             TransactionLog__c exceptionLog = new TransactionLog__c(RecordId__c = recordId, 
                                                                    Process_Name__c = className,
                                                                    LogMessage__c = exceptionMessage,
-                                                                   LogData__c=LogData,
+                                                                   LogData__c=logData,
                                                                    LogType__c=logType);
             Savepoint sp = Database.setSavepoint();
             Database.SaveResult[] srList = safe.doInsert(exceptionLog);
@@ -112,7 +112,7 @@ public with sharing class LogHandler {
 * This method can be called from any component.It will create an instance of TransactionLog__c record & returns it,
 * it can be an exception or just the transaction information.
 * 
-* @param ipInput recordid,ClassName, Exception, LogData, LogType
+* @param ipInput recordid,ClassName, Exception, logData, LogType
 * @param Output  TransactionLog__c
 */
     public static TransactionLog__c getLog(Id recordId,String className,String exceptionMessage,String logData,String logType)

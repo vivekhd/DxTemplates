@@ -18,7 +18,6 @@ public class RuleSelector_Test {
             System.assert(ex.getMessage().contains('Script-thrown exception'));
         }
         Test.stopTest();
-        List<Rule_Condition__c> deletedRuleConditions = [SELECT Id FROM Rule_Condition__c WHERE Id IN :arrIds ALL ROWS];  
     }
     
     @isTest

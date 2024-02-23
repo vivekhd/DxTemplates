@@ -19,7 +19,6 @@ private class ProductSetupCtrl_Test {
         User us = DexUtilTestDataFactory.CreateTestUser();
         System.runAs(us){
             Test.startTest();
-            List<Account> acc = DexUtilTestDataFactory.createAccounts(3, true, null);
             MultiSelectLookupController.retrieveRecords('Account','Name','ShippingCity','Name','','Name!=NULL');
             System.assert(true);
             Test.stopTest();
@@ -27,14 +26,13 @@ private class ProductSetupCtrl_Test {
     }
     
     /*SaveDocumentTemplate Test Class*/        
-    @isTest public static void getAllDocumentTemplateSections_Test1(){
+    @isTest public static void getAllDocumentTemplateSectionsTest1(){
         User us = DexUtilTestDataFactory.CreateTestUser();
         System.runAs(us) {
             List<Document_Template__c> documentTemplate = DexUtilTestDataFactory.createDocumentTemplate(1, true, null);
             List<Id> documentTemplateId = new List<Id>{documentTemplate[0].Id};
             Map<String, Object> docTemplateSectionAttributes = new Map<String, Object>{'Document_Template__c'=>documentTemplateId};
             List<Document_Template_Section__c> docTemplateSections = DexUtilTestDataFactory.createDocumentTemplateSection(1, true, docTemplateSectionAttributes);
-            List<Document__c> doc = DexUtilTestDataFactory.createDocument(1, true, docTemplateSectionAttributes);
             List<Document_Clause__c> docClause = DexUtilTestDataFactory.createDocumentClause(1, true, null);
         
             Account acc = new Account();
@@ -137,7 +135,7 @@ private class ProductSetupCtrl_Test {
     }
        
     
-    @isTest public static void getAllDocumentTemplateSections_Test2(){
+    @isTest public static void getAllDocumentTemplateSectionsTest2(){
         User us = DexUtilTestDataFactory.CreateTestUser();
         System.runAs(us){
             try{
@@ -145,8 +143,7 @@ private class ProductSetupCtrl_Test {
                 List<Id> documentTemplateId = new List<Id>{documentTemplate[0].Id};
                     Map<String, Object> docTemplateSectionAttributes = new Map<String, Object>{'Document_Template__c'=>documentTemplateId};
                         List<Document_Template_Section__c> docTemplateSections = DexUtilTestDataFactory.createDocumentTemplateSection(1, true, docTemplateSectionAttributes);
-                List<Document__c> doc = DexUtilTestDataFactory.createDocument(1, true, docTemplateSectionAttributes);
-                List<Document_Clause__c> docClause = DexUtilTestDataFactory.createDocumentClause(1, true, null);
+                
                 
                 String parentTemplateId = documentTemplate[0].Parent_Template__c;
                 
@@ -208,10 +205,9 @@ private class ProductSetupCtrl_Test {
                 SaveDocumentTemplate.createDocumentTemplate(docTemplate3);        
                 SaveDocumentTemplate.activateTemplate(documentTemplate[0].Id, parentTemplateId, true);
                 SaveDocumentTemplate.getDocumentTemplates('Account');
-                Document_Template__c docTem;
                 SaveDocumentTemplate.deleteTemplate(documentTemplate[0].Id);
                 ApexPages.currentPage().getParameters().put('documentid', String.valueOf(docs.Id));
-                DisplayPDFController controller = new DisplayPDFController();
+                new DisplayPDFController();
             } catch(exception ex){
                 System.assert(ex.getMessage() != null, 'Exception Message was not found');
             }
@@ -222,7 +218,7 @@ private class ProductSetupCtrl_Test {
     
     
     
-    @IsTest public static void DisplayPDFController_Test3(){
+    @IsTest public static void displayPDFControllerTest3(){
         User us = DexUtilTestDataFactory.CreateTestUser();
         System.runAs(us){
                 
@@ -289,7 +285,7 @@ private class ProductSetupCtrl_Test {
             try{
                 SaveDocumentTemplate.saveDocumentTemplatedetails(docTemplate, '');
                 DisplayPDFController.headerfooterwrapper wrap=new   DisplayPDFController.headerfooterwrapper('test','0');
-                DisplayPDFController controller = new DisplayPDFController();
+                new DisplayPDFController();
                 System.assert(true);
             }catch(Exception e){
                 System.assert(e.getMessage()!= null, 'Exception Message is found');
@@ -298,7 +294,7 @@ private class ProductSetupCtrl_Test {
         Test.stopTest();
     }
     
-    @IsTest public static void DisplayPDFController_Test4(){
+    @IsTest public static void displayPDFControllerTest4(){
         User us = DexUtilTestDataFactory.CreateTestUser();
         System.runAs(us){
             try{
@@ -371,7 +367,7 @@ private class ProductSetupCtrl_Test {
         Test.stopTest();
     }
 
-    @IsTest public static void DisplayPDFController_Test5(){
+    @IsTest public static void displayPDFControllerTest5(){
         User us = DexUtilTestDataFactory.CreateTestUser();
         System.runAs(us){
             List<Document_Template__c> documentTemplate = DexUtilTestDataFactory.createDocumentTemplate(1, true, null);
@@ -393,14 +389,14 @@ private class ProductSetupCtrl_Test {
         Test.stopTest();
     }
 
-    @IsTest public static void Test6(){
+    @IsTest public static void test6(){
         User us = DexUtilTestDataFactory.CreateTestUser();
         System.runAs(us){
              try{
         List<Document_Template__c> documentTemplate = DexUtilTestDataFactory.createDocumentTemplate(1, true, null);
         List<Id> documentTemplateId = new List<Id>{documentTemplate[0].Id};
             Map<String, Object> docTemplateSectionAttributes = new Map<String, Object>{'Document_Template__c'=>documentTemplateId};
-                List<Document_Template_Section__c> docTemplateSections = DexUtilTestDataFactory.createDocumentTemplateSection(1, true, docTemplateSectionAttributes);
+                
         Document_Template__c docTemplate = new Document_Template__c();
         docTemplate.IsActive__c = true;
         docTemplate.Previously_Active__c = true;
@@ -426,7 +422,7 @@ private class ProductSetupCtrl_Test {
         docTemplateSection.Document_Template__c=documentTemplate[0].Id;
         insert docTemplateSection;  
         
-        String mainstr1='{\"sectionsCount\":\"1\",\"sectionsContent\":[{\"value\":\"<p>DxCPQ__Related_To_Type__c</p>\",\"indexvar\":0,\"key\":\"1653649808603:0\"}]}';
+        
         String mainstr='<p>Hello<spanstyle=\"color:rgb(68,68,68);\">{!DxCPQ__Document_Template__c.Id},</span></p><p><br></p><p><spanstyle=\"color:rgb(68,68,68);\">{!DxCPQ__Document_Template__c.DxCPQ__Related_To_Type__c}</span></p><p>Status:<spanstyle=\"color:rgb(68,68,68);\">{!DxCPQ__Document_Template__c.Owner.Id}</span></p><p><br></p>';
         
         Document_Template_Section__c docTemplateSection1 = new Document_Template_Section__c();
@@ -444,7 +440,6 @@ private class ProductSetupCtrl_Test {
             SaveDocumentTemplatesection.saveDocumentTemplateSectionDetails(docTemplateSection1);
         DisplayRelatedObjects.getsectionData(documentTemplate[0].Id,docTemplateSection.Id);
         MergeFieldsClass.mergefieldsMethod(newlst,documentTemplate[0].Id);
-        List<MergeFieldsClass.FieldWrap> fields=MergeFieldsClass.getFields('DxCPQ__Document_Template__c');
         MergeFieldsClass.toTitleCase('hello test MergeFieldsClass');
         //Account res=MergeFieldsClass.createTestButtonInsert('Test Acc');
         System.assert(true);
@@ -456,7 +451,7 @@ private class ProductSetupCtrl_Test {
         }
     }
     
-    @IsTest public static void DisplayPDFController_Test7(){
+    @IsTest public static void displayPDFControllerTest7(){
         User us = DexUtilTestDataFactory.CreateTestUser();
         System.runAs(us){
             List<Document_Template__c> documentTemplate = DexUtilTestDataFactory.createDocumentTemplate(1, true, null);
@@ -477,7 +472,7 @@ private class ProductSetupCtrl_Test {
         }
     }
 	
-    @IsTest public static void DisplayPDFController_Test8(){
+    @IsTest public static void displayPDFControllerTest8(){
         User us = DexUtilTestDataFactory.CreateTestUser();
         System.runAs(us){
             List<Document_Template__c> documentTemplate = DexUtilTestDataFactory.createDocumentTemplate(1, true, null);
@@ -501,7 +496,7 @@ private class ProductSetupCtrl_Test {
     }
     
 	@IsTest 
-    public static void Test_getRelatedToTypeOptions(){
+    public static void testgetRelatedToTypeOptions(){
         User us = DexUtilTestDataFactory.CreateTestUser();
         System.runAs(us){ 
             SaveDocumentTemplate.getRelatedToTypeOptions();

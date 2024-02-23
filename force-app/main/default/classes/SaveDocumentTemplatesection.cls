@@ -58,32 +58,32 @@ public with sharing class SaveDocumentTemplatesection {
     }
     
     @AuraEnabled
-    public static Document_Template_Section__c saveDocumentTemplateSectionDetails(Document_Template_Section__c Recorddetails){
+    public static Document_Template_Section__c saveDocumentTemplateSectionDetails(Document_Template_Section__c recordDetails){
         String recordIDValue='';
         try{
-            Document_Template_Section__c DocTempsec = new Document_Template_Section__c();
-            String recordId = Recorddetails.Id;
+            Document_Template_Section__c docTempsec = new Document_Template_Section__c();
+            String recordId = recordDetails.Id;
             recordIDValue = recordId;            
-            String clauseId=Recorddetails.Document_Clause__c;
+            String clauseId=recordDetails.Document_Clause__c;
             list<string> arrOfStr;
             if(clauseId!=null && clauseId.contains('"')) {
                 arrOfStr = clauseId.split('"');
-                Recorddetails.Document_Clause__c=arrOfStr[1];
+                recordDetails.Document_Clause__c=arrOfStr[1];
             }
         
             if(recordId !='' ){
-                DocTempsec.ID = Recorddetails.Id;
-                DocTempsec.Name = Recorddetails.Name;
-                DocTempsec.Section_Content__c = Recorddetails.Section_Content__c;
-                DocTempsec.New_Page__c = Recorddetails.New_Page__c;
-                DocTempsec.Type__c = Recorddetails.Type__c;
-                DocTempsec.New_Page__c = Recorddetails.New_Page__c;
-                DocTempsec.Document_Clause__c = Recorddetails.Document_Clause__c;
-                DocTempsec.Section_Details__c = String.Valueof(Recorddetails.Section_Details__c);
-                DocTempsec.RuleId__c = Recorddetails.RuleId__c ;
+                docTempsec.ID = recordDetails.Id;
+                docTempsec.Name = recordDetails.Name;
+                docTempsec.Section_Content__c = recordDetails.Section_Content__c;
+                docTempsec.New_Page__c = recordDetails.New_Page__c;
+                docTempsec.Type__c = recordDetails.Type__c;
+                docTempsec.New_Page__c = recordDetails.New_Page__c;
+                docTempsec.Document_Clause__c = recordDetails.Document_Clause__c;
+                docTempsec.Section_Details__c = String.Valueof(recordDetails.Section_Details__c);
+                docTempsec.RuleId__c = recordDetails.RuleId__c ;
                 
                 List<Document_Template_Section__c> listtobeupdated=new List<Document_Template_Section__c>();
-                listtobeupdated.add(DocTempsec);
+                listtobeupdated.add(docTempsec);
                 if (sp1 == null) sp1 = Database.setSavepoint();
                 Database.SaveResult[] urList2 = safe.doUpdate(listtobeupdated);
                 List<String> errorList1 = Safely.safeClassExceptionHandlerInsert(urList2);
@@ -93,36 +93,36 @@ public with sharing class SaveDocumentTemplatesection {
                 }
             }
             else{
-                if(Recorddetails.Name != null){
-                    DocTempsec.Name = Recorddetails.Name;
+                if(recordDetails.Name != null){
+                    docTempsec.Name = recordDetails.Name;
                 }
-                if(Recorddetails.Section_Content__c  != null){
-                    DocTempsec.Section_Content__c = Recorddetails.Section_Content__c ;
+                if(recordDetails.Section_Content__c  != null){
+                    docTempsec.Section_Content__c = recordDetails.Section_Content__c ;
                 }
-                if(Recorddetails.New_Page__c !=null){
-                    DocTempsec.New_Page__c = Recorddetails.New_Page__c ;
+                if(recordDetails.New_Page__c !=null){
+                    docTempsec.New_Page__c = recordDetails.New_Page__c ;
                 }
-                if(Recorddetails.Document_Template__c!=null){
-                    DocTempsec.Document_Template__c = Recorddetails.Document_Template__c ;
+                if(recordDetails.Document_Template__c!=null){
+                    docTempsec.Document_Template__c = recordDetails.Document_Template__c ;
                 }
-                if(Recorddetails.Sequence__c!=null){
-                    DocTempsec.Sequence__c = Recorddetails.Sequence__c ;
+                if(recordDetails.Sequence__c!=null){
+                    docTempsec.Sequence__c = recordDetails.Sequence__c ;
                 }
-                if(Recorddetails.Type__c!=null){
-                    DocTempsec.Type__c = Recorddetails.Type__c ;
+                if(recordDetails.Type__c!=null){
+                    docTempsec.Type__c = recordDetails.Type__c ;
                 }                   
-                if(Recorddetails.Document_Clause__c!=null){
-                    DocTempsec.Document_Clause__c = Recorddetails.Document_Clause__c ;
+                if(recordDetails.Document_Clause__c!=null){
+                    docTempsec.Document_Clause__c = recordDetails.Document_Clause__c ;
                 }
-                if(Recorddetails.Section_Details__c!=null){
-                    DocTempsec.Section_Details__c = Recorddetails.Section_Details__c ;
+                if(recordDetails.Section_Details__c!=null){
+                    docTempsec.Section_Details__c = recordDetails.Section_Details__c ;
                 }
-                if(Recorddetails.RuleId__c!=null){
-                    DocTempsec.RuleId__c = Recorddetails.RuleId__c ;
+                if(recordDetails.RuleId__c!=null){
+                    docTempsec.RuleId__c = recordDetails.RuleId__c ;
                 }                
                 
                 List<Document_Template_Section__c> listtobecreated=new List<Document_Template_Section__c>();
-                    listtobecreated.add(DocTempsec);
+                    listtobecreated.add(docTempsec);
                 if (sp1 == null) sp1 = Database.setSavepoint();
                 Database.SaveResult[] urListsave = safe.doInsert(listtobecreated);
                 List<String> errorList2 = Safely.safeClassExceptionHandlerInsert(urListsave);
@@ -140,12 +140,11 @@ public with sharing class SaveDocumentTemplatesection {
                         }
                     } else if (!urListsave.get(i).isSuccess()) {
                         Database.Error error = urListsave.get(i).getErrors().get(0);
-                        String failedDML = error.getMessage();
                     }                    
                 }
                 
                 if(inserteddocId!=null) {
-                    DocTempsec.id=inserteddocId;
+                    docTempsec.id=inserteddocId;
                 }
             }
     
@@ -168,7 +167,7 @@ public with sharing class SaveDocumentTemplatesection {
                 Database.rollback(sp1);
                 throw new SafeClassException(String.join( errorList3, ', ' ));
             }
-            return DocTempsec;
+            return docTempsec;
         }
         catch (Exception ex) {
             LogHandler.createLog((Id) null,'SaveDocumentTemplatesection.saveDocumentTemplateSectionDetails()','Template Id- '+recordIDValue+' '+ex.getLineNumber()+ex.getStackTraceString()+ex.getCause(),ex.getMessage(),'Exception');
@@ -178,13 +177,13 @@ public with sharing class SaveDocumentTemplatesection {
 
     
     @AuraEnabled
-    public static Document_Clause__c ClauseBody(String inputparam){        
-        list<string> arrOfStr = inputparam.split('"');
-        Document_Clause__c DC = new Document_Clause__c();
-        if(inputparam!=null && inputparam!=''){            
-            DC = [select id,Body__c,name from Document_Clause__c where Id =:arrOfStr[1] WITH SECURITY_ENFORCED];            
+    public static Document_Clause__c clauseBody(String inputParam){        
+        list<string> arrOfStr = inputParam.split('"');
+        Document_Clause__c dC = new Document_Clause__c();
+        if(inputParam!=null && inputParam!=''){            
+            dC = [select id,Body__c,name from Document_Clause__c where Id =:arrOfStr[1] WITH SECURITY_ENFORCED];            
         }
-        return DC;      
+        return dC;      
     }
     
     
@@ -249,8 +248,8 @@ public with sharing class SaveDocumentTemplatesection {
  
     @AuraEnabled(cacheable=true)
     public static List<String> getSobjectFields(String selectedObject){
-        SObjectType Docsection = Schema.getGlobalDescribe().get(selectedObject);
-        Map<String,Schema.SObjectField> mfields = Docsection.getDescribe().fields.getMap();
+        SObjectType docsection = Schema.getGlobalDescribe().get(selectedObject);
+        Map<String,Schema.SObjectField> mfields = docsection.getDescribe().fields.getMap();
         
         List<String> sObjectDetailsList = new List<String>();
         for(String s : mfields.keySet()) {
