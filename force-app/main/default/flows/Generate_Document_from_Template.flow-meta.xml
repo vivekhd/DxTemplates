@@ -1,5 +1,35 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Flow xmlns="http://soap.sforce.com/2006/04/metadata">
+    <actionCalls>
+        <description>Configure the Inputs for Template Id, Record Id and Document Name. The PDF will be attachment for the recordId being passed here.</description>
+        <name>Generate_DXTemplate_PDF_based_on_the_Inputs</name>
+        <label>Generate DXTemplate PDF based on the Inputs</label>
+        <locationX>176</locationX>
+        <locationY>134</locationY>
+        <actionName>documentAutomationController</actionName>
+        <actionType>apex</actionType>
+        <flowTransactionModel>CurrentTransaction</flowTransactionModel>
+        <inputParameters>
+            <name>documentName</name>
+            <value>
+                <elementReference>DXTemplates_DocumentName</elementReference>
+            </value>
+        </inputParameters>
+        <inputParameters>
+            <name>recordId</name>
+            <value>
+                <elementReference>DXTemplates_RecordId</elementReference>
+            </value>
+        </inputParameters>
+        <inputParameters>
+            <name>templateId</name>
+            <value>
+                <elementReference>DXTemplate_TemplateId</elementReference>
+            </value>
+        </inputParameters>
+        <nameSegment>documentAutomationController</nameSegment>
+        <versionSegment>1</versionSegment>
+    </actionCalls>
     <apiVersion>58.0</apiVersion>
     <environments>Default</environments>
     <interviewLabel>Generate Document from Template {!$Flow.CurrentDateTime}</interviewLabel>
@@ -26,24 +56,30 @@
     <start>
         <locationX>50</locationX>
         <locationY>0</locationY>
+        <connector>
+            <targetReference>Generate_DXTemplate_PDF_based_on_the_Inputs</targetReference>
+        </connector>
     </start>
     <status>Draft</status>
     <variables>
-        <name>DocumentName</name>
+        <description>Template to be used for the PDF document generation process.</description>
+        <name>DXTemplates_TemplateId</name>
         <dataType>String</dataType>
         <isCollection>false</isCollection>
         <isInput>true</isInput>
         <isOutput>false</isOutput>
     </variables>
     <variables>
-        <name>RecordId</name>
+        <description>Name of the document for the PDF being generated.</description>
+        <name>DXTemplates_DocumentName</name>
         <dataType>String</dataType>
         <isCollection>false</isCollection>
         <isInput>true</isInput>
         <isOutput>false</isOutput>
     </variables>
     <variables>
-        <name>TemplateId</name>
+        <description>Id of the record for which the PDF needs to generated and be attached.</description>
+        <name>DXTemplates_RecordId</name>
         <dataType>String</dataType>
         <isCollection>false</isCollection>
         <isInput>true</isInput>

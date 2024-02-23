@@ -25,8 +25,8 @@ global class PostInstallDataCreation implements InstallHandler {
                 for (Database.SaveResult sr : srList) {
                     if (sr.isSuccess()) {
                         System.debug('Successfully inserted Template with Id: ' + sr.getId());                        
-                        String successBody = 'Hello Team, DxCPQ Template Package Installation was successfull. This mail is for the confirmation purpose.';
-                        statusOfTheInstallation('Post Install Script run was Successfull - DxCPQ Package',successBody,context.installerId());
+                        String successBody = 'Hello Team, DXTemplates  Package Installation was successfull. This mail is for the confirmation purpose.';
+                        statusOfTheInstallation('Post Install Script run was Successfull - DXTemplates Package',successBody,context.installerId());
                     } else {
                         for(Database.Error err : sr.getErrors()) {
                             String errorBody = 'Hello Team, an error occured when creating a Template record through Apex transaction. Please review the following details.' + '\nError Details \nError Status : ' + err.getStatusCode() + '\nError Message : ' + err.getMessage() + '\nError Fields : ' + err.getFields() + '\nError Severity : Minor';
@@ -39,8 +39,8 @@ global class PostInstallDataCreation implements InstallHandler {
                 List<Database.SaveResult> sResult = safe.doInsert(new Document_Template__c[] {newDocTemplate});
                 for(Integer i=0;i<sResult.size();i++){
                     if (sResult.get(i).isSuccess()){
-                        String successBody = 'Hello Team, DxCPQ Template Package Installation was successfull. This mail is for the confirmation purpose.';
-                        statusOfTheInstallation('Post Install Script run was Successfull - DxCPQ Package',successBody,context.installerId());
+                        String successBody = 'Hello Team, DXTemplates Package Installation was successfull. This mail is for the confirmation purpose.';
+                        statusOfTheInstallation('Post Install Script run was Successfull - DXTemplates Package',successBody,context.installerId());
                     }   else if (!sResult.get(i).isSuccess())   {
                         Database.Error err = sResult.get(i).getErrors().get(0);
 
@@ -53,7 +53,7 @@ global class PostInstallDataCreation implements InstallHandler {
         catch(Exception error){
             String errorDetails = '\nCause : ' + error.getCause() + '\nLine Number :' + error.getLineNumber() + '\nError Message :' + error.getMessage() + '\nError Stack : ' + error.getStackTraceString();
             String errorBody = 'Hello Team,\n An error occured while running an Apex transaction. Please review the following error details and contact the Package Manager for more details. \n Error : ' + error + '\nDebug Log :' + errorDetails;
-            statusOfTheInstallation('Error - Post Install Apex Transaction - DxCPQ Template Package',errorBody,context.installerId());            
+            statusOfTheInstallation('Error - Post Install Apex Transaction - DXTemplates Package',errorBody,context.installerId());            
         }
     }
 
@@ -61,7 +61,6 @@ global class PostInstallDataCreation implements InstallHandler {
         String installerEmailAddress = [Select Email from User where Id =: userId WITH SECURITY_ENFORCED].Email;
         Messaging.SingleEmailMessage emailDraft = new Messaging.SingleEmailMessage();
         emailDraft.toAddresses = new String[] { installerEmailAddress };
-        emailDraft.optOutPolicy = 'FILTER';
         emailDraft.subject = mailSubject;
         emailDraft.plainTextBody = messageBody;
         Messaging.SingleEmailMessage[] messages =   new List<Messaging.SingleEmailMessage> {emailDraft};

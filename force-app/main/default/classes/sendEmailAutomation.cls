@@ -6,26 +6,28 @@
 * Last Modified Date: 08/10/2023
 */
 global class sendEmailAutomation implements Queueable,Database.AllowsCallouts{
+   
     String attachmentName;
-    Id documentRecordInserted;
-
     Id attachmentParentId;
-    private static Savepoint sp1;  
-    public static Safely safe = new Safely();
     String emailStructure;
+    Boolean isSpecificToFox;
+    Id documentRecordInserted;
+    private static Savepoint sp1;
+    public static Safely safe = new Safely();
     public class SafeClassException extends Exception {}
 
-    @Deprecated
-    global sendEmailAutomation (Id docInserted, String attachmentName, Id attachmentParentId) { 
+    global sendEmailAutomation(Id docInserted, String attachmentName, Id attachmentParentId) { 
 		this.documentRecordInserted = docInserted;
         this.attachmentName = attachmentName;
         this.attachmentParentId = attachmentParentId;
+        this.isSpecificToFox = false;
     }
     
-    global sendEmailAutomation (Id docInserted, String attachmentName, String emailStructure) {
+    global sendEmailAutomation(Id docInserted, String attachmentName, String emailStructure, Boolean isSpecificToFox) {
 		this.documentRecordInserted = docInserted;
         this.attachmentName = attachmentName;
         this.emailStructure = emailStructure;
+        this.isSpecificToFox = true;
     }
     
     public void execute(QueueableContext context) {
@@ -39,53 +41,48 @@ global class sendEmailAutomation implements Queueable,Database.AllowsCallouts{
             pg.getParameters().put('documentId',documentRecordInserted);
             
             /* Attachment Generation and Insertion of the generated Document to Parent Record */
-            /* 
-            Attachment documentAttachment = new Attachment();
-            documentAttachment.Name = attachmentName;
-            documentAttachment.Body = pg.getContentAsPDF();
-            documentAttachment.IsPrivate = false;
-            Savepoint sp1 = Database.setSavepoint();
+            if(!isSpecificToFox && emailStructure==null){
 
-            Database.SaveResult attachmentDMLStatus = Database.insert(documentAttachment);
-            if (attachmentDMLStatus.isSuccess()) {
-                insertedAttachmentId = attachmentDMLStatus.getId();
-            }
+                Attachment documentAttachment = new Attachment();
+                    documentAttachment.Name = attachmentName;
+                    documentAttachment.ParentId = attachmentParentId; 
+                    documentAttachment.Body = pg.getContentAsPDF();
+                    documentAttachment.IsPrivate = false;
+                Savepoint sp1 = Database.setSavepoint();
 
-            errorList = Safely.safeClassExceptionHandlerInsert(new Database.SaveResult[] {attachmentDMLStatus});
-            if(errorList.size()>0) {
-                Database.rollback(sp1);
-                throw new SafeClassException(String.join( errorList, ', ' ));
-            } */
-            /* if(!Test.isRunningTest()){
-                Attachment objAttachment = new Attachment();
-                objAttachment.parentID = '001IR00001o73KqYAI';
-                objAttachment.Name = 'Automation Document'+System.today()+'.pdf'; 
-                objAttachment.Body = pg.getContentAsPDF();
-                objAttachment.IsPrivate = false;            
-                insert objAttachment;
-            } */
-
-            if(emailStructure != null) {
-                Messaging.EmailFileAttachment attachmentToInsert = new Messaging.EmailFileAttachment();
-                attachmentToInsert.setFileName(attachmentName+'.pdf');
-                attachmentToInsert.setBody(pg.getContentAsPDF()); 
-                
-                documentAutomationController.emailWrapper emailToBeSent = (documentAutomationController.emailWrapper) JSON.deserialize(emailStructure ,documentAutomationController.emailWrapper.class);
-                if(emailToBeSent.contentDocumentIds != null && emailToBeSent.contentFugitiveMap != null){
-                    existingAttachments = ContentDocumentAsAttachement(emailToBeSent.contentDocumentIds,emailToBeSent.contentFugitiveMap);
+                Database.SaveResult attachmentDMLStatus = Database.insert(documentAttachment);
+                if (attachmentDMLStatus.isSuccess()) {
+                    insertedAttachmentId = attachmentDMLStatus.getId();
                 }
-                existingAttachments.add(attachmentToInsert);
+                errorList = Safely.safeClassExceptionHandlerInsert(new Database.SaveResult[] {attachmentDMLStatus});
+                if(errorList.size()>0) {
+                    Database.rollback(sp1);
+                    throw new SafeClassException(String.join( errorList, ', ' ));
+                }
 
-                Messaging.SingleEmailMessage emailContent = new Messaging.SingleEmailMessage();
-                emailContent.setFileAttachments(existingAttachments);
-                emailContent.setToAddresses(emailToBeSent.toAddresses); 
-                emailContent.setCcAddresses(emailToBeSent.toCCAddresses);
-                emailContent.setBccAddresses(emailToBeSent.toBCCAddresses);
-                emailContent.setSubject(emailToBeSent.emailSubject);
-                emailContent.setHTMLBody(emailToBeSent.emailBody);
-                if(emailToBeSent.fromAddress != null) { emailContent.setOrgWideEmailAddressId(emailToBeSent.fromAddress); }
-                if(emailToBeSent.emailTemplateId != null) { emailContent.setTemplateId(emailToBeSent.emailTemplateId); }
-                Messaging.SendEmailResult[] emailSentStatus = Messaging.sendEmail(new List<Messaging.SingleEmailMessage> {emailContent});
+            } else {
+                if(emailStructure != null) {
+                    Messaging.EmailFileAttachment attachmentToInsert = new Messaging.EmailFileAttachment();
+                    attachmentToInsert.setFileName(attachmentName+'.pdf');
+                    attachmentToInsert.setBody(pg.getContentAsPDF()); 
+                    
+                    documentAutomationController.emailWrapper emailToBeSent = (documentAutomationController.emailWrapper) JSON.deserialize(emailStructure ,documentAutomationController.emailWrapper.class);
+                    if(emailToBeSent.contentDocumentIds != null && emailToBeSent.contentFugitiveMap != null){
+                        existingAttachments = ContentDocumentAsAttachement(emailToBeSent.contentDocumentIds,emailToBeSent.contentFugitiveMap);
+                    }
+                    existingAttachments.add(attachmentToInsert);
+
+                    Messaging.SingleEmailMessage emailContent = new Messaging.SingleEmailMessage();
+                    emailContent.setFileAttachments(existingAttachments);
+                    emailContent.setToAddresses(emailToBeSent.toAddresses); 
+                    emailContent.setCcAddresses(emailToBeSent.toCCAddresses);
+                    emailContent.setBccAddresses(emailToBeSent.toBCCAddresses);
+                    emailContent.setSubject(emailToBeSent.emailSubject);
+                    emailContent.setHTMLBody(emailToBeSent.emailBody);
+                    if(emailToBeSent.fromAddress != null) { emailContent.setOrgWideEmailAddressId(emailToBeSent.fromAddress); }
+                    if(emailToBeSent.emailTemplateId != null) { emailContent.setTemplateId(emailToBeSent.emailTemplateId); }
+                    Messaging.SendEmailResult[] emailSentStatus = Messaging.sendEmail(new List<Messaging.SingleEmailMessage> {emailContent});
+                }
             }
         }
         catch(Exception ex) {
