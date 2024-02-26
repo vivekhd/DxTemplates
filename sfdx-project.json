@@ -5,9 +5,8 @@
       "package": "DxTemplates_Unlocked",
       "versionName": "ver 0.1",
       "versionNumber": "0.1.0.NEXT",
-      "default": false,
+      "default": true,
       "versionDescription": "",
-      "postInstallScript": "PostInstallDataCreation",
       "apexTestAccess": {
         "permissionSets": [
           "DX_Template_Access"
@@ -19,7 +18,7 @@
       "package": "DX_Templates",
       "versionName": "ver 0.1",
       "versionNumber": "0.1.2.NEXT",
-      "default": true,
+      "default": false,
       "versionDescription": "",
       "postInstallScript": "PostInstallDataCreation",
       "ancestorVersion": "HIGHEST"
@@ -38,6 +37,7 @@
     "Dx_Templates@0.1.0-2": "04tQm000000O7bRIAS",
     "Dx_Templates@0.1.1-1": "04tQm000000O81FIAS",
     "Dx_Templates@0.1.2-1": "04tQm000000OisjIAC",
-    "Dx_Templates@0.1.2-2": "04tQm000000PKUzIAO"
+    "Dx_Templates@0.1.2-2": "04tQm000000PKUzIAO",
+    "DxTemplates_Unlocked@0.1.0-12": "04tQm000000htyvIAA"
   }
 }
