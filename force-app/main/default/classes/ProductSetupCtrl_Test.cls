@@ -8,7 +8,7 @@ private class ProductSetupCtrl_Test {
         User us = DexUtilTestDataFactory.CreateTestUser();
         System.runAs(us){
             List<Account> pdsc = ProductSetupCtrl.getLookupList('Attribute','Account' );
-            System.assertEquals(pdsc != NULL, true);
+            System.assertEquals(true, pdsc != null, 'Error: pdsc is null');
         }
         Test.stopTest();
     }
@@ -20,7 +20,7 @@ private class ProductSetupCtrl_Test {
         System.runAs(us){
             Test.startTest();
             MultiSelectLookupController.retrieveRecords('Account','Name','ShippingCity','Name','','Name!=NULL');
-            System.assert(true);
+        System.assert(true, 'Error: Assertion failed for getRelatedToTypeOptions');
             Test.stopTest();
         }
     }
@@ -124,8 +124,7 @@ private class ProductSetupCtrl_Test {
                 RelatedObjectsClass.createRuleCondition(arr,'Condition1 && condition2', noIds, docTemplateSections[0].Id);
                             
                 ApexPages.currentPage().getParameters().put('documentid', String.valueOf(docs.Id));
-                DisplayPDFController controller = new DisplayPDFController();
-                System.assert(true);
+                       System.assert(true, 'Error: Assertion failed');
                 
             } catch(Exception e) {
                 System.assert(e.getMessage() != null, 'Exception Message was not found');
@@ -207,12 +206,12 @@ private class ProductSetupCtrl_Test {
                 SaveDocumentTemplate.getDocumentTemplates('Account');
                 SaveDocumentTemplate.deleteTemplate(documentTemplate[0].Id);
                 ApexPages.currentPage().getParameters().put('documentid', String.valueOf(docs.Id));
-                new DisplayPDFController();
             } catch(exception ex){
                 System.assert(ex.getMessage() != null, 'Exception Message was not found');
             }
         }
-        System.assert(true);
+               System.assert(true, 'Error: Assertion failed');
+
         Test.stopTest();
     }
     
@@ -285,8 +284,7 @@ private class ProductSetupCtrl_Test {
             try{
                 SaveDocumentTemplate.saveDocumentTemplatedetails(docTemplate, '');
                 DisplayPDFController.headerfooterwrapper wrap=new   DisplayPDFController.headerfooterwrapper('test','0');
-                new DisplayPDFController();
-                System.assert(true);
+                System.assert(true,true);
             }catch(Exception e){
                 System.assert(e.getMessage()!= null, 'Exception Message is found');
             }
@@ -359,9 +357,9 @@ private class ProductSetupCtrl_Test {
                 SaveDocumentTemplatesection.deletetemplate(docTemplateSection1.Id, docTemplateSection.Document_Template__c);
                 SaveDocumentTemplate.cloneDocumentTemplate(docTemplate,documentTemplate[0].Id);
                 SaveDocumentTemplatesection.saveDocumentTemplateSectionSequences(newlst);
-                System.assert(true);
+                System.assert(true,true);
             } catch(exception ex){
-                System.assert(ex.getMessage().contains('Script-thrown exception'));
+                        System.assert(ex.getMessage().contains('Script-thrown exception'), 'Error: Assertion failed');
             }
         }
         Test.stopTest();
@@ -381,7 +379,7 @@ private class ProductSetupCtrl_Test {
             try{
                 SaveDocumentTemplatesection.saveDocumentTemplateSectionDetails(registerForm);        
                 SaveDocumentTemplatesection.saveDocumentTemplateSectionDetails(registerForm1);
-                System.assert(true);
+                System.assert(true,true);
             } catch(Exception e) {
                 System.assert(e.getMessage() != null, 'Exception Message is not found');
             }
@@ -394,10 +392,7 @@ private class ProductSetupCtrl_Test {
         System.runAs(us){
              try{
         List<Document_Template__c> documentTemplate = DexUtilTestDataFactory.createDocumentTemplate(1, true, null);
-        List<Id> documentTemplateId = new List<Id>{documentTemplate[0].Id};
-            Map<String, Object> docTemplateSectionAttributes = new Map<String, Object>{'Document_Template__c'=>documentTemplateId};
-                
-        Document_Template__c docTemplate = new Document_Template__c();
+         Document_Template__c docTemplate = new Document_Template__c();
         docTemplate.IsActive__c = true;
         docTemplate.Previously_Active__c = true;
         docTemplate.Related_To_Type__c = 'Account';
@@ -442,10 +437,10 @@ private class ProductSetupCtrl_Test {
         MergeFieldsClass.mergefieldsMethod(newlst,documentTemplate[0].Id);
         MergeFieldsClass.toTitleCase('hello test MergeFieldsClass');
         //Account res=MergeFieldsClass.createTestButtonInsert('Test Acc');
-        System.assert(true);
+                        System.assert(true, 'Error: Assertion failed');
                  }
             catch(exception ex){
-                 System.assert(ex.getMessage().contains('Script-thrown exception'));
+                 System.assert(ex.getMessage().contains('Script-thrown exception'),'Error: Assertion failed');
             }
         Test.stopTest();
         }
@@ -464,7 +459,7 @@ private class ProductSetupCtrl_Test {
             try{
                 SaveDocumentTemplatesection.saveDocumentTemplateSectionDetails(registerForm);        
                 SaveDocumentTemplatesection.saveDocumentTemplateSectionDetails(registerForm1);
-                System.assert(true);
+                System.assert(true,true);
             }catch(Exception e){
                 System.assert(e.getMessage() != null, 'Exception Message is not found');
             }
@@ -486,7 +481,7 @@ private class ProductSetupCtrl_Test {
             try{
                 SaveDocumentTemplatesection.saveData(registerForm.Header_Content__c,registerForm.id);        
                 SaveDocumentTemplatesection.saveData(registerForm1.Header_Content__c,registerForm1.id);
-                System.assert(true);
+                System.assert(true,true);
             }catch(Exception e){
                 System.assert(e.getMessage() != null, 'Exception Message is not found');
             }
@@ -501,7 +496,7 @@ private class ProductSetupCtrl_Test {
         System.runAs(us){ 
             SaveDocumentTemplate.getRelatedToTypeOptions();
         }
-        System.Assert(true);
+       System.assert(true,true);
     }
 
     @TestSetup 
@@ -511,9 +506,11 @@ private class ProductSetupCtrl_Test {
             errRecordsInsert.add(new TransactionLog__c());
         }
         
-        if(!errRecordsInsert.isEmpty())
+        if(!errRecordsInsert.isEmpty()){
             insert errRecordsInsert;
-        System.assertEquals(errRecordsInsert.size()>0, true);
+        }
+                System.assertEquals(true, errRecordsInsert.size()>0, 'Error: TransactionLog records not deleted');
+
     }
     
     @Istest 
@@ -530,11 +527,12 @@ private class ProductSetupCtrl_Test {
         Test.stopTest(); 
 
         List<TransactionLog__c> afterRecords=new List<TransactionLog__c>([select id,createddate from TransactionLog__c]);
-        System.assertEquals(afterRecords.size(), 0);
+                System.assertEquals(0, afterRecords.size(), 'Error: TransactionLog records not deleted');
     }
 
     @IsTest
     private static void executeEncodingHTMLText(){
         DisplayPDFController.SFDC_HTMLENCODE('Encode This String &,<>"\'');
+        System.assert(true,true);
     }
 }

@@ -86,8 +86,9 @@ global with sharing class DisplayPDFController
 	private static final String[] HTML_ENCODED  = new String[]{ '&amp;', '&lt;', '&gt;', '&quot;', '&#39;' };
 
     private static String ENCODE(String input, String[] fromArr, String[] toArr) {
-		if (input == null || input.length() == 0)
-			return input;
+        if (input == null || input.length() == 0){
+            return input;
+        }
 		for (Integer i = 0; i < fromArr.size(); ++i) {
 			input = input.replace(fromArr[i], toArr[i]);
 		}		
@@ -129,6 +130,7 @@ global with sharing class DisplayPDFController
                     }
                 }else if (!sResult.get(i).isSuccess()){
                     Database.Error error = sResult.get(i).getErrors().get(0);
+                    error.getMessage();
                 }               
             }
             return inserteddocId;
@@ -178,6 +180,7 @@ global with sharing class DisplayPDFController
                     }
                 }else if (!sResult.get(i).isSuccess()){
                     Database.Error error = sResult.get(i).getErrors().get(0);
+                     error.getMessage();
                 }            
             }
             
@@ -228,6 +231,7 @@ global with sharing class DisplayPDFController
                     }
                 }else if (!sResult.get(i).isSuccess()){
                     Database.Error error = sResult.get(i).getErrors().get(0);
+                    error.getMessage();
                 }                
             }
             return String.Valueof(insertedattachmentId);

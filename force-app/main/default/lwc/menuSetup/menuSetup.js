@@ -1,4 +1,4 @@
-import { LightningElement, track, wire, api } from 'lwc';
+import { LightningElement, track,api } from 'lwc';
 
 
 
@@ -210,7 +210,7 @@ export default class DxCpqMenuSetup extends LightningElement {
         this.dispatchEvent(selectedEvent);
     }
 
-    getHierarchyData(gridData) {
+   /*  getHierarchyData(gridData) {
         this.listArr = [];
         if (this.gridData && this.gridData instanceof Array) {
             this.gridData.forEach(obj => {
@@ -229,7 +229,7 @@ export default class DxCpqMenuSetup extends LightningElement {
                 });
             }
         }
-    }
+    } */
 
     filterData(event) {
         let searchParam = event.target.value;

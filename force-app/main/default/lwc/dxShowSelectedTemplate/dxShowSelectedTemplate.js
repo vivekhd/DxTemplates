@@ -4,8 +4,9 @@ import generateDocument from '@salesforce/apex/DisplayPDFController.generateDocu
 import generatePDFAttachment from '@salesforce/apex/DisplayPDFController.generatePDFAttachment';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 import getAllPopupMessages from '@salesforce/apex/PopUpMessageSelector.getAllConstants';
-import { loadScript, loadStyle } from 'lightning/platformResourceLoader';
+import { loadStyle } from 'lightning/platformResourceLoader';
 import rte_tbl from '@salesforce/resourceUrl/rte_tbl';
+import createLog from '@salesforce/apex/LogHandler.createLog';
 
 export default class DxShowSelectedTemplate extends LightningElement {
     @api showHeader;
@@ -76,11 +77,11 @@ export default class DxShowSelectedTemplate extends LightningElement {
                     {
                         let index;
                         this.showHeader = true;
-                        var seccon= JSON.parse(tempSec.DxCPQ__Section_Content__c);
+                        let seccon= JSON.parse(tempSec.DxCPQ__Section_Content__c);
                         this.headerArr = seccon.sectionsContent;
                         
                         setTimeout(() => {
-                        let allHeaders = this.template.querySelectorAll('[data-indexhead]');
+                       
                         let count =0;
                         let lst =[];
                         lst.push('');
@@ -118,7 +119,7 @@ export default class DxShowSelectedTemplate extends LightningElement {
                     }
                     else if(tempSec.DxCPQ__Type__c=='Footer')
                     {
-                        var seccon= JSON.parse(tempSec.DxCPQ__Section_Content__c);
+                        let seccon= JSON.parse(tempSec.DxCPQ__Section_Content__c);
                         this.showFooter = true;
                         var obj = {};
                         obj.footertext=seccon.footertext;
@@ -159,7 +160,7 @@ export default class DxShowSelectedTemplate extends LightningElement {
                     }
                 })                                
             }
-        }).catch((err) => {
+        }).catch(() => {
             this.isLoaded=false;
         });
     }
@@ -182,6 +183,10 @@ export default class DxShowSelectedTemplate extends LightningElement {
       .then(() => {
       })
       .catch(error => {
+        let tempError = error.toString();
+        let errorMessage = error.message || 'Unknown error message';
+        createLog({recordId:'', className:'dxShowSelectedTemplate LWC Component', exceptionMessage:errorMessage, logData:tempError, logType:'Exception'});
+   
       });
     }
 
@@ -196,7 +201,7 @@ export default class DxShowSelectedTemplate extends LightningElement {
                 this.handleAttachment(result);
             }
             
-        }).catch((err) => {
+        }).catch(() => {
             this.isLoaded2=false;
         });
         
@@ -223,7 +228,10 @@ export default class DxShowSelectedTemplate extends LightningElement {
                     this.isLoaded2=false;
             }
             
-        }).catch((err) => {
+        }).catch(error => {
+            let tempError = error.toString();
+            let errorMessage = error.message || 'Unknown error message';
+            createLog({recordId:'', className:'dxTemplateSetup LWC Component', exceptionMessage:errorMessage, logData:tempError, logType:'Exception'});
         });
     }
 
@@ -235,6 +243,6 @@ export default class DxShowSelectedTemplate extends LightningElement {
     }  
 
     /* Commented by Rahul - not intended in this release */
-    handleClauseContent(event){ } 
+    handleClauseContent(){ } 
 
 }

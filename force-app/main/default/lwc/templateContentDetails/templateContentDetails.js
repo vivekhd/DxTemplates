@@ -1,10 +1,10 @@
-import { LightningElement, track, api, wire } from 'lwc';
+import { LightningElement, track, api } from 'lwc';
 import saveDocumentTemplateSectionDetails from '@salesforce/apex/SaveDocumentTemplatesection.saveDocumentTemplateSectionDetails';
-import ClauseBody from '@salesforce/apex/SaveDocumentTemplatesection.ClauseBody';
+import ClauseBody from '@salesforce/apex/SaveDocumentTemplatesection.clauseBody';
 import deletetemplate from '@salesforce/apex/SaveDocumentTemplatesection.deletetemplate';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 import gettemplatesectiondata from '@salesforce/apex/SaveDocumentTemplatesection.gettemplatesectiondata';
-
+import createLog from '@salesforce/apex/LogHandler.createLog';
 export default class TemplateContentDetails extends LightningElement {
   isLoaded = false;
   showMergeFields = false;
@@ -78,7 +78,7 @@ export default class TemplateContentDetails extends LightningElement {
     this.Recorddetailsnew.Name = event.detail.selectedRecord.recordName;
   }
 
-  updateItemEventHandler(event) {
+  updateItemEventHandler() {
     this.selectedClauseId = undefined;
     this.richtextVal = '';
     this.Recorddetailsnew.Name = '';
@@ -87,14 +87,18 @@ export default class TemplateContentDetails extends LightningElement {
   handleClauseSelection(event) {
     this.clauseId = event.detail.value;
     const clauseIdstring = JSON.stringify(this.clauseId)
-    ClauseBody({ inputparam: clauseIdstring })
+    ClauseBody({ inputParam: clauseIdstring })
       .then(result => {
         if (result != null) {
           this.richtextVal = result.DxCPQ__Body__c;
           this.Recorddetailsnew.Name = result.Name;
         }
       })
-      .catch(error => { })
+      .catch(error => {
+          let tempError = error.toString();
+            let errorMessage = error.message || 'Unknown error message';
+            createLog({recordId:'', className:'templateContentDetails LWC Component', exceptionMessage:errorMessage, logData:tempError, logType:'Exception'});
+       })
   }
 
   @api handleObjectNameSelection(objName) {
@@ -117,7 +121,7 @@ export default class TemplateContentDetails extends LightningElement {
     this.Recorddetailsnew.Name = '';
   }
 
-  handlesectionsave(event) {
+  handlesectionsave() {
     var richtextvalvar = this.richtextVal;
     var mergefieldsfinalList = [];
 
@@ -156,7 +160,7 @@ export default class TemplateContentDetails extends LightningElement {
 
     this.Recorddetailsnew.DxCPQ__Document_Template__c = this.documenttemplaterecord.Id;
     if (this.Recorddetailsnew.Name != '' && this.Recorddetailsnew.Name != null && clauseCheck) {
-      saveDocumentTemplateSectionDetails({ Recorddetails: this.Recorddetailsnew })
+      saveDocumentTemplateSectionDetails({ recordDetails: this.Recorddetailsnew })
         .then(result => {
           if (result != null) {
             this.savedRecordID = result;
@@ -170,7 +174,11 @@ export default class TemplateContentDetails extends LightningElement {
             this.dispatchEvent(firecustomevent);
           }
         })
-        .catch(error => { })
+        .catch(error => { 
+            let tempError = error.toString();
+            let errorMessage = error.message || 'Unknown error message';
+            createLog({recordId:'', className:'templateContentDetails LWC Component', exceptionMessage:errorMessage, logData:tempError, logType:'Exception'});
+        })
       this.clickedfirsttime = true;
     }
     else {
@@ -241,7 +249,7 @@ export default class TemplateContentDetails extends LightningElement {
     this.richtextVal = event.detail.value;
   }
 
-  handlesectionDelete(event) {
+  handlesectionDelete() {
     if (this.sectionrecordid.indexOf('NotSaved') !== -1) {
       var firecustomevent = new CustomEvent('deletesectiondata', { detail: this.sectionrecordid });
       this.dispatchEvent(firecustomevent);
@@ -254,7 +262,11 @@ export default class TemplateContentDetails extends LightningElement {
             this.dispatchEvent(firecustomevent);
           }
         })
-        .catch(error => { })
+        .catch(error => {
+            let tempError = error.toString();
+            let errorMessage = error.message || 'Unknown error message';
+            createLog({recordId:'', className:'templateContentDetails LWC Component', exceptionMessage:errorMessage, logData:tempError, logType:'Exception'});
+         })
     }
   }
 
@@ -326,6 +338,10 @@ export default class TemplateContentDetails extends LightningElement {
       })
       .catch(error => {
         this.isLoaded = false;
+        let tempError = error.toString();
+        let errorMessage = error.message || 'Unknown error message';
+        createLog({recordId:'', className:'dxTemplateSetup LWC Component', exceptionMessage:errorMessage, logData:tempError, logType:'Exception'});
+   
       })
   }
 }

@@ -19,84 +19,74 @@ private inherited sharing class CanTheUser_Tests {
     
     @isTest
     static void canCrudCreateDocumentPositive() {
-        System.assertEquals(
-            CanTheUser.create('Document__c'),true
-        );
+        System.assertEquals(true, CanTheUser.create('Document__c'), 'Assertion failed: CanTheUser.create(\'Document__c\') should return true');
+
     }
     
     @isTest
     static void canCrudCreateDocumentListPositive() {
         List<Sobject> listDoc = new List<Sobject> {new Document__c()};
-		System.assertEquals(
-           CanTheUser.create(listDoc),true
-        );
+         System.assertEquals(true, CanTheUser.create(listDoc), 'Assertion failed: CanTheUser.create(listDoc) should return true');
+
     }
     
     @isTest
     static void canCrudReadDocumentPositive() {
-        System.assertEquals(
-            CanTheUser.read('Document__c'),true
-        );
+      
+        System.assertEquals(true, CanTheUser.read('Document__c'), 'Assertion failed: CanTheUser.read(\'Document__c\') should return true');
+
     }
     
    	@isTest
     static void canCrudEditDocumentListPositive() {
         List<Sobject> listDoc = new List<Sobject> {new Document__c()};
-		System.assertEquals(
-           CanTheUser.edit(listDoc),true
-        );
+         System.assertEquals(true, CanTheUser.edit(listDoc), 'Assertion failed: CanTheUser.edit(listDoc) should return true');
+
     }
     
     @isTest
     static void canCrudEditDocumentPositive() {
-        System.assertEquals(
-            CanTheUser.edit('Document__c'),true
-        );
+        System.assertEquals(true, CanTheUser.edit('Document__c'), 'Assertion failed: CanTheUser.edit(\'Document__c\') should return true');
+
+        
     }
     
     @isTest
     static void canCrudUpsDocumentListPositive() {
         List<Sobject> listDoc = new List<Sobject> {new Document__c()};
-		System.assertEquals(
-           CanTheUser.ups(listDoc),false
-        );
+         System.assertEquals(false, CanTheUser.ups(listDoc), 'Assertion failed: CanTheUser.ups(\'Document__c\') should return true');
+
     }
     
     @isTest
     static void canCrudUpsDocumentPositive() {
-        System.assertEquals(
-            CanTheUser.ups(new Document__c()),false
-        );
+        System.assertEquals(false, CanTheUser.ups(new Document__c()), 'Assertion failed: CanTheUser.ups(\'Document__c\') should return true');
+
     }
     
     @isTest
     static void canCrudUpsDocumentPositive1() {
-        System.assertEquals(
-            CanTheUser.ups('Document__c'),false
-        );
+        System.assertEquals(false, CanTheUser.ups('Document__c'), 'Assertion failed: CanTheUser.ups(\'Document__c\') should return true');
+
     }
     
     @isTest
     static void canCrudReadDocumentListPositive() {
         List<Sobject> listDoc = new List<Sobject> {new Document__c()};
-		System.assertEquals(
-           CanTheUser.read(listDoc),true
-        );
+            System.assertEquals(true, CanTheUser.read(listDoc), 'Assertion failed: CanTheUser.read(listDoc) should return true');
+
     }
     
     @isTest
     static void canCrudDestroyDocumentListPositive() {
         List<Sobject> listDoc = new List<Sobject> {new Document__c()};
-		System.assertEquals(
-           CanTheUser.destroy(listDoc),true
-        );
+        System.assertEquals(true, CanTheUser.destroy(listDoc), 'Assertion failed: CanTheUser.destroy(listDoc) should return true');
+
     }
     
     @isTest
     static void canCrudDestroyDocumentPositive() {
-        System.assertEquals(
-            CanTheUser.destroy('Document__c'),true
-        );
+        System.assertEquals(true, CanTheUser.destroy('Document__c'), 'Assertion failed: CanTheUser.destroy(\'Document__c\') should return true');
     }
 
     @isTest
@@ -171,33 +161,28 @@ private inherited sharing class CanTheUser_Tests {
     @isTest
     static void canCrudEditorDocumentPositive() {
         List<SObject> arr = new List<SObject> {new Document__c()};
-        System.assertEquals(
-            CanTheUser.crud(arr,CanTheUser.CrudType.DEL),true
-        );
+        System.assertEquals(true, CanTheUser.crud(arr, CanTheUser.CrudType.DEL), 'Expected CRUD operation to return true');
+
     }
     
     @isTest
     static void canFLSDocumentPositive() {
-        System.assertEquals(
-            CanTheUser.flsAccessible('Document__c','Id'),false
-        );
+        System.assertEquals(false, CanTheUser.flsAccessible('Document__c','Id'), 'Expected field-level security check to return false');
     }
     
     @isTest
     static void canFLScheckDocumentPositive() {
         Set<String> arr = new Set<String> {'Id','CreatedDate'};
         Map<String,Boolean> arrMap = new Map<String,Boolean> {'CreatedDate'=>false, 'Id'=>false};
-        System.assertEquals(
-            CanTheUser.bulkFLSAccessible('Document__c',arr),arrMap
-        );
+       System.assertEquals(arrMap, CanTheUser.bulkFLSAccessible('Document__c', arr), 'Expected bulk field-level security check to match map');
+
     }
     
     @isTest
     static void canBULKFLScheckDocumentPositive() {
         Set<String> arr = new Set<String> {'Id','CreatedDate'};
         Map<String,Boolean> arrMap = new Map<String,Boolean> {'CreatedDate'=>false, 'Id'=>false};
-        System.assertEquals(
-            CanTheUser.bulkFLSUpdatable('Document__c',arr),arrMap
-        );
+        System.assertEquals(arrMap, CanTheUser.bulkFLSUpdatable('Document__c', arr), 'Expected bulk field-level security update check to match map');
+
     }    
 }

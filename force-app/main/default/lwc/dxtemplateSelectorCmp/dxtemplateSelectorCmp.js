@@ -2,10 +2,11 @@ import {api, LightningElement, track, wire } from 'lwc';
 import {loadStyle } from 'lightning/platformResourceLoader';
 import dexcpqcartstylesCSS from '@salesforce/resourceUrl/dexcpqcartstyles';
 import rte_tbl from '@salesforce/resourceUrl/rte_tbl';
-import SavePDFtoQuote from '@salesforce/apex/DisplayPDFController.SavePDFtoQuote';
+import SavePDFtoQuote from '@salesforce/apex/DisplayPDFController.savePDFtoQuote';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 import { CurrentPageReference } from 'lightning/navigation';
 import { NavigationMixin } from 'lightning/navigation';
+import createLog from '@salesforce/apex/LogHandler.createLog';
 
 export default class DxtemplateSelectorCmp extends NavigationMixin(LightningElement) {
 
@@ -73,7 +74,7 @@ export default class DxtemplateSelectorCmp extends NavigationMixin(LightningElem
         }
     }
 
-    updateItemEventHandler(event) {
+    updateItemEventHandler() {
         this.selectedTemplateId = undefined;
         this.showTemplate = false;
         this.showpreviewbutton = false;
@@ -85,6 +86,7 @@ export default class DxtemplateSelectorCmp extends NavigationMixin(LightningElem
 
     closeModal() {
         this.showModal = false;
+        this.showSendEmailModal = false;
     }
 
     handlePDF() {
@@ -118,7 +120,7 @@ export default class DxtemplateSelectorCmp extends NavigationMixin(LightningElem
                 this.showsavepdftoquote = false;
                 this.showsendemail = true;
             })
-            .catch((err) => {
+            .catch(() => {
                 const event4 = new ShowToastEvent({
                     title: 'Error',
                     message: `An Error occurred while saving the PDF document. Please contact the System Administrator.`,
@@ -139,6 +141,9 @@ export default class DxtemplateSelectorCmp extends NavigationMixin(LightningElem
             ]).then(() => {
             })
             .catch(error => {
+                  let tempError = error.toString();
+            let errorMessage = error.message || 'Unknown error message';
+            createLog({recordId:'', className:'dxtemplateSelectorCmp LWC Component', exceptionMessage:errorMessage, logData:tempError, logType:'Exception'});
             });
     }
 
@@ -158,7 +163,7 @@ export default class DxtemplateSelectorCmp extends NavigationMixin(LightningElem
     }
 
     // Modified by Rahul
-    handleBacktoQuote(event) {
+    handleBacktoQuote() {
         //history.back();
         this[NavigationMixin.Navigate]({
             type: 'standard__recordPage',
@@ -170,15 +175,11 @@ export default class DxtemplateSelectorCmp extends NavigationMixin(LightningElem
         });
     }
 
-    showSendEmailMethod(event) {
+    showSendEmailMethod() {
         this.showSendEmailModal = true;
     }
 
     submitDetails() {
-        this.showSendEmailModal = false;
-    }
-
-    closeModal() {
         this.showSendEmailModal = false;
     }
 

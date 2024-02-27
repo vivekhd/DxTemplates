@@ -1,4 +1,4 @@
-import { LightningElement, wire, api, track } from 'lwc';
+import { LightningElement,  api, track } from 'lwc';
 import getsectionData from '@salesforce/apex/DisplayRelatedObjects.getsectionData';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 import createLog from '@salesforce/apex/LogHandler.createLog';
@@ -74,12 +74,12 @@ export default class DisplayRelatedObjectsData extends LightningElement {
                         rowData.rownumber = 'row' + index;
                         if (element.type == "Record") {
                             rowData.rowType = 'Record';
-                            var records = element.values;
+                            let records = element.values;
                             if (this.showslno) {
                                 records.unshift(this.slno);
                                 this.slno = this.slno + 1;
                             }
-                            var cellList = [];
+                            let cellList = [];
                             for (let i in records) {
                                 if (i % 2 == 0 && this.showslno == true) {
                                     let cellData = this.handleCellCreation(records, i);                                    
@@ -96,8 +96,8 @@ export default class DisplayRelatedObjectsData extends LightningElement {
                         else if (element.type == "Category") {
                             rowData.rowType = 'Category';
 
-                            var records = element.values;
-                            var cellList = [];
+                            let records = element.values;
+                            let cellList = [];
                             const cellData = new Object();
                             this.slno = 1;
                             cellData.colspan = this.tableheaders.length;
@@ -112,9 +112,9 @@ export default class DisplayRelatedObjectsData extends LightningElement {
                         else if (element.type == "Total" || element.type == "SubTotal") {
                             rowData.rowType = 'Totals';
 
-                            var records = element.values;
+                            let records = element.values;
                             this.subtotalVal.push(records);
-                            var cellList = [];
+                            let cellList = [];
                             var countEmpty = 0;
                             var span = 0;
 
@@ -201,8 +201,8 @@ export default class DisplayRelatedObjectsData extends LightningElement {
             .catch(error => {
                 this.showSpinner = false;               
                 let tempError = error.toString();
-                createLog({recordId:this.templatesectionid, className:'displayRelatedObjectsData LWC Component', exceptionMessage:error.message, LogData:tempError, logType:'Exception'})
-                .then(result => {console.log('Log is generated');})
+                createLog({recordId:this.templatesectionid, className:'displayRelatedObjectsData LWC Component', exceptionMessage:error.message, logData:tempError, logType:'Exception'})
+                .then(result => {console.log('Log is generated',result);})
                 .catch(error => {console.log('Log is not generated ' + JSON.stringify(error));})
 
                 if (error.exceptionType == "System.NullPointerException" && error.message.includes('Cannot read values of null')) {
@@ -303,14 +303,15 @@ export default class DisplayRelatedObjectsData extends LightningElement {
             var dateFormatted = '';
             var timeFormatted = '';
             var time;
-
+            var numDateFormat;
+            var dateFormatSep;
             if(dateFormatStr.includes('*')){
-                var numDateFormat = Number(dateFormatStr.substring(0, dateFormatStr.length - 2));
-                var dateFormatSep = dateFormatStr.charAt(dateFormatStr.length - 2);
+                 numDateFormat = Number(dateFormatStr.substring(0, dateFormatStr.length - 2));
+                 dateFormatSep = dateFormatStr.charAt(dateFormatStr.length - 2);
             }
             else{
-                var numDateFormat = Number(dateFormatStr.substring(0, dateFormatStr.length - 1));
-                var dateFormatSep = dateFormatStr.charAt(dateFormatStr.length - 1);
+                 numDateFormat = Number(dateFormatStr.substring(0, dateFormatStr.length - 1));
+                 dateFormatSep = dateFormatStr.charAt(dateFormatStr.length - 1);
             }  
 
             while (numDateFormat > 0) {

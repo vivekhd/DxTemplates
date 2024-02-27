@@ -58,7 +58,7 @@ export default class DxCpqConditionRowcmp extends LightningElement {
     }
 
 
-    addNewConditionRowHandler(event){        
+    addNewConditionRowHandler(){        
         const addNewRowEvent = new CustomEvent('addnewrow', { detail: {index: this.row._index}, bubbles: true, composed : true });
         this.dispatchEvent(addNewRowEvent);
     }
@@ -111,7 +111,7 @@ export default class DxCpqConditionRowcmp extends LightningElement {
         this.dispatchEvent(changeEvent);
     }
 
-    deleteConditionRowHandler(event){
+    deleteConditionRowHandler(){
         const deleteRowEvent = new CustomEvent('deleterow', { detail: {index: this.row._index}, bubbles: true, composed : true });
         this.dispatchEvent(deleteRowEvent);
         
@@ -254,7 +254,7 @@ export default class DxCpqConditionRowcmp extends LightningElement {
 
 
     //lookup creation
-    handleClick(event) {
+    handleClick() {
         let changeEvent = new CustomEvent('dxcpqconditionchange', {
             detail: [   
                         { index: this.row._index, fieldName: 'lookupDetailsinputClass', value: 'slds-has-focus' },
@@ -278,7 +278,7 @@ export default class DxCpqConditionRowcmp extends LightningElement {
         this.dispatchEvent(changeEvent);   
     }
 
-    handleRemovePill(event) {
+    handleRemovePill() {
         let changeEvent = new CustomEvent('dxcpqconditionchange', {
             detail: [   
                         { index: this.row._index, fieldName: 'lookupDetailsisValueSelected', value: false },
@@ -293,7 +293,7 @@ export default class DxCpqConditionRowcmp extends LightningElement {
         
     }
 
-    addNewGroupHandler(event){        
+    addNewGroupHandler(){        
         let action;
         let disableAction;
         if (this.row.selectedGlobalValue === 'allConditionsAreMet') {

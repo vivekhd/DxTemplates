@@ -195,7 +195,7 @@ const createRuleConditionHierarcy=(ruleExpression, ruleConditionsMap, fieldWrap 
 
 
     const createListOfConditions=(arrayList)=>{
-        listOfExistingConditions=[];
+      listOfExistingConditions=[];
         let list = [];
         if (arrayList instanceof Array && arrayList.length>0) {
             arrayList.forEach(obj => {

@@ -1,8 +1,8 @@
-/* Class			: DisplayRelatedObjects
+/** Class			: DisplayRelatedObjects
 * Developer			:          
 * Created Date		: 05/01/2023
-* Description		: This class creates the data-wrapper require for the pdf generation. This class performs the dataquery, numerical calculation on QLIs, gathers the ConfigAttributes thereby passing it to the VF Page.
-The associated test class is in SectionSetupCtrl_Test
+* @description		: This class creates the data-wrapper require for the pdf generation. This class performs the dataquery, numerical calculation on QLIs, gathers the ConfigAttributes thereby passing it to the VF Page.
+* The associated test class is in SectionSetupCtrl_Test
 * Last Modified Date: 15/02/2023
 */
 public with sharing class DisplayRelatedObjects {    
@@ -13,6 +13,12 @@ public with sharing class DisplayRelatedObjects {
     public static Id currTemplate;
     public static String rOHtmlContent = '<tbody>';
     
+    /**
+     * @description Retrieves section data based on record ID and template section ID
+     * @param recordid String ID of the record
+     * @param templatesectionid String ID of the template section
+     * @return  String JSON serialized data
+     */
     @AuraEnabled
     public static string getsectionData(String recordid,String templatesectionid){
         currTemplate = templatesectionid;
@@ -261,7 +267,14 @@ public with sharing class DisplayRelatedObjects {
         return '';
     }
     
+    /** Class   : Wrapper
+ 	* @description : This class represents a wrapper containing data for PDF generation.
+ 	*/
     public class Wrapper{
+        
+		/**
+		* @description the values (cells) making up this row
+		*/
         public List<RowWrapper> rowWrapperList;
         public List<String> headers;
         public Boolean newPage;
@@ -291,23 +304,41 @@ public with sharing class DisplayRelatedObjects {
         public String chartLabel;
     }
     
-    
+    /** Class      : RowWrapper
+ 	* @description : This class represents a wrapper for a row of data, containing cells.
+ 	*/  
     public class RowWrapper{
-        // the values (cells) making up this row
+        
+        /**
+		* @description the values (cells) making up this row
+		*/
         public List<Object> values;
         public String type;
         
         // constructor
+		/**
+ 		* @description : constructor of RowWrapper
+ 		*/ 
         public RowWrapper(){
             values=new List<object>();
         }
         
-        // append a value (cell) to the row
+        
+         /** 
+		 * @description : append a value (cell) to the row 
+		 * @param value
+		 */ 
         public void addValue(Object value){
             values.add(value);
         }
     }
     
+    /**
+     * @description Retrieves the field type mapping for the specified object and field list.
+     * @param objName    The API name of the object.
+     * @param fieldList  The list of field names.
+     * @return           A map containing field names as keys and their corresponding data types as values.
+     */
     public static Map<String,String> getObjectFieldTypeMap(String objName, List<String> fieldList){
         Map<String,String> fieldNameType = new Map<String,String>();
         try {
@@ -345,7 +376,12 @@ public with sharing class DisplayRelatedObjects {
         }
         return fieldNameType;
     }
-    
+    /**
+     * @description Retrieves the API name of the lookup object for the specified lookup field on the given object.
+     * @param fromObjName  The API name of the object containing the lookup field.
+     * @param lkpField     The API name of the lookup field.
+     * @return             The API name of the related object.
+     */
     public static string getLkpObjectApi(String fromObjName, String lkpField){
         try{
             
@@ -360,7 +396,14 @@ public with sharing class DisplayRelatedObjects {
         }
         return '';
     }
-    
+   
+    /**
+     * @description Creates a RowWrapper object containing data from the specified fields of the given record.
+     * @param fieldsObjList   The list of fields to include in the RowWrapper.
+     * @param currRecord      The record from which to retrieve the field values.
+     * @param fieldNameType   A map containing field names and their corresponding data types.
+     * @return                The RowWrapper object containing the record data.
+     */
     public Static RowWrapper recordDataWrapperCreation(List<Object> fieldsObjList, Sobject currRecord, Map<String,String> fieldNameType){
         RowWrapper recType = new RowWrapper();
         recType.type='Record';

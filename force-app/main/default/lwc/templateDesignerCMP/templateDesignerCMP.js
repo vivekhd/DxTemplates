@@ -5,10 +5,11 @@ import saveDocumentTemplateSectionSequences from '@salesforce/apex/SaveDocumentT
 import getAllDocumentTemplateSections from '@salesforce/apex/SaveDocumentTemplatesection.getAllDocumentTemplateSections';
 import activateTemplate from '@salesforce/apex/SaveDocumentTemplate.activateTemplate';
 import deleteTemplate from '@salesforce/apex/SaveDocumentTemplate.deleteTemplate';
-import { loadScript, loadStyle } from 'lightning/platformResourceLoader';
+import { loadStyle } from 'lightning/platformResourceLoader';
 import dxQuoteTemplate from '@salesforce/resourceUrl/dxQuoteTemplate';
 import dexcpqcartstylesCSS from '@salesforce/resourceUrl/dexcpqcartstyles';
 import getAllPopupMessages from '@salesforce/apex/PopUpMessageSelector.getAllConstants';
+import createLog from '@salesforce/apex/LogHandler.createLog';
 
 export default class TemplateDesignerCMP extends NavigationMixin(LightningElement) {
   @api recordId;
@@ -250,12 +251,12 @@ export default class TemplateDesignerCMP extends NavigationMixin(LightningElemen
     if (this.showPreview == false) { this.showPreview = true; }
   }
 
-  handledeletesectiondata(event) {
+  handledeletesectiondata() {
     this.isconnectedcalledondeletion = true;
     this.connectedCallback();
   }
 
-  handleHeaderClick(event) {
+  handleHeaderClick() {
     const elm = this.template.querySelector(`[data-id="${this.header.Id}"]`);
     elm.classList.add("active");
     this.sections.forEach((loopvar, index) => {
@@ -267,7 +268,7 @@ export default class TemplateDesignerCMP extends NavigationMixin(LightningElemen
     this.displaysectionbasedontype(this.header.Id, this.header.Type);
   }
 
-  handleFooterClick(event) {
+  handleFooterClick() {
     const elm = this.template.querySelector(`[data-id="${this.footer.Id}"]`);
     elm.classList.add("active");
     this.sections.forEach((loopvar, index) => {
@@ -489,6 +490,10 @@ export default class TemplateDesignerCMP extends NavigationMixin(LightningElemen
 
         })
         .catch(error => {
+            let tempError = error.toString();
+            let errorMessage = error.message || 'Unknown error message';
+            createLog({recordId:'', className:'templateDesignerCMP LWC Component', exceptionMessage:errorMessage, logData:tempError, logType:'Exception'});
+
           this.isLoaded2 = false;
         })
     } else if (this.isconnectedcalledonLoad == true) {
@@ -531,7 +536,7 @@ export default class TemplateDesignerCMP extends NavigationMixin(LightningElemen
     }
   }
 
-  handleActiveTemplate(event) {
+  handleActiveTemplate() {
     let isActive;
 
     if (this.activateTemplateLabel == 'Activate Template') {
@@ -561,7 +566,12 @@ export default class TemplateDesignerCMP extends NavigationMixin(LightningElemen
       if (result != null) {
         this.disableEditing = result.DxCPQ__Previously_Active__c;
       }
-    }).catch(error => {  })
+    }).catch(error => {
+            let tempError = error.toString();
+            let errorMessage = error.message || 'Unknown error message';
+            createLog({recordId:'', className:'templateDesignerCMP LWC Component', exceptionMessage:errorMessage, logData:tempError, logType:'Exception'});
+
+      })
   }
 
   disableEditingHandler(isActive) {
@@ -571,7 +581,7 @@ export default class TemplateDesignerCMP extends NavigationMixin(LightningElemen
     this.template.querySelector('c-template-footer').handleActivateTemplate(isActive, this.relatedtoTypeObjName);
   }
 
-  handleCloneTemplate(event) {
+  handleCloneTemplate() {
     this.showAddNewTemplate = false;
     this.editTemplate = false;
     this.showDeleteTemplate = false;
@@ -639,7 +649,7 @@ export default class TemplateDesignerCMP extends NavigationMixin(LightningElemen
     this.template.querySelector('c-modal').show();
   }
 
-  handleRefreshTemplateHandler(event) {
+  handleRefreshTemplateHandler() {
     setTimeout(() => {
       eval("$A.get('e.force:refreshView').fire();");
     }, 100);
@@ -651,7 +661,7 @@ export default class TemplateDesignerCMP extends NavigationMixin(LightningElemen
     this.templatename = this.doctemplatedetails.Name;
   }
 
-  updateItemEventHandler(event) {
+  updateItemEventHandler() {
     this.previewRecordId = undefined;
   }
 
@@ -703,7 +713,12 @@ export default class TemplateDesignerCMP extends NavigationMixin(LightningElemen
       });
       this.dispatchEvent(delEvt);
       this.template.querySelector('c-modal').hide();
-    }).catch(error => {  })
+    }).catch(error => { 
+      let tempError = error.toString();
+            let errorMessage = error.message || 'Unknown error message';
+            createLog({recordId:'', className:'templateDesignerCMP LWC Component', exceptionMessage:errorMessage, logData:tempError, logType:'Exception'});
+
+     })
   }
 
   renderedCallback() {
@@ -713,12 +728,16 @@ export default class TemplateDesignerCMP extends NavigationMixin(LightningElemen
       loadStyle(this, dexcpqcartstylesCSS),
     ])
       .then(() => { })
-      .catch(error => { });
+      .catch(error => {
+        let tempError = error.toString();
+            let errorMessage = error.message || 'Unknown error message';
+            createLog({recordId:'', className:'templateDesignerCMP LWC Component', exceptionMessage:errorMessage, logData:tempError, logType:'Exception'});
+
+       });
   }
 
   handleSubmit() {
     var allRecords = [];
-    let data = this.sections;
     this.sections.forEach(function (val) {
       var Recorddetails = { Name: '', DxCPQ__Sequence__c: 0, DxCPQ__Type__c: '', Id: '' };
       Recorddetails.Id = val.Id;
@@ -732,7 +751,12 @@ export default class TemplateDesignerCMP extends NavigationMixin(LightningElemen
       .then(result => {
         if (result != null) { this.isLoaded = false; }
       })
-      .catch(error => { this.isLoaded = false; })
+      .catch(error => { 
+        let tempError = error.toString();
+            let errorMessage = error.message || 'Unknown error message';
+            createLog({recordId:'', className:'templateDesignerCMP LWC Component', exceptionMessage:errorMessage, logData:tempError, logType:'Exception'});
+
+        this.isLoaded = false; })
   }
 
   processRowNumbers() {

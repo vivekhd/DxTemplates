@@ -1,4 +1,20 @@
+/**
+* Class			    : MergeFieldsClass
+* Developer			: 
+* Created Date		: 
+* @description  	: Apex class for handling merge fields in document templates.
+ *              Provides methods for merging fields based on a specified record and object,
+ *              transforming text to title case, and retrieving available fields for a given object.
+* Last Modified Date: 
+*/
 public with sharing class MergeFieldsClass {
+
+	/**
+     * @description Merges fields in the document template content based on the specified record and object.
+     * @param selectedTemplateContents List of Document_Template_Section__c objects representing template sections.
+     * @param recordId Id of the target record for merging fields.
+     * @return List<Document_Template_Section__c> List of template sections with merged fields.
+     */
     public static List<Document_Template_Section__c> mergefieldsMethod(List<Document_Template_Section__c> selectedTemplateContents, Id recordId) {   
         try{
             String objectName = recordId.getSObjectType().getDescribe().getName();
@@ -76,6 +92,11 @@ public with sharing class MergeFieldsClass {
         return selectedTemplateContents;
     }
     
+	 /**
+     * @description Converts a given phrase to title case.
+     * @param phrase String representing the input phrase.
+     * @return String Title-cased version of the input phrase.
+     */
     public static String toTitleCase(String phrase){
         String titlePhrase = '';
         try{
@@ -96,6 +117,11 @@ public with sharing class MergeFieldsClass {
         return titlePhrase.trim();
     }
     
+	/**
+     * @description Retrieves a list of available fields for a given object.
+     * @param selectedObject String representing the API name of the target Salesforce object.
+     * @return List<FieldWrap> List of FieldWrap objects containing details of available fields.
+     */
     @AuraEnabled
     public static List<FieldWrap> getFields(String selectedObject){
         Map<String, Schema.SObjectType> gd = Schema.getGlobalDescribe(); 
@@ -136,18 +162,53 @@ public with sharing class MergeFieldsClass {
         return strList;    
     }
     
+	/**
+     * @description Inner class representing the structure of a field.
+     *              Contains fields for the field name, API name, data type, values (for picklists),
+     *              related object name (for reference fields), and relationship name.
+     */
     public class FieldWrap{
+       /**
+         * @description Represents the name or label associated with a field.
+         *              Used for displaying a human-readable identifier for the field.
+         */
         @AuraEnabled
-        public String name{get;set;}
+        public String name { get; set; }
+        
+        /**
+         * @description Represents the API name of a field.
+         *              Used for programmatic identification and reference to the field in Apex and API calls.
+         */
         @AuraEnabled
-        public String apiName{get;set;}
+        public String apiName { get; set; }
+        
+        /**
+         * @description Represents the data type of a field.
+         *              Used for specifying the type of data that can be stored in the field.
+         */
         @AuraEnabled
-        public String dataType{get;set;}
+        public String dataType { get; set; }
+        
+        /**
+         * @description Represents a list of values associated with a field, particularly applicable for picklist fields.
+         *              Used for displaying and managing the available values for selection in the user interface.
+         */
         @AuraEnabled
-        public List<String> values{get;set;}
+        public List<String> values { get; set; }
+        
+        /**
+         * @description Represents the API name of the Salesforce object to which the field belongs.
+         *              Used for identifying the parent object of the field.
+         */
         @AuraEnabled
-        public String sObjectName{get;set;}
+        public String sObjectName { get; set; }
+        
+        /**
+         * @description Represents the relationship name of the field if it is a reference (lookup) field.
+         *              Used for identifying the relationship between objects.
+         */
         @AuraEnabled
-        public String relationshipName{get;set;}
+        public String relationshipName { get; set; }
+
     }    
 }

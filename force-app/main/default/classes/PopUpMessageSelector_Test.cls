@@ -6,8 +6,7 @@ private class PopUpMessageSelector_Test {
             User us = DexUtilTestDataFactory.CreateTestUser();
             System.runAs(us){
                 PopUpMessageSelector.getAllConstants();
-                System.assert(true);
-            }
+                                        System.assert(true, 'Error: Assertion failed');            }
             Test.stopTest();
         }
 }

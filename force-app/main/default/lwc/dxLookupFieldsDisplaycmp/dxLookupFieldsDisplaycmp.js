@@ -30,8 +30,7 @@ export default class DxLookupFieldsDisplaycmp extends LightningElement {
                         this.showLstOfObj = true;
                     }
                 }
-            }).catch(error => {
-                console.log('Error in LWC_dxLookupFieldsDisplayCMP' + JSON.stringify(error));
+            }).catch(() => {
             })
     }
 
@@ -65,7 +64,7 @@ export default class DxLookupFieldsDisplaycmp extends LightningElement {
                                     tempObj.uKey = (new Date()).getTime() + ":" + index;
                                     this.lstOfObjects.push(tempObj);
                                 }
-                            }).catch(error => {
+                            }).catch(() => {
                             })
                         } else {
                             let tempstr;

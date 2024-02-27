@@ -2,7 +2,7 @@ import { LightningElement, track, wire, api } from 'lwc';
 import getDocumentTemplates from '@salesforce/apex/SaveDocumentTemplate.getDocumentTemplates';
 import createDocumentTemplate from '@salesforce/apex/SaveDocumentTemplate.createDocumentTemplate';
 import getRelatedToTypeOptions from '@salesforce/apex/SaveDocumentTemplate.getRelatedToTypeOptions';
-
+import createLog from '@salesforce/apex/LogHandler.createLog';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 import getAllPopupMessages from '@salesforce/apex/PopUpMessageSelector.getAllConstants';
 
@@ -50,6 +50,9 @@ export default class DxTemplateSetup extends LightningElement {
                 }
             })
             .catch(error => {
+                  let tempError = error.toString();
+            let errorMessage = error.message || 'Unknown error message';
+            createLog({recordId:'', className:'dxTemplateSetup LWC Component', exceptionMessage:errorMessage, logData:tempError, logType:'Exception'});
             })
 
     }
@@ -74,6 +77,9 @@ export default class DxTemplateSetup extends LightningElement {
             }
         })
         .catch(error => {
+              let tempError = error.toString();
+            let errorMessage = error.message || 'Unknown error message';
+            createLog({recordId:'', className:'dxTemplateSetup LWC Component', exceptionMessage:errorMessage, logData:tempError, logType:'Exception'});
         })
     }
 
@@ -201,6 +207,10 @@ export default class DxTemplateSetup extends LightningElement {
                 this.template.querySelector('c-modal').hide();
             }
         }).catch(error => {
+            let tempError = error.toString();
+            let errorMessage = error.message || 'Unknown error message';
+            createLog({recordId:'', className:'dxTemplateSetup LWC Component', exceptionMessage:errorMessage, logData:tempError, logType:'Exception'});
+       
 
         })
     }

@@ -1,5 +1,5 @@
-import { LightningElement, track, api, wire } from 'lwc';
-import { loadScript,loadStyle } from 'lightning/platformResourceLoader';
+import { LightningElement, track, api} from 'lwc';
+import {loadStyle } from 'lightning/platformResourceLoader';
 import { createRuleConditionHierarcy } from 'c/conditionUtil';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 import rte_tbl from '@salesforce/resourceUrl/rte_tbl';
@@ -14,6 +14,7 @@ import getSObjectListFiltering from '@salesforce/apex/RelatedObjectsClass.getSOb
 import gettemplatesectiondata from '@salesforce/apex/SaveDocumentTemplatesection.gettemplatesectiondata';
 import resetRulesForTemplate from '@salesforce/apex/RelatedObjectsClass.handleTemplateRuleResetCondition';
 import saveDocumentTemplateSectionDetails from '@salesforce/apex/SaveDocumentTemplatesection.saveDocumentTemplateSectionDetails';
+import createLog from '@salesforce/apex/LogHandler.createLog';
 
 export default class TemplateRelatedObjects extends LightningElement {
 
@@ -79,11 +80,9 @@ export default class TemplateRelatedObjects extends LightningElement {
     ruleExpression;
     ruleConditions = [];
     mapOfRC;
-    conditionsArr;
     lstofactualConditions;
     conditionExists = false;
     allConditions = [];
-    listOfExistingConditions = [];
     ruleIdCreated = '';
     ruleExists = false;
     hasSpecialCharacter = false;
@@ -412,7 +411,11 @@ export default class TemplateRelatedObjects extends LightningElement {
                 loadStyle(this, dexcpqcartstylesCSS),
             ])
             .then(() => {})
-            .catch(error => {});
+            .catch(error => {
+                let tempError = error.toString();
+                let errorMessage = error.message || 'Unknown error message';
+                createLog({recordId:'', className:'templateRelatedObjects LWC Component', exceptionMessage:errorMessage, logData:tempError, logType:'Exception'});    
+            });
 
         this.newfontsize();
     }
@@ -440,7 +443,11 @@ export default class TemplateRelatedObjects extends LightningElement {
                     }
                 }
             })
-            .catch(error => {})
+            .catch(error => {
+                let tempError = error.toString();
+                let errorMessage = error.message || 'Unknown error message';
+                createLog({recordId:'', className:'templateRelatedObjects LWC Component', exceptionMessage:errorMessage, logData:tempError, logType:'Exception'});    
+            })
     }
 
     @api handleActivateTemplate(isActive, objName) {
@@ -468,7 +475,7 @@ export default class TemplateRelatedObjects extends LightningElement {
     /*
     This function handles the deletion part of a section
     */
-    handlesectionDelete(event) {
+    handlesectionDelete() {
         if (this.sectionrecordid.indexOf('NotSaved') !== -1) {
             var firecustomevent = new CustomEvent('deletesectiondata', {
                 detail: this.sectionrecordid
@@ -487,7 +494,11 @@ export default class TemplateRelatedObjects extends LightningElement {
                         this.dispatchEvent(firecustomevent);
                     }
                 })
-                .catch(error => {})
+                .catch(error => {
+                     let tempError = error.toString();
+            let errorMessage = error.message || 'Unknown error message';
+            createLog({recordId:'', className:'templateRelatedObjects LWC Component', exceptionMessage:errorMessage, logData:tempError, logType:'Exception'});
+                })
         }
     }
 
@@ -759,7 +770,11 @@ export default class TemplateRelatedObjects extends LightningElement {
                                                         }
                                                     }
                                                 })
-                                                .catch((error) => {})
+                                                .catch((error) => {
+                                                     let tempError = error.toString();
+            let errorMessage = error.message || 'Unknown error message';
+            createLog({recordId:'', className:'templateRelatedObjects LWC Component', exceptionMessage:errorMessage, logData:tempError, logType:'Exception'});
+                                                })
                                         }
                                     }
                                 }
@@ -841,6 +856,9 @@ export default class TemplateRelatedObjects extends LightningElement {
                 }
             })
             .catch(error => {
+                let tempError = error.toString();
+            let errorMessage = error.message || 'Unknown error message';
+            createLog({recordId:'', className:'templateRelatedObjects LWC Component', exceptionMessage:errorMessage, logData:tempError, logType:'Exception'});                     
                 this.isLoaded = false;
             })
     }
@@ -881,7 +899,11 @@ export default class TemplateRelatedObjects extends LightningElement {
                         });
                     }
                 })
-                .catch((error) => {})
+                .catch((error) => {
+                    let tempError = error.toString();
+            let errorMessage = error.message || 'Unknown error message';
+            createLog({recordId:'', className:'templateRelatedObjects LWC Component', exceptionMessage:errorMessage, logData:tempError, logType:'Exception'});
+                })
 
             getFields({
                 selectedObject: this.selectedChildObjectName
@@ -907,7 +929,11 @@ export default class TemplateRelatedObjects extends LightningElement {
                     }
                     this.displayfields = true;
                 }
-            }).catch(error => {})
+            }).catch(error => {
+                let tempError = error.toString();
+            let errorMessage = error.message || 'Unknown error message';
+            createLog({recordId:'', className:'templateRelatedObjects LWC Component', exceptionMessage:errorMessage, logData:tempError, logType:'Exception'});
+            })
         }
         this.handleRuleWrapperMaking();
     }
@@ -980,7 +1006,7 @@ export default class TemplateRelatedObjects extends LightningElement {
             if (this.tableHeaders.includes(selectedremovingfield)) {
                 for (let i = 0; i < this.tableHeaders.length; i++) {
                     if (this.tableHeaders[i] == selectedremovingfield) {
-                        const t = this.tableHeaders.splice(i, 1);
+                        this.tableHeaders.splice(i, 1);
                     }
                 }
             } else {
@@ -1007,7 +1033,8 @@ export default class TemplateRelatedObjects extends LightningElement {
     /*
     All the data entered above will be stored in the JSON Format and will get saved in the Document Template section 
     */
-    handlesectionsave(event) {
+    handlesectionsave() {
+        var obj = {};
         if (this.selectedChildObjectName == '' || this.Recorddetailsnew.Name == '' || this.listOfAddedFields == '') {
             this.dispatchEvent(new ShowToastEvent({
                 title: 'Error',
@@ -1026,13 +1053,13 @@ export default class TemplateRelatedObjects extends LightningElement {
             }
 
             if (this.selectedChildObjectName != undefined) {
-                if (this.childobjects.hasOwnProperty(this.selectedChildObjectName)) {
+                if (Object.prototype.hasOwnProperty.call(this.childobjects, this.selectedChildObjectName)) {
                     childloopkupfieldAPIname = this.childobjects[this.selectedChildObjectName];
                     this.childLookupAPI = childloopkupfieldAPIname;
                 }
 
                 //JSON construction logic START
-                var obj = {};
+                obj = {};
                 obj.whereClause = '(' + this.filteringCondition + ')';
                 obj.mainChildObject = this.selectedChildObjectName;
                 obj.childLookupfieldAPIname = childloopkupfieldAPIname;
@@ -1100,7 +1127,7 @@ export default class TemplateRelatedObjects extends LightningElement {
 
             if (this.Recorddetailsnew.Name != '' && this.Recorddetailsnew.Name != null) {
                 saveDocumentTemplateSectionDetails({
-                        Recorddetails: this.Recorddetailsnew
+                        recordDetails: this.Recorddetailsnew
                     })
                     .then(result => {
                         if (result != null) {
@@ -1118,7 +1145,11 @@ export default class TemplateRelatedObjects extends LightningElement {
                             this.template.querySelector('c-hidden-component').callFromComponent(result.Id, this.tableHeaders, this.selectedHbgColor, this.selectedHFontColor, this.fontsize, this.fontfamily, this.SerialNumber);
                         }
                     })
-                    .catch(error => {})
+                    .catch(error => {
+                        let tempError = error.toString();
+            let errorMessage = error.message || 'Unknown error message';
+            createLog({recordId:'', className:'templateRelatedObjects LWC Component', exceptionMessage:errorMessage, logData:tempError, logType:'Exception'});
+                    })
             }
         }
         this.template.querySelector('c-template-designer-cmp').showPreview = true;
@@ -1179,7 +1210,11 @@ export default class TemplateRelatedObjects extends LightningElement {
 
                                     }
                                 })
-                                .catch(error => {})
+                                .catch(error => {
+                                    let tempError = error.toString();
+            let errorMessage = error.message || 'Unknown error message';
+            createLog({recordId:'', className:'templateRelatedObjects LWC Component', exceptionMessage:errorMessage, logData:tempError, logType:'Exception'});
+                                })
                         } else {
                             let tempstr;
                             for (let i = 0; i < this.listOfRelatedObjects.length; i++) {
@@ -1312,7 +1347,7 @@ export default class TemplateRelatedObjects extends LightningElement {
                 if (this.listOfRelatedObjects[0].fieldList[i].value == selectedVal) {
                     this.listOfAddedFields.push(this.listOfRelatedObjects[0].fieldList[i]);
                     selectedFieldLabel = this.listOfRelatedObjects[0].fieldList[i].label;
-                    const tem = this.listOfRelatedObjects[0].fieldList.splice(i, 1);
+                    this.listOfRelatedObjects[0].fieldList.splice(i, 1);
                 }
             }
             if (selectedVal.includes('.')) {
@@ -1477,8 +1512,7 @@ export default class TemplateRelatedObjects extends LightningElement {
      */
     getSelectedTableRowHandler(event) {
         this.selectedTableRow = event.target.dataset.id;
-        let select = event.target.id;
-        let a = this.template.querySelectorAll('[data-id="' + this.selectedTableRow + '"]')[0];
+         this.template.querySelectorAll('[data-id="' + this.selectedTableRow + '"]')[0];
         this.handleActionButtonsVisibility(this.selectedTableRow);
     }
 
@@ -1515,7 +1549,7 @@ export default class TemplateRelatedObjects extends LightningElement {
     /*
     This piece of code reverts the previous value of the selected header on hitting cancel
      */
-    previousVal(event) {
+    previousVal() {
         for (let j = 0; j < this.changedHeaders.length; j++) {
             let ind = this.changedHeaders[j].index;
             if (this.listOfAddedFields[ind].label == this.changedHeaders[j].current) {
@@ -1685,7 +1719,7 @@ export default class TemplateRelatedObjects extends LightningElement {
     }
 
     /* this is to show the rules popup window on selecting the fileter label */
-    handleFiltering(event) {
+    handleFiltering() {
         this.ruleCondition = true;
         this.template.querySelector('c-modal').show();
     }
@@ -1699,14 +1733,18 @@ export default class TemplateRelatedObjects extends LightningElement {
                 .then((result) => {
                     this.fieldWrapper = result;
                 })
-                .catch((error) => {});
+                .catch((error) => {
+                    let tempError = error.toString();
+                    let errorMessage = error.message || 'Unknown error message';
+                    createLog({recordId:'', className:'templateRelatedObjects LWC Component', exceptionMessage:errorMessage, logData:tempError, logType:'Exception'});
+             });
         }
     }
 
     /*
     The piece of code is to create the rules after entering the conditions in rules popup window.
     */
-    handleCreateRules(event) {
+    handleCreateRules() {
         const conditionChild = this.template.querySelector('c-conditioncmp').getConditionDetails();
         this.ruleExpression = conditionChild.expression;
 
@@ -1728,7 +1766,11 @@ export default class TemplateRelatedObjects extends LightningElement {
                 let event = new Object();
                 this.getExistingConditions(event);
             })
-            .catch(error => {});
+            .catch(error => {
+                let tempError = error.toString();
+            let errorMessage = error.message || 'Unknown error message';
+            createLog({recordId:'', className:'templateRelatedObjects LWC Component', exceptionMessage:errorMessage, logData:tempError, logType:'Exception'});                                             
+            });
 
         this.template.querySelector('c-modal').hide();
     }
@@ -1817,7 +1859,11 @@ export default class TemplateRelatedObjects extends LightningElement {
                     this.dispatchEvent(Errormsg);
                 }
             })
-            .catch(error => {});
+            .catch(error => {
+                let tempError = error.toString();
+            let errorMessage = error.message || 'Unknown error message';
+            createLog({recordId:'', className:'templateRelatedObjects LWC Component', exceptionMessage:errorMessage, logData:tempError, logType:'Exception'});                                             
+            });
         this.ruleCondition = false;
         this.template.querySelector('c-modal').hide();
     }
@@ -1826,7 +1872,7 @@ export default class TemplateRelatedObjects extends LightningElement {
     The piece of code is to update  the rules wnich are already saved aftere entering the coditions in rules popup window .
     (As condition1 && condition2 || condition3)
     */
-    handleRuleUpdates(event) {
+    handleRuleUpdates() {
         this.ruleConditions = [];
         const conditionChild = this.template.querySelector('c-conditioncmp').getConditionDetails();
         this.createRuleConditionObjects(conditionChild.listOfConditions);
@@ -1847,7 +1893,11 @@ export default class TemplateRelatedObjects extends LightningElement {
                     let event = new Object();
                     this.getExistingConditions(event);
                 })
-                .catch(error => {});
+                .catch(error => {
+                    let tempError = error.toString();
+            let errorMessage = error.message || 'Unknown error message';
+            createLog({recordId:'', className:'templateRelatedObjects LWC Component', exceptionMessage:errorMessage, logData:tempError, logType:'Exception'});                                             
+                });
         }
         this.template.querySelector('c-modal').hide();
     }
@@ -1855,7 +1905,7 @@ export default class TemplateRelatedObjects extends LightningElement {
     /*
       The piece of code is to get the conditions of templates in onload
     */
-    getExistingConditions(event) {
+    getExistingConditions() {
         this.mapOfRC = new Map();
         this.conditionsArr = [];
         this.conditionExists = false;
@@ -1881,7 +1931,11 @@ export default class TemplateRelatedObjects extends LightningElement {
                     }
                 }
             })
-            .catch(error => {})
+            .catch(error => {
+                let tempError = error.toString();
+                let errorMessage = error.message || 'Unknown error message';
+                createLog({recordId:'', className:'templateRelatedObjects LWC Component', exceptionMessage:errorMessage, logData:tempError, logType:'Exception'});    
+            })
     }
 
     /*

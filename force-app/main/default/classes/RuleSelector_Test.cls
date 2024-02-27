@@ -15,7 +15,7 @@ public class RuleSelector_Test {
             RuleSelector.deleteRuleConditions(arrIds);
         }
         catch (exception ex){
-            System.assert(ex.getMessage().contains('Script-thrown exception'));
+            System.assert(ex.getMessage().contains('Script-thrown exception'),true);
         }
         Test.stopTest();
     }
@@ -34,7 +34,7 @@ public class RuleSelector_Test {
             RuleSelector.deleteRuleConditions(arrIds);
         }
         catch (exception ex){
-            System.assert(ex.getMessage().contains('Script-thrown exception'));
+            System.assert(ex.getMessage().contains('Script-thrown exception'),true);
         }       
         Test.stopTest();           
     }    
@@ -47,7 +47,7 @@ public class RuleSelector_Test {
         User us = DexUtilTestDataFactory.CreateTestUser();
         System.runAs(us){          
         	String arr = RelatedObjectsClass.handleTemplateRuleResetCondition(rule.Id);
-            System.assertEquals(arr, 'Success');
+            System.assertEquals('Success', arr, 'Unexpected result');
         }
         Test.stopTest();        
     }    
@@ -60,7 +60,7 @@ public class RuleSelector_Test {
         User us = DexUtilTestDataFactory.CreateTestUser();
         System.runAs(us){          
         	String arr = RelatedObjectsClass.handleTemplateRuleResetCondition(null);
-            System.assertEquals(arr, 'Error');
+           System.assertEquals('Error', arr, 'Unexpected result');
         }
         Test.stopTest();        
     } 

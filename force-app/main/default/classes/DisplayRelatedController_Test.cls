@@ -8,7 +8,8 @@ private class DisplayRelatedController_Test {
             insert testDocument;
             ApexPages.currentPage().getParameters().put('documentId', testDocument.Id);
             DisplayRelatedController controller = new DisplayRelatedController();
-            System.assertEquals('Test Document Body', controller.displayText);
+            System.assertEquals('Test Document Body', controller.displayText, 'Incorrect display text retrieved');
+
         }
         Test.stopTest();
     }
@@ -29,7 +30,8 @@ private class DisplayRelatedController_Test {
             }
             catch(exception ex)
             {
-                System.assert(ex.getMessage().contains('Script-thrown exception'));
+                System.assert(ex.getMessage().contains('Script-thrown exception'), 'Expected exception message not found');
+
             }
         }
         Test.stopTest();
@@ -49,7 +51,8 @@ private class DisplayRelatedController_Test {
                 DisplayRelatedObjects.getObjectFieldTypeMap('Account', fieldList);
             }
             catch(exception ex){	
-                System.assert(ex.getMessage().contains('Assertion Failed: Expected: datetime, Actual: DATETIME'));
+             System.assert(ex.getMessage().contains('Assertion Failed: Expected: datetime, Actual: DATETIME'), 'Assertion failed: Unexpected data type');
+
             }
         }
         Test.stopTest();
@@ -63,7 +66,8 @@ private class DisplayRelatedController_Test {
             Account testAccount = new Account(Name = 'Test Account');
             insert testAccount;
             String lkpObjectApi = DisplayRelatedObjects.getLkpObjectApi('Account', 'OwnerId');
-            System.assertEquals('User', lkpObjectApi);
+            System.assertEquals('User', lkpObjectApi, 'Incorrect lookup object API name');
+
         }
         Test.stopTest();
     }
@@ -78,9 +82,9 @@ private class DisplayRelatedController_Test {
                 String invalidFromObjName = 'Invalid_Object';
                 String invalidLkpField = 'Invalid_Field';
                 String lkpObjectApi = DisplayRelatedObjects.getLkpObjectApi(invalidFromObjName, invalidLkpField);
-                System.assertEquals('', lkpObjectApi);
+                System.assertEquals('', lkpObjectApi,'Incorrect lookup object API name');
             } catch (Exception ex) {
-                System.assert(ex.getMessage().contains('expected exception message'));
+                System.assert(ex.getMessage().contains('expected exception message'),'Expected exception message not found');
             }
         }
         Test.stopTest();
@@ -111,7 +115,8 @@ private class DisplayRelatedController_Test {
             DisplayRelatedObjects.getsectionData(testOpportunity.Id, testSection.Id);
         }
         Test.stopTest();
-        System.assert(true);
+        System.assert(true, '');
+
     }
     
     @isTest
@@ -138,7 +143,7 @@ private class DisplayRelatedController_Test {
             DisplayRelatedObjects.getsectionData(testOpportunity.Id, testSection.Id);
         }
         Test.stopTest();
-        System.assert(true);
+        System.assert(true, '');
     }
     
     @isTest
@@ -174,7 +179,7 @@ private class DisplayRelatedController_Test {
             DisplayRelatedObjects.getsectionData(testAccount.Id, testSection.Id);
         }
         Test.stopTest();
-         System.assert(true);
+         System.assert(true, '');
     }
     
     
@@ -215,7 +220,7 @@ private class DisplayRelatedController_Test {
             DisplayRelatedObjects.getsectionData(testAccount.Id, testSection.Id);
         }
         Test.stopTest();
-         System.assert(true);
+        System.assert(true, '');
     }
     
     @isTest
@@ -255,7 +260,7 @@ private class DisplayRelatedController_Test {
             DisplayRelatedObjects.getsectionData(testAccount.Id, testSection.Id);
         }
         Test.stopTest();
-        System.assert(true);
+        System.assert(true, '');
     }    
     
     @isTest
@@ -267,11 +272,11 @@ private class DisplayRelatedController_Test {
             insert testAccount;
             List<MultiSelectLookupController.SObjectQueryResult> result = MultiSelectLookupController.retrieveRecords(
                 'Account', 'Id,Name', 'Name', 'Test', '', '');
-            System.assertEquals(1, result.size());
-            System.assertEquals(testAccount.Id, result[0].recordId);
-            System.assertEquals(testAccount.Name, result[0].recordName);
-            System.assertEquals(testAccount.Id, result[0].recordObject.get('Id'));
-            System.assertEquals(testAccount.Name, result[0].recordObject.get('Name'));
+            System.assertEquals(1, result.size(),'Result size is not as expected');
+            System.assertEquals(testAccount.Id, result[0].recordId,'Record ID is not as expected');
+            System.assertEquals(testAccount.Name, result[0].recordName,'Record name is not as expected');
+            System.assertEquals(testAccount.Id, result[0].recordObject.get('Id'),'Record object ID is not as expected');
+            System.assertEquals(testAccount.Name, result[0].recordObject.get('Name'),'Record object name is not as expected');
         }
         Test.stopTest();
     }
@@ -286,15 +291,15 @@ private class DisplayRelatedController_Test {
                 insert testAccount;
                 List<MultiSelectLookupController.SObjectQueryResult> result = MultiSelectLookupController.retrieveRecords(
                     'Account', 'Id,Name', 'Name', 'Test', '', '');
-                System.assertEquals(1, result.size());
-                System.assertEquals(testAccount.Id, result[0].recordId);
-                System.assertEquals(testAccount.Name, result[0].recordName);
-                System.assertEquals(testAccount.Id, result[0].recordObject.get('Id'));
-                System.assertEquals(testAccount.Name, result[0].recordObject.get('Name'));
+                System.assertEquals(1, result.size(),'Unexpected result size');
+                System.assertEquals(testAccount.Id, result[0].recordId,'Unexpected result size');
+                System.assertEquals(testAccount.Name, result[0].recordName,'Record ID does not match');
+                System.assertEquals(testAccount.Id, result[0].recordObject.get('Id'),'Record Object ID does not match');
+                System.assertEquals(testAccount.Name, result[0].recordObject.get('Name'),'Record Object Name does not match');
             }
             catch(exception ex)
             {
-                System.assert(ex.getMessage().contains('Script-thrown exception'));
+                System.assert(ex.getMessage().contains('Script-thrown exception'),'Expected exception message not found');
             }
             
         }
@@ -311,15 +316,16 @@ private class DisplayRelatedController_Test {
                 insert testAccount;
                 List<MultiSelectLookupController.SObjectQueryResult> result = MultiSelectLookupController.retrieveRecords(
                     'Account', 'Id,Name', 'Name', '*', '', '');
-                System.assertEquals(1, result.size());
-                System.assertEquals(testAccount.Id, result[0].recordId);
-                System.assertEquals(testAccount.Name, result[0].recordName);
-                System.assertEquals(testAccount.Id, result[0].recordObject.get('Id'));
-                System.assertEquals(testAccount.Name, result[0].recordObject.get('Name'));
+                System.assertEquals(1, result.size(),'Unexpected result size');
+                System.assertEquals(testAccount.Id, result[0].recordId,'Record ID does not match');
+                System.assertEquals(testAccount.Name, result[0].recordName,'Record Name does not match');
+                System.assertEquals(testAccount.Id, result[0].recordObject.get('Id'), 'Record Object ID does not match');
+				System.assertEquals(testAccount.Name, result[0].recordObject.get('Name'), 'Record Object Name does not match');
+
             }
             catch(exception ex)
             {
-                System.assert(ex.getMessage().contains('Script-thrown exception'));
+                System.assert(ex.getMessage().contains('Script-thrown exception'),'Expected exception message not found');
             }
         }
         Test.stopTest();
@@ -338,11 +344,11 @@ private class DisplayRelatedController_Test {
             }
             catch(exception ex)
             {
-                System.assert(ex.getMessage().contains('Script-thrown exception'));
+                System.assert(ex.getMessage().contains('Script-thrown exception'),'Expected exception message not found');
             }
         }
         Test.stopTest();
-         System.assert(true);
+         System.assert(true,'');
     }
     
     @isTest
@@ -354,7 +360,7 @@ private class DisplayRelatedController_Test {
             DisplayRelatedObjects.RowWrapper rowWrapper = new DisplayRelatedObjects.RowWrapper();
             rowWrapper.addValue('Value 1');
             rowWrapper.addValue('Value 2');
-            System.assertEquals(2, rowWrapper.values.size());
+            System.assertEquals(2, rowWrapper.values.size(),'Unexpected result size');
             
             // Test Wrapper
             DisplayRelatedObjects.Wrapper wrapper = new DisplayRelatedObjects.Wrapper();
@@ -381,27 +387,27 @@ private class DisplayRelatedController_Test {
             wrapper.chartLabel = 'Sales Data';
             
             // Perform assertions on Wrapper properties
-            System.assertEquals(1, wrapper.rowWrapperList.size());
-            System.assertEquals(2, wrapper.headers.size());
-            System.assertEquals(true, wrapper.newPage);
-            System.assertEquals('Red', wrapper.catFontClr);
-            System.assertEquals('White', wrapper.catBgClr);
-            System.assertEquals('Arial', wrapper.catFontFam);
-            System.assertEquals('12px', wrapper.catFontSize);
-            System.assertEquals('Blue', wrapper.headFontClr);
-            System.assertEquals('Yellow', wrapper.headBgClr);
-            System.assertEquals('Verdana', wrapper.headFontFam);
-            System.assertEquals('14px', wrapper.headFontSize);
-            System.assertEquals(true, wrapper.showSlNo);
-            System.assertEquals(true, wrapper.displayChart);
-            System.assertEquals('yyyy-MM-dd', wrapper.dateFormat);
-            System.assertEquals('HH:mm:ss', wrapper.timeFormat);
-            System.assertEquals('#,##0.00', wrapper.numberFormat);
-            System.assertEquals('$#,##0.00', wrapper.currencyFormat);
-            System.assertEquals('(###) ###-####', wrapper.phoneFormat);
-            System.assertEquals(true, wrapper.chartNewPage);
-            System.assertEquals('bar', wrapper.selGraphvalue);
-            System.assertEquals('Sales Data', wrapper.chartLabel);
+            System.assertEquals(1, wrapper.rowWrapperList.size(),'Unexpected row wrapper list size');
+            System.assertEquals(2, wrapper.headers.size(),'Unexpected headers size');
+            System.assertEquals(true, wrapper.newPage,'New page flag is not true');
+            System.assertEquals('Red', wrapper.catFontClr,'Category font color is not Red');
+            System.assertEquals('White', wrapper.catBgClr,'Category background color is not White');
+            System.assertEquals('Arial', wrapper.catFontFam,'Category font family is not Arial');
+            System.assertEquals('12px', wrapper.catFontSize,'Category font size is not 12px');
+            System.assertEquals('Blue', wrapper.headFontClr,'Header font color is not Blue');
+            System.assertEquals('Yellow', wrapper.headBgClr,'Header background color is not Yellow');
+            System.assertEquals('Verdana', wrapper.headFontFam,'Header font family is not Verdana');
+            System.assertEquals('14px', wrapper.headFontSize,'Header font size is not 14px');
+            System.assertEquals(true, wrapper.showSlNo,'Show serial number flag is not true');
+            System.assertEquals(true, wrapper.displayChart,'Display chart flag is not true');
+            System.assertEquals('yyyy-MM-dd', wrapper.dateFormat,'Date format is not yyyy-MM-dd');
+            System.assertEquals('HH:mm:ss', wrapper.timeFormat,'Time format is not HH:mm:ss');
+            System.assertEquals('#,##0.00', wrapper.numberFormat,'Number format is not #,##0.00');
+            System.assertEquals('$#,##0.00', wrapper.currencyFormat,'Currency format is not $#,##0.00');
+            System.assertEquals('(###) ###-####', wrapper.phoneFormat,'Phone format is not (###) ###-####');
+            System.assertEquals(true, wrapper.chartNewPage,'Chart new page flag is not true');
+            System.assertEquals('bar', wrapper.selGraphvalue,'Selected graph value is not bar');
+            System.assertEquals('Sales Data', wrapper.chartLabel,'Chart label is not "Sales Data"');
         }
         Test.stopTest(); 
     }

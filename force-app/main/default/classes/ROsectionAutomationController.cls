@@ -1,12 +1,11 @@
-/* 
+/**
 * Class			    : ROsectionAutomationController
 * Developer			: Rahul Bejgam (ASE - Dextara)
 * Created Date		: 08/03/2023
-* Description		: This class creates the data-wrapper. This class performs the dataquery for header HTML and related object record, numerical calculation and formats data. 
-                      The class is for only Autogeneration of pdf.
+* @description		: This class creates the data-wrapper. This class performs the dataquery for header HTML and related object record, numerical calculation and formats data. 
+*                      The class is for only Autogeneration of pdf.
 * Last Modified Date: 08/11/2023
 */
-
 public with sharing class ROsectionAutomationController {
 
     /* User Selected Styles from Template Builder */
@@ -24,6 +23,12 @@ public with sharing class ROsectionAutomationController {
     public static Map<String,Decimal> currencyFieldSubTotals; 
 
     /* Function that returns the HTML Version of the Related Object section content */
+   /**
+ * @description Generates HTML content for a related object section based on the provided template section and record ID.
+ * @param recordid The ID of the record for which the related object section is generated.
+ * @param templatesectionid The ID of the template section used for generating the HTML content.
+ * @return HTML content representing the related object section with data and optional chart.
+ */
     public static string getSectionDataAsHTML(String recordid,String templatesectionid)  {
         relatedObjectSectionID = templatesectionid;                
         List<sObject> relatedObjectQueriedRecords = new List<sObject>();
@@ -258,8 +263,8 @@ public with sharing class ROsectionAutomationController {
 
                 /*Bar height Calculation*/
                 for(String keyPtr : categorySubTotalValueMap.keySet()){
-                    Decimal Val = (categorySubTotalValueMap.get(keyPtr) / currencyFieldTotals.get(chartYAxis));
-                    String htpt = String.valueOf((Val.setScale(3))*100);
+                    Decimal val = (categorySubTotalValueMap.get(keyPtr) / currencyFieldTotals.get(chartYAxis));
+                    String htpt = String.valueOf((val.setScale(3))*100);
                     
                     Map<String,String> tempMap = new Map<String,String> {
                         'width' => String.valueOf(Math.round(93/(categorySubTotalValueMap.size()))) + '%',
@@ -293,6 +298,12 @@ public with sharing class ROsectionAutomationController {
     }
     
     /* Function that formulates each Object's Field and Type */
+    /**
+ * @description Retrieves a map containing the data type of each field in the specified object.
+ * @param objName The API name of the object for which field data types are retrieved.
+ * @param fieldList A list of field names for which data types need to be determined.
+ * @return Map<String,String> A map where field names are keys, and values are their corresponding data types.
+ */
     public static Map<String,String> getObjectFieldTypeMap(String objName, List<String> fieldList)  {
         Map<String,String> fieldNameType = new Map<String,String>();
         try {
@@ -331,6 +342,12 @@ public with sharing class ROsectionAutomationController {
         return fieldNameType;
     }
     
+	/**
+ * @description Retrieves the API name of the related object from a given object and lookup field.
+ * @param fromObjName The API name of the source object where the lookup field is defined.
+ * @param lkpField The API name of the lookup field for which the related object API name is to be retrieved.
+ * @return The API name of the related object, or an empty string if an exception occurs.
+ */
     public static string getReferenceObjectAPIName(String fromObjName, String lkpField)  {
         try {            
             Schema.DescribeFieldResult scehmaMap = Schema.getGlobalDescribe().get(fromObjName).getDescribe().fields.getMap().get(lkpField).getDescribe();
@@ -344,6 +361,12 @@ public with sharing class ROsectionAutomationController {
         return '';
     } 
     
+	/**
+ * @description Extracts data from the current record and populates the HTML content for a table cell.
+ * @param selectedFieldAsHeaderAPIList List of selected field API names to be used as headers.
+ * @param currRecord Current record from which data is extracted.
+ * @param fieldNameType Mapping of field API names to their data types.
+ */
     public static void dataFetchFromCurrentRecord(List<Object> selectedFieldAsHeaderAPIList, Sobject currRecord, Map<String,String> fieldNameType)  {
        try{
             for(Object field : selectedFieldAsHeaderAPIList) {
@@ -452,6 +475,17 @@ public with sharing class ROsectionAutomationController {
 
     
     /*Functions to handle to the Date Time Style for the field value.*/
+	/**
+ * @description Handles the formatting of date and time based on the user's preferences.
+ * @param dateList List of date components (year, month, day).
+ * @param timeStr String representation of time.
+ * @param valKey Integer to determine the output format: 
+ *               0 for both date and time, 
+ *               <0 for date only, 
+ *               >0 for time only.
+ * @return Formatted date, time, or both based on the valKey parameter.
+ * @throws AuraHandledException if an exception occurs during the formatting process.
+ */
     public static String handleDateTimeFormatAsSelectedbyUser(List<String> dateList, String timeStr, Integer valKey)  { 
         String dateFormatSep; 
         String dateFormatted = '';
@@ -544,6 +578,12 @@ public with sharing class ROsectionAutomationController {
     }        
     
     /* Format the Number or Currency Field Value to User Selected Format */
+    /**
+ * @description Handles the formatting of a currency or number field based on the specified rounding pattern.
+ * @param fieldValue String representation of the numerical value to be formatted.
+ * @param roundPattern String representing the rounding pattern for the numerical value.
+ * @return Object containing the formatted Decimal value or 'Error' if an exception occurs during the formatting.
+ */
     public static Object handleCurrencyNumberFormat(String fieldValue, String roundPattern)  {
         try {
             Decimal value = (Decimal.valueOf(fieldValue)).setScale(Integer.valueOf(roundPattern));
@@ -555,10 +595,16 @@ public with sharing class ROsectionAutomationController {
     }
 
     /* Header Content Stored on the RO Template Section Record - called from Automation Class */
+    /**
+ * @description Retrieves the header content from a Document Template Section based on the provided section Id.
+ * @param roTemplateSectionId Id of the Document Template Section to retrieve the header content from.
+ * @return String representing the header content of the specified Document Template Section.
+ *         If an exception occurs during the retrieval, an error message is returned.
+ */
     public static String getHeaderContent(Id roTemplateSectionId)  {
         try {
             String query = 'Select Header_Content__c from Document_Template_Section__c where Id =\'' + roTemplateSectionId +'\' limit 1';
-            Document_Template_Section__c ROTemplateSection = Database.query(query);
+            Document_Template_Section__c roTemplateSection = Database.query(query);
             return ROTemplateSection.Header_Content__c;
         }
         catch(Exception ex)  {
@@ -567,5 +613,8 @@ public with sharing class ROsectionAutomationController {
         }
     }
     
+	/**
+ * @description Custom exception class named SafeClassException, extending the built-in Exception class.
+ */
     public class SafeClassException extends Exception { }
 }

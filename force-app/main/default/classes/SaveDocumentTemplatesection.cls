@@ -1,6 +1,18 @@
+/**
+* Class			    : SaveDocumentTemplatesection
+* Developer			: 
+* Created Date		: 
+* @description		: 
+* Last Modified Date: 
+*/
 public with sharing class SaveDocumentTemplatesection {
     public static Safely safe = new Safely();
     private static Savepoint sp1;
+      /**
+     * @description        : Retrieves all Document Template Sections for a given Document Template Id.
+     * @param docTempId     : Id of the Document Template.
+     * @return              : List of Document Template Sections.
+     */
     @AuraEnabled
     public static List<Document_Template_Section__c> getAllDocumentTemplateSections(Id docTempId){
         List<Document_Template_Section__c> allSections=new List<Document_Template_Section__c>([select id,Sequence__c,Section_Content__c,Name,
@@ -11,6 +23,11 @@ public with sharing class SaveDocumentTemplatesection {
         return allSections;
     }
     
+     /**
+     * @description        : Saves the sequence of Document Template Sections.
+     * @param allSectionRecords : List of Document Template Sections to be updated.
+     * @return              : Acknowledgment message.
+     */
     @AuraEnabled
     public static string saveDocumentTemplateSectionSequences(List<Document_Template_Section__c> allSectionRecords){
         String recId='';
@@ -40,7 +57,7 @@ public with sharing class SaveDocumentTemplatesection {
             sectionSeqMap.clear();
             if(!allSectionsTobeUpdated.isEmpty())
             {
-                if (sp1 == null) sp1 = Database.setSavepoint();
+                if (sp1 == null) {sp1 = Database.setSavepoint();}
                 Database.SaveResult[] urList2 = safe.doUpdate(allSectionsTobeUpdated);
                 List<String> errorList1 = Safely.safeClassExceptionHandlerInsert(urList2);
                 if(errorList1.size()>0){
@@ -57,6 +74,11 @@ public with sharing class SaveDocumentTemplatesection {
         }     
     }
     
+     /**
+     * @description        : Saves or updates the details of a Document Template Section.
+     * @param recordDetails : Details of the Document Template Section.
+     * @return              : Saved or updated Document Template Section.
+     */
     @AuraEnabled
     public static Document_Template_Section__c saveDocumentTemplateSectionDetails(Document_Template_Section__c recordDetails){
         String recordIDValue='';
@@ -84,7 +106,7 @@ public with sharing class SaveDocumentTemplatesection {
                 
                 List<Document_Template_Section__c> listtobeupdated=new List<Document_Template_Section__c>();
                 listtobeupdated.add(docTempsec);
-                if (sp1 == null) sp1 = Database.setSavepoint();
+                if (sp1 == null) {sp1 = Database.setSavepoint();}
                 Database.SaveResult[] urList2 = safe.doUpdate(listtobeupdated);
                 List<String> errorList1 = Safely.safeClassExceptionHandlerInsert(urList2);
                 if(errorList1.size()>0){
@@ -123,7 +145,7 @@ public with sharing class SaveDocumentTemplatesection {
                 
                 List<Document_Template_Section__c> listtobecreated=new List<Document_Template_Section__c>();
                     listtobecreated.add(docTempsec);
-                if (sp1 == null) sp1 = Database.setSavepoint();
+                if (sp1 == null) {sp1 = Database.setSavepoint();}
                 Database.SaveResult[] urListsave = safe.doInsert(listtobecreated);
                 List<String> errorList2 = Safely.safeClassExceptionHandlerInsert(urListsave);
                 if(errorList2.size()>0){
@@ -140,6 +162,7 @@ public with sharing class SaveDocumentTemplatesection {
                         }
                     } else if (!urListsave.get(i).isSuccess()) {
                         Database.Error error = urListsave.get(i).getErrors().get(0);
+                        error.getMessage();
                     }                    
                 }
                 
@@ -160,7 +183,7 @@ public with sharing class SaveDocumentTemplatesection {
                 }
             }
 
-            if (sp1 == null) sp1 = Database.setSavepoint();
+            if (sp1 == null) {sp1 = Database.setSavepoint();}
             Database.SaveResult[] doctempS = safe.doUpdate(doctempSecList);
             List<String> errorList3 = Safely.safeClassExceptionHandlerInsert(doctempS);
             if(errorList3.size()>0){
@@ -175,7 +198,11 @@ public with sharing class SaveDocumentTemplatesection {
         }       
     }
 
-    
+     /**
+     * @description        : Retrieves the body of a Document Clause based on the given input parameter.
+     * @param inputParam    : String parameter for Document Clause Id.
+     * @return              : Document Clause record.
+     */
     @AuraEnabled
     public static Document_Clause__c clauseBody(String inputParam){        
         list<string> arrOfStr = inputParam.split('"');
@@ -186,7 +213,12 @@ public with sharing class SaveDocumentTemplatesection {
         return dC;      
     }
     
-    
+    /**
+     * @description        : Deletes a Document Template Section.
+     * @param secidtobedeleted : Id of the Document Template Section to be deleted.
+     * @param doctemplateid : Id of the Document Template.
+     * @return              : 'success' if deletion is successful.
+     */
     @AuraEnabled
     public static String deletetemplate(String secidtobedeleted,String doctemplateid){
         try{
@@ -209,7 +241,7 @@ public with sharing class SaveDocumentTemplatesection {
             }
             
             if(!sectionstobeupdated.IsEmpty()) {
-                if (sp1 == null) sp1 = Database.setSavepoint();
+                if (sp1 == null) {sp1 = Database.setSavepoint();}
                 Database.SaveResult[] urList2 = safe.doUpdate(sectionstobeupdated);
                 List<String> errorList1 = Safely.safeClassExceptionHandlerInsert(urList2);
                 if(errorList1.size()>0){
@@ -223,7 +255,7 @@ public with sharing class SaveDocumentTemplatesection {
             List<Document_Template_Section__c> deletedts=new List<Document_Template_Section__c>();
             deletedts.add(deletesection);
             if(deletedts.size()>0){
-                if (sp1 == null) sp1 = Database.setSavepoint();
+                if (sp1 == null) {sp1 = Database.setSavepoint();}
                 List<Database.DeleteResult> deleteResult = safe.doDelete(deletedts);
                 List<String> errorList4 = Safely.safeClassExceptionHandlerDelete(deleteResult);
                 if(errorList4.size()>0){
@@ -238,6 +270,11 @@ public with sharing class SaveDocumentTemplatesection {
         }  
     }
     
+		 /**
+     * @description        : Retrieves data for editing a Document Template Section.
+     * @param editrecordid : Id of the Document Template Section to be edited.
+     * @return              : Document Template Section data.
+     */
     @AuraEnabled
     public static Document_Template_Section__c gettemplatesectiondata(String editrecordid){
         Document_Template_Section__c recorddata = new Document_Template_Section__c();
@@ -246,6 +283,11 @@ public with sharing class SaveDocumentTemplatesection {
         return recorddata;
     }
  
+	/**
+     * @description        : Retrieves a list of fields for a given SObject.
+     * @param selectedObject : SObject name for which fields are to be retrieved.
+     * @return              : List of SObject field names.
+     */
     @AuraEnabled(cacheable=true)
     public static List<String> getSobjectFields(String selectedObject){
         SObjectType docsection = Schema.getGlobalDescribe().get(selectedObject);
@@ -257,13 +299,18 @@ public with sharing class SaveDocumentTemplatesection {
         }
         return sObjectDetailsList;
     }
-
+	
+	/**
+     * @description        : Saves data for a Document Template Section.
+     * @param dataFrom      : Data to be saved.
+     * @param recordId      : Id of the Document Template Section.
+     */
     @AuraEnabled
     public static void saveData(String dataFrom, Id recordId){
         Document_Template_Section__c  arr = new Document_Template_Section__c() ;
         arr.Id = recordId;
         arr.Header_Content__c = dataFrom;
-        if (sp1 == null) sp1 = Database.setSavepoint();
+        if (sp1 == null) {sp1 = Database.setSavepoint();}
         Database.SaveResult[] urList2 = safe.doUpdate(arr);
         List<String> errorList1 = Safely.safeClassExceptionHandlerInsert(urList2);
         if(errorList1.size()>0){
@@ -271,7 +318,9 @@ public with sharing class SaveDocumentTemplatesection {
             throw new SafeClassException(String.join( errorList1, ', ' ));
         }
     }
-    
+      /**
+     * @description        : Internal custom exception class.
+     */
     public class SafeClassException extends Exception{     
     }  
 }
