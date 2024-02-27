@@ -5,7 +5,7 @@
       "package": "DxTemplates_Unlocked",
       "versionName": "ver 0.1",
       "versionNumber": "0.1.0.NEXT",
-      "default": false,
+      "default": true,
       "versionDescription": "",
       "postInstallScript": "PostInstallDataCreation",
       "apexTestAccess": {
@@ -19,7 +19,7 @@
       "package": "Dx_Templates",
       "versionName": "ver 0.1",
       "versionNumber": "0.1.2.NEXT",
-      "default": true,
+      "default": false,
       "versionDescription": "",
       "postInstallScript": "PostInstallDataCreation",
       "ancestorVersion": "HIGHEST"
