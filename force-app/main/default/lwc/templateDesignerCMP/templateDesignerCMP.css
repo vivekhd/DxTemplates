@@ -98,5 +98,4 @@
   -o-transition: all 0.2s ease-out;
   transition: all 0.2s ease-out;
 }
-/*.grabable {background:var(--lwc-brandPrimaryTransparent10);}
-.grabable:focus, .grabable:active, .grabable:hover, .grabable.active {background:var(--lwc-brandPrimaryTransparent40)#E6EFF9;}*/
+.dxt .slds-slider__value{visibility: hidden!important;}

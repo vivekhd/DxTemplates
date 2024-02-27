@@ -1,4 +1,26 @@
+/* The MergeFieldsClass assists in merging record fields into templates, handles title case conversions, 
+ * and retrieves object fields for dynamic form generation.
+ * Error handling ensures robustness. 
+ * It integrates with Salesforce Aura components, offering versatile 
+ * functionality for template customization and data presentation. 
+ * With features like field merging and dynamic form 
+ * generation, it enhances user experience and 
+ * streamlines data management within Salesforce applications.
+*/
+
+
+/**
+ * @description Represents the MergeFieldsClass, which is a class with sharing.
+ *              This class provides functionality related to merging fields.
+ */
 public with sharing class MergeFieldsClass {
+    /**
+     * @description    Merges fields from the specified record into the selected template contents
+     * @param          selectedTemplateContents  List of Document_Template_Section__c representing selected template contents
+     * @param          recordId                  Id of the record from which fields will be merged
+     * @return         List<Document_Template_Section__c> The modified template contents with merged fields
+     */
+
     public static List<Document_Template_Section__c> mergefieldsMethod(List<Document_Template_Section__c> selectedTemplateContents, Id recordId) {   
         try{
             String objectName = recordId.getSObjectType().getDescribe().getName();
@@ -76,6 +98,11 @@ public with sharing class MergeFieldsClass {
         return selectedTemplateContents;
     }
     
+    /**
+     * @description    Converts a phrase to title case
+     * @param          phrase String to be converted to title case
+     * @return         String Phrase converted to title case
+     */
     public static String toTitleCase(String phrase){
         String titlePhrase = '';
         try{
@@ -96,6 +123,11 @@ public with sharing class MergeFieldsClass {
         return titlePhrase.trim();
     }
     
+    /**
+     * @description    Retrieves the fields of a selected object
+     * @param          selectedObject String name of the selected object
+     * @return         List<FieldWrap> List of FieldWrap objects representing the fields of the selected object
+     */
     @AuraEnabled
     public static List<FieldWrap> getFields(String selectedObject){
         Map<String, Schema.SObjectType> gd = Schema.getGlobalDescribe(); 
@@ -136,22 +168,55 @@ public with sharing class MergeFieldsClass {
         return strList;    
     }
     
+    /**
+     * @description Represents a wrapper class used to encapsulate field information.
+     *              This class provides properties to store metadata about a field, such as its name, API name,
+     *              data type, values, sObject name, and relationship name.
+     */
     public class FieldWrap{
+        /**
+         * @description Represents the name of the field.
+         */
         @AuraEnabled
         public String name{get;set;}
+        
+        /**
+         * @description Represents the API name of the field.
+         */
         @AuraEnabled
         public String apiName{get;set;}
+        
+        /**
+         * @description Represents the data type of the field.
+         */
         @AuraEnabled
         public String dataType{get;set;}
+        
+        /**
+         * @description Represents the list of values associated with the field.
+         */
         @AuraEnabled
         public List<String> values{get;set;}
+        
+        /**
+         * @description Represents the API name of the sObject to which the field belongs.
+         */
         @AuraEnabled
         public String sObjectName{get;set;}
+        
+        /**
+         * @description Represents the relationship name of the field (if it's a related field).
+         */
         @AuraEnabled
         public String relationshipName{get;set;}
-    }  
-    
-    
+    }    
+
+     /**
+     * @description    Merges fields from the specified record into the selected template contents
+     * @param          selectedTemplateContents  List of Document_Template_Section__c representing selected template contents
+     * @param          recordIds                  List of Ids of the records from which fields will be merged
+     * @return         List<Document_Template_Section__c> The modified template contents with merged fields
+     */
     public static List<Document_Template_Section__c> mergefieldsMethodMultiple(List<Document_Template_Section__c> selectedTemplateContents, List<String> recordIds) {   
         try{
             List<Document_Template_Section__c> docsTempLst = new List<Document_Template_Section__c>();

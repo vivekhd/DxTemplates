@@ -3,7 +3,7 @@ import {loadStyle } from 'lightning/platformResourceLoader';
 import { getRecord, getSObjectInfo } from 'lightning/uiRecordApi';
 import dexcpqcartstylesCSS from '@salesforce/resourceUrl/dexcpqcartstyles';
 import rte_tbl from '@salesforce/resourceUrl/rte_tbl';
-import SavePDFtoQuote from '@salesforce/apex/DisplayPDFController.SavePDFtoQuote';
+import SavePDFtoQuote from '@salesforce/apex/DisplayPDFController.savePDFtoQuote';
 import pdfModefun from '@salesforce/apex/DisplayPDFController.pdfMode';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 import { CurrentPageReference } from 'lightning/navigation';
@@ -155,6 +155,18 @@ export default class DxtemplateSelectorCmp extends NavigationMixin(LightningElem
         this.pdfSize();
     }
 
+    pdfSize()
+    {
+        console.log('kkk',this.pdf);
+        pdfModefun({wrapperdata: this.pdf})
+        .then(kushik => {             
+            console.log('send Data',kushik);  
+        })
+        .catch(error =>{
+            console.log('error in JS',error);
+        });
+    }
+
     savePDFtoQuote()
     {
         console.log('savePDFtoQuote-',this.pdfdocumentid);
@@ -170,7 +182,7 @@ export default class DxtemplateSelectorCmp extends NavigationMixin(LightningElem
             const event4 = new ShowToastEvent({
                 title: 'Success',
                 message:
-                'Saved as attachment to the record!',
+                'PDF is saved under Quote Successfully',
                 variant: 'success',
                 });
 

@@ -264,7 +264,7 @@ html { scroll-behavior:smooth; }
 .dxt .slds-modal .inlineFooter, .dxt .slds-modal .modal-footer, .dxt .slds-modal .slds-modal__footer, .dxt .oneRecordActionWrapper.isModal .forceChangeRecordTypeFooter { background:#fafafa!important; margin-top:-2px; z-index:1; }
 .dxt .slds-modal .inlineFooter { border-top:2px solid #3f8ab3!important; }
 
-.dxt .oneRecordActionWrapper.isModal .inlineTitle { border-bottom:1px solid #3f8ab3!important; position:relative; margin:-9px ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¹-12px 0 -12px!important; }
+.dxt .oneRecordActionWrapper.isModal .inlineTitle { border-bottom:1px solid #3f8ab3!important; position:relative; margin:-9px ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬ ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Â¦Ãƒâ€šÃ‚Â¡ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¹-12px 0 -12px!important; }
 .dxt .oneRecordActionWrapper { background:#fff; }
 .dx-codeviewbox textarea.slds-textarea { background:gray; color:white; }
 
@@ -491,7 +491,7 @@ html { scroll-behavior:smooth; }
 .dxcappcontainer2max .popslidecontaineratv { position:fixed; display:block; min-width:65%; width:160rem; max-width:99.2%; margin:auto; box-shadow:0px 0px 10px rgba(0,0,0,0.3); border-radius:5px; padding:0px; min-height:360px; height:100%; max-height:calc(100vh - 99px); z-index:9; top:50px; left:6px; transform:translate(-1px, -3px); opacity:1; transition:all .5s; }
 
 
-
+.dxt .slds-slider__value{visibility: hidden!important;}  
 
 .dxt .slds-listbox_vertical .slds-listbox__option_plain, .dxt .slds-listbox_vertical .slds-listbox__option--plain, .dxt .slds-listbox--vertical .slds-listbox__option_plain, .dxt .slds-listbox--vertical .slds-listbox__option--plain { padding:0.3rem 0.5rem; }
 .dx-config_childicon .slds-icon-text-default {/*--slds-c-icon-color-foreground:#2376cc!important;*/transform:scale(-1,1);}
