@@ -327,7 +327,14 @@ export default class TemplateContentDetails extends LightningElement {
         element.value = '';
       }
     });
-    setTimeout(() => { this.template.querySelector('[data-id="newpage"]').checked = this.newpage; });
+    setTimeout(() => { 
+      try{
+        this.template.querySelector('[data-id="newpage"]').checked = this.newpage; 
+      }
+      catch(error){
+        console.log('error in setTimeout for checked error >> ', error.message);
+      }
+      });
   }
 
   @api loadsectionsectionvaluesforedit(recordID) {
@@ -354,7 +361,15 @@ export default class TemplateContentDetails extends LightningElement {
             this.ukey = (new Date()).getTime();
           }
           this.newpage = result.DxCPQ__New_Page__c;
-          setTimeout(() => { this.template.querySelector('[data-id="newpage"]').checked = this.newpage; });
+          setTimeout(() => { 
+            try{
+              this.template.querySelector('[data-id="newpage"]').checked = this.newpage; 
+            }
+            catch(error){
+              console.log('error in setTimeout for checked error >> ', error.message);
+            }
+              
+            });
 
           if (result.DxCPQ__Section_Content__c != null) {
             this.richtextVal = result.DxCPQ__Section_Content__c;

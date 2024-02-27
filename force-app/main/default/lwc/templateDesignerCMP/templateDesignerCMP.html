@@ -1,21 +1,24 @@
 <template>
 	<div class="dxqt">
+
 		<div class="lgc-bg slds-text-align_left dx-box1 slds-box slds-m-horizontal_xx-small">
 			<div class="slds-grid slds-wrap">
-				
 				<div class="slds-col slds-text-align_left" style="padding-top:2px;">
-
 					<lightning-button-group>
-						<lightning-button label={activateTemplateLabel} onclick={handleActiveTemplate}></lightning-button>
+						<lightning-button label={activateTemplateLabel} onclick={handleActiveTemplate}>
+						</lightning-button>
 						<lightning-button label="Clone Template" onclick={handleCloneTemplate}></lightning-button>
-						<lightning-button label="Delete Template" onclick={handleDeleteTemplateHandler}></lightning-button>
-						<!-- <lightning-button label="Refresh Template" onclick={handleRefreshTemplateHandler}></lightning-button> -->
+						<lightning-button label="Delete Template" onclick={handleDeleteTemplateHandler}>
+						</lightning-button>
+						<lightning-button label="Refresh Template" onclick={handleRefreshTemplateHandler}>
+						</lightning-button>
 						<template if:true={showPreview}>
-							<lightning-button label="Preview Template" title="preview" onclick={handlePreview}></lightning-button>
+							<lightning-button label="Preview Template" title="preview" onclick={handlePreview}>
+							</lightning-button>
 						</template>
 					</lightning-button-group>
-
-					<lightning-badge label={relatedtoTypeObjName} class="slds-badge_inverse slds-m-left_medium"></lightning-badge>
+					<lightning-badge label={relatedtoTypeObjName} class="slds-badge_inverse slds-m-left_medium">
+					</lightning-badge>
 				</div>
 
 				<div class="slds-col slds-text-align_right">
@@ -32,8 +35,9 @@
 							<lightning-button-icon icon-name="utility:task" alternative-text="Section : Clause"
 								title="Section : Clause" onclick={handleNewClause} disabled={disableEditing}>
 							</lightning-button-icon>
-							<!-- <lightning-button-icon icon-name="utility:table"  alternative-text="Section : Table" 
-							title="Section : Table" onclick={handleNewTable}></lightning-button-icon>  -->
+							<lightning-button-icon icon-name="utility:table" alternative-text="Section : Table"
+								title="Section : Table" onclick={handleNewTable} disabled={disableEditing}>
+							</lightning-button-icon>
 							<span style="line-height:32px"> &nbsp; - &nbsp; </span>
 							<lightning-button-icon icon-name="utility:edit" alternative-text="Edit Template"
 								title="Edit Template" onclick={handleEditTemplate} disabled={disableEditing}>
@@ -44,9 +48,10 @@
 
 			</div>
 		</div>
-
 		<div class="dx-box1bot slds-box">
+
 			<div class="slds-grid slds-wrap">
+
 				<div class="slds-col slds-size_9-of-12">
 					<div class="slds-grid slds-wrap slds-p-right_small">
 
@@ -67,14 +72,15 @@
 								sectionrecordid={selectedSectionRecordID} documenttemplaterecord={doctemplatedetails}>
 							</c-template-content-details>
 
-							<!-- <c-template-table-details showtabledetails={showtabledetails}
+
+							<c-template-table-details showtabledetails={showtabledetails}
 								selected-object-name={relatedtoTypeObjChild} recordidvalueprop={recordIDValueprop}
 								rowcount={rowCount} sectiontype={SectionTypename}
 								onsavesectiondata={handlesavedsectiondata} ondeletesectiondata={handledeletesectiondata}
 								recordidtoedit={recordidtoedit} sectionrecordid={selectedSectionRecordID}
 								documenttemplaterecordid={doctemplatedetails.Id}
 								documenttemplaterecord={doctemplatedetails}>
-							</c-template-table-details> -->
+							</c-template-table-details>
 
 							<c-template-related-objects showrelatedobjectdetails={showrelatedobjectdetails}
 								selected-object-name={relatedtoTypeObjChild} recordidvalueprop={recordIDValueprop}
@@ -117,7 +123,6 @@
 								</div>
 							</div>
 
-							<!-- HEADER START -->
 							<template if:true={header}>
 								<div class="grabable" key={header.Id} id={header.Id} data-drag-id={header.Id}
 									data-onload='templateHeader' onclick={handleHeaderClick} data-index={header.Id}
@@ -140,7 +145,6 @@
 									</div>
 								</div>
 							</template>
-							<!-- HEADER STOP -->
 
 							<template if:true={sections}>
 								<template for:each={sections} for:item="section" for:index="index">
@@ -175,7 +179,6 @@
 							</template>
 							<template if:false={sections}>No rows found.</template>
 
-							<!-- FOOTER START -->
 							<template if:true={footer}>
 								<div class="grabable" key={footer.Id} id={footer.Id} data-drag-id={footer.Id}
 									data-onload='templateFooter' onclick={handleFooterClick} data-index={footer.Id}
@@ -198,7 +201,6 @@
 									</div>
 								</div>
 							</template>
-							<!-- FOOTER STOP -->
 
 						</div>
 					</template>
@@ -288,13 +290,163 @@
 							<lightning-input-field field-name="DxCPQ__Description__c"> </lightning-input-field>
 							<lightning-output-field field-name="DxCPQ__Version_Number__c"> </lightning-output-field>
 							<div class="slds-text-align_right">
-								<lightning-button class="slds-m-top_small" type="submit" label="Save" variant="brand"></lightning-button>
+								<lightning-button class="slds-m-top_small" type="submit" label="Save" variant="brand">
+								</lightning-button>
 							</div>
 						</lightning-record-edit-form>
+						<div class="slds-text-align_left">
+							<lightning-button class="slds-m-top_small" type="submit" label="Watermark Settings"
+								variant="brand" onclick={handleWatermarkSettings}></lightning-button>
+						</div>
+
 					</div>
 					<footer class="slds-modal__footer"></footer>
 				</template>
+
+				<template if:true={showwatermarkbtn}>
+					<!---- Modal Code added by Bhavya for watermark starts--->
+					<span slot="header">Watermark Settings</span>
+					<div class="slds-modal__content slds-p-around_medium" id="modal-content-id-1"
+						style="max-height: 500px;">
+						<lightning-tabset>
+							<lightning-tab label="Text" onactive={handleTabChange} data-name="Text">
+
+								<div class="slds-grid slds-wrap slds-gutters_small slds-grid_vertical-align-center">
+									<div
+										class="slds-col slds-size_1-of-1 slds-medium-size_4-of-12 slds-large-size_4-of-12">
+										<lightning-input type="text" label="Watermark Text" value={watermarkText}
+											onchange={handleWatermarkChange} data-label="watermarkText">
+										</lightning-input>
+									</div>
+									<div
+										class="slds-col slds-size_1-of-1 slds-medium-size_4-of-12 slds-large-size_4-of-12">
+										<lightning-input type="color" name="input-color" label="Color"
+											value={colorValue} data-label="color" onchange={handleWatermarkChange}>
+										</lightning-input>
+									</div>
+									<div
+										class="slds-col slds-size_1-of-1 slds-medium-size_4-of-12 slds-large-size_4-of-12">
+										<lightning-combobox name="FontSize" label="Font Size" value={fontSizeValue}
+											placeholder="" data-label="fontSize" options={fontSizeOptions}
+											onchange={handleWatermarkChange}> </lightning-combobox>
+									</div>
+									<div
+										class="slds-col slds-size_1-of-1 slds-medium-size_4-of-12 slds-large-size_4-of-12">
+										<lightning-slider class="rotationSlider" label="Rotation" size="x-small"
+											value={rotationvalue} onchange={handleRotationChange} data-label="rotation"
+											min="0" max="90" step="5" data-type="Text"></lightning-slider>
+									</div>
+									<div
+										class="slds-col slds-size_1-of-1 slds-medium-size_4-of-12 slds-large-size_4-of-12">
+										<lightning-combobox name="opacity" label="Opacity" data-label="opacity"
+											value={opacityValue} placeholder="" options={opacityOptions}
+											onchange={handleWatermarkChange}> </lightning-combobox>
+									</div>
+									<div
+										class="slds-col slds-size_1-of-1 slds-medium-size_4-of-12 slds-large-size_4-of-12">
+										<lightning-input type="checkbox" label="Primary" name="textPrimary"
+											checked={checkedValText} onchange={handleWatermarkPrimary}
+											data-label="textPrimary"></lightning-input>
+									</div>
+								</div>
+								<div class="slds-grid slds-gutters_small">
+									<template for:each={watermarkPageOptionsText} for:item="item">
+										<fieldset key={item.value} style="display: block; float: left;">
+											<div class="slds-form-element__control" style="margin:15px 0px 10px 15px">
+												<span class="slds-radio">
+																<input name="radiogroup" id={item.value} type="radio" value={item.value} onchange={handleWatermarkPageChange} checked = {item.checked}/>
+																<label class="slds-radio__label" for={item.value}>
+																	<span class="slds-radio_faux"></span>
+												<span class="slds-form-element__label" style="display: inline !important;">{item.label}</span>
+												</label>
+												</span>
+											</div>
+										</fieldset>
+									</template>
+								</div>
+								<div
+									class="slds-grid slds-grid_vertical-align-center slds-grid_align-center slds-text-align_center">
+									<div class="output-container slds-col slds-size_1-of-1 slds-medium-size_12-of-12 slds-large-size_12-of-12 "
+										style="border:1px solid #333;">
+										<canvas id="outputCanvas" class="canvasText" width="600px"
+											height="600px"></canvas>
+									</div>
+								</div>
+
+							</lightning-tab>
+							<lightning-tab label="Image" onactive={handleTabChange} data-name="Image">
+								<div class="slds-grid slds-wrap slds-gutters_small slds-grid_vertical-align-center">
+									<div
+										class="slds-col slds-size_1-of-1 slds-medium-size_4-of-12 slds-large-size_4-of-12">
+										<input type="file" accept="image/*" onchange={handleUploadFinished}>
+												</div>
+										<div
+											class="slds-col slds-size_1-of-1 slds-medium-size_4-of-12 slds-large-size_4-of-12">
+											<lightning-slider label="Image Scaling %" size="x-small"
+												value={imageScalingValue} onchange={handleWatermarkChange} min="0"
+												max="200" data-label="imagescaling"></lightning-slider>
+										</div>
+										<div
+											class="slds-col slds-size_1-of-1 slds-medium-size_4-of-12 slds-large-size_4-of-12">
+											<lightning-combobox name="opacityImage" label="Opacity"
+												value={opacityImageValue} placeholder="" data-label="opacityImage"
+												options={opacityOptions} onchange={handleWatermarkChange}>
+											</lightning-combobox>
+										</div>
+										<div
+											class="slds-col slds-size_1-of-1 slds-medium-size_4-of-12 slds-large-size_4-of-12">
+											<lightning-slider class="rotationSlider" label="Rotation" size="x-small"
+												value={rotationImagevalue} onchange={handleRotationChange}
+												data-label="rotation" min="0" max="90" step="5" data-type="Image">
+											</lightning-slider>
+										</div>
+
+										<div
+											class="slds-col slds-size_1-of-1 slds-medium-size_4-of-12 slds-large-size_4-of-12">
+											<lightning-input type="checkbox" label="Primary" name="imagePrimary"
+												checked={checkedValImage} onchange={handleWatermarkPrimary}
+												data-label="imagePrimary"></lightning-input>
+										</div>
+									</div>
+									<div class="slds-grid slds-wrap slds-gutters_small">
+										<template for:each={watermarkPageOptionsImage} for:item="item">
+											<fieldset key={item.value} style="display: block; float: left;">
+												<div class="slds-form-element__control"
+													style="margin:15px 0px 10px 15px">
+													<span class="slds-radio">
+															<input name="radiogroupforImage" id={item.value} type="radio" value={item.value} onchange={handleWatermarkPageChange} checked = {item.checked}/>
+															<label class="slds-radio__label" for={item.value}>
+																<span class="slds-radio_faux"></span>
+													<span class="slds-form-element__label" style="display: inline !important;">{item.label}</span>
+													</label>
+													</span>
+												</div>
+											</fieldset>
+										</template>
+									</div>
+									<div
+										class="slds-grid slds-grid_vertical-align-center slds-grid_align-center slds-text-align_center">
+										<div class="output-container slds-col slds-size_1-of-1 slds-medium-size_12-of-12 slds-large-size_12-of-12 "
+											style="border:1px solid #333;">
+											<canvas class="canvasImage" width="800px" height="800px"></canvas>
+
+
+										</div>
+									</div>
+							</lightning-tab>
+						</lightning-tabset>
+
+					</div>
+					<div class="slds-modal__footer">
+						<button class="slds-button slds-button_neutral" aria-label="Cancel and close" onclick={handleWaterMarkCancel}>Cancel</button>
+						<button class="slds-button slds-button_brand" onclick={handleWaterMarkSave}>Save</button>
+					</div>
+				</template>
 			</c-modal>
+
+
+
+			<!-----Watermark code ends here ---->
 		</div>
 	</div>
 </template>
