@@ -141,98 +141,79 @@ private class ProductSetupCtrl_Test {
         User us = DexUtilTestDataFactory.CreateTestUser();
         System.runAs(us){
              try{
-        		List<Document_Template__c> documentTemplate = DexUtilTestDataFactory.createDocumentTemplate(1, true, null);
-        		List<Id> documentTemplateId = new List<Id>{documentTemplate[0].Id};
-            	Map<String, Object> docTemplateSectionAttributes = new Map<String, Object>{'Document_Template__c'=>documentTemplateId};
+        List<Document_Template__c> documentTemplate = DexUtilTestDataFactory.createDocumentTemplate(1, true, null);
+        List<Id> documentTemplateId = new List<Id>{documentTemplate[0].Id};
+            Map<String, Object> docTemplateSectionAttributes = new Map<String, Object>{'Document_Template__c'=>documentTemplateId};
                 List<Document_Template_Section__c> docTemplateSections = DexUtilTestDataFactory.createDocumentTemplateSection(1, true, docTemplateSectionAttributes);
-        		List<Document__c> doc = DexUtilTestDataFactory.createDocument(1, true, docTemplateSectionAttributes);
-        		List<Document_Clause__c> docClause = DexUtilTestDataFactory.createDocumentClause(1, true, null);
+        List<Document__c> doc = DexUtilTestDataFactory.createDocument(1, true, docTemplateSectionAttributes);
+        List<Document_Clause__c> docClause = DexUtilTestDataFactory.createDocumentClause(1, true, null);
         
-        		String parentTemplateId = documentTemplate[0].Parent_Template__c;
+        String parentTemplateId = documentTemplate[0].Parent_Template__c;
         
-                Account acc = new Account();
-                acc.Name = 'Test Account';
-                Insert acc;
-                
-                Opportunity opp = new Opportunity();
-                opp.Name = 'Test Opportunity';
-                opp.AccountId = acc.Id;
-                opp.CloseDate = System.today()+15;
-                opp.StageName = 'Prospecting';
-                Insert opp;
-                
-                 Document_Template__c docTemplate2 = new Document_Template__c();
-                docTemplate2.Parent_Template__c = 'Test class';
-                docTemplate2.IsActive__c = true;
-                docTemplate2.Previously_Active__c = true;
-                docTemplate2.Related_To_Type__c = 'Account';
-                 
-                Document_Template__c docTemplate3 = new Document_Template__c();
-                docTemplate3.Parent_Template__c = 'Test class';
-                docTemplate3.IsActive__c = true;
-                docTemplate3.Previously_Active__c = true;
-                docTemplate3.Related_To_Type__c = 'Account';
-                //docTemplate3.Watermark_Data__c = 'test';
-                Map<string,object> wrec=new  Map<string,object>();
-                wrec.put('indexvar',0);
-                wrec.put('value','Left');
-                 
-                ContentVersion cv = new ContentVersion();
-                 cv.Title='Test';
-                 cv.VersionData=Blob.valueOf('Test');
-                 cv.IsMajorVersion=true;
-                 cv.PathOnClient='test';
-                 insert cv;
-                 String wmark='[{"name":"Text","isPrimary":true,"contentVersionID":"'+cv.id+'","pageOption":"All Pages","fontsize":"28","opacity":"1","color":"#5DFF05","rotation":"45","textVal":"gabbbbbbbb","pageTextOption":"All Pages"},{"name":"Image","isPrimary":false,"contentVersionID":null,"pageOption":"All Pages","opacity":"1","rotation":"0","pageImageOption":"All Pages","imageScale":100}]';
-                doctemplate2.DxCPQ__Watermark_Data__c=wmark;
-                 insert doctemplate2;
-                 
-                List<Object> headerListObject=new List<Object>();
-                headerListObject.add(wrec);
-                Map<String, Object> headerMap =new Map<String, Object>();
-                headerMap.put('sectionsCount',3);
-                headerMap.put('sectionsContent',headerListObject);
-                Map<string,object> mapjson=new  Map<string,object>();
-                
-                mapjson.put('header',headerMap);
-                
-                Map<string,object> wrec1=new  Map<string,object>();
-                
-                wrec1.put('indexvar',0);
-                wrec1.put('value','Left');
-                
-                List<Object> footerListObject=new List<Object>();
-                footerListObject.add(wrec1);
-                
-                Map<String, Object> footerMap =new Map<String, Object>();
-                footerMap.put('sectionsCount',4);
-                footerMap.put('displaypagesequence',true);
-                footerMap.put('sectionsContent',footerListObject);
-                mapjson.put('footer',headerMap);
-                String myJSON = JSON.serialize(mapjson);
-                Document__c docs = new Document__c();
-                docs.Document_Content__c = myJSON;
-                docs.Document_Body__c = 'Test Document Body';
-                docs.Document_Template__c =  documentTemplate[0].Id;
-                insert docs;
-                    
-                documentTemplate[0].Previously_Active__c=false;
-                documentTemplate[0].Watermark_Data__c= wmark;
-                update documentTemplate[0];
-                Test.startTest();
-                
-                SaveDocumentTemplatesection.deletetemplate(docTemplateSections[0].Id, documentTemplate[0].Id);
-                SaveDocumentTemplate.saveDocumentTemplatedetails(documentTemplate[0], documentTemplate[0].Id);        
-                SaveDocumentTemplate.createDocumentTemplate(docTemplate3);        
-                SaveDocumentTemplate.activateTemplate(documentTemplate[0].Id, parentTemplateId, true);
-                SaveDocumentTemplate.getDocumentTemplates('Account');
-                Document_Template__c docTem;
-                //SaveDocumentTemplate.deleteTemplate(documentTemplate[0].Id);
-                ApexPages.currentPage().getParameters().put('documentid', String.valueOf(docs.Id));
-                DisplayPDFController controller = new DisplayPDFController();
-                 DisplayPDFController.getDocumentTemplateData(doctemplate2.Id);
-             }
-			catch(exception ex){
+        Account acc = new Account();
+        acc.Name = 'Test Account';
+        Insert acc;
+        
+        Opportunity opp = new Opportunity();
+        opp.Name = 'Test Opportunity';
+        opp.AccountId = acc.Id;
+        opp.CloseDate = System.today()+15;
+        opp.StageName = 'Prospecting';
+        Insert opp;
+        
+        Document_Template__c docTemplate3 = new Document_Template__c();
+        docTemplate3.Parent_Template__c = 'Test class';
+        docTemplate3.IsActive__c = true;
+        docTemplate3.Previously_Active__c = true;
+        docTemplate3.Related_To_Type__c = 'Account';
+        Map<string,object> wrec=new  Map<string,object>();
+        wrec.put('indexvar',0);
+        wrec.put('value','Left');
+        
+        List<Object> headerListObject=new List<Object>();
+        headerListObject.add(wrec);
+        Map<String, Object> headerMap =new Map<String, Object>();
+        headerMap.put('sectionsCount',3);
+        headerMap.put('sectionsContent',headerListObject);
+        Map<string,object> mapjson=new  Map<string,object>();
+        
+        mapjson.put('header',headerMap);
+        
+        Map<string,object> wrec1=new  Map<string,object>();
+        
+        wrec1.put('indexvar',0);
+        wrec1.put('value','Left');
+        
+        List<Object> footerListObject=new List<Object>();
+        footerListObject.add(wrec1);
+        
+        Map<String, Object> footerMap =new Map<String, Object>();
+        footerMap.put('sectionsCount',4);
+        footerMap.put('displaypagesequence',true);
+        footerMap.put('sectionsContent',footerListObject);
+        mapjson.put('footer',headerMap);
+        String myJSON = JSON.serialize(mapjson);
+        Document__c docs = new Document__c();
+        docs.Document_Content__c = myJSON;
+        docs.Document_Body__c = 'Test Document Body';
+        docs.Document_Template__c =  documentTemplate[0].Id;
+        insert docs;
+            
+        documentTemplate[0].Previously_Active__c=false;
+        update documentTemplate[0];
+        Test.startTest();
+        
+        SaveDocumentTemplatesection.deletetemplate(docTemplateSections[0].Id, documentTemplate[0].Id);
+        SaveDocumentTemplate.saveDocumentTemplatedetails(documentTemplate[0], documentTemplate[0].Id);        
+        SaveDocumentTemplate.createDocumentTemplate(docTemplate3);        
+        SaveDocumentTemplate.activateTemplate(documentTemplate[0].Id, parentTemplateId, true);
+        SaveDocumentTemplate.getDocumentTemplates('Account');
+        Document_Template__c docTem;
+        SaveDocumentTemplate.deleteTemplate(documentTemplate[0].Id);
+        ApexPages.currentPage().getParameters().put('documentid', String.valueOf(docs.Id));
+        DisplayPDFController controller = new DisplayPDFController();
+                 }
+            catch(exception ex){
                  System.assert(ex.getMessage().contains('Script-thrown exception'));
             }
         }
