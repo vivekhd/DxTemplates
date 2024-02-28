@@ -170,7 +170,6 @@
 	<types>
 		<members>Document_Template_Record_Page</members>
 		<members>Document_Template_Section_Record_Page</members>
-		<members>LightningSales_UtilityBar</members>
 		<name>FlexiPage</name>
 	</types>
 	<types>		
