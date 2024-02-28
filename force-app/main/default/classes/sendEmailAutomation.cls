@@ -16,19 +16,24 @@ global class sendEmailAutomation implements Queueable,Database.AllowsCallouts{
     public static Safely safe = new Safely();
     public class SafeClassException extends Exception {}
 
-    global sendEmailAutomation(Id docInserted, String attachmentName, Id attachmentParentId) { 
-		this.documentRecordInserted = docInserted;
-        this.attachmentName = attachmentName;
-        this.attachmentParentId = attachmentParentId;
-        this.isSpecificToFox = false;
-    }
-
+    /* Deprecated method - removed for Fox Specific Changes. */
+    @Deprecated
     global sendEmailAutomation(Id docInserted, String attachmentName, String emailStructure) {
 		this.documentRecordInserted = docInserted;
         this.attachmentName = attachmentName;
         this.emailStructure = emailStructure;
     }
+
+    /* Constructor used for the context of general Organizations. */
+    global sendEmailAutomation(Id docInserted, String attachmentName, Id attachmentParentId) { 
+		this.documentRecordInserted = docInserted;
+        this.attachmentName = attachmentName;
+        this.attachmentParentId = attachmentParentId;
+        this.isSpecificToFox = false;
+        this.emailStructure = null;
+    }
     
+    /* Constructor used for the context of FOX Organization. */
     global sendEmailAutomation(Id docInserted, String attachmentName, String emailStructure, Boolean isSpecificToFox) {
 		this.documentRecordInserted = docInserted;
         this.attachmentName = attachmentName;
@@ -96,6 +101,7 @@ global class sendEmailAutomation implements Queueable,Database.AllowsCallouts{
         }
     }
 
+    /* FOX specific method for attaching the existing ContentVersion records to the Email being sent. */
     private List<Messaging.EmailFileAttachment> ContentDocumentAsAttachement(List<Id> contentDocumentIds,Map<Id,String> contentFugitiveMap) {
         List<ContentVersion> documents                  = new List<ContentVersion>{};
         List<Messaging.EmailFileAttachment> attachments = new List<Messaging.EmailFileAttachment>{};
