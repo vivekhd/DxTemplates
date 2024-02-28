@@ -1,0 +1,448 @@
+<template>
+	<div>
+		<template if:true={showtabledetails}>
+
+			<div class="slds-grid slds-wrap slds-p-around_small slds-border_bottom"
+				style="border:1px solid #e5e5e5; border-radius:5px; background: rgb(243 243 243);">
+				<div class="slds-col slds-size_1-of-1 slds-medium-size_5-of-12 slds-large-size_5-of-12">
+					<lightning-input type="text" variant="standard" name="name" label="Name"
+						value={Recorddetailsnew.Name} onchange={handlename} placeholder="Type Section Name Here..."
+						required disabled={isDisabled}>
+					</lightning-input>
+				</div>
+				<div
+					class="slds-col slds-size_1-of-1 slds-medium-size_2-of-12 slds-large-size_2-of-12 slds-p-left_small">
+					<label class="slds-form-element__label">&nbsp;</label>
+					<lightning-button disabled={disableButton} variant="brand" label="Update" title="Update"
+						onclick={handlesectionsave}>
+					</lightning-button>
+				</div>
+			</div>
+
+			<div class="slds-m-horizontal_large">
+				<div if:true={isLoaded} class="slds-is-relative">
+					<lightning-spinner alternative-text="Loading..." variant="brand">
+					</lightning-spinner>
+				</div>
+			</div>
+
+
+			<div class="slds-col slds-p-top_large slds-size_12-of-12">
+				<div class="slds-grid slds-wrap">
+
+					<div class="slds-col  slds-size_12-of-12 slds-p-bottom_small"
+						style="border:1px solid #e5e5e5; border-radius:5px; background: rgb(243 243 243);"
+						lwc:if={tableOnLoad}>
+						<div class="slds-grid slds-wrap">
+
+							<div class="slds-col slds-size_5-of-12 slds-p-left_small">
+								<label class="slds-form-element__label" for="Rows">Enter Number of Rows </label>
+								<input type="Number" value={rownumber} class="slds-input rows" onchange={handlerowchange} disabled={isDisabled} />
+							</div>
+
+								<div class="slds-col slds-size_5-of-12">
+									<label class="slds-form-element__label" for="Cols">Enter Number of Columns</label>
+									<input type="Number" value={colnumber} class="slds-input cols" onchange={handlecolchange} disabled={isDisabled}/>
+													</div>
+
+									<div class="slds-col slds-size_2-of-12 slds-p-left_small">
+										<label class="slds-form-element__label">&nbsp;</label>
+										<lightning-button disabled={disableButton} variant="brand" label="Show Table"
+											title="titleName" onclick={handletablecreate}>
+										</lightning-button>
+									</div>
+								</div>
+							</div>
+
+
+							<div class="slds-col slds-size_12-of-12" lwc:if={tableDisplayed}>
+								<div class="slds-card dx-rte_toolbar slds-no-print">
+									<div class="slds-grid slds-grid_vertical slds-nowrap">
+										<div role="group" class="slds-rich-text-editor__toolbar slds-shrink-none">
+											<div class="slds-grid slds-wrap">
+												<div class="slds-rich-text-editor__select">
+													<lightning-combobox name="progress" label="Font-Family"
+														value={fontfamily} placeholder="Select Font"
+														options={fontfamilyoptions} onchange={handlefontfamilyChange}
+														disabled={isDisabled}>
+													</lightning-combobox>
+
+												</div>
+												<div class="slds-rich-text-editor__select slds-size_xx-small">
+													<lightning-combobox name="progress" label="Font-Size"
+														value={fontsize} placeholder="Font Size"
+														options={fontsizeoptions} onchange={handlefontsizeChange}
+														disabled={isDisabled}>
+													</lightning-combobox>
+												</div>
+											</div>
+											<lightning-input type="color" name="input-color" label="H. Font"
+												title="Header Font Color" value={selectedHFontColor}
+												onchange={handleHFontColorChange} disabled={isDisabled}>
+											</lightning-input>
+											<lightning-input type="color" name="input-color" label="H. BG"
+												title="Header Background Color" value={selectedHbgColor}
+												onchange={handleHbgColorChange} disabled={isDisabled}></lightning-input>
+											<lightning-input type="color" name="input-color" label="B. Font"
+												title="Body Font Color" value={selectedBFontColor}
+												onchange={handleBFontColorChange} disabled={isDisabled}>
+											</lightning-input>
+											<lightning-input type="color" name="input-color" label="B. BG"
+												title="Body Background Color" value={selectedBBgcolor}
+												onchange={handleBBgColorchange} disabled={isDisabled}></lightning-input>
+
+
+											<div class="slds-col slds-size_1-of-12 slds-p-left_xx-small"
+												style="width:60px">
+												<label class="slds-form-element__label">S. No</label>
+												<lightning-input type="checkbox" class="slds-input serialNumber"
+													label="Include Serial Numbers" style="width:60px;"
+													onclick={handleSnoClick} disabled={isDisabled}>
+												</lightning-input>
+											</div>
+
+											<div class="slds-col slds-size_1-of-12 slds-p-left_small">
+												<label class="slds-form-element__label">Table</label>
+												<lightning-button-menu title="Edit Table"
+													class="slds-col slds-p-right_medium" alternative-text="Show menu"
+													icon-name="utility:table" horizontal-align="left"
+													disabled={isDisabled}>
+													<lightning-menu-item label="Add Row" value="Option1"
+														onclick={handlenewrow} icon-name="utility:arrow_bottom"
+														alternative-text="">
+													</lightning-menu-item>
+
+													<lightning-menu-item label="Add Column" value="Option2"
+														onclick={handlenewcolumn} icon-name="utility:arrow_right"
+														alternative-text="">
+													</lightning-menu-item>
+
+													<lightning-menu-item label="Delete Row" value={rownumber}
+														onclick={handleDeleteRow} icon-name="utility:delete"
+														alternative-text="">
+													</lightning-menu-item>
+
+													<lightning-menu-item label="Delete Column" value={colnumber}
+														onclick={handleDeleteColumn} icon-name="utility:record_delete"
+														alternative-text="">
+													</lightning-menu-item>
+												</lightning-button-menu>
+											</div>
+
+											<div class="slds-col slds-size_1-of-12">
+												<label class="slds-form-element__label">Borders</label>
+												<lightning-button-menu title="Borders"
+													class="slds-col slds-p-right_medium" alternative-text="Show menu"
+													icon-name="utility:steps" horizontal-align="left"
+													disabled={isDisabled}>
+
+													<lightning-menu-item label="No Borders" value="Option1"
+														onclick={handleNoBorders} icon-name={noBordersIcon}
+														alternative-text="">
+													</lightning-menu-item>
+
+													<lightning-menu-item label="All Borders" value="Option2"
+														onclick={handleAllBorders} icon-name={allBordersIcon}
+														alternative-text="">
+													</lightning-menu-item>
+
+													<lightning-menu-item label="Outside Borders" value="Option3"
+														onclick={handleOutsideBorders} icon-name={outsideBordersIcon}
+														alternative-text="">
+													</lightning-menu-item>
+
+													<lightning-menu-item label="Thick Outside Borders" value="Option4"
+														onclick={handleThickOutsideBorders}
+														icon-name={thickOutsideBordersIcon} alternative-text="">
+													</lightning-menu-item>
+
+													<lightning-menu-item label="Thick Outside All Borders"
+														value="Option5" onclick={handleThickOutsideAllBorders}
+														icon-name={thickOutsideAllBordersIcon} alternative-text="">
+													</lightning-menu-item>
+
+												</lightning-button-menu>
+											</div>
+											<lightning-input type="color" name="input-color" label="B. CLR"
+												title="Border Color" value={selectedBDRbgcolor}
+												onchange={handleBDRbgColorchange} disabled={isDisabled}>
+											</lightning-input>
+
+											<div class="slds-col slds-size_1-of-12">
+												<label class="slds-form-element__label" for="Rows">Rows</label>
+												<input type="Number" value={rownumber} class="slds-input rows" id="Rows" onchange={handlerowchange} style="text-align: center;" readonly disabled={isDisabled} />
+											</div>
+												<div class="slds-col slds-size_1-of-12">
+													<label class="slds-form-element__label" for="Cols">Cols</label>
+													<input type="Number" value={colnumber} class="slds-input cols" id="Cols" onchange={handlecolchange} style="text-align: center;" readonly disabled={isDisabled}/>
+												</div>
+												</div>
+											</div>
+										</div>
+									</div>
+								</div>
+							</div>
+							<template if:true={showtablecontent}>
+
+								<br/> <br/>
+								<div class="tableMainClass" data-id='tab'>
+									<table class="mytable" data-id="mytab"
+										style="font-family: Verdana; font-size: large; table-layout:fixed; ">
+										<colgroup>
+											<template for:each={tableheaders} for:item="headval">
+												<col key={headval} />
+											</template>
+										</colgroup>
+										<thead>
+											<tr class="myclass1" style="font-size:14px;">
+
+												<th scope="col" class="serialNumber" style="width:5%;"
+													lwc:if={isSerialNumberCheck}>
+													<div class="slds-align_absolute-center">
+														S.No
+													</div>
+												</th>
+
+												<template for:each={tableheaders} for:item="headval">
+													<th scope="col" key={headval}>
+														<lightning-input-rich-text onchange={handleRichTextAreaHead}
+															onclick={getSelectedTableHeader}
+															class="slds-align_absolute-center TableRowClass"
+															data-head={headval} title={headval}
+															formats="size, bold, italic, underline, strike, align, color, background"
+															disabled={isDisabled}>
+
+															<lightning-rich-text-toolbar-button-group slot="toolbar"
+																aria-label="First group">
+
+																<lightning-rich-text-toolbar-button
+																	icon-name="utility:merge"
+																	icon-alternative-text="Add Merge Field"
+																	onclick={handleHeadermergefieldadd}
+																	disabled={isDisabled}>
+																</lightning-rich-text-toolbar-button>
+
+															</lightning-rich-text-toolbar-button-group>
+
+															<lightning-rich-text-toolbar-button-group slot="toolbar"
+																aria-label="Second group">
+
+																<lightning-rich-text-toolbar-button
+																	icon-name="utility:arrow_bottom"
+																	icon-alternative-text="Add New Row"
+																	onclick={handlenewrow}>
+																</lightning-rich-text-toolbar-button>
+
+																<lightning-rich-text-toolbar-button
+																	icon-name="utility:arrow_right"
+																	icon-alternative-text="Add New Column"
+																	onclick={handlenewcolumn}>
+																</lightning-rich-text-toolbar-button>
+
+																<lightning-rich-text-toolbar-button
+																	icon-name="utility:delete"
+																	icon-alternative-text="Delete Row"
+																	onclick={handleDeleteRow}>
+																</lightning-rich-text-toolbar-button>
+
+																<lightning-rich-text-toolbar-button
+																	icon-name="utility:record_delete"
+																	icon-alternative-text="Delete Column"
+																	onclick={handleDeleteColumn}>
+																</lightning-rich-text-toolbar-button>
+
+															</lightning-rich-text-toolbar-button-group>
+
+															<lightning-rich-text-toolbar-button-group slot="toolbar"
+																aria-label="Third group">
+
+																<lightning-rich-text-toolbar-button
+																	icon-name="utility:clear"
+																	icon-alternative-text="Clear Table"
+																	onclick={handleclearTable}>
+																</lightning-rich-text-toolbar-button>
+
+															</lightning-rich-text-toolbar-button-group>
+
+														</lightning-input-rich-text>
+														<div data-id={headval} hidden></div>
+													</th>
+												</template>
+											</tr>
+										</thead>
+										<tbody>
+											<template for:each={tablerows} for:item="rowvar">
+												<tr key={rowvar.rownumber} data-rowvalue={rowvar.rowindex}>
+
+													<td scope="col" class="serialNumber" lwc:if={isSerialNumberCheck}>
+														<div class="slds-align_absolute-center">
+															{rowvar.rowindex}
+														</div>
+													</td>
+
+													<template for:each={rowvar.columns} for:item="colvar">
+														<td scope="col" key={colvar.id} style={colvar.style}>
+															<lightning-input-rich-text onchange={handleRichTextArea}
+																onclick={getSelectedTableRowHandler}
+																class="slds-align_absolute-center TableRowClass"
+																data-id={colvar.id} title={colvar.id}
+																formats="size, bold, italic, underline, strike, align, color, background"
+																disabled={isDisabled}> <br>
+
+																<lightning-rich-text-toolbar-button-group slot="toolbar"
+																	aria-label="First group">
+
+																	<lightning-rich-text-toolbar-button
+																		icon-name="utility:merge"
+																		icon-alternative-text="Add Merge Field"
+																		onclick={handlemergefieldadd}
+																		disabled={isDisabled}>
+																	</lightning-rich-text-toolbar-button>
+
+																	<lightning-rich-text-toolbar-button
+																		icon-name="utility:image"
+																		icon-alternative-text="Add Image"
+																		onclick={handleImageadd} disabled={isDisabled}>
+																	</lightning-rich-text-toolbar-button>
+
+																</lightning-rich-text-toolbar-button-group>
+
+																<lightning-rich-text-toolbar-button-group slot="toolbar"
+																	aria-label="Second group">
+
+																	<lightning-rich-text-toolbar-button
+																		icon-name="utility:arrow_bottom"
+																		icon-alternative-text="Add New Row"
+																		onclick={handlenewrow}>
+																	</lightning-rich-text-toolbar-button>
+
+																	<lightning-rich-text-toolbar-button
+																		icon-name="utility:arrow_right"
+																		icon-alternative-text="Add New Column"
+																		onclick={handlenewcolumn}>
+																	</lightning-rich-text-toolbar-button>
+
+																	<lightning-rich-text-toolbar-button
+																		icon-name="utility:delete"
+																		icon-alternative-text="Delete Row"
+																		onclick={handleDeleteRow}>
+																	</lightning-rich-text-toolbar-button>
+
+																	<lightning-rich-text-toolbar-button
+																		icon-name="utility:record_delete"
+																		icon-alternative-text="Delete Column"
+																		onclick={handleDeleteColumn}>
+																	</lightning-rich-text-toolbar-button>
+
+																</lightning-rich-text-toolbar-button-group>
+
+																<lightning-rich-text-toolbar-button-group slot="toolbar"
+																	aria-label="Third group">
+
+																	<lightning-rich-text-toolbar-button
+																		icon-name="utility:clear"
+																		icon-alternative-text="Clear Table"
+																		onclick={handleclearTable}>
+																	</lightning-rich-text-toolbar-button>
+
+																</lightning-rich-text-toolbar-button-group>
+
+															</lightning-input-rich-text>
+															<div data-id={colvar.divid} style={colvar.style} hidden>
+															</div>
+														</td>
+													</template>
+												</tr>
+											</template>
+										</tbody>
+									</table>
+								</div>
+							</template>
+
+							<div class="slds-col slds-size_12-of-12 slds-text-align_right slds-p-top_small">
+								<lightning-button class="slds-m-left_small" disabled={disableButton} variant="brand"
+									label="Save" title="titleName" onclick={handlesectionsave}>
+								</lightning-button>
+								<lightning-button class="slds-m-left_small" disabled={disabledeleteButton}
+									variant="brand" label="Delete" title="titleName" onclick={handlesectionDelete}>
+								</lightning-button>
+							</div>
+		</template>
+
+		<c-modal>
+
+			<template lwc:if={showmergefield}>
+				<span slot="header">Merge Field(s)</span>
+				<div class="slds-modal__content slds-p-around_medium" style="min-height: 240px;">
+					<c-dx-lookup-fields-displaycmp selection-object={selectedObjectName}>
+					</c-dx-lookup-fields-displaycmp>
+				</div>
+
+				<footer class="slds-modal__footer">
+					<div class="slds-text-align_right">
+						<lightning-button variant="brand" label="insert" title="insert" onclick={getMergeField}>
+						</lightning-button>
+					</div>
+				</footer>
+			</template>
+
+			<template lwc:elseif={showImageModal}>
+				<span slot="header">Select Image</span>
+				<div class="slds-modal__content slds-p-around_small dx-lrf-std-cstm-1" style="min-height: 240px;">
+					<template if:true={showimages}>
+						<template if:true={imagesfound}>
+							<div class="slds-grid slds-p-around_xx-small slds-border_bottom"
+								style="border: 1px solid rgb(229, 229, 229); border-radius: 5px; background: rgb(243, 243, 243);">
+								<div
+									class="slds-col slds-size_1-of-2 slds-medium-size_4-of-12 slds-large-size_4-of-12 slds-p-bottom_xx-small">
+									<lightning-input if:true={showimages} name="enter-search" label="Search"
+										type="search" onchange={handleSearch}></lightning-input>
+								</div>
+
+							</div>
+						</template>
+						<div class="slds-grid slds-wrap slds-p-top_small">
+							<template if:true={imagesfound}>
+								<template for:each={imageUrls} for:item="image" for:index="index">
+
+									<div class="slds-col slds-size_1-of-1 slds-large-size_3-of-12 slds-text-align_center"
+										key={image.Id}>
+										<div class="slds-box slds-box_small  slds-m-bottom_small" key={image.Id}
+											data-id={image.Id} onclick={handleselectedImage} disabled={isDisabled}>
+
+											<img key={image.Id} src={image.URL} alt="User Image" style={selectedImageStyle}/>
+											<br key={image.Id}/>
+											<br key={image.Id}/>
+											<lightning-formatted-text value={image.title} key={image.Id}
+												disabled={isDisabled}></lightning-formatted-text>
+
+										</div>
+									</div>
+
+								</template>
+							</template>
+						</div>
+						<template if:false={imagesfound}>
+							<p>No Images found, Please upload the images under Files & try again</p>
+						</template>
+					</template>
+
+				</div>
+			</template>
+
+			<template lwc:elseif={isClearTable}>
+				<span slot="header">Clear Table</span>
+
+				<div class="slds-modal__content slds-p-around_medium">
+					<p>Clicking "Submit" will discard all changes made to the table, and you will need to rebuild it
+						from scratch.</p>
+				</div>
+
+				<footer class="slds-modal__footer">
+					<button class="slds-button slds-button_neutral" onclick={cancelTableClear} title="Cancel">Cancel</button>
+					<button class="slds-button slds-button_brand" onclick={submitTableClear} title="Submit">Submit</button>
+				</footer>
+			</template>
+		</c-modal>
+	</div>
+</template>
