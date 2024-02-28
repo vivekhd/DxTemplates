@@ -5,7 +5,7 @@
       "package": "DxTemplates_Unlocked",
       "versionName": "ver 0.1",
       "versionNumber": "0.1.0.NEXT",
-      "default": true,
+      "default": false,
       "versionDescription": "",
       "apexTestAccess": {
         "permissionSets": [
@@ -17,8 +17,8 @@
       "path": "force-app",
       "package": "Dx_Templates",
       "versionName": "ver 0.1",
-      "versionNumber": "0.2.0.NEXT",
-      "default": false,
+      "versionNumber": "0.3.0.NEXT",
+      "default": true,
       "versionDescription": "",
       "postInstallScript": "PostInstallDataCreation",
       "ancestorVersion": "HIGHEST"
@@ -52,6 +52,9 @@
     "Dx_Templates@0.2.0-2": "04tQm000000hgdVIAQ",
     "Dx_Templates@0.2.0-3": "04tQm000000hgiLIAQ",
     "Dx_Templates@0.2.0-4": "04tQm000000hgnBIAQ",
-    "DxTemplates_Unlocked@0.1.0-13": "04tQm000000ifKPIAY"
+    "DxTemplates_Unlocked@0.1.0-13": "04tQm000000ifKPIAY",
+    "DxTemplates_Unlocked@0.1.0-14": "04tQm000000issjIAA",
+    "Dx_Templates@0.3.0-1": "04tQm000000j5oLIAQ",
+    "DxTemplates_Unlocked@0.1.0-15": "04tQm000000j5y1IAA"
   }
 }
