@@ -1094,7 +1094,8 @@ popUpMessage; // Popup message.
   handleWatermarkSettings() {
     this.editTemplate = false;
     this.showwatermarkbtn = true;
-    this.generateCanvas();
+    this.getSavedDocTempWatermarkData();
+    //this.generateCanvas();
   }
 
 /**
@@ -1370,6 +1371,7 @@ popUpMessage; // Popup message.
           this.pageImageOption = savedWaterMarkData[1].pageImageOption;
           this.checkedValImage = savedWaterMarkData[1].isPrimary;
           this.opacityImageValue = savedWaterMarkData[1].opacity;
+          this.generateCanvas();
         }
       }).catch(error => {
         console.log('error activation', error);

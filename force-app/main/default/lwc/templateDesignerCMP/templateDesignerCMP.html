@@ -35,9 +35,9 @@
 							<lightning-button-icon icon-name="utility:task" alternative-text="Section : Clause"
 								title="Section : Clause" onclick={handleNewClause} disabled={disableEditing}>
 							</lightning-button-icon>
-							<lightning-button-icon icon-name="utility:table" alternative-text="Section : Table"
+							<!---<lightning-button-icon icon-name="utility:table" alternative-text="Section : Table"
 								title="Section : Table" onclick={handleNewTable} disabled={disableEditing}>
-							</lightning-button-icon>
+							</lightning-button-icon>-->
 							<span style="line-height:32px"> &nbsp; - &nbsp; </span>
 							<lightning-button-icon icon-name="utility:edit" alternative-text="Edit Template"
 								title="Edit Template" onclick={handleEditTemplate} disabled={disableEditing}>
@@ -334,7 +334,7 @@
 										class="slds-col slds-size_1-of-1 slds-medium-size_4-of-12 slds-large-size_4-of-12">
 										<lightning-slider class="rotationSlider" label="Rotation" size="x-small"
 											value={rotationvalue} onchange={handleRotationChange} data-label="rotation"
-											min="0" max="90" step="5" data-type="Text"></lightning-slider>
+											min="-180" max="180" step="5" data-type="Text"></lightning-slider>
 									</div>
 									<div
 										class="slds-col slds-size_1-of-1 slds-medium-size_4-of-12 slds-large-size_4-of-12">
@@ -397,7 +397,7 @@
 											class="slds-col slds-size_1-of-1 slds-medium-size_4-of-12 slds-large-size_4-of-12">
 											<lightning-slider class="rotationSlider" label="Rotation" size="x-small"
 												value={rotationImagevalue} onchange={handleRotationChange}
-												data-label="rotation" min="0" max="90" step="5" data-type="Image">
+												data-label="rotation" min="-180" max="180" step="5" data-type="Image">
 											</lightning-slider>
 										</div>
 
