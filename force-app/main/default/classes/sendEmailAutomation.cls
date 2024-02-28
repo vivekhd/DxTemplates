@@ -22,6 +22,12 @@ global class sendEmailAutomation implements Queueable,Database.AllowsCallouts{
         this.attachmentParentId = attachmentParentId;
         this.isSpecificToFox = false;
     }
+
+    global sendEmailAutomation(Id docInserted, String attachmentName, String emailStructure) {
+		this.documentRecordInserted = docInserted;
+        this.attachmentName = attachmentName;
+        this.emailStructure = emailStructure;
+    }
     
     global sendEmailAutomation(Id docInserted, String attachmentName, String emailStructure, Boolean isSpecificToFox) {
 		this.documentRecordInserted = docInserted;
