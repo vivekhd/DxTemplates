@@ -19,7 +19,7 @@
       "versionName": "ver 0.1",
       "versionNumber": "0.2.0.NEXT",
       "default": true,
-      "versionDescription": "",
+      "versionDescription": "Fox Team Version",
       "postInstallScript": "PostInstallDataCreation",
       "ancestorVersion": "HIGHEST"
     }
