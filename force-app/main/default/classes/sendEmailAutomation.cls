@@ -18,6 +18,7 @@ global class sendEmailAutomation implements Queueable,Database.AllowsCallouts{
 
     /* Deprecated method - removed for Fox Specific Changes. */
     @deprecated
+    @deprecated
     global sendEmailAutomation(Id docInserted, String attachmentName, String emailStructure) {
 		this.documentRecordInserted = docInserted;
         this.attachmentName = attachmentName;
@@ -103,6 +104,14 @@ global class sendEmailAutomation implements Queueable,Database.AllowsCallouts{
                     if(emailToBeSent.fromAddress != null) { emailContent.setOrgWideEmailAddressId(emailToBeSent.fromAddress); }
                     if(emailToBeSent.emailTemplateId != null) { emailContent.setTemplateId(emailToBeSent.emailTemplateId); }
                     Messaging.SendEmailResult[] emailSentStatus = Messaging.sendEmail(new List<Messaging.SingleEmailMessage> {emailContent});
+
+                    Map<String,Object> emailStatusInfo = new Map<String,Object> { 'status' => emailSentStatus[0].isSuccess(), 'errorInfo' => emailSentStatus[0].getErrors()};
+                    DxCPQ__DXTemplates_HandlerClass__mdt metaDataContent = [SELECT Id,Label,DxCPQ__HandlerClassName__c FROM DxCPQ__DXTemplates_HandlerClass__mdt where Label = 'HandlerClass'];
+                    if(metaDataContent != null) {
+                        Type t = Type.forName(metaDataContent.DxCPQ__HandlerClassName__c);
+                        DXHandlerInterface api = (DXHandlerInterface)t.newInstance();
+                        Map<String,Object> replaceData = api.execute(emailStatusInfo);
+                    }         
                 }
             }
         }
