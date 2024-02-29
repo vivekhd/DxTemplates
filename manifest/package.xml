@@ -3,9 +3,12 @@
 	<types>
 		<members>CanTheUser</members>
 		<members>CanTheUser_Tests</members>
+		<members>DXHandlerInterface</members>
 		<members>DexUtilTestDataFactory</members>
 		<members>DisplayPDFController</members>
+		<members>DisplayPDFController_Test</members>
 		<members>DisplayRelatedController</members>
+		<members>DisplayRelatedController_Test</members>
 		<members>DisplayRelatedObjects</members>
 		<members>FooterClass</members>
 		<members>LogHandler</members>
@@ -16,6 +19,8 @@
 		<members>PdfDisplayTest</members>
 		<members>PopUpMessageSelector</members>
 		<members>PopUpMessageSelector_Test</members>
+		<members>PostInstallDataCreation</members>
+		<members>PostInstallDataCreation_Test</members>
 		<members>ProductSetupCtrl</members>
 		<members>ProductSetupCtrl_Test</members>
 		<members>ROsectionAutomationController</members>
@@ -27,64 +32,19 @@
 		<members>SaveDocumentTemplate</members>
 		<members>SaveDocumentTemplatesection</members>
 		<members>documentAutomationController</members>
-		<members>PostInstallDataCreation</members>
 		<members>sendEmailAutomation</members>
-		<members>DisplayPDFController_Test</members>
-		<members>DisplayRelatedController_Test</members>
-		<members>PostInstallDataCreation_Test</members>
 		<name>ApexClass</name>
 	</types>
 	<types>
-		<members>cloneDocumentCmp</members>
-		<members>conditionRowcmp</members>
-		<members>conditionUtil</members>
-		<members>conditioncmp</members>
-		<members>displayRelatedObjectsData</members>
-		<members>dxLookupFieldsDisplaycmp</members>
-		<members>dxSelectedRelatedObjectTemplateCmp</members>
-		<members>dxShowSelectedTemplate</members>
-		<members>dxTemplateSetup</members>
-		<members>dxtemplateSelectorCmp</members>
-		<members>generatePDF</members>
-		<members>hiddenComponent</members>
-		<members>menuSetup</members>
-		<members>menuSetupRow</members>
-		<members>modal</members>
-		<members>multiLookupComponent</members>
-		<members>searchCategory</members>
-		<members>summaryChildHierarchy</members>
-		<members>templateContentDetails</members>
-		<members>templateDesignerCMP</members>
-		<members>templateFooter</members>
-		<members>templateFooterType</members>
-		<members>templateHeader</members>
-		<members>templateHeaderType</members>
-		<members>templateRelatedObjects</members>
-		<members>templateTableDetails</members>
-		<name>LightningComponentBundle</name>
+		<members>renderAsPdfLWC</members>
+		<name>ApexPage</name>
 	</types>
 	<types>
-		<members>dexcpqcartstyles</members>
-		<members>dexcpqfonts</members>
-		<members>dexcpqstyles</members>
-		<members>dxQuoteTemplate</members>
-		<members>rte_tbl</members>
-        <members>Template_iconattributeoption1</members>
-        <members>Template_iconattributeoption2</members>
-        <members>Template_iconattributeoption3</members>
-		<name>StaticResource</name>
+		<members>NavigateToDocument</members>
+		<name>AuraDefinitionBundle</name>
 	</types>
 	<types>
-		<members>Document_Clause__c</members>
-		<members>Document_Template_Section__c</members>
-		<members>Document_Template__c</members>
-		<members>Document__c</members>
-		<members>Rule_Condition__c</members>
-		<members>Rule__c</members>
-		<members>TransactionLog__c</members>
-		<name>CustomObject</name>
-	</types>
-	<types>
+		<members>DXTemplates_HandlerClass__mdt.HandlerClassName__c</members>
 		<members>Document_Clause__c.Body__c</members>
 		<members>Document_Clause__c.Category__c</members>
 		<members>Document_Clause__c.IsActive__c</members>
@@ -138,26 +98,18 @@
 		<name>CustomField</name>
 	</types>
 	<types>
-		<members>Document_Clause__c-Document Clause Layout</members>
-		<members>Document_Template_Section__c-Document Template Section Layout</members>
-		<members>Document_Template__c-Document Template Layout</members>
-		<members>Document__c-Document Layout</members>
-		<members>Rule_Condition__c-Rule Condition Layout</members>
-		<members>Rule__c-Rule Layout</members>
-		<members>TransactionLog__c-Transaction Log Layout</members>
-		<name>Layout</name>
+		<members>DXTemplates_HandlerClass.HandlerClass</members>
+		<name>CustomMetadata</name>
 	</types>
 	<types>
-		<members>renderAsPdfLWC</members>
-		<name>ApexPage</name>
-	</types>
-	<types>
-		<members>Dx_Template_Access</members>
-		<name>PermissionSet</name>
-	</types>
-	<types>
-		<members>NavigateToDocument</members>
-		<name>AuraDefinitionBundle</name>
+		<members>Document_Clause__c</members>
+		<members>Document_Template_Section__c</members>
+		<members>Document_Template__c</members>
+		<members>Document__c</members>
+		<members>Rule_Condition__c</members>
+		<members>Rule__c</members>
+		<members>TransactionLog__c</members>
+		<name>CustomObject</name>
 	</types>
 	<types>
 		<members>Document_Clause__c</members>
@@ -172,7 +124,50 @@
 		<members>Document_Template_Section_Record_Page</members>
 		<name>FlexiPage</name>
 	</types>
-	<types>		
+	<types>
+		<members>Generate_Document_from_Template</members>
+		<name>Flow</name>
+	</types>
+	<types>
+		<members>Document_Clause__c-Document Clause Layout</members>
+		<members>Document_Template_Section__c-Document Template Section Layout</members>
+		<members>Document_Template__c-Document Template Layout</members>
+		<members>Document__c-Document Layout</members>
+		<members>Rule_Condition__c-Rule Condition Layout</members>
+		<members>Rule__c-Rule Layout</members>
+		<members>TransactionLog__c-Transaction Log Layout</members>
+		<name>Layout</name>
+	</types>
+	<types>
+		<members>cloneDocumentCmp</members>
+		<members>conditionRowcmp</members>
+		<members>conditionUtil</members>
+		<members>conditioncmp</members>
+		<members>displayRelatedObjectsData</members>
+		<members>dxLookupFieldsDisplaycmp</members>
+		<members>dxSelectedRelatedObjectTemplateCmp</members>
+		<members>dxShowSelectedTemplate</members>
+		<members>dxTemplateSetup</members>
+		<members>dxtemplateSelectorCmp</members>
+		<members>generatePDF</members>
+		<members>hiddenComponent</members>
+		<members>menuSetup</members>
+		<members>menuSetupRow</members>
+		<members>modal</members>
+		<members>multiLookupComponent</members>
+		<members>searchCategory</members>
+		<members>summaryChildHierarchy</members>
+		<members>templateContentDetails</members>
+		<members>templateDesignerCMP</members>
+		<members>templateFooter</members>
+		<members>templateFooterType</members>
+		<members>templateHeader</members>
+		<members>templateHeaderType</members>
+		<members>templateRelatedObjects</members>
+		<members>templateTableDetails</members>
+		<name>LightningComponentBundle</name>
+	</types>
+	<types>
 		<members>Document_Clause__c.All</members>
 		<members>Document_Template_Section__c.All</members>
 		<members>Document_Template__c.All</members>
@@ -182,9 +177,20 @@
 		<members>TransactionLog__c.All</members>
 		<name>ListView</name>
 	</types>
-	<types>	
-	    <members>Generate_Document_from_Template</members>
-		<name>Flow</name>
+	<types>
+		<members>Dx_Template_Access</members>
+		<name>PermissionSet</name>
 	</types>
-	<version>55.0</version>
+	<types>
+		<members>Template_iconattributeoption1</members>
+		<members>Template_iconattributeoption2</members>
+		<members>Template_iconattributeoption3</members>
+		<members>dexcpqcartstyles</members>
+		<members>dexcpqfonts</members>
+		<members>dexcpqstyles</members>
+		<members>dxQuoteTemplate</members>
+		<members>rte_tbl</members>
+		<name>StaticResource</name>
+	</types>
+	<version>58.0</version>
 </Package>
