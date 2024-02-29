@@ -18,7 +18,6 @@ global class sendEmailAutomation implements Queueable,Database.AllowsCallouts{
 
     /* Deprecated method - removed for Fox Specific Changes. */
     @deprecated
-    @deprecated
     global sendEmailAutomation(Id docInserted, String attachmentName, String emailStructure) {
 		this.documentRecordInserted = docInserted;
         this.attachmentName = attachmentName;
