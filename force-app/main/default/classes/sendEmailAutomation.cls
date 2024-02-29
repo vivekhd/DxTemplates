@@ -17,7 +17,6 @@ global class sendEmailAutomation implements Queueable,Database.AllowsCallouts{
     public class SafeClassException extends Exception {}
 
     /* Deprecated method - removed for Fox Specific Changes. */
-    @Deprecated
     global sendEmailAutomation(Id docInserted, String attachmentName, String emailStructure) {
 		this.documentRecordInserted = docInserted;
         this.attachmentName = attachmentName;
@@ -25,7 +24,7 @@ global class sendEmailAutomation implements Queueable,Database.AllowsCallouts{
     }
 
     /* Constructor used for the context of general Organizations. */
-    global sendEmailAutomation(Id docInserted, String attachmentName, Id attachmentParentId) { 
+    global sendEmailAutomation(Id docInserted, String attachmentName, Id attachmentParentId, String ignoreThisText) { 
 		this.documentRecordInserted = docInserted;
         this.attachmentName = attachmentName;
         this.attachmentParentId = attachmentParentId;
