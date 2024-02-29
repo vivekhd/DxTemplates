@@ -33,8 +33,8 @@ export default class DxTemplateSetup extends LightningElement {
   @track checkedValImage = false; // Default Image watermark checkbox (isPrimary) is unchecked, false
   @track imageScalingValue = 100; // Default Image scaling = 100
   @track opacityValue = '1.0'; // Default text Opacity = 1
-  @track pageTextOption = 'All Pages'; // Default text page Option for watermark is selected as "ALL PAGES"
-  @track pageImageOption = 'All Pages'; // Default Image page Option for watermark is selected as "ALL PAGES"
+  @track pageTextOption = 'All Pages - Text'; // Default text page Option for watermark is selected as "ALL PAGES"
+  @track pageImageOption = 'All Pages - Image'; // Default Image page Option for watermark is selected as "ALL PAGES"
   //watermarkPageOptionsText combobox options for Text Watermark
   watermarkPageOptionsText = [
         { label: 'All Pages', value: 'All Pages - Text', checked : true },
