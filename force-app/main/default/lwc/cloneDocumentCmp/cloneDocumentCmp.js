@@ -25,6 +25,7 @@ export default class CloneDocumentCmp extends LightningElement {
         docTempObj.DxCPQ__Related_To_Type__c = this.parentTemplateRelatedToType;
         docTempObj.DxCPQ__Description__c = fields.DxCPQ__Description__c;
         docTempObj.DxCPQ__Parent_Template__c=fields.DxCPQ__Parent_Template__c;
+        docTempObj.DxCPQ__Watermark_Data__c=fields.DxCPQ__Watermark_Data__c;
         cloneDocumentTemplate({docTemp:docTempObj, docTempId:this.recordId}).then(result=>{
             if(result){
                 this.resultObj = JSON.parse(JSON.stringify(result));
