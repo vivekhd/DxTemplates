@@ -30,6 +30,7 @@ global with sharing class documentAutomationController {
     }
     
     /* This method is for Automated PDF document generation for FOX Cient. Email action is given for this client hence the parameter is accepted. */
+    @deprecated
     global static void generateDocument(Id templateId, List<String> recordIds, String documentNameAfterGeneration, String emailToBeSent) {
         try {
             Id insertedDocumentId = documentGenerationForAutomationContext(templateId,recordIds);
@@ -37,6 +38,38 @@ global with sharing class documentAutomationController {
             System.enqueueJob(new sendEmailAutomation(insertedDocumentId, documentNameAfterGeneration, emailToBeSent, true));
         } catch (Exception ex) {
             LogHandler.createLog((Id) null,'documentAutomationController.generateDocument()','Template Id- '+templateId+' '+ex.getLineNumber()+ex.getStackTraceString()+ex.getCause(),ex.getMessage(),'Exception');
+        }
+    }
+
+    /* This method is for Automated PDF document generation for FOX Cient. Email action is given for this client hence the parameter is accepted. */
+    global static void generateDocument(Id templateId, List<String> recordIds, String documentNameAfterGeneration) {
+        try {
+            Id insertedDocumentId = documentGenerationForAutomationContext(templateId,recordIds);
+            /* Queueing the process for a different Transaction */
+            System.enqueueJob(new sendEmailAutomation(insertedDocumentId, documentNameAfterGeneration, true));
+        } catch (Exception ex) {
+            LogHandler.createLog((Id) null,'documentAutomationController.generateDocument()','Template Id- '+templateId+' '+ex.getLineNumber()+ex.getStackTraceString()+ex.getCause(),ex.getMessage(),'Exception');
+        }
+    }
+
+    /* This method is for Automated PDF document generation for FOX Cient. Email action is given for this client hence the parameter is accepted. */
+    global static void generateDocument(String methodName,Map<string,Object> inputMap) {
+        try {
+            Id templateId = (Id) (inputMap.containsKey('templateId')?inputMap.get('templateId'):null);
+            List<String> recordIds = (List<String>) (inputMap.containsKey('recordIds')?inputMap.get('recordIds'):new List<String>());
+            String documentNameAfterGeneration = (String) (inputMap.containsKey('documentNameAfterGeneration')?inputMap.get('documentNameAfterGeneration'):null);
+            if(templateId!=null && !recordIds.isEmpty() )
+            {
+                Id insertedDocumentId = documentGenerationForAutomationContext(templateId,recordIds);
+                Map<string,Object> outputMap=new Map<string,Object>();
+                outputMap.putAll(inputMap);
+                outputMap.put('insertedDocumentId',insertedDocumentId);
+                // Queueing the process for a different Transaction 
+                System.enqueueJob(new sendEmailAutomation('NA',outputMap));
+            }
+            
+        } catch (Exception ex) {
+            LogHandler.createLog((Id) null,'documentAutomationController.generateDocument()','Template Id- '+' '+ex.getLineNumber()+ex.getStackTraceString()+ex.getCause(),ex.getMessage(),'Exception');
         }
     }
 

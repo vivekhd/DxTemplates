@@ -13,6 +13,7 @@ global class sendEmailAutomation implements Queueable,Database.AllowsCallouts{
     Boolean isSpecificToFox;
     Id documentRecordInserted;
     private static Savepoint sp1;
+    Map<string,Object> inputMap;
     public static Safely safe = new Safely();
     public class SafeClassException extends Exception {}
 
@@ -44,6 +45,7 @@ global class sendEmailAutomation implements Queueable,Database.AllowsCallouts{
     }
     
     /* Constructor used for the context of FOX Organization. */
+    
     global sendEmailAutomation(Id docInserted, String attachmentName, String emailStructure, Boolean isSpecificToFox) {
 		this.documentRecordInserted = docInserted;
         this.attachmentName = attachmentName;
@@ -51,6 +53,27 @@ global class sendEmailAutomation implements Queueable,Database.AllowsCallouts{
         this.isSpecificToFox = true;
     }
     
+    /* Constructor used for the context of FOX Organization. */
+    global sendEmailAutomation(Id docInserted, String attachmentName, Boolean isSpecificToFox) {
+        this.documentRecordInserted = docInserted;
+        this.attachmentName = attachmentName;
+        //this.emailStructure = emailStructure;
+        this.isSpecificToFox = true;
+    }
+
+
+    // Constructor used for the context of FOX Organization. 
+    global sendEmailAutomation(String methodName,Map<string,Object> inputMap) {
+        this.inputMap = inputMap;
+        this.isSpecificToFox = (boolean) (inputMap.containsKey('isSpecificToFox')?inputMap.get('isSpecificToFox'):false);
+        this.documentRecordInserted = (Id) (inputMap.containsKey('insertedDocumentId')?inputMap.get('insertedDocumentId'):null);
+        this.attachmentName = (String) (inputMap.containsKey('documentNameAfterGeneration')?inputMap.get('documentNameAfterGeneration'):null);
+        //this.documentRecordInserted = docInserted;
+        //this.attachmentName = attachmentName;
+        //this.emailStructure = emailStructure;
+        //this.isSpecificToFox = true;
+    }
+
     public void execute(QueueableContext context) {
         try {
             List<String> errorList;
@@ -82,7 +105,7 @@ global class sendEmailAutomation implements Queueable,Database.AllowsCallouts{
                 }
 
             } else {
-                if(emailStructure != null) {
+                /*if(emailStructure != null) {
                     Messaging.EmailFileAttachment attachmentToInsert = new Messaging.EmailFileAttachment();
                     attachmentToInsert.setFileName(attachmentName+'.pdf');
                     attachmentToInsert.setBody(pg.getContentAsPDF()); 
@@ -102,16 +125,25 @@ global class sendEmailAutomation implements Queueable,Database.AllowsCallouts{
                     emailContent.setHTMLBody(emailToBeSent.emailBody);
                     if(emailToBeSent.fromAddress != null) { emailContent.setOrgWideEmailAddressId(emailToBeSent.fromAddress); }
                     if(emailToBeSent.emailTemplateId != null) { emailContent.setTemplateId(emailToBeSent.emailTemplateId); }
-                    Messaging.SendEmailResult[] emailSentStatus = Messaging.sendEmail(new List<Messaging.SingleEmailMessage> {emailContent});
+                    Messaging.SendEmailResult[] emailSentStatus = Messaging.sendEmail(new List<Messaging.SingleEmailMessage> {emailContent});*/
+                    
+                    
 
-                    Map<String,Object> emailStatusInfo = new Map<String,Object> { 'status' => emailSentStatus[0].isSuccess(), 'errorInfo' => emailSentStatus[0].getErrors()};
+
+                    Attachment documentAttachment = new Attachment();
+                    documentAttachment.Name = attachmentName +'.pdf';
+                    documentAttachment.Body = pg.getContentAsPDF();
+
+                    Map<String,Object> outputMap = new Map<String,Object>();
+                    outputMap.put('PDFAttachment',documentAttachment);
+                    outputMap.putAll(inputMap);
                     DxCPQ__DXTemplates_HandlerClass__mdt metaDataContent = [SELECT Id,Label,DxCPQ__HandlerClassName__c FROM DxCPQ__DXTemplates_HandlerClass__mdt where Label = 'HandlerClass'];
                     if(metaDataContent != null) {
-                        Type t = Type.forName(metaDataContent.DxCPQ__HandlerClassName__c);
-                        DXHandlerInterface api = (DXHandlerInterface)t.newInstance();
-                        Map<String,Object> replaceData = api.execute(emailStatusInfo);
+                        Type objectType = Type.forName(metaDataContent.DxCPQ__HandlerClassName__c);
+                        DXHandlerInterface api = (DXHandlerInterface)objectType.newInstance();
+                        Map<String,Object> replaceData = api.execute(outputMap);
                     }         
-                }
+                /*}*/
             }
         }
         catch(Exception ex) {
