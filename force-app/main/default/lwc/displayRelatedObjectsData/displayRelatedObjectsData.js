@@ -230,7 +230,7 @@ export default class DisplayRelatedObjectsData extends LightningElement {
 
         if ((records[i] + '').includes('servlet.shepherd/version/download/')) {
             cellData.value = records[i];
-            cellData.style = 'border: 1px solid black; text-align: center;';
+            cellData.style = 'border: 1px solid black; text-align: center; background-color:transparent;';
             cellData.imgcell = true;
             cellData.width = '100px';
         }
@@ -261,7 +261,7 @@ export default class DisplayRelatedObjectsData extends LightningElement {
             }
             else { cellData.value = records[i]; }
 
-            cellData.style = 'border: 1px solid black; text-align: center;';
+            cellData.style = 'border: 1px solid black; text-align: center; background-color:transparent;';
             cellData.imgcell = false;
             if (records[i - 1] == 'CURRENCY' || records[i - 1] == 'NUMBER' || records[i - 1] == 'BOOLEAN') {
                 cellData.width = '30px';
