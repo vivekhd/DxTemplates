@@ -20,19 +20,11 @@ global class sendEmailAutomation implements Queueable,Database.AllowsCallouts{
     /* Deprecated method - removed for Fox Specific Changes. */
     @deprecated
     global sendEmailAutomation(Id docInserted, String attachmentName, String emailStructure) {
-		this.documentRecordInserted = docInserted;
-        this.attachmentName = attachmentName;
-        this.emailStructure = emailStructure;
     }
 
     /* Constructor used for the context of general Organizations. */
     @deprecated
     global sendEmailAutomation(Id docInserted, String attachmentName, Id attachmentParentId) { 
-        this.documentRecordInserted = docInserted;
-        this.attachmentName = attachmentName;
-        this.attachmentParentId = attachmentParentId;
-        this.isSpecificToFox = false;
-        this.emailStructure = null;
     }
 
     /* Constructor used for the context of general Organizations. */
@@ -45,22 +37,12 @@ global class sendEmailAutomation implements Queueable,Database.AllowsCallouts{
     }
     
     /* Constructor used for the context of FOX Organization. */
-    
     global sendEmailAutomation(Id docInserted, String attachmentName, String emailStructure, Boolean isSpecificToFox) {
-		this.documentRecordInserted = docInserted;
-        this.attachmentName = attachmentName;
-        this.emailStructure = emailStructure;
-        this.isSpecificToFox = true;
     }
     
     /* Constructor used for the context of FOX Organization. */
     global sendEmailAutomation(Id docInserted, String attachmentName, Boolean isSpecificToFox) {
-        this.documentRecordInserted = docInserted;
-        this.attachmentName = attachmentName;
-        //this.emailStructure = emailStructure;
-        this.isSpecificToFox = true;
     }
-
 
     // Constructor used for the context of FOX Organization. 
     global sendEmailAutomation(String methodName,Map<string,Object> inputMap) {
@@ -68,10 +50,6 @@ global class sendEmailAutomation implements Queueable,Database.AllowsCallouts{
         this.isSpecificToFox = (boolean) (inputMap.containsKey('isSpecificToFox')?inputMap.get('isSpecificToFox'):false);
         this.documentRecordInserted = (Id) (inputMap.containsKey('insertedDocumentId')?inputMap.get('insertedDocumentId'):null);
         this.attachmentName = (String) (inputMap.containsKey('documentNameAfterGeneration')?inputMap.get('documentNameAfterGeneration'):null);
-        //this.documentRecordInserted = docInserted;
-        //this.attachmentName = attachmentName;
-        //this.emailStructure = emailStructure;
-        //this.isSpecificToFox = true;
     }
 
     public void execute(QueueableContext context) {
@@ -90,7 +68,11 @@ global class sendEmailAutomation implements Queueable,Database.AllowsCallouts{
                 Attachment documentAttachment = new Attachment();
                     documentAttachment.Name = attachmentName;
                     documentAttachment.ParentId = attachmentParentId; 
+                if(!Test.isRunningTest()){
                     documentAttachment.Body = pg.getContentAsPDF();
+                } else {
+                    documentAttachment.Body = Blob.valueOf('Test');
+                }
                     documentAttachment.IsPrivate = false;
                 Savepoint sp1 = Database.setSavepoint();
 
@@ -105,68 +87,28 @@ global class sendEmailAutomation implements Queueable,Database.AllowsCallouts{
                 }
 
             } else {
-                /*if(emailStructure != null) {
-                    Messaging.EmailFileAttachment attachmentToInsert = new Messaging.EmailFileAttachment();
-                    attachmentToInsert.setFileName(attachmentName+'.pdf');
-                    attachmentToInsert.setBody(pg.getContentAsPDF()); 
-                    
-                    documentAutomationController.emailWrapper emailToBeSent = (documentAutomationController.emailWrapper) JSON.deserialize(emailStructure ,documentAutomationController.emailWrapper.class);
-                    if(emailToBeSent.contentDocumentIds != null && emailToBeSent.contentFugitiveMap != null){
-                        existingAttachments = ContentDocumentAsAttachement(emailToBeSent.contentDocumentIds,emailToBeSent.contentFugitiveMap);
-                    }
-                    existingAttachments.add(attachmentToInsert);
-
-                    Messaging.SingleEmailMessage emailContent = new Messaging.SingleEmailMessage();
-                    emailContent.setFileAttachments(existingAttachments);
-                    emailContent.setToAddresses(emailToBeSent.toAddresses); 
-                    emailContent.setCcAddresses(emailToBeSent.toCCAddresses);
-                    emailContent.setBccAddresses(emailToBeSent.toBCCAddresses);
-                    emailContent.setSubject(emailToBeSent.emailSubject);
-                    emailContent.setHTMLBody(emailToBeSent.emailBody);
-                    if(emailToBeSent.fromAddress != null) { emailContent.setOrgWideEmailAddressId(emailToBeSent.fromAddress); }
-                    if(emailToBeSent.emailTemplateId != null) { emailContent.setTemplateId(emailToBeSent.emailTemplateId); }
-                    Messaging.SendEmailResult[] emailSentStatus = Messaging.sendEmail(new List<Messaging.SingleEmailMessage> {emailContent});*/
-                    
-                    
-
-
-                    Attachment documentAttachment = new Attachment();
-                    documentAttachment.Name = attachmentName +'.pdf';
+                Attachment documentAttachment = new Attachment();
+                documentAttachment.Name = attachmentName +'.pdf';
+                if(!Test.isRunningTest()){
                     documentAttachment.Body = pg.getContentAsPDF();
+                } else {
+                    documentAttachment.Body = Blob.valueOf('Test');
+                }               
 
-                    Map<String,Object> outputMap = new Map<String,Object>();
-                    outputMap.put('PDFAttachment',documentAttachment);
-                    outputMap.putAll(inputMap);
-                    DxCPQ__DXTemplates_HandlerClass__mdt metaDataContent = [SELECT Id,Label,DxCPQ__HandlerClassName__c FROM DxCPQ__DXTemplates_HandlerClass__mdt where Label = 'HandlerClass'];
-                    if(metaDataContent != null) {
-                        Type objectType = Type.forName(metaDataContent.DxCPQ__HandlerClassName__c);
-                        DXHandlerInterface api = (DXHandlerInterface)objectType.newInstance();
-                        Map<String,Object> replaceData = api.execute(outputMap);
-                    }         
-                /*}*/
+                Map<String,Object> outputMap = new Map<String,Object>();
+                outputMap.put('PDFAttachment',documentAttachment);
+                outputMap.putAll(inputMap);
+
+                DxCPQ__DXTemplates_HandlerClass__mdt metaDataContent = [SELECT Id,Label,DxCPQ__HandlerClassName__c FROM DxCPQ__DXTemplates_HandlerClass__mdt where Label = 'HandlerClass'];
+                if(metaDataContent != null) {
+                    Type objectType = Type.forName(metaDataContent.DxCPQ__HandlerClassName__c);
+                    DXHandlerInterface api = (DXHandlerInterface)objectType.newInstance();
+                    Map<String,Object> replaceData = api.execute(outputMap);
+                }         
             }
         }
         catch(Exception ex) {
             LogHandler.createLog((Id) null,'sendEmailAutomation.execute() Queueable Class','Document Id- '+ documentRecordInserted + ' ' + ex.getLineNumber() + ex.getStackTraceString() + ex.getCause(),ex.getMessage(),'Exception');
         }
-    }
-
-    /* FOX specific method for attaching the existing ContentVersion records to the Email being sent. */
-    private List<Messaging.EmailFileAttachment> ContentDocumentAsAttachement(List<Id> contentDocumentIds,Map<Id,String> contentFugitiveMap) {
-        List<ContentVersion> documents                  = new List<ContentVersion>{};
-        List<Messaging.EmailFileAttachment> attachments = new List<Messaging.EmailFileAttachment>{};
-        documents.addAll([
-            SELECT Id, Title, FileType,FileExtension, VersionData, isLatest, ContentDocumentId
-            FROM ContentVersion
-            WHERE isLatest = true AND ContentDocumentId IN :contentDocumentIds
-        ]);
-        
-        for (ContentVersion document: documents) {
-            Messaging.EmailFileAttachment attachment = new Messaging.EmailFileAttachment();
-            attachment.setBody(document.VersionData);
-            attachment.setFileName(contentFugitiveMap.get(document.ContentDocumentId)+'-'+document.Title+'.'+document.FileExtension);
-            attachments.add(attachment);
-        }
-        return attachments;
     }
 }

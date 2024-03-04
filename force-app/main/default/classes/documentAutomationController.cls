@@ -79,8 +79,10 @@ global with sharing class documentAutomationController {
             String documentContent = '';
             Document__c sectionContentRecord = new Document__c();
             Map<String,String> headerFooterSectionMap = new Map<String,String> {};
-            
+            Integer recordPointer = 0;
+
             for(Document_Template_Section__c singleDataSection : DisplayPDFController.getTemplateSectionsMulRecords(templateId, recordIds , null) ) {
+                
                 if(singleDataSection.Type__c == 'Header') {
                     headerFooterSectionMap.put('\"header\"',singleDataSection.Section_Content__c);
                 } else if (singleDataSection.Type__c == 'Footer') {
@@ -93,7 +95,7 @@ global with sharing class documentAutomationController {
                     } else {
                         documentContent = documentContent + '<table class="tableMainClass">' + ROsectionAutomationController.getHeaderContent(singleDataSection.Id).replace('<table>','').replace('</table>','');
                     }                    
-                    documentContent = documentContent + ROsectionAutomationController.getSectionDataAsHTML(recordIds[0], singleDataSection.Id) + '</table>';
+                    documentContent = documentContent + ROsectionAutomationController.getSectionDataAsHTML(recordIds[recordPointer++], singleDataSection.Id) + '</table>';
                 }
             }
             
@@ -129,6 +131,7 @@ global with sharing class documentAutomationController {
     }
 
     @JsonAccess(serializable='always' deserializable='always')
+    @deprecated
     global class emailWrapper{
         global List<String> toAddresses; 
         global List<String> toCCAddresses;
