@@ -141,7 +141,7 @@ global with sharing class DisplayPDFController
                 defaultCSS = true;  
             } 
             if(inputparam != null){
-                displayText = String.escapeSingleQuotes(docrec.Document_Body__c);        
+                displayText = String.escapeSingleQuotes(docrec.Document_Body__c).replace('\\', '');        
             } else {
                 displayText = 'ID not found ' + inputparam;
             }
