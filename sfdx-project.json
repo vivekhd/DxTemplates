@@ -1,45 +1,6 @@
 {
-  "packageDirectories": [
-    {
-      "path": "force-app",
-      "package": "DxTemplates_Unlocked",
-      "versionName": "ver 0.1",
-      "versionNumber": "0.1.0.NEXT",
-      "default": false,
-      "versionDescription": "",
-      "apexTestAccess": {
-        "permissionSets": [
-          "Dx_Template_Access"
-        ]
-      }
-    },
-    {
-      "path": "force-app",
-      "package": "Dx_Templates",
-      "versionName": "ver 0.1",
-      "versionNumber": "0.1.7.NEXT",
-      "default": true,
-      "versionDescription": "",
-      "postInstallScript": "PostInstallDataCreation",
-      "ancestorVersion": "HIGHEST"
-    }
-  ],
   "name": "DxTemplates",
   "namespace": "DxCPQ",
   "sfdcLoginUrl": "https://login.salesforce.com",
-  "sourceApiVersion": "58.0",
-  "packageAliases": {
-    "DxTemplates_Unlocked": "0HoQm00000000UfKAI",
-    "DxTemplates_Unlocked@0.1.0-1": "04tQm000000NzVpIAK",
-    "DxTemplates_Unlocked@0.1.0-2": "04tQm000000O6YvIAK",
-    "Dx_Templates": "0HoQm00000000WHKAY",
-    "Dx_Templates@0.1.0-1": "04tQm000000O7TNIA0",
-    "Dx_Templates@0.1.0-2": "04tQm000000O7bRIAS",
-    "Dx_Templates@0.1.1-1": "04tQm000000O81FIAS",
-    "Dx_Templates@0.1.2-1": "04tQm000000OisjIAC",
-    "Dx_Templates@0.1.2-2": "04tQm000000PKUzIAO",
-    "Dx_Templates@0.1.3-1": "04tQm000000QZJtIAO",
-    "Dx_Templates@0.1.3-2": "04tQm000000UzVtIAK",
-    "Dx_Templates@0.1.3-3": "04tQm000000UzXVIA0"
-  }
+  "sourceApiVersion": "58.0"
 }
