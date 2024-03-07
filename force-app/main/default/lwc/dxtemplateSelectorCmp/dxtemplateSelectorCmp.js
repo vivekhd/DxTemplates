@@ -61,7 +61,7 @@ export default class DxtemplateSelectorCmp extends NavigationMixin(LightningElem
         this.delayTimeout = setTimeout(() => { }, 0);
 
         let dateKey = new Date().toLocaleString().split(', ');
-        this.modifiedPDFName = 'DX-' + this.objectLabel + '-' + dateKey[0].replaceAll('/','') + dateKey[1].split(' ')[0].replaceAll(':','');
+        this.modifiedPDFName = 'DX-' + this.objectLabel + '-' + dateKey[0].replaceAll('/','') + '-' + dateKey[1].split(' ')[0].replaceAll(':','');
     }
 
     selectItemEventHandler(event) {
