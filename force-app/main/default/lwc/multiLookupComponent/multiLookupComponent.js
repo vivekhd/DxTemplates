@@ -84,9 +84,13 @@ export default class DxMultiLookupComponent extends LightningElement {
                     this.error = error;
                     this.lstResult = undefined;
                     this.isDialogDisplay = false;
-                    createLog({ recordId: this.templatesectionid, className: 'multiLookupComponent LWC Component', exceptionMessage: error.body.message, LogData: error.body.exceptionType, logType: 'Exception' })
-                        .then(result => { console.log('Log is generated'); })
-                        .catch(error => { console.log('Log is not generated ' + JSON.stringify(error)); })
+                    createLog({ recordId: this.templatesectionid, className: 'multiLookupComponent LWC Component', exceptionMessage: error.body.message, logData: error.body.exceptionType, logType: 'Exception' })
+                        .then(result => {result; })
+                        .catch(error => { 
+                            let tempError = error.toString();
+                            let errorMessage = error.message || 'Unknown error message';
+                            createLog({recordId:'', className:'multiLookupComponent LWC Component', exceptionMessage:errorMessage, logData:tempError, logType:'Exception'});
+                        })
                 })
         } else {
             this.isDialogDisplay = false;

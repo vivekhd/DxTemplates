@@ -1,24 +1,27 @@
-/* Class:              DexUtilTestDataFactory
-    * Developer:          Abhishek Goel
-    * Created Date:       30/1/2020
-    * Description:        This generic test is used to create the records for test classes
+/**
+ 	* Class:              DexUtilTestDataFactory
+    * Developer		:     Abhishek Goel
+    * Created Date	:     30/1/2020
+    * @description	:     This generic test is used to create the records for test classes
     * Last Modified Date: 30/1/2020
     * Change Log: 
     */
     @isTest
     public with sharing class DexUtilTestDataFactory {
-    /* Method:             createRecords
-    * Parameters:         List<SObject> records : List of sobjects(Account, Contact etc..) which has to be created/inserted
-    *                      Boolean doInsert: set true to if you want to instert the created record or else false
-    *                      Map<String, Object> attributes: takes list of attributes for one or multiple records
-    * Return:             List<SObject> : List of sobject which has been created/inserted
-    * Created Date:       30/1/2020
-    * Description:        This generic method is used to create the record of any Sobject type
-    * Last Modified Date: 30/1/2020
-    * Change Log: 
-    */
-
+    /**
+     * @description An instance of the Safely class used for safe database operations.
+     */
     public static Safely safe = new Safely();
+     /**
+     * @description Creates records with optional attributes and inserts them into the database.
+     * 
+     * @param records    List of SObject records to be created.
+     * @param doInsert   Boolean flag indicating whether to insert the records into the database.
+     * @param attributes Map of attributes to be applied to the records during creation.
+     *                   Keys represent field names, and values can be single values or lists of values
+     *                   corresponding to each record in the 'records' list.
+     * @return           List of created SObject records.
+     */
     public static List<SObject> createRecords(List<SObject> records, Boolean doInsert, Map<String, Object> attributes){
         try{
             Integer i = 0;
@@ -58,16 +61,16 @@
         return records;
     }
 
-    /* Method:             createAccounts
-    * Parameters:         Integer numToInsert : Number of account records to be inserted
-    *                      Boolean doInsert: set true to if you want to instert the created record or else false
-    *                      Map<String, Object> attributes: takes list of attributes for one or multiple records
-    * Return:             List<Account> : List of Accoutns which has been created/inserted
-    * Created Date:       30/1/2020
-    * Description:        This method is used to create or insert account record
-    * Last Modified Date: 30/1/2020
-    * Change Log: 
-    */
+   /**
+     * @description Creates a list of Account records with specified attributes and optionally inserts them into the database.
+     * 
+     * @param numToInsert  The number of Account records to create.
+     * @param doInsert     Boolean flag indicating whether to insert the records into the database.
+     * @param attributes   Map of attributes to be applied to the records during creation.
+     *                     Keys represent field names, and values can be single values or lists of values
+     *                     corresponding to each record.
+     * @return             List of created Account records.
+     */
     public static List<Account> createAccounts(Integer numToInsert, Boolean doInsert, Map<String, Object> attributes){
         List<Account> accountsToInsert = new List<Account>();
         for(Integer i=0; i< numToInsert; i++){
@@ -79,16 +82,16 @@
         return createRecords(accountsToInsert, doInsert, attributes);
     }
 
-    /* Method:             createContacts
-    * Parameters:         Integer numToInsert : Number of contact records to be inserted
-    *                      Boolean doInsert: set true to if you want to instert the created record or else false
-    *                      Map<String, Object> attributes: takes list of attributes for one or multiple records
-    * Return:             List<Contact> : List of Contacts which has been created/inserted
-    * Created Date:       30/1/2020
-    * Description:        This method is used to create or insert contact record
-    * Last Modified Date: 30/1/2020
-    * Change Log: 
-    */
+    /**
+     * @description Creates a list of Contact records with specified attributes and optionally inserts them into the database.
+     * 
+     * @param numToInsert  The number of Contact records to create.
+     * @param doInsert     Boolean flag indicating whether to insert the records into the database.
+     * @param attributes   Map of attributes to be applied to the records during creation.
+     *                     Keys represent field names, and values can be single values or lists of values
+     *                     corresponding to each record.
+     * @return             List of created Contact records.
+     */
     public static List<Contact> createContacts(Integer numToInsert, Boolean doInsert, Map<String, Object> attributes){
         List<Contact> consToInsert = new List<Contact>();
         for(Integer i=0; i< numToInsert; i++){
@@ -100,16 +103,16 @@
         return createRecords(consToInsert, doInsert, attributes);
     }
 
-    /* Method:            createOpportunities
-    * Parameters:         Integer numToInsert : Number of contact records to be inserted
-    *                     Boolean doInsert: set true to if you want to instert the created record or else false
-    *                     Map<String, Object> attributes: takes list of attributes for one or multiple records
-    * Return:             List<Opportunity>
-    * Created Date:       30/1/2020
-    * Description:        This method is used to create or insert Opportunity record.
-    * Last Modified Date: 30/1/2020
-    * Change Log: 
-    */
+   /**
+     * @description Creates a list of Opportunity records with specified attributes and optionally inserts them into the database.
+     * 
+     * @param numToInsert  The number of Opportunity records to create.
+     * @param doInsert     Boolean flag indicating whether to insert the records into the database.
+     * @param attributes   Map of attributes to be applied to the records during creation.
+     *                     Keys represent field names, and values can be single values or lists of values
+     *                     corresponding to each record.
+     * @return             List of created Opportunity records.
+     */
     public static List<Opportunity> createOpportunities(Integer numToInsert, Boolean doInsert, Map<String, Object> attributes){
         List<Opportunity> consToInsert = new List<Opportunity>();
         List<String> stages = new List<String>{'Prospecting', 'Qualification', 'Needs Analysis', 'Proposal', 'Negotiation', 'Closed Won', 'Closed Lost'};
@@ -122,7 +125,16 @@
         }
         return createRecords(consToInsert, doInsert, attributes);
     }
-
+        /**
+         * @description Creates a list of Rule__c records with specified attributes and optionally inserts them into the database.
+         * 
+         * @param numToInsert  The number of Rule__c records to create.
+         * @param doInsert     Boolean flag indicating whether to insert the records into the database.
+         * @param attributes   Map of attributes to be applied to the records during creation.
+         *                     Keys represent field names, and values can be single values or lists of values
+         *                     corresponding to each record.
+         * @return             List of created Rule__c records.
+ 		*/
     public static list<Rule__c> createRule(Integer numToInsert, Boolean doInsert, Map<String, Object> attributes){
         List<Rule__c> ruleToInsert = new List<Rule__c>();
         for(Integer i=0; i< numToInsert; i++){
@@ -133,7 +145,16 @@
         }
         return createRecords(ruleToInsert, doInsert, attributes);
     }
-
+        /**
+         * @description Creates a list of Rule_Condition__c records with specified attributes and optionally inserts them into the database.
+         * 
+         * @param numToInsert  The number of Rule_Condition__c records to create.
+         * @param doInsert     Boolean flag indicating whether to insert the records into the database.
+         * @param attributes   Map of attributes to be applied to the records during creation.
+         *                     Keys represent field names, and values can be single values or lists of values
+         *                     corresponding to each record.
+         * @return             List of created Rule_Condition__c records.
+ 		*/
     public static list<Rule_Condition__c> createRuleCondition(Integer numToInsert, Boolean doInsert, Map<String, Object> attributes){
         List<Rule_Condition__c> ruleConditionToInsert = new List<Rule_Condition__c>();
         for(Integer i=0; i< numToInsert; i++){
@@ -146,19 +167,35 @@
         }
         return createRecords(ruleConditionToInsert, doInsert, attributes);
     }
-
+     /**
+     * @description Creates a list of TransactionLog__c records with specified attributes and optionally inserts them into the database.
+     * 
+     * @param numToInsert  The number of TransactionLog__c records to create.
+     * @param doInsert     Boolean flag indicating whether to insert the records into the database.
+     * @param attributes   Map of attributes to be applied to the records during creation.
+     *                     Keys represent field names, and values can be single values or lists of values
+     *                     corresponding to each record.
+     * @return             List of created TransactionLog__c records.
+     */
     public static List<TransactionLog__c> createTransactionLog(Integer numToInsert, Boolean doInsert, Map<String, Object> attributes){
-        List<TransactionLog__c> TransactionLogToInsert = new List<TransactionLog__c>();
+        List<TransactionLog__c> transactionLogToInsert = new List<TransactionLog__c>();
         for(Integer i=0; i< numToInsert; i++){
             TransactionLog__c trn = new TransactionLog__c();
-            TransactionLogToInsert.add(trn);
+            transactionLogToInsert.add(trn);
         }
-        return createRecords(TransactionLogToInsert, doInsert, attributes);
+        return createRecords(transactionLogToInsert, doInsert, attributes);
     }
 
-    /* Method  : createDocumentTemplate
-    * To Insert Document Template we are using this method
-    */
+  /**
+     * @description Creates a list of Document_Template__c records with specified attributes and optionally inserts them into the database.
+     * 
+     * @param numToInsert  The number of Document_Template__c records to create.
+     * @param doInsert     Boolean flag indicating whether to insert the records into the database.
+     * @param attributes   Map of attributes to be applied to the records during creation.
+     *                     Keys represent field names, and values can be single values or lists of values
+     *                     corresponding to each record.
+     * @return             List of created Document_Template__c records.
+     */
     public static List<Document_Template__c> createDocumentTemplate(Integer numToInsert, Boolean doInsert, Map<String, Object> attributes){
         List<Document_Template__c> docTemplatesToInsert = New List<Document_Template__c>();
         for(Integer i=0; i< numToInsert; i++){
@@ -172,9 +209,16 @@
         return createRecords(docTemplatesToInsert, doInsert, attributes);
     }
 
-    /* Method  : createDocument
-        * To Insert Documents we are using this method
-        */
+    /**
+     * @description Creates a list of Document__c records with specified attributes and optionally inserts them into the database.
+     * 
+     * @param numToInsert  The number of Document__c records to create.
+     * @param doInsert     Boolean flag indicating whether to insert the records into the database.
+     * @param attributes   Map of attributes to be applied to the records during creation.
+     *                     Keys represent field names, and values can be single values or lists of values
+     *                     corresponding to each record.
+     * @return             List of created Document__c records.
+     */
     Public static List<Document__c> createDocument(Integer numToInsert, Boolean doInsert, Map<String, Object> attributes){
         List<Document__c> docsToInsert = New List<Document__c>();
         for(Integer i=0; i< numToInsert; i++){
@@ -187,9 +231,16 @@
         return createRecords(docsToInsert, doInsert, attributes);
     }
 
-    /* Method  : createDocumentClause
-        * To Insert Document Clause we are using this method
-        */
+    /**
+     * @description Creates a list of Document_Clause__c records with specified attributes and optionally inserts them into the database.
+     * 
+     * @param numToInsert  The number of Document_Clause__c records to create.
+     * @param doInsert     Boolean flag indicating whether to insert the records into the database.
+     * @param attributes   Map of attributes to be applied to the records during creation.
+     *                     Keys represent field names, and values can be single values or lists of values
+     *                     corresponding to each record.
+     * @return             List of created Document_Clause__c records.
+     */
 
     Public static List<Document_Clause__c> createDocumentClause(Integer numToInsert, Boolean doInsert, Map<String, Object> attributes){
         List<Document_Clause__c> docClauseToInsert = New List<Document_Clause__c>();
@@ -205,9 +256,16 @@
         return createRecords(docClauseToInsert, doInsert, attributes);
     }
 
-    /* Method  : createDocumentClause
-        * To Insert Document Clause we are using this method
-        */
+   /**
+     * @description Creates a list of Document_Template_Section__c records with specified attributes and optionally inserts them into the database.
+     * 
+     * @param numToInsert  The number of Document_Template_Section__c records to create.
+     * @param doInsert     Boolean flag indicating whether to insert the records into the database.
+     * @param attributes   Map of attributes to be applied to the records during creation.
+     *                     Keys represent field names, and values can be single values or lists of values
+     *                     corresponding to each record.
+     * @return             List of created Document_Template_Section__c records.
+     */
     Public static List<Document_Template_Section__c> createDocumentTemplateSection(Integer numToInsert, Boolean doInsert, Map<String, Object> attributes){
         List<Document_Template_Section__c> docTemplateSectionToInsert = New List<Document_Template_Section__c>();
         for(Integer i=0; i< numToInsert; i++){
@@ -222,8 +280,12 @@
         }
         return createRecords(docTemplateSectionToInsert, doInsert, attributes);
     }
-
-    public static User CreateTestUser(){
+    /**
+     * @description Creates a test User record with a unique username and assigns the System Administrator profile.
+     * 
+     * @return The created test User.
+     */
+    public static User createTestUser(){
         List<user> lstuser = new List<User>();
         String uniqueUserName = 'dxcpq' + DateTime.now().getTime() + '@testorg.com';
         Profile prof = [select id from profile where name LIKE '%System Administrator%'];
@@ -233,14 +295,18 @@
         TimeZoneSidKey='America/Los_Angeles',
         UserName=uniqueUserName);
         lstuser.add(u);
-        set<Id> UserId = new set<Id>();
+        set<Id> userId = new set<Id>();
         List<user> retUser = createRecords(lstuser, true, new Map<String, Object>());
-        UserId.add(retUser[0].Id);
-        AssignPermissionSetToUsers(UserId);
+        userId.add(retUser[0].Id);
+        assignPermissionSetToUsers(userId);
         return retUser[0];
     }
-
-    public static void AssignPermissionSetToUsers (Set<Id> usersId) {
+    /**
+     * @description Assigns the specified Permission Set to the given set of Users.
+     * 
+     * @param usersId The set of User IDs to which the Permission Set will be assigned.
+     */
+    public static void assignPermissionSetToUsers (Set<Id> usersId) {
         List<PermissionSetAssignment> permissionSetList = new List<PermissionSetAssignment>();
         List<PermissionSet> permissionstobeassigned = [SELECT Id, Label FROM PermissionSet WHERE Name IN ('Dx_Template_Access')];
         for (User u : [Select Id, Name FROM User Where Id IN : usersId]){
@@ -251,9 +317,12 @@
                 permissionSetList.add(psa);
             }
         }
-        List<Database.upsertResult> uResults = Database.upsert(permissionSetList,false);
+       Database.upsert(permissionSetList,false);
     }
-
+	/**
+     * @description Custom exception class to handle exceptions in the SafeClass.
+     * Extends the standard Exception class.
+     */
     public class SafeClassException extends Exception{
     }
 }

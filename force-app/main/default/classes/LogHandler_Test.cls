@@ -19,9 +19,9 @@ private class LogHandler_Test {
         try{
             LogHandler.createMultipleLogs(logRecordList);
         }catch(Exception e){
-            system.assert(e.getMessage()!=null);
+             System.assert(e.getMessage()!=null, 'Error: Assertion failed');
         }
-        System.assert(true);
+        System.assert(true,'Error: Assertion failed');
         Test.stopTest();
         }
     }

@@ -1,7 +1,18 @@
+/**
+* Class			    : DisplayRelatedController
+* Developer			: 
+* Created Date		: 
+* @description		: 
+* Last Modified Date: 
+*/
 global with sharing class DisplayRelatedController {
-    
+    /**
+     * @description : Property to hold the display text
+     */
     public String displayText{  get;  set;  }
-    
+    /**
+     *@description :  Constructor to initialize the display text
+     */
     public DisplayRelatedController() {
         Id documentid;
         try{

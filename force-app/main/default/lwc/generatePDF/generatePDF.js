@@ -1,7 +1,8 @@
-import { LightningElement,api,wire,track } from 'lwc';
+import { LightningElement,api } from 'lwc';
 import { NavigationMixin } from 'lightning/navigation';
 import pdfObjectdetails from '@salesforce/apex/PdfDisplay.getObjectDetails';
 import getDomainUrl from '@salesforce/apex/PdfDisplay.getDomainUrl';
+import createLog from '@salesforce/apex/LogHandler.createLog';
 export default class GeneratePDF extends  NavigationMixin(LightningElement)  {
 
     @api recordId;
@@ -18,7 +19,7 @@ export default class GeneratePDF extends  NavigationMixin(LightningElement)  {
                 this.objectApiName = result.objectName;
                 this.objectLabel = result.objectLabel;
             })
-            .catch(error => {});
+            .catch(() => {});
 
     }
 
@@ -29,8 +30,11 @@ export default class GeneratePDF extends  NavigationMixin(LightningElement)  {
                     this.domainURL = result;
                 }
             })
-            .catch((error) => {
-                console.error('Error retrieving getDomainUrl message:', error.message);
+            .catch(error => {
+                let tempError = error.toString();
+                let errorMessage = error.message || 'Unknown error message';
+                createLog({recordId:'', className:'generatePDF LWC Component', exceptionMessage:errorMessage, logData:tempError, logType:'Exception'});
+           
             });
     }
 

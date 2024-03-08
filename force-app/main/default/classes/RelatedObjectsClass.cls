@@ -1,9 +1,21 @@
+/**
+ * Class: RelatedObjectsClass
+ * Developer:
+ * Created Date:
+ * @description : tility class for managing related objects and rule conditions.
+ * Last Modified Date:
+ */
 global with sharing class RelatedObjectsClass {
     
     public static Safely safe = new Safely();
 	private static Savepoint sp1;
     
     //Below method will return the list of child object names for the selectedobject
+    /**
+     * @description Returns a map of child object names for the selected object.
+     * @param selectedObject The object for which to retrieve child object names.
+     * @return Map containing child object names and their corresponding relationship field names.
+     */
     @AuraEnabled
     public static map<string,string> getRelatedObjects(string selectedObject){
         try{
@@ -31,6 +43,11 @@ global with sharing class RelatedObjectsClass {
     }
     
     //Below method will return the list of field names present in the selected object
+    /**
+     * @description Returns a map of field names present in the selected object.
+     * @param selectedObject The object for which to retrieve field names.
+     * @return Map containing field names and their corresponding labels.
+     */
     @AuraEnabled
     public static Map<string,string> getFields(String selectedObject){
     try{
@@ -39,11 +56,11 @@ global with sharing class RelatedObjectsClass {
         Map <String,Schema.SObjectType> gd = Schema.getGlobalDescribe();
         Schema.SObjectType sobjType = gd.get(selectedObject);
         Schema.DescribeSObjectResult r = sobjType.getDescribe();
-        Map<String, Schema.SObjectField> MapofField = r.fields.getMap();        
+        Map<String, Schema.SObjectField> mapOfField = r.fields.getMap();        
         
-        for(String fieldName : MapofField.keySet()) {
-            Schema.SObjectField field = MapofField.get(fieldName);
-            Schema.DescribeFieldResult F = field.getDescribe();
+        for(String fieldName : mapOfField.keySet()) {
+            Schema.SObjectField field = mapOfField.get(fieldName);
+            Schema.DescribeFieldResult f = field.getDescribe();
             reqFields.add(String.ValueOf(field));
             reqFieldsMap.put(String.ValueOf(field),String.Valueof(F.getLabel()));
         }
@@ -55,12 +72,22 @@ global with sharing class RelatedObjectsClass {
     }  
     }
     
+    /**
+     * @description Returns the related object details for the selected Document Template.
+     * @param docTempId The Document Template ID.
+     * @return Document_Template__c object.
+     */
     @AuraEnabled
     public static Document_Template__c getRelatedObjectForSelectedDocumentTemplate(Id docTempId){
         Document_Template__c docTemp = [SELECT Id, Name, Related_To_Type__c, IsActive__c FROM Document_Template__c WHERE Id=:docTempId WITH SECURITY_ENFORCED LIMIT 1];
         return docTemp;
     }
     
+    /**
+     * @description Returns grouping values (picklist values) for fields in the selected object.
+     * @param selectedObject The object for which to retrieve grouping values.
+     * @return Map containing field names and their grouping values.
+     */
     @AuraEnabled
     public static Map<String,Object> getGroupingValues(String selectedObject){
         try{
@@ -68,18 +95,18 @@ global with sharing class RelatedObjectsClass {
             Map <String,Schema.SObjectType> gd = Schema.getGlobalDescribe();
             Schema.SObjectType sobjType = gd.get(selectedObject);
             Schema.DescribeSObjectResult r = sobjType.getDescribe();
-            Map<String, Schema.SObjectField> MapofField = r.fields.getMap();
-            for(String fieldName : MapofField.keySet()) {
-                Schema.SObjectField field = MapofField.get(fieldName);
-                Schema.DescribeFieldResult F = field.getDescribe();
+            Map<String, Schema.SObjectField> mapOfField = r.fields.getMap();
+            for(String fieldName : mapOfField.keySet()) {
+                Schema.SObjectField field = mapOfField.get(fieldName);
+                Schema.DescribeFieldResult f = field.getDescribe();
                 if(f.getType()+''=='PICKLIST')
                 {                
                     List<Object> lst = new List<Object>();
-                    for(Integer i=0;i<F.getPicklistValues().size();i++)
+                    for(Integer i=0;i<f.getPicklistValues().size();i++)
                     {
                         Map<String,String> mp = new Map<String,String>();
-                        mp.put('label',F.getPicklistValues()[i].getLabel());
-                        mp.put('value',F.getPicklistValues()[i].getValue());
+                        mp.put('label',f.getPicklistValues()[i].getLabel());
+                        mp.put('value',f.getPicklistValues()[i].getValue());
                         lst.add(mp);
                     }
                     reqFields.put(fieldName,lst);
@@ -94,6 +121,11 @@ global with sharing class RelatedObjectsClass {
     }    
     
     /* TemplateRelatedObjects LWC Calls - Intended for Filtering Rules - Modified by Rahul*/
+    /**
+     * @description Returns a list of ConditionObjectWrapper objects for the selected child object label.
+     * @param selectedChildObjectLabel The label of the child object for which to retrieve conditions.
+     * @return List of ConditionObjectWrapper objects containing object label, API name, and field set details.
+     */
     @AuraEnabled	
     public static List<ConditionObjectWrapper> getSObjectListFiltering(String selectedChildObjectLabel){        	
         List<ConditionObjectWrapper> conditionObjectList = new List<ConditionObjectWrapper>();	
@@ -105,6 +137,11 @@ global with sharing class RelatedObjectsClass {
         return conditionObjectList;	
     }
     
+	/**
+     * @description Returns a list of fields wrapped in a custom class.
+     * @param selectedObject The object for which to retrieve fields.
+     * @return List of FieldWrap objects containing field details.
+     */
     public static List<FieldWrap> getFieldsWrapper(String selectedObject){
         try{
             Map<String, Schema.SObjectType> gd = Schema.getGlobalDescribe(); 
@@ -138,12 +175,22 @@ global with sharing class RelatedObjectsClass {
         }   
     }
     
+	/**
+     * @description Returns existing Rule Conditions for the specified rule name.
+     * @param ruleName The name of the rule for which to retrieve conditions.
+     * @return List of Rule_Condition__c objects.
+     */
     @AuraEnabled
     public static List<Rule_Condition__c> getExistingConditions(String ruleName){
         List<Rule_Condition__c> existingConditions = RuleSelector.getRuleConditions(ruleName);
         return existingConditions;
     }
     
+	/**
+     * @description Clones rules from the parent template and returns the cloned rule ID.
+     * @param parentTempSecId The ID of the parent template section.
+     * @return ID of the cloned rule.
+     */
     public static Id cloneRulesFromParentTemplate(Id parentTempSecId){
         try{
             
@@ -172,10 +219,17 @@ global with sharing class RelatedObjectsClass {
         }  
     }
     
+	/**
+     * @description Creates or updates rule conditions based on the provided data.
+     * @param ruleConditions JSON string containing rule conditions data.
+     * @param ruleExpression Rule expression string.
+     * @param deleteIds List of IDs to delete.
+     * @param sectionrecordid Section record ID.
+     * @return Name (ID) of the created or updated rule.
+     */
     @AuraEnabled
     public static String createRuleCondition(String ruleConditions, String ruleExpression, List<Id> deleteIds , String sectionrecordid){
         try{
-            Id RuleId;
             Id tempruleId;
             String ruleName;
             if(deleteIds != null && deleteIds.size() > 0){
@@ -275,7 +329,7 @@ global with sharing class RelatedObjectsClass {
                     }
                 }
                 if(insertConditionsList.size()>0){
-                    if (sp1 == null) sp1 = Database.setSavepoint();
+                    if (sp1 == null){ sp1 = Database.setSavepoint();} 
                     Database.SaveResult[] srLst1 = safe.doInsert(insertConditionsList);
                     List<String> errorList1 = Safely.safeClassExceptionHandlerInsert(srLst1);
                     if(errorList1.size()>0){
@@ -284,7 +338,7 @@ global with sharing class RelatedObjectsClass {
                     }
                 }
                 if(updateConditionsList.size()>0){
-                    if (sp1 == null) sp1 = Database.setSavepoint();
+                    if (sp1 == null) {sp1 = Database.setSavepoint();}
                     Database.SaveResult[] srList2 = safe.doUpdate(updateConditionsList);
                     List<String> errorList2 = Safely.safeClassExceptionHandlerInsert(srList2);
                     if(errorList2.size()>0){
@@ -301,48 +355,134 @@ global with sharing class RelatedObjectsClass {
         }  
     }
     
+	/**
+     *@description Custom wrapper class for rule conditions.
+     */
     public class RuleConditionWrapper{
+        /**
+         * @description Represents the unique identifier (Id) of the condition.
+         *              Used to uniquely identify and manage the condition in the client-side.
+         */
         @AuraEnabled
-        public String Id {get;set;}
+        public String Id { get; set; }
+        
+        /**
+         * @description Represents the name of the condition, providing a meaningful label or identifier.
+         */
         @AuraEnabled
-        public String conditionName {get;set;}
+        public String conditionName { get; set; }
+        
+        /**
+         * @description Represents the operator used in the condition, defining the type of comparison.
+         *              Examples include '=', '!=', '>', '<', etc.
+         */
         @AuraEnabled
-        public String operator {get;set;}
+        public String operator { get; set; }
+        
+        /**
+         * @description Represents the object selected in the condition, specifying the context or entity for the condition.
+         */
         @AuraEnabled
-        public String selectedObject {get;set;}
+        public String selectedObject { get; set; }
+        
+        /**
+         * @description Represents the data type of the selected field in the condition.
+         *              Examples include 'Text', 'Number', 'Date', etc.
+         */
         @AuraEnabled
-        public String dataType {get;set;}
+        public String dataType { get; set; }
+        
+        /**
+         * @description Represents the field selected in the condition, indicating the property or attribute being compared.
+         */
         @AuraEnabled
-        public String selectedField {get;set;}
+        public String selectedField { get; set; }
+        
+        /**
+         * @description Represents the value used in the condition for comparison with the selected field.
+         */
         @AuraEnabled
-        public String value {get;set;}
+        public String value { get; set; }
+        
+        /**
+         * @description Represents the index of the condition, providing its position or order among multiple conditions.
+         */
         @AuraEnabled
-        public String conditionIndex {get;set;}
+        public String conditionIndex { get; set; }
+
 	}
     
+	/**
+     * @description Custom wrapper class for condition objects.
+     */
     public class ConditionObjectWrapper{
+       /**
+         * @description Represents the label or display name of the Salesforce object.
+         *              Used for presenting a human-readable name associated with the object.
+         */
         @AuraEnabled
-        public String objectLabelName{get;set;}
+        public String objectLabelName { get; set; }
+        
+        /**
+         * @description Represents the API name of the Salesforce object.
+         *              Used for identifying the object programmatically in Apex and API calls.
+         */
         @AuraEnabled
-        public String objectAPIName{get;set;}
+        public String objectAPIName { get; set; }
+        
+        /**
+         * @description Represents a list of FieldWrap objects, each providing information about a field on the Salesforce object.
+         *              Used for displaying and managing details about fields associated with the object.
+         * @see FieldWrap
+         */
         @AuraEnabled
-        public List<FieldWrap> fieldSet{get;set;}
-    }
+        public List<FieldWrap> fieldSet { get; set; }
+ }
 	
+	/**
+     * @description Custom wrapper class for fields.
+     */
    	public class FieldWrap{
+        /**
+         * @description Represents the name or label associated with a field.
+         *              Used for displaying a human-readable identifier for the field.
+         */
         @AuraEnabled
-        public String name{get;set;}
+        public String name { get; set; }
+        
+        /**
+         * @description Represents the API name of a field.
+         *              Used for programmatic identification and reference to the field in Apex and API calls.
+         */
         @AuraEnabled
-        public String apiName{get;set;}
+        public String apiName { get; set; }
+        
+        /**
+         * @description Represents the data type of a field.
+         *              Used for specifying the type of data that can be stored in the field.
+         */
         @AuraEnabled
-        public String dataType{get;set;}
+        public String dataType { get; set; }
+        
+        /**
+         * @description Represents a list of values associated with a field, particularly applicable for picklist fields.
+         *              Used for displaying and managing the available values for selection in the user interface.
+         */
         @AuraEnabled
-        public List<String> values{get;set;}
-    }
+        public List<String> values { get; set; }
+}
     
+	/**
+     * @description Custom exception class for safe handling.
+     */
     public class SafeClassException extends Exception{        
 	}
     
+	/**
+     * @description Handles resetting conditions for the specified template rule.
+     * @param templateRuleId The ID of the template rule to reset.
+     * @return Success or Error message.
+     */
     @AuraEnabled
     public static String handleTemplateRuleResetCondition(Id templateRuleId) {
         try{

@@ -3,6 +3,7 @@ import getContentVersions from '@salesforce/apex/FooterClass.getContentVersions'
 import saveDocumentTemplateSectionDetails from '@salesforce/apex/SaveDocumentTemplatesection.saveDocumentTemplateSectionDetails';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 import gettemplatesectiondata from '@salesforce/apex/SaveDocumentTemplatesection.gettemplatesectiondata';
+import createLog from '@salesforce/apex/LogHandler.createLog';
 
 export default class TemplateFooter extends LightningElement {
   imageUrls = [];
@@ -50,7 +51,11 @@ export default class TemplateFooter extends LightningElement {
         this.showimages = true;
       }
     }
-    else if (error) { }
+    else if (error) {
+      let tempError = error.toString();
+            let errorMessage = error.message || 'Unknown error message';
+            createLog({recordId:'', className:'templateFooter LWC Component', exceptionMessage:errorMessage, logData:tempError, logType:'Exception'});
+     }
   }
 
   @api handleActivateTemplate(isActive) {
@@ -63,7 +68,7 @@ export default class TemplateFooter extends LightningElement {
     this.handlecolumnsClass(this.columnvalue);
     if (this.footerSectionsMap.length > 0) {
       if (this.footerSectionsMap.length < this.columnvalue) {
-        for (var i = this.footerSectionsMap.length; i < this.columnvalue; i++) {
+        for (let i = this.footerSectionsMap.length; i < this.columnvalue; i++) {
           if (this.oldFooterColumnList[i]) {
             this.footerSectionsMap.push(this.oldFooterColumnList[i]);
           }
@@ -78,7 +83,7 @@ export default class TemplateFooter extends LightningElement {
       }
     }
     else {
-      for (var i = 0; i < this.columnvalue; i++) {
+      for (let i = 0; i < this.columnvalue; i++) {
         this.columnvalueList.push(i);
         this.footerSectionsMap.push({ "value": "", "indexvar": i, "key": (new Date()).getTime() + ":" + i })
       }
@@ -177,10 +182,15 @@ export default class TemplateFooter extends LightningElement {
           });
         }
       })
-      .catch(error => { })
+      .catch(error => { 
+            let tempError = error.toString();
+            let errorMessage = error.message || 'Unknown error message';
+            createLog({recordId:'', className:'templateFooter LWC Component', exceptionMessage:errorMessage, logData:tempError, logType:'Exception'});
+
+      })
   }
 
-  handlesectionsave(event) {
+  handlesectionsave() {
     this.Recorddetailsnew.Name = this.sectiontype;
     var currecid = this.sectionrecordid;
     if (this.footerSectionsMap.length > 0) {
@@ -208,7 +218,7 @@ export default class TemplateFooter extends LightningElement {
     this.Recorddetailsnew.DxCPQ__Document_Template__c = this.documenttemplaterecord.Id;
 
     if (this.Recorddetailsnew.Name != '' && this.Recorddetailsnew.Name != null) {
-      saveDocumentTemplateSectionDetails({ Recorddetails: this.Recorddetailsnew })
+      saveDocumentTemplateSectionDetails({ recordDetails: this.Recorddetailsnew })
         .then(result => {
           if (result != null) {
             this.savedRecordID = result;

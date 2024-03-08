@@ -1,15 +1,18 @@
-/* 
+/**
 * Class			    : PostInstallDataCreation
 * Developer			: Rahul Bejgam        
 * Created Date		: 09/09/2023
-* Description		: This class is for running Apex after the package Installation for a default record creation on the Document Template and sending the status of theis apex transaction eiforther failure/success of the Apex transaction.
+* @description		: This class is for running Apex after the package Installation for a default record creation on the Document Template and sending the status of theis apex transaction eiforther failure/success of the Apex transaction.
 * Test Class        : PostInstallDataCreation_test.apxc
 * Last Modified Date: 10/09/2023
 */
-
 global class PostInstallDataCreation implements InstallHandler {
     public static Safely safe = new Safely();
 
+	/**
+     * @description Invoked on package installation. Creates a default Document Template record and schedules Apex class for log clearance.
+     * @param context InstallContext object providing information about the installation context.
+     */
     global void onInstall(InstallContext context) {
         try {
             if(!context.isUpgrade()) {
@@ -43,6 +46,12 @@ global class PostInstallDataCreation implements InstallHandler {
         }
     }
 
+	/**
+     * @description Sends email notification about the status of the installation.
+     * @param mailSubject Subject of the email.
+     * @param messageBody Body of the email.
+     * @param userId Id of the user to receive the email.
+     */
     global void statusOfTheInstallation(String mailSubject,String messageBody, Id userId){
         String installerEmailAddress = [Select Email from User where Id =: userId WITH SECURITY_ENFORCED].Email;
         Messaging.SingleEmailMessage emailDraft = new Messaging.SingleEmailMessage();
@@ -51,6 +60,6 @@ global class PostInstallDataCreation implements InstallHandler {
         emailDraft.subject = mailSubject;
         emailDraft.plainTextBody = messageBody;
         Messaging.SingleEmailMessage[] messages =   new List<Messaging.SingleEmailMessage> {emailDraft};
-        Messaging.SendEmailResult[] results = Messaging.sendEmail(messages);
+        Messaging.sendEmail(messages);
     }
 }

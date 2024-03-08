@@ -1,8 +1,8 @@
-/* Class			: DisplayRelatedObjects
+/** Class			: DisplayRelatedObjects
 * Developer			:          
 * Created Date		: 05/01/2023
-* Description		: This class creates the data-wrapper require for the pdf generation. This class performs the dataquery, numerical calculation on QLIs, gathers the ConfigAttributes thereby passing it to the VF Page.
-The associated test class is in SectionSetupCtrl_Test
+* @description		: This class creates the data-wrapper require for the pdf generation. This class performs the dataquery, numerical calculation on QLIs, gathers the ConfigAttributes thereby passing it to the VF Page.
+* The associated test class is in SectionSetupCtrl_Test
 * Last Modified Date: 15/02/2023
 */
 public with sharing class DisplayRelatedObjects {    
@@ -11,8 +11,14 @@ public with sharing class DisplayRelatedObjects {
     public static Map<String,Decimal> currencyFieldTotals; 
     public static String errType = null;
     public static Id currTemplate;
-    public static String ROHtmlContent = '<tbody>';
+    public static String rOHtmlContent = '<tbody>';
     
+    /**
+     * @description Retrieves section data based on record ID and template section ID
+     * @param recordid String ID of the record
+     * @param templatesectionid String ID of the template section
+     * @return  String JSON serialized data
+     */
     @AuraEnabled
     public static string getsectionData(String recordid,String templatesectionid){
         currTemplate = templatesectionid;
@@ -24,14 +30,13 @@ public with sharing class DisplayRelatedObjects {
             Document_Template_Section__c dsrec=[select id,Section_Content__c from Document_Template_Section__c where id=:templatesectionid WITH SECURITY_ENFORCED];
             Map<string,Object> jsonMap = (Map<string,Object>)JSON.deserializeUntyped(dsrec.Section_Content__c);
                         
-            String objectName = 'Document_Template_Section__c';
+            
             List<Object> fieldsObjList = (List<Object>) jsonMap.get('tablelistValues');
             List<Object> fieldsObjListValues = (List<Object>) jsonMap.get('tablelistLabels');
             Map<String,Object> tableStyleList = (Map<String,Object>) jsonMap.get('style');
             
             // User Selected fields for Subtotal Calculation
             List<Object> subTotFieldNames = (List<Object>) jsonMap.get('subTotal');
-            list<string> productIds = new list<String>();
             
             Boolean newPage = (Boolean) jsonMap.get('newPage');
             Boolean serialNumber = (Boolean) jsonMap.get('SerialNumber');
@@ -112,7 +117,6 @@ public with sharing class DisplayRelatedObjects {
                 Map<Object, List<SObject>> recordCategoryMap = new Map<Object, List<SObject>>();
                 String ptrfield = (String) grpby;
                 for(Sobject ptrRecord : ChildRecords){
-                    Map<String, Object> maprec = (Map<String, Object>) JSON.deserializeUntyped(JSON.serialize(ptrRecord));
                     
                     if(!recordCategoryMap.containsKey(ptrRecord.get(ptrfield)) && ptrRecord.get(ptrfield)!=null){
                         List<SObject> recordList = new  List<SObject>();
@@ -151,7 +155,7 @@ public with sharing class DisplayRelatedObjects {
                     for(Integer i=0; i<count; i++){
                         Sobject currRecord = (Sobject) recordListofKey[i];
                         //Function Call
-                        RowWrapper recType = RecordDataWrapperCreation(fieldsObjList, currRecord, fieldNameType);
+                        RowWrapper recType = recordDataWrapperCreation(fieldsObjList, currRecord, fieldNameType);
                         //Function Call
                         rowWrapperList.add(recType);
                     }
@@ -199,13 +203,12 @@ public with sharing class DisplayRelatedObjects {
                 ChildRecords = Database.query(recordsQuery);
                 for(Sobject currRecord: ChildRecords) {
                     //qliRecIds.add(currRecord.get('Id'));
-                    ROHtmlContent += '<tr>';
-                    Map<String, Object> maprec = (Map<String, Object>) JSON.deserializeUntyped(JSON.serialize(currRecord));                    
+                    rOHtmlContent += '<tr>';                   
                     //Function Call
-                    RowWrapper recType = RecordDataWrapperCreation(fieldsObjList, currRecord, fieldNameType);
+                    RowWrapper recType = recordDataWrapperCreation(fieldsObjList, currRecord, fieldNameType);
                     //Function Call
                     rowWrapperList.add(recType);
-                    ROHtmlContent += '</tr>';
+                    rOHtmlContent += '</tr>';
                 }
                 //Adding GrandTotals to WrapperList
                 RowWrapper totType = new RowWrapper();
@@ -254,7 +257,7 @@ public with sharing class DisplayRelatedObjects {
             masterWrapper.chartNewPage = chartNewPage;
               
             string jsonstring = JSON.serialize(masterWrapper);
-            ROHtmlContent += '</tbody>';
+            rOHtmlContent += '</tbody>';
             return jsonstring;
         }
         catch(Exception ex)
@@ -264,7 +267,14 @@ public with sharing class DisplayRelatedObjects {
         return '';
     }
     
+    /** Class   : Wrapper
+ 	* @description : This class represents a wrapper containing data for PDF generation.
+ 	*/
     public class Wrapper{
+        
+		/**
+		* @description the values (cells) making up this row
+		*/
         public List<RowWrapper> rowWrapperList;
         public List<String> headers;
         public Boolean newPage;
@@ -294,23 +304,41 @@ public with sharing class DisplayRelatedObjects {
         public String chartLabel;
     }
     
-    
+    /** Class      : RowWrapper
+ 	* @description : This class represents a wrapper for a row of data, containing cells.
+ 	*/  
     public class RowWrapper{
-        // the values (cells) making up this row
+        
+        /**
+		* @description the values (cells) making up this row
+		*/
         public List<Object> values;
         public String type;
         
         // constructor
+		/**
+ 		* @description : constructor of RowWrapper
+ 		*/ 
         public RowWrapper(){
             values=new List<object>();
         }
         
-        // append a value (cell) to the row
+        
+         /** 
+		 * @description : append a value (cell) to the row 
+		 * @param value
+		 */ 
         public void addValue(Object value){
             values.add(value);
         }
     }
     
+    /**
+     * @description Retrieves the field type mapping for the specified object and field list.
+     * @param objName    The API name of the object.
+     * @param fieldList  The list of field names.
+     * @return           A map containing field names as keys and their corresponding data types as values.
+     */
     public static Map<String,String> getObjectFieldTypeMap(String objName, List<String> fieldList){
         Map<String,String> fieldNameType = new Map<String,String>();
         try {
@@ -328,14 +356,14 @@ public with sharing class DisplayRelatedObjects {
                         String objNameLkp = getLkpObjectApi(objName,tempfield[0]);
                         
                         tempfield.remove(0);
-                        Map<String,String> FieldnameTypeLookup = getObjectFieldTypeMap(objNameLkp,tempfield);
-                        fieldNameType.put(selfield,FieldnameTypeLookup.get(tempfield[0]));
+                        Map<String,String> fieldnameTypeLookup = getObjectFieldTypeMap(objNameLkp,tempfield);
+                        fieldNameType.put(selfield,fieldnameTypeLookup.get(tempfield[0]));
                     }
                     else{
                         List<String> tempfield = selfield.split('\\.');
                         tempfield.remove(0);
-                        Map<String,String> FieldnameTypeLookup = getObjectFieldTypeMap('User',tempfield);
-                        fieldNameType.put(selfield,FieldnameTypeLookup.get(tempfield[0]));
+                        Map<String,String> fieldnameTypeLookup = getObjectFieldTypeMap('User',tempfield);
+                        fieldNameType.put(selfield,fieldnameTypeLookup.get(tempfield[0]));
                     }
                 }
                 else{
@@ -348,7 +376,12 @@ public with sharing class DisplayRelatedObjects {
         }
         return fieldNameType;
     }
-    
+    /**
+     * @description Retrieves the API name of the lookup object for the specified lookup field on the given object.
+     * @param fromObjName  The API name of the object containing the lookup field.
+     * @param lkpField     The API name of the lookup field.
+     * @return             The API name of the related object.
+     */
     public static string getLkpObjectApi(String fromObjName, String lkpField){
         try{
             
@@ -363,11 +396,18 @@ public with sharing class DisplayRelatedObjects {
         }
         return '';
     }
-    
-    public Static RowWrapper RecordDataWrapperCreation(List<Object> fieldsObjList, Sobject currRecord, Map<String,String> fieldNameType){
+   
+    /**
+     * @description Creates a RowWrapper object containing data from the specified fields of the given record.
+     * @param fieldsObjList   The list of fields to include in the RowWrapper.
+     * @param currRecord      The record from which to retrieve the field values.
+     * @param fieldNameType   A map containing field names and their corresponding data types.
+     * @return                The RowWrapper object containing the record data.
+     */
+    public Static RowWrapper recordDataWrapperCreation(List<Object> fieldsObjList, Sobject currRecord, Map<String,String> fieldNameType){
         RowWrapper recType = new RowWrapper();
         recType.type='Record';
-        TransactionLog__c[] logList = new TransactionLog__c[] {};
+       
         	try{
                 for(Object field : fieldsObjList){
                     String fieldStr = (String) field;
@@ -422,17 +462,17 @@ public with sharing class DisplayRelatedObjects {
                             currencyFieldSubTotals.put(fieldStr, tempValueSubTotal);
                         } 
                     }
-                    ROHtmlContent = ROHtmlContent + '<td scope="col" style="border: 1px solid black; text-align: center;">' + recVal + '</td>';
+                    rOHtmlContent = rOHtmlContent + '<td scope="col" style="border: 1px solid black; text-align: center;">' + recVal + '</td>';
                     recType.addValue(recVal);
                 }
             }
         Catch(Exception ex) {
             if(errType==null){
                 errType = ex.getTypeName();
-                LogHandler.createLog((Id) null,'DisplayRelatedObjects.RecordDataWrapperCreation()','Template Id- '+currTemplate+' '+ex.getLineNumber()+ex.getStackTraceString()+ex.getCause(),ex.getMessage(),'Exception');
+                LogHandler.createLog((Id) null,'DisplayRelatedObjects.recordDataWrapperCreation()','Template Id- '+currTemplate+' '+ex.getLineNumber()+ex.getStackTraceString()+ex.getCause(),ex.getMessage(),'Exception');
             }
             else if(ex.getTypeName()!=errType) {
-                LogHandler.createLog((Id) null,'DisplayRelatedObjects.RecordDataWrapperCreation()','Template Id- '+currTemplate+' '+ex.getLineNumber()+ex.getStackTraceString()+ex.getCause(),ex.getMessage(),'Exception');
+                LogHandler.createLog((Id) null,'DisplayRelatedObjects.recordDataWrapperCreation()','Template Id- '+currTemplate+' '+ex.getLineNumber()+ex.getStackTraceString()+ex.getCause(),ex.getMessage(),'Exception');
             }
         }
         return recType;

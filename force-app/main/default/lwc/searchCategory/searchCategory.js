@@ -67,9 +67,9 @@ export default class DxSearchCategory extends LightningElement {
         var selectedVal = event.currentTarget.dataset.id;
         if (selectedVal && this.hasMultiSelect === true) {
             var count = 0;
-            var options = JSON.parse(JSON.stringify(this.optionData));
+            let options = JSON.parse(JSON.stringify(this.optionData));
             if (selectedVal === this.mapOfValueLabel.get('All')) {
-                for (var i = 0; i < this.optionData.length; i++) {
+                for (let i = 0; i < this.optionData.length; i++) {
                     if (options[i].value == this.mapOfValueLabel.get('All')) {
                         options[i].selected = true;
                         count++;
@@ -78,7 +78,7 @@ export default class DxSearchCategory extends LightningElement {
                     }
                 }
             } else {
-                for (var i = 0; i < options.length; i++) {
+                for (let i = 0; i < options.length; i++) {
                     if (options[i].value === this.mapOfValueLabel.get('All')) {
                         options[i].selected = false;
                     }
@@ -95,8 +95,8 @@ export default class DxSearchCategory extends LightningElement {
             this.searchString = count + ' Option(s) Selected';
             event.preventDefault();
         }else{
-            var options = JSON.parse(JSON.stringify(this.optionData));
-            for (var i = 0; i < options.length; i++) {
+            let options = JSON.parse(JSON.stringify(this.optionData));
+            for (let i = 0; i < options.length; i++) {
                 if (options[i].value === selectedVal) {
                     options[i].selected = options[i].selected ? false : true;
                     if(options[i].selected === true){

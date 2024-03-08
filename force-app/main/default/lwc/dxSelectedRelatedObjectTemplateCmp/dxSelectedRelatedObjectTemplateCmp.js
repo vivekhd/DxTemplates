@@ -20,7 +20,7 @@ export default class DxSelectedRelatedObjectTemplateCmp extends LightningElement
                        this.showTemplateSelector=true;
                    }
                }
-            }).catch(error=>{
+            }).catch(()=>{
             })
         }, 0);
     }
@@ -32,7 +32,7 @@ export default class DxSelectedRelatedObjectTemplateCmp extends LightningElement
         }  
     }
 
-    updateItemEventHandler(event){
+    updateItemEventHandler(){
         this.selectedObjectId=undefined;
         this.showTemplate=false;
     }

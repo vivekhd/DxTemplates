@@ -192,10 +192,9 @@ export default class DxCpqConditioncmp extends LightningElement {
      */
     deleteCondition(event) {
         let index = event.detail.index;
-        let child;
         let childToUpdate;
         let childArr = this.lstOfCondition;
-        let lastChildrenArr=[];
+        
         let groupToUpdate=[];
         let rowToUpdate;
         if(isNaN(index)){
@@ -335,7 +334,7 @@ export default class DxCpqConditioncmp extends LightningElement {
             groupIndex = childArr instanceof Array?childArr.length:0;
         }       
         tempObj._index = index+"-"+groupIndex+"-"+rowIndex;
-        let insertIndex = parseInt(tempObj._index.charAt(tempObj._index.length-1));       
+            
         tempObj.Id = null;
         tempObj.objectName = this.sObjectList;
         tempObj.fieldName = [];
@@ -390,7 +389,7 @@ export default class DxCpqConditioncmp extends LightningElement {
             let groupAction = con.childAction;
             if (con.children) {               
                 let groupStatement;
-                let tempIndex=0;
+                let tempIndex = 0;
                 for (let j = 0; j < con.children.length; j++) {
                     let child = con.children[j];
                     let childAction = child.action;
@@ -429,8 +428,6 @@ export default class DxCpqConditioncmp extends LightningElement {
     getRuleExpressionForGroup(rowList,index){
         let currentIndex = index;       
         let finalCondition;
-        let finalExpression;
-        let finalStatement;
         let groupExpression;
         let singleCondition;
         for (let i = 0; i < rowList.length; i++) {

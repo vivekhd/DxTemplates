@@ -20,7 +20,7 @@ private class Safely_Test {
         safe.doDelete(new List<Account>());
         safe.doQuery('SELECT Id FROM Account');
         }
-        System.assert(true);
+        System.assert(true, true);
         Test.stopTest();
     }
 }

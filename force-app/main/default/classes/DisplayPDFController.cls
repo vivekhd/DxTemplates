@@ -86,8 +86,9 @@ global with sharing class DisplayPDFController
 	private static final String[] HTML_ENCODED  = new String[]{ '&amp;', '&lt;', '&gt;', '&quot;', '&#39;' };
 
     private static String ENCODE(String input, String[] fromArr, String[] toArr) {
-		if (input == null || input.length() == 0)
-			return input;
+        if (input == null || input.length() == 0){
+            return input;
+        }
 		for (Integer i = 0; i < fromArr.size(); ++i) {
 			input = input.replace(fromArr[i], toArr[i]);
 		}		
@@ -129,7 +130,7 @@ global with sharing class DisplayPDFController
                     }
                 }else if (!sResult.get(i).isSuccess()){
                     Database.Error error = sResult.get(i).getErrors().get(0);
-                    String failedDML = error.getMessage();
+                    error.getMessage();
                 }               
             }
             return inserteddocId;
@@ -179,7 +180,7 @@ global with sharing class DisplayPDFController
                     }
                 }else if (!sResult.get(i).isSuccess()){
                     Database.Error error = sResult.get(i).getErrors().get(0);
-                    String failedDML = error.getMessage();
+                     error.getMessage();
                 }            
             }
             
@@ -192,7 +193,7 @@ global with sharing class DisplayPDFController
     }
     
     @AuraEnabled
-    public static string SavePDFtoQuote(ID documentid, String quoteId, String pdfMode, String pdfName){ 
+    public static string savePDFtoQuote(ID documentid, String quoteId, String pdfMode, String pdfName){ 
         try{ 
             Attachment arec = [SELECT Name, Body,id FROM Attachment WHERE id = :documentid WITH SECURITY_ENFORCED];
             Attachment objAttachment = New Attachment(Body = arec.Body); 
@@ -230,12 +231,12 @@ global with sharing class DisplayPDFController
                     }
                 }else if (!sResult.get(i).isSuccess()){
                     Database.Error error = sResult.get(i).getErrors().get(0);
-                    String failedDML = error.getMessage();
+                    error.getMessage();
                 }                
             }
             return String.Valueof(insertedattachmentId);
         } catch (Exception ex) {
-            LogHandler.createLog((Id) null,'DisplayPDFController.SavePDFtoQuote()','documentid ->  '+documentid+' '+ex.getLineNumber()+ex.getStackTraceString()+ex.getCause(),ex.getMessage(),'Exception');
+            LogHandler.createLog((Id) null,'DisplayPDFController.savePDFtoQuote()','documentid ->  '+documentid+' '+ex.getLineNumber()+ex.getStackTraceString()+ex.getCause(),ex.getMessage(),'Exception');
             return 'Error';
         }       
     }    
@@ -255,11 +256,11 @@ global with sharing class DisplayPDFController
     
     public class SafeClassException extends Exception{}
     
-    public class headerfooterwrapper{
+    public class HeaderFooterWrapper{
         public String value {get; set;}
         public String indexvar {get; set;}
         
-        public headerfooterwrapper(String value,String indexvar) {
+        public HeaderFooterWrapper(String value,String indexvar) {
             this.value = value;
             this.indexvar = indexvar;
         }

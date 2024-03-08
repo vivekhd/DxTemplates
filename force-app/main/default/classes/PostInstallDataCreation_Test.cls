@@ -13,6 +13,6 @@ private class PostInstallDataCreation_Test {
     public static void runTestClass() {
         PostInstallDataCreation myClass = new PostInstallDataCreation();
         Test.testInstall(myClass, null);
-	System.assert(true);
+        System.assert(true, 'Runs in Installation Context');
     }
 }

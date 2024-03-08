@@ -1,12 +1,11 @@
-/* 
+/**
 * Class			    : ROsectionAutomationController
 * Developer			: Rahul Bejgam (ASE - Dextara)
 * Created Date		: 08/03/2023
-* Description		: This class creates the data-wrapper. This class performs the dataquery for header HTML and related object record, numerical calculation and formats data. 
-                      The class is for only Autogeneration of pdf.
+* @description		: This class creates the data-wrapper. This class performs the dataquery for header HTML and related object record, numerical calculation and formats data. 
+*                      The class is for only Autogeneration of pdf.
 * Last Modified Date: 08/11/2023
 */
-
 public with sharing class ROsectionAutomationController {
 
     /* User Selected Styles from Template Builder */
@@ -17,13 +16,19 @@ public with sharing class ROsectionAutomationController {
 
     public static Id relatedObjectSectionID;
     public static String errorTypeCaught = null;
-    public static String ROHtmlContent = '<tbody>';
+    public static String roHtmlContent = '<tbody>';
 
     /* Variables to hold the Sum Calculations of field records */
     public static Map<String,Decimal> currencyFieldTotals;
     public static Map<String,Decimal> currencyFieldSubTotals; 
 
     /* Function that returns the HTML Version of the Related Object section content */
+   /**
+ * @description Generates HTML content for a related object section based on the provided template section and record ID.
+ * @param recordid The ID of the record for which the related object section is generated.
+ * @param templatesectionid The ID of the template section used for generating the HTML content.
+ * @return HTML content representing the related object section with data and optional chart.
+ */
     public static string getSectionDataAsHTML(String recordid,String templatesectionid)  {
         relatedObjectSectionID = templatesectionid;                
         List<sObject> relatedObjectQueriedRecords = new List<sObject>();
@@ -55,15 +60,9 @@ public with sharing class ROsectionAutomationController {
             timeFormat = (String) contentAndStylingMap.get('timeFormat');
             numberFormat = (String) contentAndStylingMap.get('numberFormat');
             currencyFormat = (String) contentAndStylingMap.get('currencyFormat');
-            Boolean ROSectionInNewPage = (Boolean) contentAndStylingMap.get('newPage');
             Boolean displaySerialNumber = (Boolean) contentAndStylingMap.get('SerialNumber');
 
             /* Inline Styles for SubTotal and GrandTotal */
-            String subTotalTDTextColor;
-            String subTotalTDbackground;
-            String grandTotalTDTextColor;
-            String grandTotalTDbackground;
-            
             /* Html Inline style for Category <td> */
             Map<String,Object> tableStyleList = (Map<String,Object>) contentAndStylingMap.get('style');  
             Map<String,Object> categoryStyleAttributes = (Map<String,Object>) tableStyleList.get('category');
@@ -113,8 +112,6 @@ public with sharing class ROsectionAutomationController {
                 Map<Object, List<SObject>> recordCategoryMap = new Map<Object, List<SObject>>();
                 
                 for(Sobject ptrRecord : relatedObjectQueriedRecords)  {
-                    Map<String, Object> maprec = (Map<String, Object>) JSON.deserializeUntyped(JSON.serialize(ptrRecord));
-
                     if(!recordCategoryMap.containsKey(ptrRecord.get(ptrfield)) && ptrRecord.get(ptrfield)!=null)  {
                         List<SObject> recordList = new  List<SObject>();
                         recordList.add(ptrRecord);
@@ -143,7 +140,7 @@ public with sharing class ROsectionAutomationController {
                 Boolean firstTDblock ;
 
                 for(Object key: recordCategoryMap.keyset())  {
-                    ROHtmlContent = ROHtmlContent + '<tr> <td  colspan=\"'+ dataColSpanForCategory +'\" scope="col" Style = \"'+ categoryInlineStyle + '\">' + String.valueOf(key).toUpperCase() + '</td> </tr> ';
+                    roHtmlContent = roHtmlContent + '<tr> <td  colspan=\"'+ dataColSpanForCategory +'\" scope="col" Style = \"'+ categoryInlineStyle + '\">' + String.valueOf(key).toUpperCase() + '</td> </tr> ';
                                         
                     String ptrKey = (String) key;
                     List<Object> recordListofKey = recordCategoryMap.get(ptrKey);
@@ -152,31 +149,31 @@ public with sharing class ROsectionAutomationController {
                     Integer count = recordListofKey.size();
                     for(Integer i=0; i<count; i++)  {
                         Sobject currRecord = (Sobject) recordListofKey[i];
-                        ROHtmlContent += '<tr>';
+                        roHtmlContent += '<tr>';
                         if(displaySerialNumber)  {
-                            ROHtmlContent = ROHtmlContent + '<td scope="col" style="border: 1px solid black; text-align: center;">' + tableSerialNumber  + '</td>';
+                            roHtmlContent = roHtmlContent + '<td scope="col" style="border: 1px solid black; text-align: center;">' + tableSerialNumber  + '</td>';
                         }
                         dataFetchFromCurrentRecord(selectedFieldAsHeaderAPIList, currRecord, fieldNameType);
-                        ROHtmlContent += '</tr>';
+                        roHtmlContent += '</tr>';
                         tableSerialNumber+=1; 
                     }                 
                     
                     firstTDblock = displaySerialNumber;
                     if(currencyFieldTotals.size() > 0) {
-                        ROHtmlContent += '<tr>';
-                        ROHtmlContent = ROHtmlContent + '<td colspan="1" scope="col" style="border: 1px solid black; background-color:#0077b6 ; color: white; border-right-style: none; font-size: 12px">Sub Total</td>';
+                        roHtmlContent += '<tr>';
+                        roHtmlContent = roHtmlContent + '<td colspan="1" scope="col" style="border: 1px solid black; background-color:#0077b6 ; color: white; border-right-style: none; font-size: 12px">Sub Total</td>';
                         for(Object ptrFieldSubTotal : selectedFieldAsHeaderAPIList) {
                             if(currencyFieldTotals.containsKey((String) ptrFieldSubTotal) && subTotFieldNames.contains(ptrFieldSubTotal)) {
-                                ROHtmlContent += '<td colspan="1" scope="col" style="border: 1px solid black; color:#ffffff; background-color:#0077b6; text-align: center; border-right-style:none; border-left-style:none;\">' + currencyFieldSubTotals.get((String) ptrFieldSubTotal) + '</td>';
+                                roHtmlContent += '<td colspan="1" scope="col" style="border: 1px solid black; color:#ffffff; background-color:#0077b6; text-align: center; border-right-style:none; border-left-style:none;\">' + currencyFieldSubTotals.get((String) ptrFieldSubTotal) + '</td>';
                             }
                             else {
                                 if(firstTDblock)  {
-                                    ROHtmlContent += '<td colspan="1" scope="col" style="border: 1px solid black; background-color:#0077b6 ;border-right-style: none;border-left-style:none;\"> </td>';
+                                    roHtmlContent += '<td colspan="1" scope="col" style="border: 1px solid black; background-color:#0077b6 ;border-right-style: none;border-left-style:none;\"> </td>';
                                 }                                
                                 firstTDblock = true;
                             }
                         }
-                        ROHtmlContent += '</tr>';
+                        roHtmlContent += '</tr>';
                     }
                     categorySubTotalValueMap.put(String.valueOf(key),currencyFieldSubTotals.get(chartYAxis));                                      
                     
@@ -188,21 +185,21 @@ public with sharing class ROsectionAutomationController {
                 
                 firstTDblock = displaySerialNumber;
                 if(currencyFieldTotals.size() > 0)  {
-                    ROHtmlContent += '<tr>';
-                    ROHtmlContent += '<td colspan="1" scope="col" style="border: 1px solid black; background-color:#03045e ; color: white; border-right-style: none; font-size: 12px">Grand Total</td>';
+                    roHtmlContent += '<tr>';
+                    roHtmlContent += '<td colspan="1" scope="col" style="border: 1px solid black; background-color:#03045e ; color: white; border-right-style: none; font-size: 12px">Grand Total</td>';
                     
                     for(Object ptrFieldTotal : selectedFieldAsHeaderAPIList) {
                         if(currencyFieldTotals.containsKey((String) ptrFieldTotal) && subTotFieldNames.contains(ptrFieldTotal)) {
-                            ROHtmlContent += '<td colspan="1" scope="col" style="border: 1px solid black; color:#ffffff; background-color:#03045e; border-right-style:none; text-align: center; border-left-style:none;\">' + currencyFieldTotals.get((String) ptrFieldTotal) + '</td>';
+                            roHtmlContent += '<td colspan="1" scope="col" style="border: 1px solid black; color:#ffffff; background-color:#03045e; border-right-style:none; text-align: center; border-left-style:none;\">' + currencyFieldTotals.get((String) ptrFieldTotal) + '</td>';
                         }
                         else {
                             if(firstTDblock)  {
-                                ROHtmlContent += '<td colspan="1" scope="col" style="border: 1px solid black; background-color:#03045e ;border-right-style: none;border-left-style:none;\"> </td>';
+                                roHtmlContent += '<td colspan="1" scope="col" style="border: 1px solid black; background-color:#03045e ;border-right-style: none;border-left-style:none;\"> </td>';
                             }
                             firstTDblock = true;
                         }
                     }
-                    ROHtmlContent += '</tr>';
+                    roHtmlContent += '</tr>';
                 }
             }
 
@@ -212,36 +209,35 @@ public with sharing class ROsectionAutomationController {
                 relatedObjectQueriedRecords = Database.query(recordsQuery);      
 
                 for(Sobject currRecord: relatedObjectQueriedRecords) {
-                    ROHtmlContent += '<tr>';
+                    roHtmlContent += '<tr>';
                     if(displaySerialNumber)  {
-                        ROHtmlContent = ROHtmlContent + '<td scope="col" style="border: 1px solid black; text-align: center;">' + tableSerialNumber  + '</td>';
+                        roHtmlContent = roHtmlContent + '<td scope="col" style="border: 1px solid black; text-align: center;">' + tableSerialNumber  + '</td>';
                     }
-                    Map<String, Object> maprec = (Map<String, Object>) JSON.deserializeUntyped(JSON.serialize(currRecord));  
                     dataFetchFromCurrentRecord(selectedFieldAsHeaderAPIList, currRecord, fieldNameType);                  
-                    ROHtmlContent += '</tr>';
+                    roHtmlContent += '</tr>';
                     tableSerialNumber += 1;
                 }
 
                 /*Adding GrandTotals to WrapperList*/
                 Boolean firstTDblock = displaySerialNumber;
                 if(currencyFieldTotals.size() > 0)  {
-                    ROHtmlContent += '<tr>';
-                    ROHtmlContent += '<td colspan="1" scope="col" style="border: 1px solid black; background-color:#03045e ; color: white; border-right-style: none; font-size: 12px">Grand Total</td>';
+                    roHtmlContent += '<tr>';
+                    roHtmlContent += '<td colspan="1" scope="col" style="border: 1px solid black; background-color:#03045e ; color: white; border-right-style: none; font-size: 12px">Grand Total</td>';
                     for(Object ptrFieldTotal : selectedFieldAsHeaderAPIList) {
                         if(currencyFieldTotals.containsKey((String) ptrFieldTotal) && subTotFieldNames.contains(ptrFieldTotal)) {
-                            ROHtmlContent += '<td colspan="1" scope="col" style="border: 1px solid black; color:#ffffff; background-color:#03045e; border-right-style:none; border-left-style:none;\">' + currencyFieldTotals.get((String) ptrFieldTotal) + '</td>';
+                            roHtmlContent += '<td colspan="1" scope="col" style="border: 1px solid black; color:#ffffff; background-color:#03045e; border-right-style:none; border-left-style:none;\">' + currencyFieldTotals.get((String) ptrFieldTotal) + '</td>';
                         }
                         else {
                             if(firstTDblock)  {
-                                ROHtmlContent += '<td colspan="1" scope="col" style="border: 1px solid black; background-color:#03045e ;border-right-style: none;border-left-style:none;\"> </td>';
+                                roHtmlContent += '<td colspan="1" scope="col" style="border: 1px solid black; background-color:#03045e ;border-right-style: none;border-left-style:none;\"> </td>';
                             }                            
                             firstTDblock = true;
                         }
                     }
-                    ROHtmlContent += '</tr>';  
+                    roHtmlContent += '</tr>';  
                 }              
             }
-            ROHtmlContent += '</tbody>';
+            roHtmlContent += '</tbody>';
 
             /*HTML formation of Chart*/
             if(displayChart){
@@ -267,8 +263,8 @@ public with sharing class ROsectionAutomationController {
 
                 /*Bar height Calculation*/
                 for(String keyPtr : categorySubTotalValueMap.keySet()){
-                    Decimal Val = (categorySubTotalValueMap.get(keyPtr) / currencyFieldTotals.get(chartYAxis));
-                    String htpt = String.valueOf((Val.setScale(3))*100);
+                    Decimal val = (categorySubTotalValueMap.get(keyPtr) / currencyFieldTotals.get(chartYAxis));
+                    String htpt = String.valueOf((val.setScale(3))*100);
                     
                     Map<String,String> tempMap = new Map<String,String> {
                         'width' => String.valueOf(Math.round(93/(categorySubTotalValueMap.size()))) + '%',
@@ -290,10 +286,10 @@ public with sharing class ROsectionAutomationController {
 
                 chartContent += '</tr> </tbody> </table> </div> </td> </tr> ';
                 chartContent +='<tr> <td style="text-align: center;"> Categories </td> </tr> </table> </div>';
-                ROHtmlContent+=chartContent;
+                roHtmlContent+=chartContent;
             }
             
-            return ROHtmlContent;
+            return roHtmlContent;
         }
         catch(Exception ex) {
             LogHandler.createLog((Id) templatesectionid,'ROsectionAutomationController.getsectionData()','Template Id- '+ relatedObjectSectionID + ' ' + ex.getLineNumber() + ex.getStackTraceString() + ex.getCause(),ex.getMessage(),'Exception');   
@@ -302,6 +298,12 @@ public with sharing class ROsectionAutomationController {
     }
     
     /* Function that formulates each Object's Field and Type */
+    /**
+ * @description Retrieves a map containing the data type of each field in the specified object.
+ * @param objName The API name of the object for which field data types are retrieved.
+ * @param fieldList A list of field names for which data types need to be determined.
+ * @return Map<String,String> A map where field names are keys, and values are their corresponding data types.
+ */
     public static Map<String,String> getObjectFieldTypeMap(String objName, List<String> fieldList)  {
         Map<String,String> fieldNameType = new Map<String,String>();
         try {
@@ -318,14 +320,14 @@ public with sharing class ROsectionAutomationController {
                         String objNameLkp = getReferenceObjectAPIName(objName,tempfield[0]);
                         
                         tempfield.remove(0);
-                        Map<String,String> FieldnameTypeLookup = getObjectFieldTypeMap(objNameLkp,tempfield);
-                        fieldNameType.put(selfield,FieldnameTypeLookup.get(tempfield[0]));
+                        Map<String,String> fieldNameTypeLookup = getObjectFieldTypeMap(objNameLkp,tempfield);
+                        fieldNameType.put(selfield,fieldNameTypeLookup.get(tempfield[0]));
                     }
                     else {
                         List<String> tempfield = selfield.split('\\.');
                         tempfield.remove(0);
-                        Map<String,String> FieldnameTypeLookup = getObjectFieldTypeMap('User',tempfield);
-                        fieldNameType.put(selfield,FieldnameTypeLookup.get(tempfield[0]));
+                        Map<String,String> fieldNameTypeLookup = getObjectFieldTypeMap('User',tempfield);
+                        fieldNameType.put(selfield,fieldNameTypeLookup.get(tempfield[0]));
                     }
                 }
                 else {
@@ -340,6 +342,12 @@ public with sharing class ROsectionAutomationController {
         return fieldNameType;
     }
     
+	/**
+ * @description Retrieves the API name of the related object from a given object and lookup field.
+ * @param fromObjName The API name of the source object where the lookup field is defined.
+ * @param lkpField The API name of the lookup field for which the related object API name is to be retrieved.
+ * @return The API name of the related object, or an empty string if an exception occurs.
+ */
     public static string getReferenceObjectAPIName(String fromObjName, String lkpField)  {
         try {            
             Schema.DescribeFieldResult scehmaMap = Schema.getGlobalDescribe().get(fromObjName).getDescribe().fields.getMap().get(lkpField).getDescribe();
@@ -353,9 +361,14 @@ public with sharing class ROsectionAutomationController {
         return '';
     } 
     
+	/**
+ * @description Extracts data from the current record and populates the HTML content for a table cell.
+ * @param selectedFieldAsHeaderAPIList List of selected field API names to be used as headers.
+ * @param currRecord Current record from which data is extracted.
+ * @param fieldNameType Mapping of field API names to their data types.
+ */
     public static void dataFetchFromCurrentRecord(List<Object> selectedFieldAsHeaderAPIList, Sobject currRecord, Map<String,String> fieldNameType)  {
-        TransactionLog__c[] logList = new TransactionLog__c[] {};
-        try{
+       try{
             for(Object field : selectedFieldAsHeaderAPIList) {
                 Object recVal;   
                 String fieldStr = (String) field;
@@ -440,12 +453,12 @@ public with sharing class ROsectionAutomationController {
                     
                     /* Check for Image and styling the TD accordingly */
                     if(returnedFormattedValue.contains('servlet.shepherd/version/download/')){
-                        ROHtmlContent = ROHtmlContent + '<td scope="col" width="100px" style="border: 1px solid black; text-align: center;"> <img style="max-height:100% ; max-width:100%; height:40px; width:40px;" src= '+ returnedFormattedValue +'> </td>';
+                        roHtmlContent = roHtmlContent + '<td scope="col" width="100px" style="border: 1px solid black; text-align: center;"> <img style="max-height:100% ; max-width:100%; height:40px; width:40px;" src= '+ returnedFormattedValue +'> </td>';
                     } else {
-                        ROHtmlContent = ROHtmlContent + '<td scope="col" width=\"' + cellTDwidth +'\" style="border: 1px solid black; text-align: center;">' + returnedFormattedValue + '</td>';
+                        roHtmlContent = roHtmlContent + '<td scope="col" width=\"' + cellTDwidth +'\" style="border: 1px solid black; text-align: center;">' + returnedFormattedValue + '</td>';
                     }
                 } else {
-                    ROHtmlContent = ROHtmlContent + '<td scope="col" width=\"' + cellTDwidth +'\" style="border: 1px solid black; text-align: center;"> </td>';
+                    roHtmlContent = roHtmlContent + '<td scope="col" width=\"' + cellTDwidth +'\" style="border: 1px solid black; text-align: center;"> </td>';
                 }                 
             }
         }
@@ -462,6 +475,17 @@ public with sharing class ROsectionAutomationController {
 
     
     /*Functions to handle to the Date Time Style for the field value.*/
+	/**
+ * @description Handles the formatting of date and time based on the user's preferences.
+ * @param dateList List of date components (year, month, day).
+ * @param timeStr String representation of time.
+ * @param valKey Integer to determine the output format: 
+ *               0 for both date and time, 
+ *               <0 for date only, 
+ *               >0 for time only.
+ * @return Formatted date, time, or both based on the valKey parameter.
+ * @throws AuraHandledException if an exception occurs during the formatting process.
+ */
     public static String handleDateTimeFormatAsSelectedbyUser(List<String> dateList, String timeStr, Integer valKey)  { 
         String dateFormatSep; 
         String dateFormatted = '';
@@ -472,7 +496,6 @@ public with sharing class ROsectionAutomationController {
         List<String> timer = new List<String> {};
         List<Integer> dateIndex = new List<Integer> {};
         List<String> monthLstHalf = new List<String>{'', 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'June', 'July', 'Aug', 'Sept', 'Oct', 'Nov', 'Dec'};
-        List<String> monthLstFull = new List<String>{'', 'January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'};
         
         try{
             if (dateList != null && dateFormatStr != null) {          
@@ -555,6 +578,12 @@ public with sharing class ROsectionAutomationController {
     }        
     
     /* Format the Number or Currency Field Value to User Selected Format */
+    /**
+ * @description Handles the formatting of a currency or number field based on the specified rounding pattern.
+ * @param fieldValue String representation of the numerical value to be formatted.
+ * @param roundPattern String representing the rounding pattern for the numerical value.
+ * @return Object containing the formatted Decimal value or 'Error' if an exception occurs during the formatting.
+ */
     public static Object handleCurrencyNumberFormat(String fieldValue, String roundPattern)  {
         try {
             Decimal value = (Decimal.valueOf(fieldValue)).setScale(Integer.valueOf(roundPattern));
@@ -566,17 +595,26 @@ public with sharing class ROsectionAutomationController {
     }
 
     /* Header Content Stored on the RO Template Section Record - called from Automation Class */
-    public static String getHeaderContent(Id ROTemplateSectionId)  {
+    /**
+ * @description Retrieves the header content from a Document Template Section based on the provided section Id.
+ * @param roTemplateSectionId Id of the Document Template Section to retrieve the header content from.
+ * @return String representing the header content of the specified Document Template Section.
+ *         If an exception occurs during the retrieval, an error message is returned.
+ */
+    public static String getHeaderContent(Id roTemplateSectionId)  {
         try {
-            String query = 'Select Header_Content__c from Document_Template_Section__c where Id =\'' + ROTemplateSectionId +'\' limit 1';
-            Document_Template_Section__c ROTemplateSection = Database.query(query);
+            String query = 'Select Header_Content__c from Document_Template_Section__c where Id =\'' + roTemplateSectionId +'\' limit 1';
+            Document_Template_Section__c roTemplateSection = Database.query(query);
             return ROTemplateSection.Header_Content__c;
         }
         catch(Exception ex)  {
-            LogHandler.createLog((Id) null,'ROsectionAutomationController.getHeaderContent()','Template Id- '+ ROTemplateSectionId + ' ' + ex.getLineNumber() + ex.getStackTraceString() + ex.getCause(),ex.getMessage(),'Exception');   
+            LogHandler.createLog((Id) null,'ROsectionAutomationController.getHeaderContent()','Template Id- '+ roTemplateSectionId + ' ' + ex.getLineNumber() + ex.getStackTraceString() + ex.getCause(),ex.getMessage(),'Exception');   
             return '<p> Error while querying header Content through Automation - Log is generated </p>';
         }
     }
     
+	/**
+ * @description Custom exception class named SafeClassException, extending the built-in Exception class.
+ */
     public class SafeClassException extends Exception { }
 }

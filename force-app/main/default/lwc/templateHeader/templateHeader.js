@@ -1,8 +1,9 @@
-import { LightningElement, wire, api, track } from 'lwc';
+import { LightningElement, wire, api } from 'lwc';
 import saveDocumentTemplateSectionDetails from '@salesforce/apex/SaveDocumentTemplatesection.saveDocumentTemplateSectionDetails';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 import gettemplatesectiondata from '@salesforce/apex/SaveDocumentTemplatesection.gettemplatesectiondata';
 import getAllPopupMessages from '@salesforce/apex/PopUpMessageSelector.getAllConstants';
+import createLog from '@salesforce/apex/LogHandler.createLog';
 
 export default class TemplateHeader extends LightningElement {
 
@@ -50,7 +51,7 @@ export default class TemplateHeader extends LightningElement {
     this.handlecolumnsClass(this.columnvalue);
     if (this.headerSectionsMap.length > 0) {
       if (this.headerSectionsMap.length < this.columnvalue) {
-        for (var i = this.headerSectionsMap.length; i < this.columnvalue; i++) {
+        for (let i = this.headerSectionsMap.length; i < this.columnvalue; i++) {
           if (this.oldHeaderColumnList[i]) {
             this.headerSectionsMap.push(this.oldHeaderColumnList[i]);
           }
@@ -65,7 +66,7 @@ export default class TemplateHeader extends LightningElement {
       }
     }
     else {
-      for (var i = 0; i < this.columnvalue; i++) {
+      for (let i = 0; i < this.columnvalue; i++) {
         this.columnvalueList.push(i);
         this.headerSectionsMap.push({ "value": "", "indexvar": i, "key": (new Date()).getTime() + ":" + i })
       }
@@ -149,10 +150,14 @@ export default class TemplateHeader extends LightningElement {
           this.handlecolumnsClass(this.columnvalue);
         }
       })
-      .catch(error => { })
+      .catch(error => {
+        let tempError = error.toString();
+            let errorMessage = error.message || 'Unknown error message';
+            createLog({recordId:'', className:'templateHeader LWC Component', exceptionMessage:errorMessage, logData:tempError, logType:'Exception'});                                             
+       })
   }
 
-  handlesectionsave(event) {
+  handlesectionsave() {
     this.Recorddetailsnew.Name = this.sectiontype;
     var currecid = this.sectionrecordid;
     if (this.headerSectionsMap.length > 0) {
@@ -178,7 +183,7 @@ export default class TemplateHeader extends LightningElement {
     this.Recorddetailsnew.DxCPQ__Document_Template__c = this.documenttemplaterecord.Id;
 
     if (this.Recorddetailsnew.Name != '' && this.Recorddetailsnew.Name != null) {
-      saveDocumentTemplateSectionDetails({ Recorddetails: this.Recorddetailsnew })
+      saveDocumentTemplateSectionDetails({ recordDetails: this.Recorddetailsnew })
         .then(result => {
           if (result != null) {
             this.savedRecordID = result;
@@ -194,7 +199,11 @@ export default class TemplateHeader extends LightningElement {
             this.dispatchEvent(firecustomevent);
           }
         })
-        .catch(error => { })
+        .catch(error => {
+            let tempError = error.toString();
+            let errorMessage = error.message || 'Unknown error message';
+            createLog({recordId:'', className:'templateHeader LWC Component', exceptionMessage:errorMessage, logData:tempError, logType:'Exception'});
+              })
     }
   }
 }

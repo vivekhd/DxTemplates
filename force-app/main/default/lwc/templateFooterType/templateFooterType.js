@@ -1,6 +1,7 @@
 import { LightningElement, wire, api, track } from 'lwc';
 import getContentVersions from '@salesforce/apex/FooterClass.getContentVersions';
 import getSearchedContentVersions from '@salesforce/apex/FooterClass.getSearchedContentVersions';
+import createLog from '@salesforce/apex/LogHandler.createLog';
 
 export default class TemplateFooterType extends LightningElement {
     imageUrls = [];
@@ -182,7 +183,12 @@ export default class TemplateFooterType extends LightningElement {
                     this.imagesfound = true;
                 }
             }
-        } else if (error) { }
+        } else if (error) { 
+            let tempError = error.toString();
+            let errorMessage = error.message || 'Unknown error message';
+            createLog({recordId:'', className:'templateFooterType LWC Component', exceptionMessage:errorMessage, logData:tempError, logType:'Exception'});
+
+        }
     }
 
     handleSearch(event) {
@@ -199,7 +205,12 @@ export default class TemplateFooterType extends LightningElement {
                 })
                 .catch(error => {
                     this.searchData = undefined;
-                    if (error) { }
+                    if (error) {
+                         let tempError = error.toString();
+            let errorMessage = error.message || 'Unknown error message';
+            createLog({recordId:'', className:'templateFooterType LWC Component', exceptionMessage:errorMessage, logData:tempError, logType:'Exception'});
+
+                     }
                 })
         } else {
             this.imageUrls = this.mainimageUrls;
