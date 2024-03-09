@@ -1,440 +1,259 @@
 <template>
 	<template if:true={showrelatedobjectdetails}>
-
-		<div class="slds-grid slds-wrap slds-p-around_small slds-border_bottom"
-			style="border:1px solid #e5e5e5; border-radius:5px; background: rgb(243 243 243);">
-
-			<div class="slds-col slds-size_1-of-1 slds-medium-size_5-of-12 slds-large-size_5-of-12">
-				<lightning-input type="text" variant="standard" disabled={isDisabled} name="name" label="Name"
-					value={Recorddetailsnew.Name} onchange={handlename} placeholder="Type Section Name Here..."
-					required></lightning-input>
-			</div>
-
-			<div class="slds-col slds-size_1-of-1 slds-medium-size_2-of-12 slds-large-size_2-of-12 slds-p-left_small">
-				<!--<button type="save" disabled={disableButton} class="slds-button slds-button_brand slds-var-m-top_medium slds-float_right" onclick={handlesectionsave}>save</button>-->
-				<label class="slds-form-element__label">&nbsp;</label>
-				<lightning-button disabled={disableButton} variant="brand" label="Update" title="titleName"
-					onclick={handlesectionsave}></lightning-button>
-			</div>
-
-			<div
-				class="slds-col slds-size_1-of-1 slds-medium-size_5-of-12 slds-large-size_3-of-12 slds-p-top_x-large slds-p-left_xx-large slds-float_right">
-				<lightning-input data-id="newPageRO" type="checkbox" label="New Page" name="New Page"
-					class="slds-list_horizontal" onchange={handleNewPage} disabled={isDisabled}></lightning-input>
-			</div>
+	  <div class="slds-grid slds-wrap slds-p-around_small slds-border_bottom" style="border:1px solid #e5e5e5; border-radius:5px; background: rgb(243 243 243);">
+		<div class="slds-col slds-size_1-of-1 slds-medium-size_5-of-12 slds-large-size_5-of-12">
+		  <lightning-input type="text" variant="standard" disabled={isDisabled} name="name" label="Name" value={Recorddetailsnew.Name} onchange={handlename} placeholder="Type Section Name Here..." required></lightning-input>
 		</div>
-
-		<div class="slds-m-horizontal_large">
-			<div if:true={isLoaded} class="slds-is-relative">
-				<lightning-spinner alternative-text="Loading..." variant="brand"></lightning-spinner>
-			</div>
+		<div class="slds-col slds-size_1-of-1 slds-medium-size_2-of-12 slds-large-size_2-of-12 slds-p-left_small">
+		  <label class="slds-form-element__label">&nbsp;</label>
+		  <lightning-button disabled={disableButton} variant="brand" label="Update" title="titleName" onclick={handlesectionsave}></lightning-button>
 		</div>
-
-		<c-modal>
-			<template if:true={ruleCondition}>
-				<span slot="header">Apply Filter(s)</span>
-				<div class="slds-modal__content slds-p-around_medium" style="min-height: 300px;">
-					<c-conditioncmp list-of-existing-conditions={listOfExistingConditions} field-wrapper={fieldWrapper}
-						existing-global-value={selectedGlobalValue} existing-expression={ruleExpression}
-						style="width:100%">
-					</c-conditioncmp>
-				</div>
-
-				<footer class="slds-modal__footer">
-					<div class="slds-text-align_right">
-						<lightning-button class="slds-p-right_x-small" variant="brand" label="Cancel" title="Cancel"
-							onclick={closePreviewModal}></lightning-button>
-
-						<template if:true={ruleExists}>
-							<lightning-button class="slds-p-right_x-small" variant="brand" label="Reset Rule & Save"
-								title="Reset" onclick={handleFilterRuleReset}></lightning-button>
-
-							<lightning-button class="slds-p-right_x-small" variant="brand" label="Update Rule"
-								title="Update" onclick={handleRuleUpdates}></lightning-button>
-						</template>
-
-						<template if:false={ruleExists}>
-							<lightning-button class="slds-p-right_x-small" variant="brand" label="Create Rule"
-								title="Create" onclick={handleCreateRules}></lightning-button>
-						</template>
-					</div>
-				</footer>
-			</template>
-		</c-modal>
-
-		<div if:false={isLoaded}>
-			<div class="slds-grid  slds-wrap slds-p-bottom_small slds-gutters">
-				
-				<div class="slds-col slds-size_4-of-12 objclass">
-
-					<template if:true={renderedData}>
-					<c-search-category has-multi-select="false" data-id="childObject" options={objectTypeOptions}
-						label="Select the child Object" searchtext="Select the child Object"
-						onselectedcategoryvalues={handleObjectselection} disabled={isDisabled}>
-					 </c-search-category> 
-					</template>
-				</div>
-
-				<div class="slds-col slds-size_4-of-12 pickclass">
-					<template if:true={showPicklist}>
-						<c-search-category has-multi-select="false" data-id="picklist" options={getGroupingValues}
-							label="Select the Category" searchtext="Select the Category"
-							onselectedcategoryvalues={handleSelectedGroupingValue} disabled={isDisabled}>
-						</c-search-category>
-					</template>
-				</div>
-				
-			</div>
+		<div class="slds-col slds-size_1-of-1 slds-medium-size_5-of-12 slds-large-size_3-of-12 slds-p-top_x-large slds-p-left_xx-large slds-float_right">
+		  <lightning-input data-id="newPageRO" type="checkbox" label="New Page" name="New Page" class="slds-list_horizontal" onchange={handleNewPage} disabled={isDisabled}></lightning-input>
 		</div>
-
-		<div class="slds-grid slds-wrap slds-button">
-			<template if:true={displayfields}>
-				<div class="slds-col slds-size_12-of-12 slds-medium-size_8-of-12 slds-large-size_8-of-12">
-					<div class="slds-grid slds-wrap">
-						<div class="slds-col slds-grid slds-wrap slds-gutters" style="width:100%; max-width:95%;">
-							<template if:true={lstOfObjects}>
-								<template for:each={lstOfObjects} for:item="obj">
-									<div class="slds-col" style="width:100%; max-width:50%;" key={obj.uKey}>
-										<div class="title">&nbsp;</div>
-										<select name="car" data-id={obj.index} onchange={handleSelectedField} multiple
-											style="width:100%; height:150px;border:1px solid #999999;">
-											<template for:each={obj.fieldList} for:item="field">
-												<option key={field.value} value={field.value} style="font-size:12px; padding:3px 6px;" title={field.label}>{field.label}</option>
-											</template>
-                                    	</select>
-									</div>
-								</template>
-							</template>
-						</div>
-						<div class="slds-col slds-wrap slds-align_absolute-center slds-float_right"
-							style="width:1%; max-width:30px;">
-							<lightning-button-icon variant="container" size="x-Large" icon-name="utility:right"
-								alternative-text="Add" onclick={addition} disabled={isDisabled}>
-							</lightning-button-icon>
-							<lightning-button-icon variant="container" size="x-Large" icon-name="utility:left"
-								alternative-text="Remove" onclick={Removal} disabled={isDisabled}>
-							</lightning-button-icon>
-						</div>
-					</div>
-				</div>
-				<div class="slds-col slds-size_12-of-12 slds-medium-size_4-of-12 slds-large-size_4-of-12">
-					<template if:true={loadUp}>
-						<div class="slds-grid slds-wrap slds-gutters">
-							<div class="slds-col">
-								<div class="title"></div>
-								<div>&nbsp;</div>
-
-								<select name="field" key={lstofaddedfields.value} data-id={lstofaddedfields.label} onchange ={handleSelectedFieldsBox} multiple
-                                    style="width:100%; height:150px;border:1px solid #999999;">
-									<template for:each={lstofaddedfields} for:item="field" >
-										<option key={field.value} value={field.value} style="font-size:12px; padding:3px 6px;" title={field.label}>{field.label}</option>
-									</template>
-								</select>
-
-							</div>
-							<div class="slds-col slds-wrap slds-align_absolute-center"
-								style="width:1%; max-width:30px;">
-								<lightning-button-icon variant="container" size="x-medium" icon-name="utility:up"
-									alternative-text="moveUpWard" onclick={moveUpward} disabled={isDisabled}>
-								</lightning-button-icon>
-								<lightning-button-icon variant="container" size="x-medium" icon-name="utility:down"
-									alternative-text="moveDownWard" onclick={moveDownward} disabled={isDisabled}>
-								</lightning-button-icon>
-							</div>
-						</div>
-					</template>
-				</div>
-			</template>
+	  </div>
+	  <div class="slds-m-horizontal_large">
+		<div if:true={isLoaded} class="slds-is-relative">
+		  <lightning-spinner alternative-text="Loading..." variant="brand"></lightning-spinner>
 		</div>
-
-
-		<template if:true={showtablecontent}>
-			<br/>
-			<div class="slds-col slds-size_12-of-12">
-				<div class="slds-card dx-rte_toolbar slds-no-print">
-					<div class="slds-grid slds-grid_vertical slds-nowrap">
-						<div role="group" class="slds-grid slds-grid_align-space slds-rich-text-editor__toolbar slds-shrink-none">
-
-							<lightning-combobox name="progress" label="Font-Family" value={fontfamily}
-								placeholder="Select Font" title="Font-Family Type" options={fontfamilyoptions}
-								onchange={handlefontfamilyChange} disabled={isDisabled}>
-							</lightning-combobox>
-
-							<lightning-combobox name="progress" label="Font-Size" value={fontsize}
-								placeholder="Font Size" title="Font Size" options={fontsizeoptions}
-								onchange={handlefontsizeChange} disabled={isDisabled}>
-							</lightning-combobox>
-
-							<lightning-input type="color" name="input-color" label="H. Font" title="Header Font Color"
-								value={selectedHFontColor} onchange={handleHFontColorChange} disabled={isDisabled}>
-							</lightning-input>
-
-							<lightning-input type="color" name="input-color" label="H. BG"
-								title="Header Background Color" value={selectedHbgColor} onchange={handleHbgColorChange}
-								disabled={isDisabled}>
-							</lightning-input>
-
-							<lightning-input type="color" name="input-color" label="Cat. Font"
-								title="Category Font Color" value={selectedBFontColor} onchange={handleBFontColorChange}
-								disabled={isDisabled}>
-							</lightning-input>
-
-							<lightning-input type="color" name="input-color" label="Cat. BG"
-								title="Category Background Color" value={selectedBBgcolor}
-								onchange={handleBBgColorchange} disabled={isDisabled}>
-							</lightning-input>
-
-							
-							<lightning-button class="slds-p-top_large" icon-name="utility:filter_criteria" label="Apply Filter(s)"
-								title="Apply Filter(s)" onclick={handleFiltering} disabled={isDisabled}>
-							</lightning-button>							
-
-							<!-- <tempate if:true={showChartBox}>
-								<div>
-									<lightning-input data-id="chartBox" type="checkbox" name="Configure Chart"
-										label="Configure Chart" title="Include Chart in PDF" value={displayChart}
-										onchange={handleDisplayChart} disabled={isDisabled}>
-									</lightning-input>
-								</div>
-							</tempate> -->
-
-						</div>
-					</div>
-
-					<div class="slds-grid slds-grid_vertical slds-nowrap">
-						<div role="group" class="slds-grid slds-grid_align-space slds-col slds-rich-text-editor__toolbar slds-shrink-none">
-
-							<template if:true={showdate}>
-								<lightning-combobox name="Date format" label="Date format" title="Date format"
-									value={dateFormatvalue} placeholder={dateFormatvalue} options={dateformats}
-									onchange={handleDateFormat} disabled={isDisabled}>
-								</lightning-combobox>
-							</template>
-
-							<template if:true={showtime}>
-								<lightning-combobox name="Time format" label="Time format" title="Time format"
-									value={timeFormatvalue} placeholder={timeFormatvalue} options={timeformats}
-									onchange={handleTimeFormat} disabled={isDisabled}>
-								</lightning-combobox>
-							</template>
-
-							<template if:true={shownumber}>
-								<lightning-combobox name="Number format" label="Number format" title="Number format"
-									value={numFormatvalue} placeholder={numFormatvalue} options={numformats}
-									onchange={handleNumFormat} disabled={isDisabled}>
-								</lightning-combobox>
-							</template>
-
-							<template if:true={showcurrency}>
-								<lightning-combobox name="Currency format" label="Currency format"
-									title="Currency format" value={curFormatvalue} placeholder={curFormatvalue}
-									options={curformats} onchange={handlecurFormat} disabled={isDisabled}>
-								</lightning-combobox>
-							</template>
-
-							<div>
-								<label>&nbsp;</label>
-								<lightning-input class="slds-align_absolute-center" data-id="serialNumber" type="checkbox" name="Serial-Number"
-									label="Serial-Number" title="Show Serial Number" value={SerialNumber}
-									onchange={handleSerialNumber} disabled={isDisabled}>
-								</lightning-input>
-							</div>
-						</div>
-					</div>
-
-					<div class="slds-p-around_small">
-						
-						<template if:true={showCalculatorFields}>							
-							<div class="slds-p-bottom_x-small">
-								<lightning-combobox name="select fields for sub total"
-									label="Select fields for Sub Total calculation" value={numfieldvalue}
-									placeholder="Select fields for Sub Total calculation" options={showNumberFields}
-									onchange={handleNumCalfields} disabled={isDisabled}></lightning-combobox>
-							</div>
-							
-							<div class="slds-p-raound_xx-small">
-								<template for:each={allNumericalFields} for:item="val">
-									<lightning-pill key={val} name={val} label={val} onremove={handleRemovenumField}
-										disabled={isDisabled}></lightning-pill>
-								</template>
-							</div>
-						</template>
-
-
-
-						<div class="tableMainClass">
-							</br>
-							<table class="mytable" style="border: 1px solid black;">
-								<thead class='tableHeader'>
-									<tr>
-										<template for:each={tableheaders} for:item="headval">
-											<th scope="col" key={headval} data-id={headval}	style="text-align:center; height: 7vh">
-												
-												<lightning-input-rich-text onchange={handleRichTextArea}
-													onclick={getSelectedTableRowHandler} formats={formats}
-													class="slds-align_absolute-center TableRowClass" value={headval}
-													key={headval} data-id={headval} title={headval}
-													disabled={isDisabled} contenteditable='true'>
-													<div data-id={headval} hidden>
-														{headval}
-													</div>
-												</lightning-input-rich-text>
-
-												<!-- <template if:true={showDone} data-id={headval}> -->
-												<template if:false={isDisabled}>
-													<lightning-button-icon data-id={headval} data-okay
-														icon-name="utility:check" alternative-text="Save"
-														class="slds-m-left_xx-small slds-hide" title="done"
-														onclick={saveLabel}></lightning-button-icon>
-													<lightning-button-icon data-id={headval} data-cancel
-														icon-name="utility:close" alternative-text="cancel"
-														class="slds-m-left_xx-small slds-hide" title="cancel"
-														onclick={previousVal}></lightning-button-icon>
-												</template>
-												<!-- </template> -->
-
-											</th>
-										</template>
-									</tr>
-								</thead>
-								<tbody>
-									<template if:false={noGrouping}>
-										<template for:each={tablerows} for:item="rowvar">
-											<tr key={rowvar.rownumber}>
-												<template for:each={rowvar.columns} for:item="colvar">
-													<td scope="col" key={colvar} style="color:black; text-align:center;">
-															{colvar}
-													</td>
-												</template>
-											</tr>
-										</template>
-									</template>
-									<template for:each={tabsection} for:item="secvar">
-										<td scope="col" key={secvar} colspan={sectionSpan} style={catStyle}>
-											<div title={secvar}>
-												{secvar}
-											</div>
-										</td>
-										<template for:each={tablerows} for:item="rowvar">
-											<tr key={rowvar.rownumber}>
-												<template for:each={rowvar.columns} for:item="colvar">
-													<td scope="col" key={colvar} style="color:black; text-align:center;"> {colvar}	</td>
-												</template>
-											</tr>
-										</template>
-									</template>
-								</tbody>
-							</table>
-						</div>
-					</div>
-				</div>
+	  </div>
+	  <c-modal>
+		<template if:true={ruleCondition}>
+		  <span slot="header">Apply Filter(s)</span>
+		  <div class="slds-modal__content slds-p-around_medium" style="min-height: 300px;">
+			<c-conditioncmp list-of-existing-conditions={listOfExistingConditions} field-wrapper={fieldWrapper} existing-global-value={selectedGlobalValue} existing-expression={ruleExpression} style="width:100%"></c-conditioncmp>
+		  </div>
+		  <footer class="slds-modal__footer">
+			<div class="slds-text-align_right">
+			  <lightning-button class="slds-p-right_x-small" variant="brand" label="Cancel" title="Cancel" onclick={closePreviewModal}></lightning-button>
+			  <template if:true={ruleExists}>
+				<lightning-button class="slds-p-right_x-small" variant="brand" label="Reset Rule & Save" title="Reset" onclick={handleFilterRuleReset}></lightning-button>
+				<lightning-button class="slds-p-right_x-small" variant="brand" label="Update Rule" title="Update" onclick={handleRuleUpdates}></lightning-button>
+			  </template>
+			  <template if:false={ruleExists}>
+				<lightning-button class="slds-p-right_x-small" variant="brand" label="Create Rule" title="Create" onclick={handleCreateRules}></lightning-button>
+			  </template>
 			</div>
-
-		<c-hidden-component></c-hidden-component>
-
-		<div class="borderdiv slds-col slds-size_12-of-12" data-id="ChartSection1">
-				<div class="slds-card dx-rte_toolbar slds-no-print">
-					<template if:true={displayChart}>
-						<div class="slds-grid slds-grid_vertical slds-nowrap">
-
-							<h4 class="slds-align_absolute-center">CHART SECTION</h4>
-							<div role="group" class="slds-rich-text-editor__toolbar slds-shrink-none">
-
-								<div class="slds-col slds-size_12-of-12">
-									<div class="slds-grid slds-wrap slds-gutters"> -->
-										<!-- Commented Previously  -->
-											<!-- <div
-												class="slds-col slds-size_12-of-12 slds-medium-size_4-of-12 slds-large-size_4-of-12">
-												<lightning-input type="text" label="Enter the chart Label"
-													value={chartLabel} onchange={handleChartLabel} disabled={isDisabled}>
-												</lightning-input> </br>
-											</div> -->
-										<!-- Commented Previously  -->
-
-										<div
-											class="slds-col slds-size_12-of-12 slds-medium-size_4-of-12 slds-large-size_4-of-12">
-											<lightning-combobox data-id="subtotalFieldValue"
-												name="Select field to generate a graph"
-												label="Select a field to generate a graph" value={subtotalFieldValue}
-												placeholder="Select a field to generate the chart"
-												field-level-help="You must select a Sub Total Field to generate the Graph upon"
-												options={subtotalField} onchange={chartValueChange}
-												disabled={isDisabled}>
-											</lightning-combobox>
-										</div>
-
-										<div
-											class="slds-col slds-size_12-of-12 slds-medium-size_4-of-12 slds-large-size_3-of-12 slds-p-top_large ">
-											<lightning-input data-id="newChartPage" type="checkbox"
-												label="Chart in New Page" name="Chart in New Page"
-												field-level-help="The Chart will start in a new page of Quote PDF"
-												class="slds-list_horizontal" onchange={handleChartNewPage}
-												checked={chartNewPage} disabled={isDisabled}></lightning-input>
-										</div>
-									</div>
-								</div>								
-							</div>
-						</div>
-					</template>
-
-					<template if:true={chartControl}>
-						<table width="100%" height="auto">
-							<tr>
-								<td width="75%" style="text-align: center;">
-									<h4>{chartLabel}</h4>
-								</td>
-							</tr>
-							<tr>
-								<td>
-									<div class="chart_vbar">
-										<table class="innerbase" style="width:96.8%">
-											<tr>
-												<td
-													style="width:3%; text-align: center; writing-mode:vertical-rl; text-orientation:upright;">
-													{subtotalFieldValue}</td>
-												<template for:each={chartLst} for:item="chart">
-													<td class="itembase" valign="bottom" key={chart.label}
-														style={chart.width}>
-														<div class="itemtitle" key={chart.label}>{chart.label}</div>
-														<div class="itemvalueout" key={chart.label}>Y%</div>
-														<div class="itembar" style={chart.height} key={chart.label}>
-															<div class="itemvaluein" key={chart.label}
-																style="padding:10px 5px 5px; color:#ffffff">XXX
-															</div>
-														</div>
-													</td>
-												</template>
-											</tr>
-										</table>
-									</div>
-								</td>
-							</tr>
-							<tr>
-								<td style="text-align: center;">	Categories	</td>
-							</tr>
-						</table>
-					</template> 
-				</div>
-			</div>
-			<br/>
-
-			</template>
-				<!--
-                    <template if:true={displaySaveTableButton}>
-                        <lightning-button class="slds-p-around_medium" disabled={disableButton} variant="brand" label="SaveTable" 
-                            title="SaveTable" onclick={handletablesave}>
-                        </lightning-button>
-                    </template>
-                -->
-
-			<div class="slds-col slds-size_12-of-12 slds-text-align_right slds-p-top_small">
-				<lightning-button class="slds-m-left_small" disabled={disabledeleteButton} variant="neutral"
-					label="Delete" title="titleName" onclick={handlesectionDelete}>
-				</lightning-button>
-				<lightning-button class="slds-m-left_small" disabled={disableButton} variant="brand" label="Save"
-					title="SaveBtn" onclick={handlesectionsave}>
-				</lightning-button>
-			</div>
-
+		  </footer>
 		</template>
+	  </c-modal>
+	  <div if:false={isLoaded}>
+		<div class="slds-grid  slds-wrap slds-p-bottom_small slds-gutters">
+		  <div class="slds-col slds-size_4-of-12 objclass">
+			<template if:true={renderedData}>
+			  <c-search-category has-multi-select="false" data-id="childObject" options={objectTypeOptions} label='Select the Reated Object' searchtext="Select the Related Object" onselectedcategoryvalues={handleObjectselection} disabled={isDisabled}></c-search-category>
+			</template>
+		  </div>
+		  <div class="slds-col slds-size_4-of-12 pickclass">
+			<template if:true={showPicklist}>
+			  <c-search-category has-multi-select="false" data-id="picklist" options={getGroupingValues} label="Select the Category" searchtext="Select the Category" onselectedcategoryvalues={handleSelectedGroupingValue} disabled={isDisabled}></c-search-category>
+			</template>
+		  </div>
+		</div>
+	  </div>
+	  <div class="slds-grid slds-wrap slds-button">
+		<template if:true={displayfields}>
+		  <div class="slds-col slds-size_12-of-12 slds-medium-size_8-of-12 slds-large-size_8-of-12">
+			<div class="slds-grid slds-wrap">
+			  <div class="slds-col slds-grid slds-wrap slds-gutters" style="width:100%; max-width:95%;">
+				<template if:true={lstOfObjects}>
+				  <template for:each={lstOfObjects} for:item="obj">
+					<div class="slds-col" style="width:100%; max-width:50%;" key={obj.uKey}>
+					  <div class="title">&nbsp;</div>
+					  <select name="car" data-id={obj.index} onchange={handleSelectedField} multiple style="width:100%; height:150px;border:1px solid #999999;">
+						<template for:each={obj.fieldList} for:item="field">
+						  <option key={field.value} value={field.value} style="font-size:12px; padding:3px 6px;" title={field.label}>{field.label}</option>
+						</template>
+					  </select>
+					</div>
+				  </template>
+				</template>
+			  </div>
+			  <div class="slds-col slds-wrap slds-align_absolute-center slds-float_right" style="width:1%; max-width:30px;">
+				<lightning-button-icon variant="container" size="x-Large" icon-name="utility:right" alternative-text="Add" onclick={addition} disabled={isDisabled}></lightning-button-icon>
+				<lightning-button-icon variant="container" size="x-Large" icon-name="utility:left" alternative-text="Remove" onclick={Removal} disabled={isDisabled}></lightning-button-icon>
+			  </div>
+			</div>
+		  </div>
+		  <div class="slds-col slds-size_12-of-12 slds-medium-size_4-of-12 slds-large-size_4-of-12">
+			<template if:true={loadUp}>
+			  <div class="slds-grid slds-wrap slds-gutters">
+				<div class="slds-col">
+				  <div class="title"></div>
+				  <div>&nbsp;</div>
+				  <select name="field" key={lstofaddedfields.value} data-id={lstofaddedfields.label} onchange={handleSelectedFieldsBox} multiple style="width:100%; height:150px;border:1px solid #999999;">
+					<template for:each={lstofaddedfields} for:item="field">
+					  <option key={field.value} value={field.value} style="font-size:12px; padding:3px 6px;" title={field.label}>{field.label}</option>
+					</template>
+				  </select>
+				</div>
+				<div class="slds-col slds-wrap slds-align_absolute-center" style="width:1%; max-width:30px;">
+				  <lightning-button-icon variant="container" size="x-medium" icon-name="utility:up" alternative-text="moveUpWard" onclick={moveUpward} disabled={isDisabled}></lightning-button-icon>
+				  <lightning-button-icon variant="container" size="x-medium" icon-name="utility:down" alternative-text="moveDownWard" onclick={moveDownward} disabled={isDisabled}></lightning-button-icon>
+				</div>
+			  </div>
+			</template>
+		  </div>
+		</template>
+	  </div>
+	  <div class="title">&nbsp;</div>
+	  <template if:true={showtablecontent}>
+		<div class="slds-col slds-size_12-of-12">
+		  <div class="slds-card dx-rte_toolbar slds-no-print">
+			<div class="slds-grid slds-grid_vertical slds-nowrap">
+			  <div role="group" class="slds-grid slds-grid_align-space slds-col slds-rich-text-editor__toolbar slds-shrink-none">
+				<lightning-combobox name="progress" label="Font-Family" value={fontfamily} placeholder="Select Font" title="Font-Family Type" options={fontfamilyoptions} onchange={handlefontfamilyChange} disabled={isDisabled}></lightning-combobox>
+				<lightning-combobox name="progress" label="Font-Size" value={fontsize} placeholder="Font Size" title="Font Size" options={fontsizeoptions} onchange={handlefontsizeChange} disabled={isDisabled}></lightning-combobox>
+				<lightning-input type="color" name="input-color" label="H. Font" title="Header Font Color" value={selectedHFontColor} onchange={handleHFontColorChange} disabled={isDisabled}></lightning-input>
+				<lightning-input type="color" name="input-color" label="H. BG" title="Header Background Color" value={selectedHbgColor} onchange={handleHbgColorChange} disabled={isDisabled}></lightning-input>
+				<lightning-input type="color" name="input-color" label="Cat. Font" title="Category Font Color" value={selectedBFontColor} onchange={handleBFontColorChange} disabled={isDisabled}></lightning-input>
+				<lightning-input type="color" name="input-color" label="Cat. BG" title="Category Background Color" value={selectedBBgcolor} onchange={handleBBgColorchange} disabled={isDisabled}></lightning-input>
+				<lightning-button class="slds-p-top_large" icon-name="utility:filter_criteria" label="Apply Filter(s)" title="Apply Filter(s)" onclick={handleFiltering} disabled={isDisabled}></lightning-button>
+				<lightning-input class="slds-p-top_large" data-id="serialNumber" type="checkbox" name="Serial-Number" label="Serial-Number" title="Show Serial Number" value={SerialNumber} onchange={handleSerialNumber} disabled={isDisabled}></lightning-input>
+			  </div>
+			</div>
+			<div class="slds-grid slds-grid_vertical slds-nowrap">
+			  <div role="group" class="slds-grid slds-grid_align-space slds-col slds-rich-text-editor__toolbar slds-shrink-none">
+				<template if:true={showdate}>
+				  <lightning-combobox name="Date format" label="Date format" title="Date format" value={dateFormatvalue} placeholder={dateFormatvalue} options={dateformats} onchange={handleDateFormat} disabled={isDisabled}></lightning-combobox>
+				</template>
+				<template if:true={showtime}>
+				  <lightning-combobox name="Time format" label="Time format" title="Time format" value={timeFormatvalue} placeholder={timeFormatvalue} options={timeformats} onchange={handleTimeFormat} disabled={isDisabled}></lightning-combobox>
+				</template>
+				<template if:true={shownumber}>
+				  <lightning-combobox name="Number format" label="Number format" title="Number format" value={numFormatvalue} placeholder={numFormatvalue} options={numformats} onchange={handleNumFormat} disabled={isDisabled}></lightning-combobox>
+				</template>
+				<template if:true={showcurrency}>
+				  <lightning-combobox name="Currency format" label="Currency format" title="Currency format" value={curFormatvalue} placeholder={curFormatvalue} options={curformats} onchange={handlecurFormat} disabled={isDisabled}></lightning-combobox>
+				</template>
+				<template lwc:if={showChartBox}>
+				  <lightning-input data-id="chartBox" type="checkbox" name="Configure Chart" class="slds-p-top_large" label="Configure Chart" title="Include Chart in PDF" value={displayChart} onchange={handleDisplayChart} disabled={isDisabled}></lightning-input>
+				  <lightning-input type="color" name="input-color" label="Fill Color" title="Chart Color" value={selectedBarChartColor} onchange={handleBarChartColorChange} disabled={isDisabled}></lightning-input>
+				</template>
+			  </div>
+			</div>
+			<div class="slds-grid slds-grid_vertical slds-nowrap slds-rich-text-editor__toolbar slds-grid_align-space">
+			  <template if:true={showCalculatorFields}>
+				<!-- <div role="group" class=""> -->
+				<div class="slds-col slds-p-bottom_xx-small slds-p-horizontal_small">
+				  <lightning-combobox name="select fields for sub total" label="Select fields for Sub Total calculation" value={numfieldvalue} placeholder="Select fields for Sub Total calculation" options={showNumberFields} onchange={handleNumCalfields} disabled={isDisabled}></lightning-combobox>
+				</div>
+				<div class="slds-col slds-p-horizontal_small">
+				  <template for:each={allNumericalFields} for:item="val">
+					<lightning-pill key={val} name={val} label={val} class="slds-p-horizontal_xx-small" onremove={handleRemovenumField} disabled={isDisabled}></lightning-pill>
+				  </template>
+				</div>
+				<!-- </div> -->
+			  </template>
+			</div>
+		  </div>
+		  <div class="tableMainClass">
+			</br>
+			<table class="mytable" style="border: 1px solid black;">
+			  <thead class='tableHeader'>
+				<tr>
+				  <template for:each={tableheaders} for:item="headval">
+					<th scope="col" key={headval} data-id={headval} style="text-align:center; height: 7vh">
+					  <lightning-input-rich-text onchange={handleRichTextArea} onclick={getSelectedTableRowHandler} formats={formats} class="slds-align_absolute-center TableRowClass" value={headval} key={headval} data-id={headval} title={headval} disabled={isDisabled} contenteditable='true'>
+						<div data-id={headval} hidden> {headval} </div>
+					  </lightning-input-rich-text>
+					  <template if:false={isDisabled}>
+						<lightning-button-icon data-id={headval} data-okay icon-name="utility:check" alternative-text="Save" class="slds-m-left_xx-small slds-hide" title="done" onclick={saveLabel}></lightning-button-icon>
+						<lightning-button-icon data-id={headval} data-cancel icon-name="utility:close" alternative-text="cancel" class="slds-m-left_xx-small slds-hide" title="cancel" onclick={previousVal}></lightning-button-icon>
+					  </template>
+					</th>
+				  </template>
+				</tr>
+			  </thead>
+			  <tbody>
+				<template if:false={noGrouping}>
+				  <template for:each={tablerows} for:item="rowvar">
+					<tr key={rowvar.rownumber}>
+					  <template for:each={rowvar.columns} for:item="colvar">
+						<td scope="col" key={colvar} style="color:black; text-align:center;"> {colvar} </td>
+					  </template>
+					</tr>
+				  </template>
+				</template>
+				<template for:each={tabsection} for:item="secvar">
+				  <td scope="col" key={secvar} colspan={sectionSpan} style={catStyle}>
+					<div title={secvar}> {secvar} </div>
+				  </td>
+				  <template for:each={tablerows} for:item="rowvar">
+					<tr key={rowvar.rownumber}>
+					  <template for:each={rowvar.columns} for:item="colvar">
+						<td scope="col" key={colvar} style="color:black; text-align:center;"> {colvar} </td>
+					  </template>
+					</tr>
+				  </template>
+				</template>
+			  </tbody>
+			</table>
+		  </div>
+		</div>
+		<c-hidden-component hidden></c-hidden-component>
+		<div class="title">&nbsp;</div>
+		<div class="borderdiv slds-col slds-size_12-of-12" data-id="ChartSection1">
+		  <div class="slds-card dx-rte_toolbar slds-no-print">
+			<template if:true={displayChart}>
+			  <div class="slds-grid slds-grid_vertical slds-nowrap">
+				<h4 class="slds-form-element__label slds-align_absolute-center">CHART SECTION</h4>
+				<div role="group" class="slds-rich-text-editor__toolbar slds-shrink-none">
+				  <div class="slds-col slds-size_12-of-12">
+					<div class="slds-grid slds-wrap slds-gutters">
+					  <!-- Commented Previously  -->
+					  <!-- <div class="slds-col slds-size_12-of-12 slds-medium-size_4-of-12 slds-large-size_4-of-12"><lightning-input type="text" label="Enter the chart Label"
+								value={chartLabel} onchange={handleChartLabel} disabled={isDisabled}></lightning-input></br></div> -->
+					  <!-- Commented Previously  -->
+					  <div class="slds-col slds-size_12-of-12 slds-medium-size_6-of-12 slds-large-size_6-of-12">
+						<lightning-combobox data-id="subtotalFieldValue" name="Select field to generate a graph" label="Select a field to generate a graph" value={subtotalFieldValue} placeholder="Select a field to generate the chart" options={subtotalField} onchange={chartValueChange} disabled={isDisabled}></lightning-combobox>
+					  </div>
+					  <div class="slds-col slds-size_12-of-12 slds-medium-size_6-of-12 slds-large-size_3-of-12 slds-p-top_large ">
+						<lightning-input data-id="newChartPage" type="checkbox" label="Chart in New Page" name="Chart in New Page" class="slds-list_horizontal" onchange={handleChartNewPage} checked={chartNewPage} disabled={isDisabled}></lightning-input>
+					  </div>
+					</div>
+				  </div>
+				</div>
+			  </div>
+			</template>
+			<template if:true={chartControl}>
+			  <table width="100%" height="auto">
+				<tr>
+				  <td width="75%" style="text-align: center;">
+					<h4>{chartLabel}</h4>
+				  </td>
+				</tr>
+				<tr>
+				  <td>
+					<div class="chart_vbar">
+					  <table class="innerbase" style="width:96.8%">
+						<tr>
+						  <td style="width:3%; text-align: center; writing-mode:vertical-rl; text-orientation:upright;"> {subtotalFieldValue} </td>
+						  <template for:each={chartLst} for:item="chart">
+							<td class="itembase" valign="bottom" key={chart.label} style={chart.width}>
+							  <div class="itemtitle" key={chart.label}> {chart.label} </div>
+							  <div class="itemvalueout" key={chart.label}> Y% </div>
+							  <div class="itembar chart-color" data-id={chart.label} key={chart.label} style={chart.height}>
+								<div class="itemvaluein" key={chart.label} style="padding:10px 5px 5px; color:#ffffff"> {chart.value} </div>
+							  </div>
+							</td>
+						  </template>
+						</tr>
+					  </table>
+					</div>
+				  </td>
+				</tr>
+				<tr>
+				  <td style="text-align: center;"> Categories </td>
+				</tr>
+			  </table>
+			</template>
+		  </div>
+		</div>
+	  </template>
+	  <div class="slds-col slds-size_12-of-12 slds-text-align_right slds-p-top_small">
+		<lightning-button class="slds-m-left_small" disabled={disabledeleteButton} variant="neutral" label="Delete" title="titleName" onclick={handlesectionDelete}></lightning-button>
+		<lightning-button class="slds-m-left_small" disabled={disableButton} variant="brand" label="Save" title="SaveBtn" onclick={handlesectionsave}></lightning-button>
+	  </div>
 	</template>
+</template>
