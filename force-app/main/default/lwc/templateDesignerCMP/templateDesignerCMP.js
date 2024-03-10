@@ -42,7 +42,8 @@ export default class TemplateDesignerCMP extends NavigationMixin(LightningElemen
   @track imageScalingValue = 100; // Default Image scaling = 100
   @track opacityValue = '1.0'; // Default text Opacity = 1
   @track pageTextOption = 'All Pages - Text'; // Default text page Option for watermark is selected as "ALL PAGES"
-  @track pageImageOption = 'All Pages - Text'; // Default Image page Option for watermark is selected as "ALL PAGES"
+  @track pageImageOption = 'All Pages - Image'; // Default Image page Option for watermark is selected as "ALL PAGES"
+  @track readonlyVal = false; // Boolean to make the field readonly
   //watermarkPageOptionsText combobox options for Text Watermark
   watermarkPageOptionsText = [
         { label: 'All Pages', value: 'All Pages - Text', checked : true },
@@ -514,6 +515,7 @@ popUpMessage; // Popup message.
     this.showfooterdetails = false;
     this.disableEditing = false;
     this.disableEditingHandler(this.disableEditing);
+    this.readonlyVal = false;
     this.activateTemplateLabel = 'Activate Template';
     this.rowCount = -1;
     this.template.querySelector("c-template-content-details").resetvaluesonchildcmp();
@@ -762,6 +764,7 @@ popUpMessage; // Popup message.
     this.template.querySelector('c-template-related-objects').handleActivateTemplate(isActive, this.relatedtoTypeObjName);
     this.template.querySelector('c-template-header').handleActivateTemplate(isActive, this.relatedtoTypeObjName);
     this.template.querySelector('c-template-footer').handleActivateTemplate(isActive, this.relatedtoTypeObjName);
+    this.readonlyVal = isActive? true: false;
   }
 
   /**
@@ -1094,7 +1097,8 @@ popUpMessage; // Popup message.
   handleWatermarkSettings() {
     this.editTemplate = false;
     this.showwatermarkbtn = true;
-    this.generateCanvas();
+    this.getSavedDocTempWatermarkData();
+    //this.generateCanvas();
   }
 
 /**
@@ -1353,25 +1357,30 @@ popUpMessage; // Popup message.
   * Method to get the already saved watermark data from apex and assign them to the respective variables
   */
   getSavedDocTempWatermarkData() {
-    getDocumentTemplateData({ templateId: this.recordId }).then(result => {
-      if (result != null) {
-        console.log('printing document template details --- > ', result);
-        let savedWaterMarkData = JSON.parse(result.DxCPQ__Watermark_Data__c);
-        this.fontSizeValue = savedWaterMarkData[0].fontsize;
-        this.opacityValue = savedWaterMarkData[0].opacity;
-        this.checkedValText = savedWaterMarkData[0].isPrimary;
-        this.pageTextOption = savedWaterMarkData[0].pageTextOption;
-        this.watermarkText = savedWaterMarkData[0].textVal;
-        this.colorValue = savedWaterMarkData[0].color;
-        this.rotationValue = savedWaterMarkData[0].rotation;
-        this.rotationImagevalue = savedWaterMarkData[1].rotation;
-        this.imageScalingValue = savedWaterMarkData[1].imageScale;
-        this.pageImageOption = savedWaterMarkData[1].pageImageOption;
-        this.checkedValImage = savedWaterMarkData[1].isPrimary;
-        this.opacityImageValue = savedWaterMarkData[1].opacity;
-      }
-    }).catch(error => {
-      console.log('error activation', error);
-    })
+    try{
+      getDocumentTemplateData({ templateId: this.recordId }).then(result => {
+        if (result != null) {
+          console.log('printing document template details --- > ', result);
+          let savedWaterMarkData = JSON.parse(result.DxCPQ__Watermark_Data__c);
+          this.fontSizeValue = savedWaterMarkData[0].fontsize;
+          this.opacityValue = savedWaterMarkData[0].opacity;
+          this.checkedValText = savedWaterMarkData[0].isPrimary;
+          this.pageTextOption = savedWaterMarkData[0].pageTextOption;
+          this.watermarkText = savedWaterMarkData[0].textVal;
+          this.colorValue = savedWaterMarkData[0].color;
+          this.rotationValue = savedWaterMarkData[0].rotation;
+          this.rotationImagevalue = savedWaterMarkData[1].rotation;
+          this.imageScalingValue = savedWaterMarkData[1].imageScale;
+          this.pageImageOption = savedWaterMarkData[1].pageImageOption;
+          this.checkedValImage = savedWaterMarkData[1].isPrimary;
+          this.opacityImageValue = savedWaterMarkData[1].opacity;
+          this.generateCanvas();
+        }
+      }).catch(error => {
+        console.log('error activation', error);
+      })
+    } catch(error) {
+      console.log('error' + error);
+    }
   }
 }

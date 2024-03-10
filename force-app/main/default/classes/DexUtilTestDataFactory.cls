@@ -5,7 +5,7 @@
     * Last Modified Date: 30/1/2020
     * Change Log: 
     */
-    @isTest
+    @IsTest
     public with sharing class DexUtilTestDataFactory {
     /* Method:             createRecords
     * Parameters:         List<SObject> records : List of sobjects(Account, Contact etc..) which has to be created/inserted

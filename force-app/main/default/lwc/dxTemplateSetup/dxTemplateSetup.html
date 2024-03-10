@@ -63,8 +63,7 @@
 				</div>
 				<footer class="slds-modal__footer"> </footer>
 			</template>
-		
-			<!-----Watermark Text & Image code added by Bhavya starts here------->
+	
 			<template if:true={showwatermarkbtn}>
 					<span slot="header">Watermark Settings</span>
 					<div class="slds-modal__content slds-p-around_medium"
@@ -89,7 +88,7 @@
 											</div>
 											<div class="slds-col slds-size_1-of-1 slds-medium-size_4-of-12 slds-large-size_4-of-12">
 												<lightning-slider class="rotationSlider" label="Rotation" size="x-small" value={rotationvalue}
-													onchange={handleRotationChange} data-label="rotation" min="0" max="90"
+													onchange={handleRotationChange} data-label="rotation" min="-180" max="180"
 													step="5" data-type = "Text"></lightning-slider>
 											</div>
 											<div class="slds-col slds-size_1-of-1 slds-medium-size_4-of-12 slds-large-size_4-of-12">
@@ -140,7 +139,7 @@
 													<lightning-combobox name="opacityImage" label="Opacity" value={opacityImageValue} placeholder="" data-label="opacityImage" options={opacityOptions} onchange={handleWatermarkChange}> </lightning-combobox>
 												</div>
 												<div class="slds-col slds-size_1-of-1 slds-medium-size_4-of-12 slds-large-size_4-of-12">
-													<lightning-slider class="rotationSlider" label="Rotation" size="x-small" value={rotationImagevalue} onchange={handleRotationChange} data-label="rotation" min="0" max="90" step="5" data-type = "Image"></lightning-slider>
+													<lightning-slider class="rotationSlider" label="Rotation" size="x-small" value={rotationImagevalue} onchange={handleRotationChange} data-label="rotation" min="-180" max="180" step="5" data-type = "Image"></lightning-slider>
 												</div>
 												
 												<div class="slds-col slds-size_1-of-1 slds-medium-size_4-of-12 slds-large-size_4-of-12">
@@ -178,7 +177,6 @@
 								<button class="slds-button slds-button_brand" onclick={handleWaterMarkSave}>Save</button>
 							</div>
 				</template>
-		<!---Watermark Text & Image code added by Bhavya ends here---->
 	</c-modal>
 	</div>
 </template>

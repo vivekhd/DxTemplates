@@ -1,5 +1,6 @@
 import { LightningElement, api,wire,track} from 'lwc';
 import getTemplateSections from '@salesforce/apex/DisplayPDFController.getTemplateSections';
+import getTemplateSectionsMulRecords from '@salesforce/apex/DisplayPDFController.getTemplateSectionsMulRecords';
 import generateDocument from '@salesforce/apex/DisplayPDFController.generateDocument';
 import generatePDFAttachment from '@salesforce/apex/DisplayPDFController.generatePDFAttachment';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
@@ -162,7 +163,7 @@ export default class DxShowSelectedTemplate extends LightningElement {
                 })                                
             }
         }).catch((err) => {
-            this.isLoaded=false;
+            // this.isLoaded=false;
             console.log('Error Section Contentes'+ JSON.stringify(err));
         });
     }

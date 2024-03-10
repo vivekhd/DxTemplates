@@ -304,7 +304,7 @@
 				</template>
 
 				<template if:true={showwatermarkbtn}>
-					<!---- Modal Code added by Bhavya for watermark starts--->
+					<!-- Modal Code added by Bhavya for watermark starts-->
 					<span slot="header">Watermark Settings</span>
 					<div class="slds-modal__content slds-p-around_medium" id="modal-content-id-1"
 						style="max-height: 500px;">
@@ -315,38 +315,38 @@
 									<div
 										class="slds-col slds-size_1-of-1 slds-medium-size_4-of-12 slds-large-size_4-of-12">
 										<lightning-input type="text" label="Watermark Text" value={watermarkText}
-											onchange={handleWatermarkChange} data-label="watermarkText">
+											onchange={handleWatermarkChange} data-label="watermarkText" disabled ={readonlyVal}>
 										</lightning-input>
 									</div>
 									<div
 										class="slds-col slds-size_1-of-1 slds-medium-size_4-of-12 slds-large-size_4-of-12">
 										<lightning-input type="color" name="input-color" label="Color"
-											value={colorValue} data-label="color" onchange={handleWatermarkChange}>
+											value={colorValue} data-label="color" onchange={handleWatermarkChange} disabled ={readonlyVal}>
 										</lightning-input>
 									</div>
 									<div
 										class="slds-col slds-size_1-of-1 slds-medium-size_4-of-12 slds-large-size_4-of-12">
 										<lightning-combobox name="FontSize" label="Font Size" value={fontSizeValue}
 											placeholder="" data-label="fontSize" options={fontSizeOptions}
-											onchange={handleWatermarkChange}> </lightning-combobox>
+											onchange={handleWatermarkChange} disabled ={readonlyVal}> </lightning-combobox>
 									</div>
 									<div
 										class="slds-col slds-size_1-of-1 slds-medium-size_4-of-12 slds-large-size_4-of-12">
 										<lightning-slider class="rotationSlider" label="Rotation" size="x-small"
 											value={rotationvalue} onchange={handleRotationChange} data-label="rotation"
-											min="0" max="90" step="5" data-type="Text"></lightning-slider>
+											min="-180" max="180" step="5" data-type="Text" disabled ={readonlyVal}></lightning-slider>
 									</div>
 									<div
 										class="slds-col slds-size_1-of-1 slds-medium-size_4-of-12 slds-large-size_4-of-12">
 										<lightning-combobox name="opacity" label="Opacity" data-label="opacity"
 											value={opacityValue} placeholder="" options={opacityOptions}
-											onchange={handleWatermarkChange}> </lightning-combobox>
+											onchange={handleWatermarkChange} disabled ={readonlyVal}> </lightning-combobox>
 									</div>
 									<div
 										class="slds-col slds-size_1-of-1 slds-medium-size_4-of-12 slds-large-size_4-of-12">
 										<lightning-input type="checkbox" label="Primary" name="textPrimary"
 											checked={checkedValText} onchange={handleWatermarkPrimary}
-											data-label="textPrimary"></lightning-input>
+											data-label="textPrimary" disabled ={readonlyVal}></lightning-input>
 									</div>
 								</div>
 								<div class="slds-grid slds-gutters_small">
@@ -354,7 +354,7 @@
 										<fieldset key={item.value} style="display: block; float: left;">
 											<div class="slds-form-element__control" style="margin:15px 0px 10px 15px">
 												<span class="slds-radio">
-																<input name="radiogroup" id={item.value} type="radio" value={item.value} onchange={handleWatermarkPageChange} checked = {item.checked}/>
+																<input name="radiogroup" id={item.value} type="radio" value={item.value} onchange={handleWatermarkPageChange} checked = {item.checked} disabled ={readonlyVal}/>
 																<label class="slds-radio__label" for={item.value}>
 																	<span class="slds-radio_faux"></span>
 												<span class="slds-form-element__label" style="display: inline !important;">{item.label}</span>
@@ -378,33 +378,33 @@
 								<div class="slds-grid slds-wrap slds-gutters_small slds-grid_vertical-align-center">
 									<div
 										class="slds-col slds-size_1-of-1 slds-medium-size_4-of-12 slds-large-size_4-of-12">
-										<input type="file" accept="image/*" onchange={handleUploadFinished}>
+										<input type="file" accept="image/*" onchange={handleUploadFinished} disabled ={readonlyVal}>
 												</div>
 										<div
 											class="slds-col slds-size_1-of-1 slds-medium-size_4-of-12 slds-large-size_4-of-12">
 											<lightning-slider label="Image Scaling %" size="x-small"
 												value={imageScalingValue} onchange={handleWatermarkChange} min="0"
-												max="200" data-label="imagescaling"></lightning-slider>
+												max="200" data-label="imagescaling" disabled ={readonlyVal}></lightning-slider>
 										</div>
 										<div
 											class="slds-col slds-size_1-of-1 slds-medium-size_4-of-12 slds-large-size_4-of-12">
 											<lightning-combobox name="opacityImage" label="Opacity"
 												value={opacityImageValue} placeholder="" data-label="opacityImage"
-												options={opacityOptions} onchange={handleWatermarkChange}>
+												options={opacityOptions} onchange={handleWatermarkChange} disabled ={readonlyVal}>
 											</lightning-combobox>
 										</div>
 										<div
 											class="slds-col slds-size_1-of-1 slds-medium-size_4-of-12 slds-large-size_4-of-12">
 											<lightning-slider class="rotationSlider" label="Rotation" size="x-small"
-												value={rotationImagevalue} onchange={handleRotationChange}
-												data-label="rotation" min="0" max="90" step="5" data-type="Image">
+												value={rotationImagevalue} onchange={handleRotationChange} disabled ={readonlyVal}
+												data-label="rotation" min="-180" max="180" step="5" data-type="Image">
 											</lightning-slider>
 										</div>
 
 										<div
 											class="slds-col slds-size_1-of-1 slds-medium-size_4-of-12 slds-large-size_4-of-12">
 											<lightning-input type="checkbox" label="Primary" name="imagePrimary"
-												checked={checkedValImage} onchange={handleWatermarkPrimary}
+												checked={checkedValImage} onchange={handleWatermarkPrimary} disabled ={readonlyVal}
 												data-label="imagePrimary"></lightning-input>
 										</div>
 									</div>
@@ -414,7 +414,7 @@
 												<div class="slds-form-element__control"
 													style="margin:15px 0px 10px 15px">
 													<span class="slds-radio">
-															<input name="radiogroupforImage" id={item.value} type="radio" value={item.value} onchange={handleWatermarkPageChange} checked = {item.checked}/>
+															<input name="radiogroupforImage" id={item.value} type="radio" value={item.value} onchange={handleWatermarkPageChange} disabled ={readonlyVal} checked = {item.checked}/>
 															<label class="slds-radio__label" for={item.value}>
 																<span class="slds-radio_faux"></span>
 													<span class="slds-form-element__label" style="display: inline !important;">{item.label}</span>
@@ -439,14 +439,14 @@
 					</div>
 					<div class="slds-modal__footer">
 						<button class="slds-button slds-button_neutral" aria-label="Cancel and close" onclick={handleWaterMarkCancel}>Cancel</button>
-						<button class="slds-button slds-button_brand" onclick={handleWaterMarkSave}>Save</button>
+						<button class="slds-button slds-button_brand" onclick={handleWaterMarkSave} if:false={readonlyVal}>Save</button>
 					</div>
 				</template>
 			</c-modal>
 
 
 
-			<!-----Watermark code ends here ---->
+			<!---Watermark code ends here -->
 		</div>
 	</div>
 </template>

@@ -1,7 +1,7 @@
-@isTest
+@IsTest
 public class RuleSelector_Test {
     
-    @isTest
+    @IsTest
     public static void testSavepointOperation() {
         Rule__c rule= new Rule__c();
         insert rule;
@@ -21,7 +21,7 @@ public class RuleSelector_Test {
         List<Rule_Condition__c> deletedRuleConditions = [SELECT Id FROM Rule_Condition__c WHERE Id IN :arrIds ALL ROWS];  
     }
     
-    @isTest
+    @IsTest
     public static void testSavepointOperation1() {
         Rule__c rule= new Rule__c();
         insert rule;
@@ -40,7 +40,7 @@ public class RuleSelector_Test {
         Test.stopTest();           
     }    
     
-    @isTest
+    @IsTest
     public static void testRelatedObjectsRestConditions() {
         Test.startTest();
         Rule__c rule= new Rule__c();
@@ -53,7 +53,7 @@ public class RuleSelector_Test {
         Test.stopTest();        
     }    
     
-    @isTest
+    @IsTest
     public static void testRelatedObjectsRestConditions1() {
         Test.startTest();
         Rule__c rule= new Rule__c();

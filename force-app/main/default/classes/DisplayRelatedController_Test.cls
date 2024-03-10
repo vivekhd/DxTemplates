@@ -1,6 +1,6 @@
-@isTest
+@IsTest
 private class DisplayRelatedController_Test {
-    @isTest static void testDisplayRelatedController() {
+    @IsTest static void testDisplayRelatedController() {
         Test.startTest();
         User us = DexUtilTestDataFactory.CreateTestUser();
         System.runAs(us){
@@ -14,7 +14,7 @@ private class DisplayRelatedController_Test {
     }
     
     //The following methods are the test classes of DisplayRelatedObjects Apex class    
-    @isTest
+    @IsTest
     static void testGetObjectFieldTypeMap() {
         Test.startTest();
         User us = DexUtilTestDataFactory.CreateTestUser();
@@ -35,7 +35,7 @@ private class DisplayRelatedController_Test {
         Test.stopTest();
     }
     
-    @isTest
+    @IsTest
     static void testGetObjectFieldTypeMap1() {
         Test.startTest();
         User us = DexUtilTestDataFactory.CreateTestUser();
@@ -56,7 +56,7 @@ private class DisplayRelatedController_Test {
         Test.stopTest();
     }
     
-    @isTest
+    @IsTest
     static void testGetLkpObjectApi() {
         Test.startTest();
         User us = DexUtilTestDataFactory.CreateTestUser();
@@ -70,7 +70,7 @@ private class DisplayRelatedController_Test {
     }
     
     
-    @isTest
+    @IsTest
     static void testGetLkpObjectApi_ExceptionHandling() {
         Test.startTest();
         User us = DexUtilTestDataFactory.CreateTestUser();
@@ -88,7 +88,7 @@ private class DisplayRelatedController_Test {
     }
     
     
-    @isTest
+    @IsTest
     static void testGetsectionData() {
         Test.startTest();
         User us = DexUtilTestDataFactory.CreateTestUser();
@@ -115,7 +115,7 @@ private class DisplayRelatedController_Test {
         System.assert(true);
     }
     
-    @isTest
+    @IsTest
     static void testGetsectionData1() {
         Test.startTest();
         User us = DexUtilTestDataFactory.CreateTestUser();
@@ -142,7 +142,7 @@ private class DisplayRelatedController_Test {
         System.assert(true);
     }
     
-    @isTest
+    @IsTest
     static void testGetsectionData3() {
         Test.startTest();
         User us = DexUtilTestDataFactory.CreateTestUser();
@@ -179,7 +179,7 @@ private class DisplayRelatedController_Test {
     }
     
     
-    @isTest
+    @IsTest
     static void testGetsectionData4() {
         Test.startTest();
         User us = DexUtilTestDataFactory.CreateTestUser();
@@ -219,7 +219,7 @@ private class DisplayRelatedController_Test {
          System.assert(true);
     }
     
-    @isTest
+    @IsTest
     static void testGetsectionData7() {
         Test.startTest();
         User us = DexUtilTestDataFactory.CreateTestUser();
@@ -259,7 +259,7 @@ private class DisplayRelatedController_Test {
         System.assert(true);
     }    
     
-    @isTest
+    @IsTest
     static void testRetrieveRecords() {
         Test.startTest();
         User us = DexUtilTestDataFactory.CreateTestUser();
@@ -277,7 +277,7 @@ private class DisplayRelatedController_Test {
         Test.stopTest();
     }
     
-    @isTest
+    @IsTest
     static void testRetrieveRecords1() {
         Test.startTest();
         User us = DexUtilTestDataFactory.CreateTestUser();
@@ -302,7 +302,7 @@ private class DisplayRelatedController_Test {
         Test.stopTest();
     }
     
-    @isTest
+    @IsTest
     static void testRetrieveRecords2() {
         Test.startTest();
         User us = DexUtilTestDataFactory.CreateTestUser();
@@ -327,7 +327,7 @@ private class DisplayRelatedController_Test {
     }
     
     
-    @isTest
+    @IsTest
     static void testGetLookupList() {
         Test.startTest();
         User us = DexUtilTestDataFactory.CreateTestUser();
@@ -346,7 +346,7 @@ private class DisplayRelatedController_Test {
          System.assert(true);
     }
     
-    @isTest
+    @IsTest
     static void testWrapperAndRowWrapper() {
         Test.startTest();
         User us = DexUtilTestDataFactory.CreateTestUser();

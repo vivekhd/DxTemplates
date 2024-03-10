@@ -3,7 +3,7 @@ import {loadStyle } from 'lightning/platformResourceLoader';
 import { getRecord, getSObjectInfo } from 'lightning/uiRecordApi';
 import dexcpqcartstylesCSS from '@salesforce/resourceUrl/dexcpqcartstyles';
 import rte_tbl from '@salesforce/resourceUrl/rte_tbl';
-import SavePDFtoQuote from '@salesforce/apex/DisplayPDFController.SavePDFtoQuote';
+import SavePDFtoQuote from '@salesforce/apex/DisplayPDFController.savePDFtoQuote';
 import pdfModefun from '@salesforce/apex/DisplayPDFController.pdfMode';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 import { CurrentPageReference } from 'lightning/navigation';
