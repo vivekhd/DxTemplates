@@ -51,8 +51,7 @@ public with sharing class SaveDocumentTemplate {
     public static Document_Template__c cloneDocumentTemplate(Document_Template__c docTemp, Id docTempId)	{
         try	{
             List<Document_Template_Section__c> docTempSec = [SELECT ID, Name, IsActive__c, New_Page__c, Section_Content__c, Sequence__c, Section_Details__c, Type__c, Document_Clause__c, ruleId__c, Header_Content__c FROM Document_Template_Section__c WHERE Document_Template__c=:docTempId WITH SECURITY_ENFORCED limit 50000];
-            List<Document_Template__c> docTempList = [SELECT ID, Name,Version_Number__c, Watermark_Data__c FROM Document_Template__c WHERE Parent_Template__c= :docTemp.Parent_Template__c OR ID=:docTemp.Parent_Template__c WITH SECURITY_ENFORCED limit 50000];
-            System.debug(docTempList);
+            List<Document_Template__c> docCloneTemplate = [SELECT ID, Name,Version_Number__c,Watermark_Data__c FROM Document_Template__c WHERE Parent_Template__c= :docTemp.Parent_Template__c WITH SECURITY_ENFORCED order by Version_Number__c desc limit 1];
             
             if(docTemp!=null){
                 docTemp.Version_Number__c = (docTemp.Parent_Template__c != docTempId) ? docCloneTemplate[0].Version_Number__c + 1 : 1;                
