@@ -1,32 +1,29 @@
 <template>
 	<div class="slds-card__header slds-einstein-header slds-grid dx-card_header_search_l sidenavleft_searchholder">
-		<lightning-combobox class="" name="Filter by SObject" label="Filter by SObject"  variant="label-hidden" value={templateValue} placeholder="SObject Filter" options={relatedTypeOptionData} onchange={handleFilterSelection} style="width:100%;">
-				</lightning-combobox>
+		<lightning-combobox class="" name="Filter by SObject" label="Filter by SObject" variant="label-hidden"
+			value={templateValue} placeholder="All" options={relatedTypeOptionData}
+			onchange={handleFilterSelection} style="width:100%;">
+		</lightning-combobox>
 	</div>
-	<!-- <div class="slds-card__header slds-einstein-header slds-grid dx-card_header_search_l sidenavleft_searchholder">
-		<lightning-input type="search" placeholder={placeholderText} variant="label-hidden" onchange={filterData}>
-		</lightning-input>
-	</div> -->
+
 	<ul class="leftsidebar-menu" style="max-height:20.5em; padding-top:38px;">
 		<!--Added by Vivek for Template Creation - START-->
 		<li class="slds-p-around_small slds-text-align_center">
 			<div style="width: 100%; padding:5px 20px 5px 10px;">
-				<lightning-input type="search" placeholder={placeholderText} variant="label-hidden" onchange={filterData}>
-		</lightning-input>
+				<lightning-input type="search" placeholder={placeholderText} variant="label-hidden"
+					onchange={filterData}>
+				</lightning-input>
 			</div>
 		</li>
+
 		<li if:true={isTemplate} class="slds-p-around_small slds-text-align_center">
 			<div style="width: 100%; padding:5px 20px 5px 10px;">
 				<lightning-button label="Add New Template" title="Creates a New Document Template"
 					icon-name="utility:add" class="dx_newtemplate slds-button_stretch" variant="brand"
 					onclick={createNewTemplateHandler}></lightning-button>
 			</div>
-		  	<!-- <div class="slds-col slds-form-element">
-				<lightning-combobox class="" name="Filter by SObject" label="Filter by SObject" value={templateValue}
-					placeholder="All" options={relatedTypeOptionData} onchange={filterSelection}>
-				</lightning-combobox>
-			</div>   -->
 		</li>
+
 		<!--Added by Vivek for Template Creation - END-->
 		<template for:each={gridDataSet} for:item="arrItem">
 			<template if:true={arrItem.isVisible}>

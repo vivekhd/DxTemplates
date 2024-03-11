@@ -4,10 +4,10 @@ global with sharing class RelatedObjectsClass {
 	private static Savepoint sp1;
     
     //Below method will return the list of child object names for the selectedobject
-    @AuraEnabled(cacheable=true)
+    @AuraEnabled
     public static map<string,string> getRelatedObjects(string selectedObject){
         try{
-            system.debug('selectedObject'+selectedObject);
+            system.debug('Selected Parent SObject Name '+ selectedObject);
             map<string,string> relatedObjectsMap = new map<string,string>();
             list<Schema.Childrelationship> relatedObjectsList = Schema.getGlobalDescribe().get(selectedObject).getdescribe().getChildRelationships();
             for (Schema.Childrelationship relatedObject : relatedObjectsList) 
@@ -27,12 +27,12 @@ global with sharing class RelatedObjectsClass {
         }
         catch (Exception ex) {
             LogHandler.createLog((Id) null,'RelatedObjectsClass.getRelatedObjects()','selectedObject -> '+selectedObject+' '+ex.getLineNumber()+ex.getStackTraceString()+ex.getCause(),ex.getMessage(),'Exception');
-            throw new AuraHandledException(ex.getMessage());
+            return null;
         }  
     }
     
     //Below method will return the list of field names present in the selected object
-    @AuraEnabled(cacheable=true)
+    @AuraEnabled
     public static Map<string,string> getFields(String selectedObject){
     try{
         Map<string,string> reqFieldsMap=new Map<string,string>();
@@ -53,7 +53,7 @@ global with sharing class RelatedObjectsClass {
     }
     catch (Exception ex) {
         LogHandler.createLog((Id) null,'RelatedObjectsClass.getFields()','selectedObject -> '+selectedObject+' '+ex.getLineNumber()+ex.getStackTraceString()+ex.getCause(),ex.getMessage(),'Exception');
-        throw new AuraHandledException(ex.getMessage());
+        return null;
     }  
     }
     
@@ -92,7 +92,7 @@ global with sharing class RelatedObjectsClass {
         }
         catch (Exception ex) {
             LogHandler.createLog((Id) null,'RelatedObjectsClass.getGroupingValues()','selectedObject -> '+selectedObject+' '+ex.getLineNumber()+ex.getStackTraceString()+ex.getCause(),ex.getMessage(),'Exception');
-            throw new AuraHandledException(ex.getMessage());
+            return null;
         }  
     }    
     
@@ -139,33 +139,23 @@ global with sharing class RelatedObjectsClass {
         }
         catch (Exception ex) {
             LogHandler.createLog((Id) null,'RelatedObjectsClass.getFieldsWrapper()','selectedObject -> '+selectedObject+' '+ex.getLineNumber()+ex.getStackTraceString()+ex.getCause(),ex.getMessage(),'Exception');
-            throw new AuraHandledException(ex.getMessage());
+            return null;
         }   
     }
     
     @AuraEnabled
     public static List<Rule_Condition__c> getExistingConditions(String ruleName){
-        System.debug(ruleName);
-        //Rule__c rule = [Select Id from Rule__c where Name=:ruleName WITH SECURITY_ENFORCED];
-        //System.debug('rule'+rule);
-        //List<Rule_Condition__c> existingConditions = RuleSelector.getRuleConditions(rule.Id);
         List<Rule_Condition__c> existingConditions = RuleSelector.getRuleConditions(ruleName);
         return existingConditions;
     }
     
     public static Id cloneRulesFromParentTemplate(Id parentTempSecId){
         try{
-            System.debug('parentTempSecId'+parentTempSecId);
             
             Id docRule = [Select ruleId__c from document_template_section__c where id=:parentTempSecId WITH SECURITY_ENFORCED limit 1].ruleId__c;
-            System.debug('docRule'+docRule);
-            
             Rule__c tempRule = [Select Id, Rule_Expression__c,Rule_Description__c, (Select Condition_Field__c,ConditionIndex__c,DataType__c,Evaluation_Object__c,Value__c,Name,Operator__c from Rule_Conditions__r) from rule__c where Id=:docRule WITH SECURITY_ENFORCED];
-            System.debug('tempRule'+tempRule.Rule_Conditions__r);
-            
             List<Map<String,Object>> condsArr = new List<Map<String,Object>> {};
-            for(Rule_Condition__c item : tempRule.Rule_Conditions__r)
-            {
+            for(Rule_Condition__c item : tempRule.Rule_Conditions__r) {
                 Map<String,Object> condMap = new Map<String,Object> {};
                 condMap.put('Id',null);
                 condMap.put('conditionIndex',item.ConditionIndex__c);
@@ -184,7 +174,7 @@ global with sharing class RelatedObjectsClass {
         }
         catch (Exception ex) {
             LogHandler.createLog((Id) null,'RelatedObjectsClass.cloneRulesFromParentTemplate()','parentTempSecId -> '+parentTempSecId+' '+ex.getLineNumber()+ex.getStackTraceString()+ex.getCause(),ex.getMessage(),'Exception');
-            throw new AuraHandledException(ex.getMessage());
+            return null;
         }  
     }
     
@@ -318,7 +308,6 @@ global with sharing class RelatedObjectsClass {
         }
         catch (Exception ex) {
             LogHandler.createLog((Id) null,'RelatedObjectsClass.createRuleCondition()','sectionrecordid -> '+sectionrecordid+' '+ex.getLineNumber()+ex.getStackTraceString()+ex.getCause(),ex.getMessage(),'Exception');
-            //throw new AuraHandledException(ex.getMessage());
             return 'Error';
         }  
     }

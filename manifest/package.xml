@@ -69,6 +69,7 @@
 		<members>Document_Template__c.Previously_Active__c</members>
 		<members>Document_Template__c.Related_To_Type__c</members>
 		<members>Document_Template__c.Version_Number__c</members>
+		<members>Document_Template__c.Watermark_Data__c</members>
 		<members>Document__c.Document_Body__c</members>
 		<members>Document__c.Document_Content__c</members>
 		<members>Document__c.Document_Template__c</members>
@@ -99,6 +100,11 @@
 	</types>
 	<types>
 		<members>DXTemplates_HandlerClass.HandlerClass</members>
+        <members>ChartAutomationStyleResources.itembar</members>
+		<members>ChartAutomationStyleResources.itembase</members>
+		<members>ChartAutomationStyleResources.itemtitle</members>
+		<members>ChartAutomationStyleResources.itemvaluein</members>
+		<members>ChartAutomationStyleResources.itemvalueout</members>
 		<name>CustomMetadata</name>
 	</types>
 	<types>

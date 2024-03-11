@@ -15,50 +15,49 @@ public with sharing class SaveDocumentTemplatesection {
         String recId='';
         try{
             system.debug('allSectionRecords-'+allSectionRecords);
-        List<id> allSectionIds=new List<id>();
-        Map<id,Decimal> sectionSeqMap=new Map<id,Decimal>();
-        List<Document_Template_Section__c> allSectionsTobeUpdated=new List<Document_Template_Section__c>();
-        for(Document_Template_Section__c rec:allSectionRecords)
-        {
-            system.debug('rec-'+rec);
-            allSectionIds.add(rec.id);
-            sectionSeqMap.put(rec.id,rec.Sequence__c);
-            recId=rec.id;
-        }
-        
-        List<Document_Template_Section__c> allSections=new List<Document_Template_Section__c>([select id,Sequence__c from Document_Template_Section__c where id in:allSectionIds WITH SECURITY_ENFORCED ]);
-        allSectionIds.clear();
-        for(Document_Template_Section__c rec:allSections)
-        {
-            if(sectionSeqMap.containsKey(rec.id)){
-                if(sectionSeqMap.get(rec.id)!=rec.Sequence__c)
-                {
-                    rec.Sequence__c=sectionSeqMap.get(rec.id);
-                    allSectionsTobeUpdated.add(rec);
+            List<id> allSectionIds=new List<id>();
+            Map<id,Decimal> sectionSeqMap=new Map<id,Decimal>();
+            List<Document_Template_Section__c> allSectionsTobeUpdated=new List<Document_Template_Section__c>();
+            for(Document_Template_Section__c rec:allSectionRecords)
+            {
+                system.debug('rec-'+rec);
+                allSectionIds.add(rec.id);
+                sectionSeqMap.put(rec.id,rec.Sequence__c);
+                recId=rec.id;
+            }
+            
+            List<Document_Template_Section__c> allSections=new List<Document_Template_Section__c>([select id,Sequence__c from Document_Template_Section__c where id in:allSectionIds WITH SECURITY_ENFORCED ]);
+            allSectionIds.clear();
+            for(Document_Template_Section__c rec:allSections)
+            {
+                if(sectionSeqMap.containsKey(rec.id)){
+                    if(sectionSeqMap.get(rec.id)!=rec.Sequence__c)
+                    {
+                        rec.Sequence__c=sectionSeqMap.get(rec.id);
+                        allSectionsTobeUpdated.add(rec);
+                    }
                 }
             }
-        }
-        sectionSeqMap.clear();
-        if(!allSectionsTobeUpdated.isEmpty())
-        {
-            //update allSectionsTobeUpdated;
-            if (sp1 == null) sp1 = Database.setSavepoint();
-            Database.SaveResult[] urList2 = safe.doUpdate(allSectionsTobeUpdated);
-            List<String> errorList1 = Safely.safeClassExceptionHandlerInsert(urList2);
-            if(errorList1.size()>0){
-                Database.rollback(sp1);
-                throw new SafeClassException(String.join( errorList1, ', ' ));
+            sectionSeqMap.clear();
+            if(!allSectionsTobeUpdated.isEmpty())
+            {
+                if (sp1 == null) sp1 = Database.setSavepoint();
+                Database.SaveResult[] urList2 = safe.doUpdate(allSectionsTobeUpdated);
+                List<String> errorList1 = Safely.safeClassExceptionHandlerInsert(urList2);
+                if(errorList1.size()>0){
+                    Database.rollback(sp1);
+                    throw new SafeClassException(String.join( errorList1, ', ' ));
+                }
             }
-        }
-        allSectionsTobeUpdated.clear();
-        
-        return 'Ack received';
+            allSectionsTobeUpdated.clear();        
+            return 'Ack received';
         }
         catch (Exception ex) {
             LogHandler.createLog((Id) null,'SaveDocumentTemplatesection.saveDocumentTemplateSectionSequences()','Template Id- '+recId+' '+ex.getLineNumber()+ex.getStackTraceString()+ex.getCause(),ex.getMessage(),'Exception');
-            throw new AuraHandledException(ex.getMessage());
+            return null;
         }     
     }
+    
     @AuraEnabled
     public static Document_Template_Section__c saveDocumentTemplateSectionDetails(Document_Template_Section__c Recorddetails){
         String recordIDValue='';
@@ -183,7 +182,7 @@ public with sharing class SaveDocumentTemplatesection {
         }
         catch (Exception ex) {
             LogHandler.createLog((Id) null,'SaveDocumentTemplatesection.saveDocumentTemplateSectionDetails()','Template Id- '+recordIDValue+' '+ex.getLineNumber()+ex.getStackTraceString()+ex.getCause(),ex.getMessage(),'Exception');
-            throw new AuraHandledException(ex.getMessage());
+            return null;
         }       
     }
 
@@ -246,7 +245,7 @@ public with sharing class SaveDocumentTemplatesection {
             return 'success';
         } catch (Exception ex) {
             LogHandler.createLog((Id) null,'SaveDocumentTemplatesection.deletetemplate()','Template Id- '+doctemplateid+' '+ex.getLineNumber()+ex.getStackTraceString()+ex.getCause(),ex.getMessage(),'Exception');
-            throw new AuraHandledException(ex.getMessage());
+            return null;
         }  
     }
     

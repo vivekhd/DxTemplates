@@ -1076,7 +1076,6 @@ export default class TemplateTableDetails extends LightningElement {
     /**
     * Method to include Serial Numbers Column to the table
     */
-
     handleSnoClick(event) {
         this.isSerialNumberCheck = event.target.checked;
         let parentData = this;

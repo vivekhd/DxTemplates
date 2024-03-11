@@ -1,8 +1,8 @@
-@isTest
+@IsTest
 private class ProductSetupCtrl_Test {
 
 	/* ProductSetupCtrl Test Class */
-    @isTest
+    @IsTest
     static void getLookupListTest(){
         Test.startTest();
         User us = DexUtilTestDataFactory.CreateTestUser();
@@ -14,7 +14,7 @@ private class ProductSetupCtrl_Test {
     }
     
     /* ProductSetupCtrl MultiSelectLookupController Class */
-    @isTest
+    @IsTest
     static void retrieveRecordsTest(){
         User us = DexUtilTestDataFactory.CreateTestUser();
         System.runAs(us){
@@ -27,7 +27,7 @@ private class ProductSetupCtrl_Test {
     }
     
     /*SaveDocumentTemplate Test Class*/        
-    @isTest public static void getAllDocumentTemplateSections_Test1(){
+    @IsTest public static void getAllDocumentTemplateSections_Test1(){
         User us = DexUtilTestDataFactory.CreateTestUser();
         System.runAs(us){
             List<Document_Template__c> documentTemplate = DexUtilTestDataFactory.createDocumentTemplate(1, true, null);
@@ -137,7 +137,7 @@ private class ProductSetupCtrl_Test {
     }
        
     
-    @isTest public static void getAllDocumentTemplateSections_Test2(){
+    @IsTest public static void getAllDocumentTemplateSections_Test2(){
         User us = DexUtilTestDataFactory.CreateTestUser();
         System.runAs(us){
              try{

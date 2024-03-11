@@ -54,7 +54,6 @@ const createRuleConditionHierarcy=(ruleExpression, ruleConditionsMap, fieldWrap 
         for (let i = 0; stackArr.length > 1; i++) {
             if (stackArr[i]) {
                 if (stackArr[i] == ')') {
-                    debugger;
                     let tempObj = { "Condition": [], Operator: "", parallelCondition: [], isChild: false }
                     let condtionObj = [];
                     let indexCount = 0;
@@ -122,7 +121,7 @@ const createRuleConditionHierarcy=(ruleExpression, ruleConditionsMap, fieldWrap 
 
     const createConditionHierarchy=(ConditionArr)=> {
         let lstOfCondition = [];
-        debugger;
+        
         ConditionArr.forEach(obj => {
             let hasConditionArray = false;
             let lastCondition;
@@ -158,7 +157,7 @@ const createRuleConditionHierarcy=(ruleExpression, ruleConditionsMap, fieldWrap 
                 if (obj.parallelCondition && obj.parallelCondition.length > 0) {
 
                     let tempArr = createConditionHierarchy(obj.parallelCondition);
-                    debugger;
+                    
                     if (tempArr instanceof Array) {
                         if (obj.parallelCondition && obj.parallelCondition.length > 0 && obj.parallelCondition[0].isChild == true) {
                             let tempObj = {}

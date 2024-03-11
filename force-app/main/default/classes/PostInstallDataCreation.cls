@@ -20,22 +20,6 @@ global class PostInstallDataCreation implements InstallHandler {
                     Version_Number__c = 1
                 );
 
-                /*
-                Database.SaveResult[] srList = Database.insert(new Document_Template__c[] {newDocTemplate},false);     
-                for (Database.SaveResult sr : srList) {
-                    if (sr.isSuccess()) {
-                        System.debug('Successfully inserted Template with Id: ' + sr.getId());                        
-                        String successBody = 'Hello Team, DXTemplates  Package Installation was successfull. This mail is for the confirmation purpose.';
-                        statusOfTheInstallation('Post Install Script run was Successfull - DXTemplates Package',successBody,context.installerId());
-                    } else {
-                        for(Database.Error err : sr.getErrors()) {
-                            String errorBody = 'Hello Team, an error occured when creating a Template record through Apex transaction. Please review the following details.' + '\nError Details \nError Status : ' + err.getStatusCode() + '\nError Message : ' + err.getMessage() + '\nError Fields : ' + err.getFields() + '\nError Severity : Minor';
-                            statusOfTheInstallation('Template record creation was unsuccessfull, Please create it.',errorBody,context.installerId());
-                        }
-                    }
-                }
-                */
-
                 List<Database.SaveResult> sResult = safe.doInsert(new Document_Template__c[] {newDocTemplate});
                 for(Integer i=0;i<sResult.size();i++){
                     if (sResult.get(i).isSuccess()){

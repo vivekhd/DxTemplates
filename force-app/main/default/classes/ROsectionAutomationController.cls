@@ -36,7 +36,6 @@ public with sharing class ROsectionAutomationController {
             String relatedObjectAPIName = String.valueof(contentAndStylingMap.get('mainChildObject'));   
             String relatedObjectFieldNameToGroupRecords = String.valueof(contentAndStylingMap.get('grouping'));                     
             List<Object> selectedFieldAsHeaderAPIList = (List<Object>) contentAndStylingMap.get('tablelistValues');
-            System.debug('selectedFieldAsHeaderAPIList >> ' + selectedFieldAsHeaderAPIList);
             List<Object> selectedFieldsAsHeaderLabelList = (List<Object>) contentAndStylingMap.get('tablelistLabels');
 
             /* "Where" Condition - from filtering option of Template Builder */
@@ -69,18 +68,26 @@ public with sharing class ROsectionAutomationController {
             Map<String,Object> tableStyleList = (Map<String,Object>) contentAndStylingMap.get('style');  
             Map<String,Object> categoryStyleAttributes = (Map<String,Object>) tableStyleList.get('category');
             String categoryInlineStyle = 'border: 1px solid black ; background-color:' + categoryStyleAttributes.get('backgroundColor') + '; color:'+ categoryStyleAttributes.get('fontcolor') +'; font-size:' + categoryStyleAttributes.get('fontsize') + '; font-family:'+ categoryStyleAttributes.get('fontfamily') + ';' ;
-            Integer dataColSpanForCategory = (displaySerialNumber) ? selectedFieldsAsHeaderLabelList.size()+1 : selectedFieldsAsHeaderLabelList.size();
-            System.debug(dataColSpanForCategory);         
+            Integer dataColSpanForCategory = (displaySerialNumber) ? selectedFieldsAsHeaderLabelList.size()+1 : selectedFieldsAsHeaderLabelList.size();       
             
             /* fieldlist String preparation for Querying */
             List<string> fieldsList= new List<string> ();
             for(Object rec: selectedFieldAsHeaderAPIList)  {
                 fieldsList.add(String.valueOf(rec));
             }
-            string fieldString = string.join(fieldsList,','); 
+            String fieldString = string.join(fieldsList,','); 
 
-            /* Map that contains field(Key) - field type (value)*/                       
+            /* Map that contains field(Key) - field type (value)*/
             Map<String,String> fieldNameType = getObjectFieldTypeMap(relatedObjectAPIName, fieldsList);
+
+            /*Chart Styles*/
+            Boolean displayChart = (Boolean) contentAndStylingMap.get('displayChart');
+            Boolean displayChartInNewPage = (Boolean) contentAndStylingMap.get('chartNewPage');
+            String barChartColor = (String) contentAndStylingMap.get('chartBarColor');
+            String chartLabel = (String) contentAndStylingMap.get('chartLabel');
+            String chartYAxis = (String) contentAndStylingMap.get('selGraphvalue');
+            Map<String,Decimal> categorySubTotalValueMap = new Map<String,Decimal> {};
+            Map<String,Map<String,String>> chartQuantifiers = new Map<String,Map<String,String>> {};
 			
             /* Fields selected to calculate the Total and Sub Total */
             currencyFieldTotals = new Map<String,Decimal> {};
@@ -100,22 +107,19 @@ public with sharing class ROsectionAutomationController {
                 fieldStringSet.add(relatedObjectFieldNameToGroupRecords.tolowercase());
                 String fieldStringquery = String.join(new List<String>(fieldStringSet), ', ');             
                 String recordsQuery = 'select '+String.escapeSingleQuotes(fieldStringquery)+' from '+String.escapeSingleQuotes(relatedObjectAPIName)+' where '+String.escapeSingleQuotes(string.valueof(contentAndStylingMap.get('childLookupfieldAPIname')))+'='+'\''+String.escapeSingleQuotes(recordid)+'\''+' '+ whereClauseinQuery+' '+String.escapeSingleQuotes(securityEnforced)+' order by '+String.escapeSingleQuotes(relatedObjectFieldNameToGroupRecords)+' desc';
-                System.debug('recordsQuery  >> ' + recordsQuery);
-                relatedObjectQueriedRecords = Database.query(recordsQuery);
-                System.debug('relatedObjectQueriedRecords >> ' + relatedObjectQueriedRecords);
+                relatedObjectQueriedRecords = Database.query(recordsQuery);    
                 
                 String ptrfield = (String) relatedObjectFieldNameToGroupRecords;  
-                System.debug('ptrfield >> ' + ptrfield);
                 Map<Object, List<SObject>> recordCategoryMap = new Map<Object, List<SObject>>();
                 
                 for(Sobject ptrRecord : relatedObjectQueriedRecords)  {
-                    System.debug('ptrRecord >> ' + ptrRecord);
                     Map<String, Object> maprec = (Map<String, Object>) JSON.deserializeUntyped(JSON.serialize(ptrRecord));
-                    
+
                     if(!recordCategoryMap.containsKey(ptrRecord.get(ptrfield)) && ptrRecord.get(ptrfield)!=null)  {
                         List<SObject> recordList = new  List<SObject>();
                         recordList.add(ptrRecord);
                         recordCategoryMap.put(ptrRecord.get(ptrfield),recordList);
+                        categorySubTotalValueMap.put(String.valueOf(ptrRecord.get(ptrfield)),0.00);
                     }
                     else if(recordCategoryMap.containsKey(ptrRecord.get(ptrfield)) && ptrRecord.get(ptrfield)!=null)  {
                         List<SObject> recordList= recordCategoryMap.get(ptrRecord.get(ptrfield));
@@ -126,7 +130,8 @@ public with sharing class ROsectionAutomationController {
                         if(recordCategoryMap.containsKey('Others'))  {
                             List<SObject> recordList= recordCategoryMap.get('Others');
                             recordList.add(ptrRecord); 
-                            recordCategoryMap.put('Others',recordList);    
+                            recordCategoryMap.put('Others',recordList); 
+                            categorySubTotalValueMap.put('Others',0.00);   
                         }
                         else {
                             List<SObject> recordList = new  List<SObject>();
@@ -151,7 +156,6 @@ public with sharing class ROsectionAutomationController {
                         if(displaySerialNumber)  {
                             ROHtmlContent = ROHtmlContent + '<td scope="col" style="border: 1px solid black; text-align: center;">' + tableSerialNumber  + '</td>';
                         }
-                        System.debug('selectedFieldAsHeaderAPIList before calling dataFetchFromCurrentRecord >> ' + selectedFieldAsHeaderAPIList);
                         dataFetchFromCurrentRecord(selectedFieldAsHeaderAPIList, currRecord, fieldNameType);
                         ROHtmlContent += '</tr>';
                         tableSerialNumber+=1; 
@@ -173,7 +177,8 @@ public with sharing class ROsectionAutomationController {
                             }
                         }
                         ROHtmlContent += '</tr>';
-                    }                                      
+                    }
+                    categorySubTotalValueMap.put(String.valueOf(key),currencyFieldSubTotals.get(chartYAxis));                                      
                     
                     /*Resetting the Subtotals to zero for next Category Sub-Total Calculation*/
                     for(String currTempField : currencyFieldTotals.keySet())  {
@@ -204,7 +209,6 @@ public with sharing class ROsectionAutomationController {
             /*No Grouping field was selected*/
             else {
                 String recordsQuery = 'select '+String.escapeSingleQuotes(fieldString)+' from '+String.escapeSingleQuotes(relatedObjectAPIName)+' where '+String.escapeSingleQuotes(string.valueof(contentAndStylingMap.get('childLookupfieldAPIname')))+'='+'\''+String.escapeSingleQuotes(recordid)+'\''+' '+ whereClauseinQuery +' '+String.escapeSingleQuotes(securityEnforced);
-                System.debug('recordsQuery without grouping >> '+ recordsQuery);
                 relatedObjectQueriedRecords = Database.query(recordsQuery);      
 
                 for(Sobject currRecord: relatedObjectQueriedRecords) {
@@ -237,7 +241,58 @@ public with sharing class ROsectionAutomationController {
                     ROHtmlContent += '</tr>';  
                 }              
             }
-            ROHtmlContent += '</tbody>'; 
+            ROHtmlContent += '</tbody>';
+
+            /*HTML formation of Chart*/
+            if(displayChart){
+
+                String newPageHtmlSnippet = displayChartInNewPage==true ? 'style="page-break-before:always;"' : '';
+                String chartContent = '<div> <table width="100%" height="auto"' + newPageHtmlSnippet + '> <tr> <td width="75%" style="text-align: center;"> <h4>' + chartLabel + '</h4> </td> </tr>';
+                chartContent += '<tr> <td> <div style="border:1px solid #666666; width:100%; height:300px;"> <table class="innerbase" style="width:calc(96% - 20px); height:280px; margin:10px; padding:0px 5px 0px 5px; border-bottom:2px solid #666666; background: repeating-linear-gradient( 180deg, #cccccc 0, #cccccc 1px, transparent 1px, transparent 20% );">';
+                chartContent += '<tbody> <tr> <td style="width: 3%; text-align: center; writing-mode: vertical-rl; text-orientation: upright;">' + chartYAxis + '</td>';
+                
+                /*
+                Map<String,String> chartStaticResourceStyle = new Map<String,String> {
+                    'itembase' => 'width:auto; height:280px; padding:0px 5px 0px 5px; border:0px; background: transparent; text-align: center; margin: 3px auto;',
+                    'itemtitle' => 'font-style: italic;font-size:8px;',
+                    'itemvalueout' => 'font-style: italic;font-size:8px; font-weight: bold;',
+                    'itembar' => 'width:100%; height:100%; border-radius: 3px 3px 0px 0px; background: #007CBA; bottom:0;',
+                    'itemvaluein' => 'font-style: italic;font-size:8px; font-weight: bold; top:50%; left: 50%; transform: translate(-50% -50%);'
+                };
+                */
+                Map<String,String> chartStaticResourceStyle = new Map<String,String> {};
+                for(DxCPQ__ChartAutomationStyleResources__mdt chartStyleAttribute :  [SELECT Id,Label,DxCPQ__Style_Composition__c FROM DxCPQ__ChartAutomationStyleResources__mdt]){
+                    chartStaticResourceStyle.put(chartStyleAttribute.label,chartStyleAttribute.DxCPQ__Style_Composition__c );
+                }
+
+                /*Bar height Calculation*/
+                for(String keyPtr : categorySubTotalValueMap.keySet()){
+                    Decimal Val = (categorySubTotalValueMap.get(keyPtr) / currencyFieldTotals.get(chartYAxis));
+                    String htpt = String.valueOf((Val.setScale(3))*100);
+                    
+                    Map<String,String> tempMap = new Map<String,String> {
+                        'width' => String.valueOf(Math.round(93/(categorySubTotalValueMap.size()))) + '%',
+                        'percent' => htpt +'%',
+                        'height' => htpt +'% ; background : ' + barChartColor + ';',
+                        'value' => String.valueOf(categorySubTotalValueMap.get(keyPtr))
+                    };
+                    chartQuantifiers.put(keyPtr,tempMap);
+                }
+
+                /*Bar Style formation*/
+                for(String categoryItem : chartQuantifiers.keySet()){
+                    chartContent += '<td style="' + chartStaticResourceStyle.get('itembase') +' width:' + chartQuantifiers.get(categoryItem).get('width')+ '" valign="bottom">';
+                    chartContent += '<div style="' + chartStaticResourceStyle.get('itemtitle') + '">' + categoryItem + '</div>';
+                    chartContent += '<div style="' + chartStaticResourceStyle.get('itemvalueout') + '">' + chartQuantifiers.get(categoryItem).get('percent') + '</div>';
+                    chartContent += '<div style="' + chartStaticResourceStyle.get('itembar') + ' ;height : ' + chartQuantifiers.get(categoryItem).get('height') + '">';
+                    chartContent += '<div style="' + chartStaticResourceStyle.get('itemvaluein') + ' padding:10px 5px 5px; color:#ffffff">' + chartQuantifiers.get(categoryItem).get('value') + '</div> </div> </td>';
+                }
+
+                chartContent += '</tr> </tbody> </table> </div> </td> </tr> ';
+                chartContent +='<tr> <td style="text-align: center;"> Categories </td> </tr> </table> </div>';
+                ROHtmlContent+=chartContent;
+            }
+            
             return ROHtmlContent;
         }
         catch(Exception ex) {
@@ -254,12 +309,9 @@ public with sharing class ROsectionAutomationController {
             Map<String, Schema.SObjectType> schemaMap = Schema.getGlobalDescribe();
             Schema.SObjectType leadSchema = schemaMap.get(objName);
             Map<String, Schema.SObjectField> fieldMap = leadSchema.getDescribe().fields.getMap();
-            System.debug('fieldList >> ' + fieldList);
             for (String selfield: fieldList) {
                 if(selfield.contains('.'))  {
-                    System.debug('inside selfield.contains(.) '+ selfield);
                     if(selfield.contains('__r'))  {
-                        System.debug('inside selfield.contains(__r) '+ selfield);
                         String fieldcstm = selfield.replace('__r' , '__c');
                         List<String> tempfield = fieldcstm.split('\\.');
                         

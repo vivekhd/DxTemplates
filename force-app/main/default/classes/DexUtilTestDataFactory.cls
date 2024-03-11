@@ -1,22 +1,22 @@
 /* Class:              DexUtilTestDataFactory
-* Developer:          Abhishek Goel
-* Created Date:       30/1/2020
-* Description:        This generic test is used to create the records for test classes
-* Last Modified Date: 30/1/2020
-* Change Log: 
-*/
-@isTest
-public with sharing class DexUtilTestDataFactory {
+    * Developer:          Abhishek Goel
+    * Created Date:       30/1/2020
+    * Description:        This generic test is used to create the records for test classes
+    * Last Modified Date: 30/1/2020
+    * Change Log: 
+    */
+    @IsTest
+    public with sharing class DexUtilTestDataFactory {
     /* Method:             createRecords
-* Parameters:         List<SObject> records : List of sobjects(Account, Contact etc..) which has to be created/inserted
-*                      Boolean doInsert: set true to if you want to instert the created record or else false
-*                      Map<String, Object> attributes: takes list of attributes for one or multiple records
-* Return:             List<SObject> : List of sobject which has been created/inserted
-* Created Date:       30/1/2020
-* Description:        This generic method is used to create the record of any Sobject type
-* Last Modified Date: 30/1/2020
-* Change Log: 
-*/
+    * Parameters:         List<SObject> records : List of sobjects(Account, Contact etc..) which has to be created/inserted
+    *                      Boolean doInsert: set true to if you want to instert the created record or else false
+    *                      Map<String, Object> attributes: takes list of attributes for one or multiple records
+    * Return:             List<SObject> : List of sobject which has been created/inserted
+    * Created Date:       30/1/2020
+    * Description:        This generic method is used to create the record of any Sobject type
+    * Last Modified Date: 30/1/2020
+    * Change Log: 
+    */
 
     public static Safely safe = new Safely();
     public static List<SObject> createRecords(List<SObject> records, Boolean doInsert, Map<String, Object> attributes){
@@ -57,17 +57,17 @@ public with sharing class DexUtilTestDataFactory {
         }
         return records;
     }
-    
+
     /* Method:             createAccounts
-* Parameters:         Integer numToInsert : Number of account records to be inserted
-*                      Boolean doInsert: set true to if you want to instert the created record or else false
-*                      Map<String, Object> attributes: takes list of attributes for one or multiple records
-* Return:             List<Account> : List of Accoutns which has been created/inserted
-* Created Date:       30/1/2020
-* Description:        This method is used to create or insert account record
-* Last Modified Date: 30/1/2020
-* Change Log: 
-*/
+    * Parameters:         Integer numToInsert : Number of account records to be inserted
+    *                      Boolean doInsert: set true to if you want to instert the created record or else false
+    *                      Map<String, Object> attributes: takes list of attributes for one or multiple records
+    * Return:             List<Account> : List of Accoutns which has been created/inserted
+    * Created Date:       30/1/2020
+    * Description:        This method is used to create or insert account record
+    * Last Modified Date: 30/1/2020
+    * Change Log: 
+    */
     public static List<Account> createAccounts(Integer numToInsert, Boolean doInsert, Map<String, Object> attributes){
         List<Account> accountsToInsert = new List<Account>();
         for(Integer i=0; i< numToInsert; i++){
@@ -78,17 +78,17 @@ public with sharing class DexUtilTestDataFactory {
         }
         return createRecords(accountsToInsert, doInsert, attributes);
     }
-    
+
     /* Method:             createContacts
-* Parameters:         Integer numToInsert : Number of contact records to be inserted
-*                      Boolean doInsert: set true to if you want to instert the created record or else false
-*                      Map<String, Object> attributes: takes list of attributes for one or multiple records
-* Return:             List<Contact> : List of Contacts which has been created/inserted
-* Created Date:       30/1/2020
-* Description:        This method is used to create or insert contact record
-* Last Modified Date: 30/1/2020
-* Change Log: 
-*/
+    * Parameters:         Integer numToInsert : Number of contact records to be inserted
+    *                      Boolean doInsert: set true to if you want to instert the created record or else false
+    *                      Map<String, Object> attributes: takes list of attributes for one or multiple records
+    * Return:             List<Contact> : List of Contacts which has been created/inserted
+    * Created Date:       30/1/2020
+    * Description:        This method is used to create or insert contact record
+    * Last Modified Date: 30/1/2020
+    * Change Log: 
+    */
     public static List<Contact> createContacts(Integer numToInsert, Boolean doInsert, Map<String, Object> attributes){
         List<Contact> consToInsert = new List<Contact>();
         for(Integer i=0; i< numToInsert; i++){
@@ -99,7 +99,30 @@ public with sharing class DexUtilTestDataFactory {
         }
         return createRecords(consToInsert, doInsert, attributes);
     }
-    
+
+    /* Method:            createOpportunities
+    * Parameters:         Integer numToInsert : Number of contact records to be inserted
+    *                     Boolean doInsert: set true to if you want to instert the created record or else false
+    *                     Map<String, Object> attributes: takes list of attributes for one or multiple records
+    * Return:             List<Opportunity>
+    * Created Date:       30/1/2020
+    * Description:        This method is used to create or insert Opportunity record.
+    * Last Modified Date: 30/1/2020
+    * Change Log: 
+    */
+    public static List<Opportunity> createOpportunities(Integer numToInsert, Boolean doInsert, Map<String, Object> attributes){
+        List<Opportunity> consToInsert = new List<Opportunity>();
+        List<String> stages = new List<String>{'Prospecting', 'Qualification', 'Needs Analysis', 'Proposal', 'Negotiation', 'Closed Won', 'Closed Lost'};
+        for(Integer i=0; i< numToInsert; i++){
+            Opportunity con = new Opportunity();
+            con.Name = 'Opportunity - ' + i;
+            con.StageName = stages.get(Integer.valueOf(Math.Random()*stages.size()));
+            con.Amount = ((Math.Random())+1)*1270;
+            consToInsert.add(con);
+        }
+        return createRecords(consToInsert, doInsert, attributes);
+    }
+
     public static list<Rule__c> createRule(Integer numToInsert, Boolean doInsert, Map<String, Object> attributes){
         List<Rule__c> ruleToInsert = new List<Rule__c>();
         for(Integer i=0; i< numToInsert; i++){
@@ -112,7 +135,7 @@ public with sharing class DexUtilTestDataFactory {
         }
         return createRecords(ruleToInsert, doInsert, attributes);
     }
-    
+
     public static list<Rule_Condition__c> createRuleCondition(Integer numToInsert, Boolean doInsert, Map<String, Object> attributes){
         List<Rule_Condition__c> ruleConditionToInsert = new List<Rule_Condition__c>();
         for(Integer i=0; i< numToInsert; i++){
@@ -135,9 +158,9 @@ public with sharing class DexUtilTestDataFactory {
     }
 
     /* Method  : createDocumentTemplate
-     * To Insert Document Template we are using this method
-     */
-	    public static List<Document_Template__c> createDocumentTemplate(Integer numToInsert, Boolean doInsert, Map<String, Object> attributes){
+    * To Insert Document Template we are using this method
+    */
+    public static List<Document_Template__c> createDocumentTemplate(Integer numToInsert, Boolean doInsert, Map<String, Object> attributes){
         List<Document_Template__c> docTemplatesToInsert = New List<Document_Template__c>();
         for(Integer i=0; i< numToInsert; i++){
             Document_Template__c docTemplate = new Document_Template__c();
@@ -149,10 +172,10 @@ public with sharing class DexUtilTestDataFactory {
         }
         return createRecords(docTemplatesToInsert, doInsert, attributes);
     }
-    
+
     /* Method  : createDocument
-     * To Insert Documents we are using this method
-     */
+        * To Insert Documents we are using this method
+        */
     Public static List<Document__c> createDocument(Integer numToInsert, Boolean doInsert, Map<String, Object> attributes){
         List<Document__c> docsToInsert = New List<Document__c>();
         for(Integer i=0; i< numToInsert; i++){
@@ -164,11 +187,11 @@ public with sharing class DexUtilTestDataFactory {
         }
         return createRecords(docsToInsert, doInsert, attributes);
     }
-    
+
     /* Method  : createDocumentClause
-     * To Insert Document Clause we are using this method
-     */
-    
+        * To Insert Document Clause we are using this method
+        */
+
     Public static List<Document_Clause__c> createDocumentClause(Integer numToInsert, Boolean doInsert, Map<String, Object> attributes){
         List<Document_Clause__c> docClauseToInsert = New List<Document_Clause__c>();
         for(Integer i=0; i< numToInsert; i++){
@@ -182,10 +205,10 @@ public with sharing class DexUtilTestDataFactory {
         }
         return createRecords(docClauseToInsert, doInsert, attributes);
     }
-    
+
     /* Method  : createDocumentClause
-     * To Insert Document Clause we are using this method
-     */
+        * To Insert Document Clause we are using this method
+        */
     Public static List<Document_Template_Section__c> createDocumentTemplateSection(Integer numToInsert, Boolean doInsert, Map<String, Object> attributes){
         List<Document_Template_Section__c> docTemplateSectionToInsert = New List<Document_Template_Section__c>();
         for(Integer i=0; i< numToInsert; i++){
@@ -202,7 +225,7 @@ public with sharing class DexUtilTestDataFactory {
         }
         return createRecords(docTemplateSectionToInsert, doInsert, attributes);
     }
-    
+
     public static User CreateTestUser(){
         List<user> lstuser = new List<User>();
         String uniqueUserName = 'dxcpq' + DateTime.now().getTime() + '@testorg.com';
