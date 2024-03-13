@@ -59,6 +59,7 @@ export default class TemplateContentDetails extends LightningElement {
     'table',
     'header',
     'color',
+    'script',
   ];
 
   renderedCallback() {
