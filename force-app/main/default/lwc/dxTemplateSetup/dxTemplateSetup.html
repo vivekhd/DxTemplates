@@ -33,22 +33,22 @@
 			<template if:true={showAddNewTemplate}>
 				<span slot="header">Add New Template</span>
 				<div class="slds-modal__content slds-p-around_small dx-lrf-std-cstm-1" style="min-height: 240px;">
-					<lightning-record-edit-form object-api-name="DxCPQ__Document_Template__c"
+					<lightning-record-edit-form object-api-name="Dx_Temp__Document_Template__c"
 						onsubmit={handleCreateSubmit}>
 						<div class="slds-grid slds-wrap">
 							<div class="slds-col slds-size_1-of-1 slds-medium-size_6-of-12">
 								<lightning-input-field field-name="Name" required> </lightning-input-field>
 							</div>
 							<div class="slds-col slds-size_1-of-1 slds-medium-size_6-of-12">
-								<lightning-input-field field-name="DxCPQ__Related_To_Type__c"
+								<lightning-input-field field-name="Dx_Temp__Related_To_Type__c"
 									onchange={handleRelatedToTypeChange} required> </lightning-input-field>
 							</div>
 							<div class="slds-col slds-size_1-of-1 slds-medium-size_6-of-12">
-								<lightning-input-field field-name="DxCPQ__Version_Number__c" value="1" read-only="true">
+								<lightning-input-field field-name="Dx_Temp__Version_Number__c" value="1" read-only="true">
 								</lightning-input-field>
 							</div>
 							<div class="slds-col slds-size_1-of-1 slds-medium-size_6-of-12">
-								<lightning-input-field field-name="DxCPQ__Description__c"> </lightning-input-field>
+								<lightning-input-field field-name="Dx_Temp__Description__c"> </lightning-input-field>
 							</div>
 						</div>
 

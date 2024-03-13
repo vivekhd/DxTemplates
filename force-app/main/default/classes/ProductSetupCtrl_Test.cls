@@ -416,12 +416,12 @@ private class ProductSetupCtrl_Test {
         insert docTemplate;
                 
         List<Object> fieldsObjList=new List<Object>();
-        fieldsObjList.add('DxCPQ__Related_To_Type__c');
-        fieldsObjList.add('DxCPQ__Parent_Template__c');
+        fieldsObjList.add('Dx_Temp__Related_To_Type__c');
+        fieldsObjList.add('Dx_Temp__Parent_Template__c');
         Map<string,Object> jsonMap=new  Map<string,Object>();
         jsonMap.put('tablelistValues',fieldsObjList);
-        jsonMap.put('mainChildObject','DxCPQ__Document_Template__c');
-        jsonMap.put('childLookupfieldAPIname','DxCPQ__Parent_Template__c');
+        jsonMap.put('mainChildObject','Dx_Temp__Document_Template__c');
+        jsonMap.put('childLookupfieldAPIname','Dx_Temp__Parent_Template__c');
         String myJSON = JSON.serialize(jsonMap);
         Document_Template_Section__c docTemplateSection = new Document_Template_Section__c();
         docTemplateSection.DisplaySectionName__c = true;
@@ -435,8 +435,8 @@ private class ProductSetupCtrl_Test {
         docTemplateSection.Document_Template__c=documentTemplate[0].Id;
         insert docTemplateSection;  
         
-        String mainstr1='{\"sectionsCount\":\"1\",\"sectionsContent\":[{\"value\":\"<p>DxCPQ__Related_To_Type__c</p>\",\"indexvar\":0,\"key\":\"1653649808603:0\"}]}';
-        String mainstr='<p>Hello<spanstyle=\"color:rgb(68,68,68);\">{!DxCPQ__Document_Template__c.Id},</span></p><p><br></p><p><spanstyle=\"color:rgb(68,68,68);\">{!DxCPQ__Document_Template__c.DxCPQ__Related_To_Type__c}</span></p><p>Status:<spanstyle=\"color:rgb(68,68,68);\">{!DxCPQ__Document_Template__c.Owner.Id}</span></p><p><br></p>';
+        String mainstr1='{\"sectionsCount\":\"1\",\"sectionsContent\":[{\"value\":\"<p>Dx_Temp__Related_To_Type__c</p>\",\"indexvar\":0,\"key\":\"1653649808603:0\"}]}';
+        String mainstr='<p>Hello<spanstyle=\"color:rgb(68,68,68);\">{!Dx_Temp__Document_Template__c.Id},</span></p><p><br></p><p><spanstyle=\"color:rgb(68,68,68);\">{!Dx_Temp__Document_Template__c.Dx_Temp__Related_To_Type__c}</span></p><p>Status:<spanstyle=\"color:rgb(68,68,68);\">{!Dx_Temp__Document_Template__c.Owner.Id}</span></p><p><br></p>';
         
         Document_Template_Section__c docTemplateSection1 = new Document_Template_Section__c();
         docTemplateSection1.DisplaySectionName__c = true;
@@ -457,7 +457,7 @@ private class ProductSetupCtrl_Test {
         MergeFieldsClass.mergefieldsMethod(newlst,documentTemplate[0].Id);
         //MergeFieldsClass.mergefieldsMethod(newlst,documentTemplate[0].Id,'Document_Template__c');
         //MergeFieldsClass.mergefieldsMethod(newlst,documentTemplate[0].Id,documentTemplate[0].Id);
-        List<MergeFieldsClass.FieldWrap> fields=MergeFieldsClass.getFields('DxCPQ__Document_Template__c');
+        List<MergeFieldsClass.FieldWrap> fields=MergeFieldsClass.getFields('Dx_Temp__Document_Template__c');
         MergeFieldsClass.toTitleCase('hello test MergeFieldsClass');
         //Account res=MergeFieldsClass.createTestButtonInsert('Test Acc');
         System.assert(true);

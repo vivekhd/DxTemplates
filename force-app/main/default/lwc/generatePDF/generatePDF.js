@@ -45,7 +45,7 @@ handleClick() {
         // this[NavigationMixin.Navigate]({
         //     type: 'standard__webPage',
         //     attributes: {
-        //         url: `/lightning/cmp/DxCPQ__NavigateToDocument?c__recordId=${this.recordId}&c__refreshKey=${this.refreshKey}`
+        //         url: `/lightning/cmp/Dx_Temp__NavigateToDocument?c__recordId=${this.recordId}&c__refreshKey=${this.refreshKey}`
         //     }
         // });
 
@@ -53,7 +53,7 @@ handleClick() {
         // Changes by Kapil - Fix for refresh previous record data onload
         // Navigate to the Aura component
         const anchor = document.createElement('a');
-        let url = `/lightning/cmp/DxCPQ__NavigateToDocument?c__recordId=${this.recordId}`;
+        let url = `/lightning/cmp/Dx_Temp__NavigateToDocument?c__recordId=${this.recordId}`;
         anchor.href = this.domainURL + url; 
         anchor.target = '_self';
         anchor.click();  

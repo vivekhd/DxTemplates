@@ -108,7 +108,7 @@ export default class TemplateHeaderType extends LightningElement {
         if (mergeField != undefined) {
 
             // Changes by Kapil - Merge field first time fix
-            //this.mergefieldname = '{!' + this.documenttemplaterecord.DxCPQ__Related_To_Type__c + '.' + mergeField + '}';
+            //this.mergefieldname = '{!' + this.documenttemplaterecord.Dx_Temp__Related_To_Type__c + '.' + mergeField + '}';
             this.mergefieldname = '{!' + this.objectName + '.' + mergeField + '}';         
 
             let tag = document.createElement('textarea');
@@ -127,7 +127,7 @@ export default class TemplateHeaderType extends LightningElement {
     getMergeField() {
         const mergeField = this.template.querySelector('c-dx-lookup-fields-displaycmp').getMergeField();
         if (mergeField != undefined) {
-           // this.mergefieldname = '{!' + this.documenttemplaterecord.DxCPQ__Related_To_Type__c + '.' + mergeField + '}';
+           // this.mergefieldname = '{!' + this.documenttemplaterecord.Dx_Temp__Related_To_Type__c + '.' + mergeField + '}';
             this.mergefieldname = '{!' + this.objectName + '.' + mergeField + '}'
 
             this.richtextVal += this.mergefieldname;

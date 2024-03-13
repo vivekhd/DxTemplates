@@ -57,28 +57,28 @@ export default class DxShowSelectedTemplate extends LightningElement {
             if(result && result.length>0){
                 result.forEach(tempSec=>{
                     
-                    if(tempSec.DxCPQ__Type__c=='Context' || tempSec.DxCPQ__Type__c=='Table' || tempSec.DxCPQ__Type__c=='Clause' ){
+                    if(tempSec.Dx_Temp__Type__c=='Context' || tempSec.Dx_Temp__Type__c=='Table' || tempSec.Dx_Temp__Type__c=='Clause' ){
                         
                         let tempObj={};
-                        tempObj.index = tempSec.DxCPQ__Sequence__c;
+                        tempObj.index = tempSec.Dx_Temp__Sequence__c;
                         tempObj.isRelated=false;
                         tempObj.isContext=true;
-                        tempObj.content=tempSec.DxCPQ__Section_Content__c;
+                        tempObj.content=tempSec.Dx_Temp__Section_Content__c;
                         this.sectionContentArr.push(tempObj);
-                    }else if(tempSec.DxCPQ__Type__c=='Related Objects')
+                    }else if(tempSec.Dx_Temp__Type__c=='Related Objects')
                     {
                         let tempObj={};
-                        tempObj.index = tempSec.DxCPQ__Sequence__c;
+                        tempObj.index = tempSec.Dx_Temp__Sequence__c;
                         tempObj.isRelated=true;
                         tempObj.isContext=false;
                         tempObj.templatesectionid=tempSec.Id;
                         this.sectionContentArr.push(tempObj);
                     }
-                    else if(tempSec.DxCPQ__Type__c=='Header')
+                    else if(tempSec.Dx_Temp__Type__c=='Header')
                     {
                         let index;
                         this.showHeader = true;
-                        var seccon= JSON.parse(tempSec.DxCPQ__Section_Content__c);
+                        var seccon= JSON.parse(tempSec.Dx_Temp__Section_Content__c);
                         this.headerArr = seccon.sectionsContent;
                         
                         setTimeout(() => {
@@ -118,9 +118,9 @@ export default class DxShowSelectedTemplate extends LightningElement {
                         }, 100);
                         this.headerfooter.header = seccon;
                     }
-                    else if(tempSec.DxCPQ__Type__c=='Footer')
+                    else if(tempSec.Dx_Temp__Type__c=='Footer')
                     {
-                        var seccon= JSON.parse(tempSec.DxCPQ__Section_Content__c);
+                        var seccon= JSON.parse(tempSec.Dx_Temp__Section_Content__c);
                         this.showFooter = true;
                         var obj = {};
                         obj.footertext=seccon.footertext;

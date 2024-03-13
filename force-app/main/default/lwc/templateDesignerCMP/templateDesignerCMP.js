@@ -61,9 +61,9 @@ export default class TemplateDesignerCMP extends NavigationMixin(LightningElemen
   @track doctemplatedetails = {
     Id: '',
     Name: '',
-    DxCPQ__Related_To_Type__c: '',
-    DxCPQ__IsActive__c: false,
-    DxCPQ__Version_Number__c: '', DxCPQ__Previously_Active__c: false, DxCPQ__Parent_Template__c: ''
+    Dx_Temp__Related_To_Type__c: '',
+    Dx_Temp__IsActive__c: false,
+    Dx_Temp__Version_Number__c: '', Dx_Temp__Previously_Active__c: false, Dx_Temp__Parent_Template__c: ''
   };
 
   constructor() {
@@ -73,8 +73,8 @@ export default class TemplateDesignerCMP extends NavigationMixin(LightningElemen
   @api handleConnectedCallback(doc) {
     this.recordId = doc.Id;
     this.doctemplatedetails.Id = doc.Id;
-    this.doctemplatedetails.DxCPQ__Related_To_Type__c = doc.DxCPQ__Related_To_Type__c;
-    this.relatedtoTypeObjName = doc.DxCPQ__Related_To_Type__c;
+    this.doctemplatedetails.Dx_Temp__Related_To_Type__c = doc.Dx_Temp__Related_To_Type__c;
+    this.relatedtoTypeObjName = doc.Dx_Temp__Related_To_Type__c;
     this.relatedtoTypeObjChild = this.relatedtoTypeObjName;
     this.isconnectedcalledonLoad = false;
     this.connectedCallback();
@@ -356,12 +356,12 @@ export default class TemplateDesignerCMP extends NavigationMixin(LightningElemen
     this.documenttemplaterecordid = '';
     this.doctemplatedetails.Id = '';
     this.doctemplatedetails.Name = '';
-    this.doctemplatedetails.DxCPQ__Related_To_Type__c = '';
+    this.doctemplatedetails.Dx_Temp__Related_To_Type__c = '';
     this.relatedtoTypeObjChild = '',
-      this.doctemplatedetails.DxCPQ__IsActive__c = false;
-    this.doctemplatedetails.DxCPQ__Version_Number__c = '';
-    this.doctemplatedetails.DxCPQ__Previously_Active__c = false;
-    this.doctemplatedetails.DxCPQ__Parent_Template__c = '';
+      this.doctemplatedetails.Dx_Temp__IsActive__c = false;
+    this.doctemplatedetails.Dx_Temp__Version_Number__c = '';
+    this.doctemplatedetails.Dx_Temp__Previously_Active__c = false;
+    this.doctemplatedetails.Dx_Temp__Parent_Template__c = '';
     this.showcontextdetails = false;
     this.showtabledetails = false;
     this.showrelatedobjectdetails = false;
@@ -413,17 +413,17 @@ export default class TemplateDesignerCMP extends NavigationMixin(LightningElemen
             this.isconnectedcalledonLoad = true;
             this.footer.rowCount = result.length;
             result.forEach((val, index) => {
-              if (val.DxCPQ__Type__c == 'Header') {
+              if (val.Dx_Temp__Type__c == 'Header') {
                 headerselected = true;
                 this.header.Id = val.Id;
-                this.header.Type = val.DxCPQ__Type__c;
-                this.header.rowCount = val.DxCPQ__Sequence__c;
+                this.header.Type = val.Dx_Temp__Type__c;
+                this.header.rowCount = val.Dx_Temp__Sequence__c;
                 this.header.sectionNameEntered = val.Name;
               }
-              else if (val.DxCPQ__Type__c == 'Footer') {
+              else if (val.Dx_Temp__Type__c == 'Footer') {
                 this.footer.Id = val.Id;
-                this.footer.Type = val.DxCPQ__Type__c;
-                this.footer.rowCount = val.DxCPQ__Sequence__c;
+                this.footer.Type = val.Dx_Temp__Type__c;
+                this.footer.rowCount = val.Dx_Temp__Sequence__c;
                 this.footer.sectionNameEntered = val.Name;
               }
               else {
@@ -433,22 +433,22 @@ export default class TemplateDesignerCMP extends NavigationMixin(LightningElemen
 
                 if (index == indexposition) {
                   this.firstsectionrecord = val;
-                  this.doctemplatedetails.Name = val.DxCPQ__Document_Template__r.Name;
-                  this.doctemplatedetails.Related_To_Type__c = val.DxCPQ__Document_Template__r.DxCPQ__Related_To_Type__c;
-                  this.relatedtoTypeObjName = val.DxCPQ__Document_Template__r.DxCPQ__Related_To_Type__c;
+                  this.doctemplatedetails.Name = val.Dx_Temp__Document_Template__r.Name;
+                  this.doctemplatedetails.Related_To_Type__c = val.Dx_Temp__Document_Template__r.Dx_Temp__Related_To_Type__c;
+                  this.relatedtoTypeObjName = val.Dx_Temp__Document_Template__r.Dx_Temp__Related_To_Type__c;
                   this.relatedtoTypeObjChild = this.relatedtoTypeObjName;
-                  this.doctemplatedetails.DxCPQ__IsActive__c = val.DxCPQ__Document_Template__r.DxCPQ__IsActive__c;
-                  this.doctemplatedetails.DxCPQ__Version_Number__c = val.DxCPQ__Document_Template__r.DxCPQ__Version_Number__c;
-                  this.doctemplatedetails.DxCPQ__Parent_Template__c = val.DxCPQ__Document_Template__r.DxCPQ__Parent_Template__c;
-                  if (this.doctemplatedetails.DxCPQ__IsActive__c == true) {
+                  this.doctemplatedetails.Dx_Temp__IsActive__c = val.Dx_Temp__Document_Template__r.Dx_Temp__IsActive__c;
+                  this.doctemplatedetails.Dx_Temp__Version_Number__c = val.Dx_Temp__Document_Template__r.Dx_Temp__Version_Number__c;
+                  this.doctemplatedetails.Dx_Temp__Parent_Template__c = val.Dx_Temp__Document_Template__r.Dx_Temp__Parent_Template__c;
+                  if (this.doctemplatedetails.Dx_Temp__IsActive__c == true) {
                     this.activateTemplateLabel = 'Deactivate Template';
                     this.showPreview = true;
                   }
                 }
-                this.rowCount = val.DxCPQ__Sequence__c;
-                this.optionsList.push({ Id: val.Id, Type: val.DxCPQ__Type__c, rowCount: val.DxCPQ__Sequence__c, sectionNameEntered: val.Name });
+                this.rowCount = val.Dx_Temp__Sequence__c;
+                this.optionsList.push({ Id: val.Id, Type: val.Dx_Temp__Type__c, rowCount: val.Dx_Temp__Sequence__c, sectionNameEntered: val.Name });
               }
-              this.disableEditing = val.DxCPQ__Document_Template__r.DxCPQ__Previously_Active__c;
+              this.disableEditing = val.Dx_Temp__Document_Template__r.Dx_Temp__Previously_Active__c;
               this.disableEditingHandler(this.disableEditing);
             });
             this.sections = this.optionsList;
@@ -456,7 +456,7 @@ export default class TemplateDesignerCMP extends NavigationMixin(LightningElemen
             this.opensection = true;
             this.connectedCallbackHandler();
             if (this.firstsectionrecord) {
-              this.displaysectionbasedontype(this.firstsectionrecord.Id, this.firstsectionrecord.DxCPQ__Type__c);
+              this.displaysectionbasedontype(this.firstsectionrecord.Id, this.firstsectionrecord.Dx_Temp__Type__c);
             }
           }
 
@@ -484,7 +484,7 @@ export default class TemplateDesignerCMP extends NavigationMixin(LightningElemen
 
           }
           else {
-            let headerArray = result.filter((tempSection) => tempSection.DxCPQ__Type__c == 'Header');
+            let headerArray = result.filter((tempSection) => tempSection.Dx_Temp__Type__c == 'Header');
             if (headerArray.length > 0) {
               this.handlechildcomponents('Header', false, headerArray[0].Id);
               setTimeout(() => {
@@ -493,7 +493,7 @@ export default class TemplateDesignerCMP extends NavigationMixin(LightningElemen
               }, 1000);
             }
             else {
-              this.handlechildcomponents(result[0].DxCPQ__Type__c, false, result[0].Id);
+              this.handlechildcomponents(result[0].Dx_Temp__Type__c, false, result[0].Id);
 
               if(this.template.querySelector(`[data-onload="templateHeader"]`) != null) {
                 const elm = this.template.querySelector(`[data-onload="templateHeader"]`);
@@ -585,9 +585,9 @@ export default class TemplateDesignerCMP extends NavigationMixin(LightningElemen
       this.template.querySelector('c-template-footer').handleActivateTemplate(isActive, this.relatedtoTypeObjName);
     }
 
-    activateTemplate({ templateId: this.documenttemplaterecordid, parentId: this.doctemplatedetails.DxCPQ__Parent_Template__c, isActive: isActive }).then(result => {
+    activateTemplate({ templateId: this.documenttemplaterecordid, parentId: this.doctemplatedetails.Dx_Temp__Parent_Template__c, isActive: isActive }).then(result => {
       if (result != null) {
-        this.disableEditing = result.DxCPQ__Previously_Active__c;
+        this.disableEditing = result.Dx_Temp__Previously_Active__c;
       }
     }).catch(error => {
       console.log('error activation', error);
@@ -695,7 +695,7 @@ export default class TemplateDesignerCMP extends NavigationMixin(LightningElemen
     this.dispatchEvent(toastEvt);
     let createdDocumentTemplateId = event.detail.id;
     let name = event.detail.fields.Name.value;
-    let versionno = event.detail.fields.DxCPQ__Version_Number__c.value;
+    let versionno = event.detail.fields.Dx_Temp__Version_Number__c.value;
     const newDocTempEvt = new CustomEvent('docedited', {
       detail: { id: createdDocumentTemplateId, name: name, version: versionno }, bubbles: true
     });
@@ -710,11 +710,11 @@ export default class TemplateDesignerCMP extends NavigationMixin(LightningElemen
     let tempObj = {};
     tempObj.Id = createdDocumentTemplateId;
     tempObj.Name = event.detail.fields.Name.value;
-    tempObj.DxCPQ__Related_To_Type__c = event.detail.fields.DxCPQ__Related_To_Type__c.value;
-    this.relatedtoTypeObjName = event.detail.fields.DxCPQ__Related_To_Type__c.value;
+    tempObj.Dx_Temp__Related_To_Type__c = event.detail.fields.Dx_Temp__Related_To_Type__c.value;
+    this.relatedtoTypeObjName = event.detail.fields.Dx_Temp__Related_To_Type__c.value;
     this.relatedtoTypeObjChild = this.relatedtoTypeObjName;
-    tempObj.DxCPQ__IsActive__c = event.detail.fields.DxCPQ__IsActive__c.value;
-    tempObj.DxCPQ__Version_Number__c = event.detail.fields.DxCPQ__Version_Number__c.value
+    tempObj.Dx_Temp__IsActive__c = event.detail.fields.Dx_Temp__IsActive__c.value;
+    tempObj.Dx_Temp__Version_Number__c = event.detail.fields.Dx_Temp__Version_Number__c.value
     const newDocTempEvt = new CustomEvent('doccreated', {
       detail: { id: createdDocumentTemplateId, name: name, templateObj: tempObj, templateObjName: this.relatedtoTypeObjChild }, bubbles: true
     });
@@ -780,11 +780,11 @@ export default class TemplateDesignerCMP extends NavigationMixin(LightningElemen
     var allRecords = [];
     let data = this.sections;
     this.sections.forEach(function (val) {
-      var Recorddetails = { Name: '', DxCPQ__Sequence__c: 0, DxCPQ__Type__c: '', Id: '' };
+      var Recorddetails = { Name: '', Dx_Temp__Sequence__c: 0, Dx_Temp__Type__c: '', Id: '' };
       Recorddetails.Id = val.Id;
       Recorddetails.Name = val.sectionNameEntered;
-      Recorddetails.DxCPQ__Sequence__c = val.index;
-      Recorddetails.DxCPQ__Type__c = val.Name;
+      Recorddetails.Dx_Temp__Sequence__c = val.index;
+      Recorddetails.Dx_Temp__Type__c = val.Name;
       allRecords.push(Recorddetails);
     });
     this.isLoaded = true;

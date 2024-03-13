@@ -34,15 +34,15 @@ export default class TemplateContentDetails extends LightningElement {
   whereClause = " IsActive__c = true";
   @track Recorddetailsnew = {
     Name: '',
-    DxCPQ__Section_Content__c: '',
-    DxCPQ__DisplaySectionName__c: false,
-    DxCPQ__New_Page__c: false,
-    DxCPQ__Document_Template__c: '',
-    DxCPQ__Sequence__c: 0,
-    DxCPQ__Type__c: '',
+    Dx_Temp__Section_Content__c: '',
+    Dx_Temp__DisplaySectionName__c: false,
+    Dx_Temp__New_Page__c: false,
+    Dx_Temp__Document_Template__c: '',
+    Dx_Temp__Sequence__c: 0,
+    Dx_Temp__Type__c: '',
     Id: '',
-    DxCPQ__RuleId__c: '',
-    DxCPQ__Document_Clause__c: ''
+    Dx_Temp__RuleId__c: '',
+    Dx_Temp__Document_Clause__c: ''
   };
   formats = [
     'font',
@@ -62,7 +62,7 @@ export default class TemplateContentDetails extends LightningElement {
   ];
 
   renderedCallback() {
-    if (this.documenttemplaterecord && this.documenttemplaterecord.DxCPQ__Previously_Active__c == true) {
+    if (this.documenttemplaterecord && this.documenttemplaterecord.Dx_Temp__Previously_Active__c == true) {
       this.handleActivateTemplate(true, this.selectedObjectName);
     }
   }
@@ -74,7 +74,7 @@ export default class TemplateContentDetails extends LightningElement {
   selectItemEventHandler(event) {
     this.clauseId = event.detail.selectedRecord.recordId;
     this.selectedClauseId = event.detail.selectedRecord.recordId;
-    this.richtextVal = event.detail.selectedRecord.recordObject.DxCPQ__Body__c;
+    this.richtextVal = event.detail.selectedRecord.recordObject.Dx_Temp__Body__c;
     this.Recorddetailsnew.Name = event.detail.selectedRecord.recordName;
   }
 
@@ -90,7 +90,7 @@ export default class TemplateContentDetails extends LightningElement {
     ClauseBody({ inputparam: clauseIdstring })
       .then(result => {
         if (result != null) {
-          this.richtextVal = result.DxCPQ__Body__c;
+          this.richtextVal = result.Dx_Temp__Body__c;
           this.Recorddetailsnew.Name = result.Name;
         }
       })
@@ -132,31 +132,31 @@ export default class TemplateContentDetails extends LightningElement {
     var currecid = this.sectionrecordid;
     if (this.richtextVal != '' && this.richtextVal != null) {
       if (this.newpage) {
-        this.Recorddetailsnew.DxCPQ__Section_Content__c = "<div style=\"page-break-before : always;\">" + this.richtextVal + "</div>";
+        this.Recorddetailsnew.Dx_Temp__Section_Content__c = "<div style=\"page-break-before : always;\">" + this.richtextVal + "</div>";
       } else {
-        this.Recorddetailsnew.DxCPQ__Section_Content__c = this.richtextVal;
+        this.Recorddetailsnew.Dx_Temp__Section_Content__c = this.richtextVal;
       }
-      this.Recorddetailsnew.DxCPQ__New_Page__c = this.newpage;
+      this.Recorddetailsnew.Dx_Temp__New_Page__c = this.newpage;
     }
 
     if (currecid != '' && this.sectionrecordid.indexOf('NotSaved') == -1) {
       this.Recorddetailsnew.Id = this.sectionrecordid;
     }
-    this.Recorddetailsnew.DxCPQ__Sequence__c = this.rowcount;
-    this.Recorddetailsnew.DxCPQ__Type__c = this.sectiontype;
-    this.Recorddetailsnew.DxCPQ__RuleId__c = '';
+    this.Recorddetailsnew.Dx_Temp__Sequence__c = this.rowcount;
+    this.Recorddetailsnew.Dx_Temp__Type__c = this.sectiontype;
+    this.Recorddetailsnew.Dx_Temp__RuleId__c = '';
 
     let clauseCheck = true;
-    if (this.Recorddetailsnew.DxCPQ__Type__c == 'Clause') {
+    if (this.Recorddetailsnew.Dx_Temp__Type__c == 'Clause') {
       if (this.clauseId != '' && this.clauseId != null) {
-        this.Recorddetailsnew.DxCPQ__Document_Clause__c = JSON.stringify(this.clauseId);
+        this.Recorddetailsnew.Dx_Temp__Document_Clause__c = JSON.stringify(this.clauseId);
       }
       else {
         clauseCheck = false;
       }
     }
 
-    this.Recorddetailsnew.DxCPQ__Document_Template__c = this.documenttemplaterecord.Id;
+    this.Recorddetailsnew.Dx_Temp__Document_Template__c = this.documenttemplaterecord.Id;
     if (this.Recorddetailsnew.Name != '' && this.Recorddetailsnew.Name != null && clauseCheck) {
       saveDocumentTemplateSectionDetails({ Recorddetails: this.Recorddetailsnew })
         .then(result => {
@@ -194,15 +194,15 @@ export default class TemplateContentDetails extends LightningElement {
     const mystring = JSON.stringify(event.detail.value);
 
     if (mystring.includes('New Page')) {
-      this.Recorddetailsnew.DxCPQ__New_Page__c = true;
+      this.Recorddetailsnew.Dx_Temp__New_Page__c = true;
     } else {
-      this.Recorddetailsnew.DxCPQ__New_Page__c = false;
+      this.Recorddetailsnew.Dx_Temp__New_Page__c = false;
     }
 
     if (mystring.includes('Display Section Name')) {
-      this.Recorddetailsnew.DxCPQ__DisplaySectionName__c = true;
+      this.Recorddetailsnew.Dx_Temp__DisplaySectionName__c = true;
     } else {
-      this.Recorddetailsnew.DxCPQ__DisplaySectionName__c = false;
+      this.Recorddetailsnew.Dx_Temp__DisplaySectionName__c = false;
     }
   }
 
@@ -248,7 +248,7 @@ export default class TemplateContentDetails extends LightningElement {
   */
 
   handlemergefieldselection(event) {
-    this.mergefieldname = '{!' + this.documenttemplaterecord.DxCPQ__Related_To_Type__c + '.' + event.detail.value + '}';
+    this.mergefieldname = '{!' + this.documenttemplaterecord.Dx_Temp__Related_To_Type__c + '.' + event.detail.value + '}';
   }
 
   handlemergefieldadd() {
@@ -282,7 +282,7 @@ export default class TemplateContentDetails extends LightningElement {
   }
 
   handleRichTextArea(event) {
-    this.Recorddetailsnew.DxCPQ__Section_Content__c = event.detail.value;
+    this.Recorddetailsnew.Dx_Temp__Section_Content__c = event.detail.value;
     this.richtextVal = event.detail.value;
   }
 
@@ -310,10 +310,10 @@ export default class TemplateContentDetails extends LightningElement {
     this.ukey = (new Date()).getTime();
     this.Recorddetailsnew.Id = '';
     this.Recorddetailsnew.Name = '';
-    this.Recorddetailsnew.DxCPQ__DisplaySectionName__c = '';
+    this.Recorddetailsnew.Dx_Temp__DisplaySectionName__c = '';
     this.richtextVal = '';
     this.clauseId = '';
-    this.Recorddetailsnew.DxCPQ__New_Page__c = false;
+    this.Recorddetailsnew.Dx_Temp__New_Page__c = false;
     this.newpage = false;
 
     this.template.querySelectorAll('lightning-input-rich-text').forEach(element => {
@@ -339,33 +339,33 @@ export default class TemplateContentDetails extends LightningElement {
         this.isLoaded = false;
         if (result != null) {
           this.Recorddetailsnew.Name = result.Name;
-          this.Recorddetailsnew.DxCPQ__Document_Template__c = result.DxCPQ__Document_Template__c;
-          this.Recorddetailsnew.DxCPQ__Sequence__c = result.DxCPQ__Sequence__c;
-          this.Recorddetailsnew.DxCPQ__Type__c = result.DxCPQ__Type__c;
-          this.Recorddetailsnew.DxCPQ__New_Page__c = result.DxCPQ__New_Page__c;
-          this.Recorddetailsnew.DxCPQ__DisplaySectionName__c = result.DxCPQ__DisplaySectionName__c;
-          this.Recorddetailsnew.DxCPQ__Section_Content__c = result.DxCPQ__Section_Content__c;
+          this.Recorddetailsnew.Dx_Temp__Document_Template__c = result.Dx_Temp__Document_Template__c;
+          this.Recorddetailsnew.Dx_Temp__Sequence__c = result.Dx_Temp__Sequence__c;
+          this.Recorddetailsnew.Dx_Temp__Type__c = result.Dx_Temp__Type__c;
+          this.Recorddetailsnew.Dx_Temp__New_Page__c = result.Dx_Temp__New_Page__c;
+          this.Recorddetailsnew.Dx_Temp__DisplaySectionName__c = result.Dx_Temp__DisplaySectionName__c;
+          this.Recorddetailsnew.Dx_Temp__Section_Content__c = result.Dx_Temp__Section_Content__c;
 
-          this.sectiontype = result.DxCPQ__Type__c;
-          if (this.Recorddetailsnew.DxCPQ__Type__c == 'Clause' && result.DxCPQ__Document_Clause__c != null) {
-            this.clauseId = result.DxCPQ__Document_Clause__c;
-            let tempObj = { recordId: result.DxCPQ__Document_Clause__c, recordName: result.DxCPQ__Document_Clause__r.Name }
+          this.sectiontype = result.Dx_Temp__Type__c;
+          if (this.Recorddetailsnew.Dx_Temp__Type__c == 'Clause' && result.Dx_Temp__Document_Clause__c != null) {
+            this.clauseId = result.Dx_Temp__Document_Clause__c;
+            let tempObj = { recordId: result.Dx_Temp__Document_Clause__c, recordName: result.Dx_Temp__Document_Clause__r.Name }
             this.template.querySelector('c-multi-lookup-component').selectedRecordHandler(tempObj);
             this.ukey = (new Date()).getTime();
           }
-          this.newpage = result.DxCPQ__New_Page__c;
+          this.newpage = result.Dx_Temp__New_Page__c;
           setTimeout(() => { this.template.querySelector('[data-id="newpage"]').checked = this.newpage; });
 
-          if (result.DxCPQ__Section_Content__c != null) {
-            this.richtextVal = result.DxCPQ__Section_Content__c;
-          } else if (result.DxCPQ__Section_Content__c == undefined) {
+          if (result.Dx_Temp__Section_Content__c != null) {
+            this.richtextVal = result.Dx_Temp__Section_Content__c;
+          } else if (result.Dx_Temp__Section_Content__c == undefined) {
             this.richtextVal = '';
           }
           this.template.querySelectorAll('lightning-checkbox-group ').forEach(element => {
-            if (result.DxCPQ__New_Page__c == true) {
+            if (result.Dx_Temp__New_Page__c == true) {
               this.value.push('New Page');
             }
-            if (result.DxCPQ__DisplaySectionName__c == true) {
+            if (result.Dx_Temp__DisplaySectionName__c == true) {
               this.value.push('Display Section Name');
             }
           });

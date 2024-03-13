@@ -5,8 +5,8 @@ public class RuleSelector_Test {
     public static void testSavepointOperation() {
         Rule__c rule= new Rule__c();
         insert rule;
-        Rule_Condition__c testRecord = new Rule_Condition__c(DxCPQ__Rule__c=rule.id);
-        Rule_Condition__c testRecord1 = new Rule_Condition__c(DxCPQ__Rule__c=rule.id);
+        Rule_Condition__c testRecord = new Rule_Condition__c(Dx_Temp__Rule__c=rule.id);
+        Rule_Condition__c testRecord1 = new Rule_Condition__c(Dx_Temp__Rule__c=rule.id);
         
         insert new List<Rule_Condition__c>{testRecord,testRecord1};
         List<Id> arrIds = new List<Id>{testRecord.Id, testRecord1.Id};
@@ -25,8 +25,8 @@ public class RuleSelector_Test {
     public static void testSavepointOperation1() {
         Rule__c rule= new Rule__c();
         insert rule;
-        Rule_Condition__c testRecord = new Rule_Condition__c(DxCPQ__Rule__c=rule.id);
-        Rule_Condition__c testRecord1 = new Rule_Condition__c(DxCPQ__Rule__c=rule.id);
+        Rule_Condition__c testRecord = new Rule_Condition__c(Dx_Temp__Rule__c=rule.id);
+        Rule_Condition__c testRecord1 = new Rule_Condition__c(Dx_Temp__Rule__c=rule.id);
         
         insert new List<Rule_Condition__c>{testRecord,testRecord1};
         List<Id> arrIds = new List<Id>{null,null};

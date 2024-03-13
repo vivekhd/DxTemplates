@@ -26,16 +26,6 @@
                 <label>Opportunity</label>
             </value>
             <value>
-                <fullName>DxCPQ__Quote__c</fullName>
-                <default>false</default>
-                <label>DxCPQ__Quote__c</label>
-            </value>
-            <value>
-                <fullName>DxCPQ__Configured_Attribute__c</fullName>
-                <default>false</default>
-                <label>DxCPQ__Configured_Attribute__c</label>
-            </value>
-            <value>
                 <fullName>QuoteLineItem</fullName>
                 <default>false</default>
                 <isActive>false</isActive>

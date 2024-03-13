@@ -12,8 +12,8 @@
 
 			<template if:true={showclausescreen}>
 				<div class="slds-col slds-size_1-of-1 slds-medium-size_4-of-12 slds-large-size_4-of-12 slds-p-left_small">
-					<c-multi-lookup-component label-name="*Document Clause" object-api-name="DxCPQ__Document_Clause__c"
-						field-api-names="Id,Name,DxCPQ__Body__c" filter-field-api-name="Name"
+					<c-multi-lookup-component label-name="*Document Clause" object-api-name="Dx_Temp__Document_Clause__c"
+						field-api-names="Id,Name,Dx_Temp__Body__c" filter-field-api-name="Name"
 						icon-name="standard:account" onsinglepill={selectItemEventHandler}
 						onremovepill={updateItemEventHandler} has-multi-select="false" read-only={isDisabled}
 						where-clause={whereClause}>

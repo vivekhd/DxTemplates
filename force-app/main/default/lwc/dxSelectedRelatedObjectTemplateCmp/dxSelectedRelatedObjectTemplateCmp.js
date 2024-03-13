@@ -14,7 +14,7 @@ export default class DxSelectedRelatedObjectTemplateCmp extends LightningElement
         this.delayTimeout = setTimeout(() => {
             getRelatedObjectForSelectedDocumentTemplate({docTempId:this.recordId}).then(result=>{
                if(result){
-                   this.relatedObject=result.DxCPQ__Related_To_Type__c;
+                   this.relatedObject=result.Dx_Temp__Related_To_Type__c;
                 //    this.searchlabel = 'Search '+this.relatedObject
                 this.searchlabel = 'Search Record';
                    if(this.relatedObject){

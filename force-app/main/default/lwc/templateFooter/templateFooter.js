@@ -31,14 +31,14 @@ export default class TemplateFooter extends LightningElement {
 
   @track Recorddetailsnew = {
     Name: '',
-    DxCPQ__Section_Content__c: '',
-    DxCPQ__DisplaySectionName__c: false,
-    DxCPQ__New_Page__c: false,
-    DxCPQ__Document_Template__c: '',
-    DxCPQ__Sequence__c: 0,
-    DxCPQ__Type__c: '',
+    Dx_Temp__Section_Content__c: '',
+    Dx_Temp__DisplaySectionName__c: false,
+    Dx_Temp__New_Page__c: false,
+    Dx_Temp__Document_Template__c: '',
+    Dx_Temp__Sequence__c: 0,
+    Dx_Temp__Type__c: '',
     Id: '',
-    DxCPQ__Document_Clause__c: ''
+    Dx_Temp__Document_Clause__c: ''
   };
 
   @wire(getContentVersions) wiredcontentversions({ error, data }) {
@@ -141,13 +141,13 @@ export default class TemplateFooter extends LightningElement {
     this.footerSectionsMap = [];
     this.value = [];
     this.Recorddetailsnew = {
-      Name: '', DxCPQ__Section_Content__c: '', DxCPQ__DisplaySectionName__c: false,
-      DxCPQ__New_Page__c: false,
-      DxCPQ__Document_Template__c: '',
-      DxCPQ__Sequence__c: 0,
-      DxCPQ__Type__c: '',
+      Name: '', Dx_Temp__Section_Content__c: '', Dx_Temp__DisplaySectionName__c: false,
+      Dx_Temp__New_Page__c: false,
+      Dx_Temp__Document_Template__c: '',
+      Dx_Temp__Sequence__c: 0,
+      Dx_Temp__Type__c: '',
       Id: '',
-      DxCPQ__Document_Clause__c: ''
+      Dx_Temp__Document_Clause__c: ''
     };
   }
 
@@ -156,7 +156,7 @@ export default class TemplateFooter extends LightningElement {
     gettemplatesectiondata({ editrecordid: recordID })
       .then(result => {
         if (result != null) {
-          var sectioncontent = JSON.parse(result.DxCPQ__Section_Content__c);
+          var sectioncontent = JSON.parse(result.Dx_Temp__Section_Content__c);
           
           /* Fix for Header Onload Alignment by Rahul*/
           let sectionsMapTemp = sectioncontent.sectionsContent;
@@ -199,15 +199,15 @@ export default class TemplateFooter extends LightningElement {
       obj.sectionsCount = this.columnvalue;
       obj.sectionsContent = this.footerSectionsMap;
       obj.displaypagesequence = this.displaypagesequence;
-      this.Recorddetailsnew.DxCPQ__Section_Content__c = JSON.stringify(obj);
+      this.Recorddetailsnew.Dx_Temp__Section_Content__c = JSON.stringify(obj);
     }
 
     if (currecid != '' && this.sectionrecordid.indexOf('NotSaved') == -1) {
       this.Recorddetailsnew.Id = this.sectionrecordid;
     }
-    this.Recorddetailsnew.DxCPQ__Sequence__c = this.rowcount;
-    this.Recorddetailsnew.DxCPQ__Type__c = this.sectiontype;
-    this.Recorddetailsnew.DxCPQ__Document_Template__c = this.documenttemplaterecord.Id;
+    this.Recorddetailsnew.Dx_Temp__Sequence__c = this.rowcount;
+    this.Recorddetailsnew.Dx_Temp__Type__c = this.sectiontype;
+    this.Recorddetailsnew.Dx_Temp__Document_Template__c = this.documenttemplaterecord.Id;
 
     if (this.Recorddetailsnew.Name != '' && this.Recorddetailsnew.Name != null) {
       saveDocumentTemplateSectionDetails({ Recorddetails: this.Recorddetailsnew })

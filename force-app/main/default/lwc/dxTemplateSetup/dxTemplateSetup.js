@@ -44,7 +44,7 @@ export default class DxTemplateSetup extends LightningElement {
                 if (data && data.length > 0) {
                     let optionList = [];
                     data.forEach(option => {
-                        optionList.push({'label':option.DxCPQ__Related_To_Type__c,'value':option.DxCPQ__Related_To_Type__c});
+                        optionList.push({'label':option.Dx_Temp__Related_To_Type__c,'value':option.Dx_Temp__Related_To_Type__c});
                     })
                     this.relatedTypeOptions = optionList ;
                    // alert('relatedTypeOptions >> ', this.relatedTypeOptions);
@@ -62,7 +62,7 @@ export default class DxTemplateSetup extends LightningElement {
             if (data && data.length > 0) {
                 this.allDocumentTemplates = data;
                 data.forEach(docTemp => {
-                    this.docGridData.push({ label: docTemp.Name + ' - v' + docTemp.DxCPQ__Version_Number__c, Name: docTemp.Id, sObjectName: docTemp.DxCPQ__Related_To_Type__c });
+                    this.docGridData.push({ label: docTemp.Name + ' - v' + docTemp.Dx_Temp__Version_Number__c, Name: docTemp.Id, sObjectName: docTemp.Dx_Temp__Related_To_Type__c });
                 });
                 this.selectedDocumentId = this.docGridData[0].Name;
                 this.relatedtoTypeObj = this.docGridData[0].sObjectName;
@@ -106,7 +106,7 @@ export default class DxTemplateSetup extends LightningElement {
         this.relatedtoTypeObj = event.detail.templateObjName;
         this.allDocumentTemplates.splice(0, 0, event.detail.templateObj);
         this.documentsExist = false;
-        this.docGridData.splice(0, 0, { label: templateName + ' - v' + event.detail.templateObj.DxCPQ__Version_Number__c, Name: this.selectedDocumentId, sObjectName: this.relatedtoTypeObj });
+        this.docGridData.splice(0, 0, { label: templateName + ' - v' + event.detail.templateObj.Dx_Temp__Version_Number__c, Name: this.selectedDocumentId, sObjectName: this.relatedtoTypeObj });
         this.template.querySelector('c-menu-setup').passOn(this.docGridData);
         this.documentsExist = true;
         this.template.querySelector('c-template-designer-c-m-p').resetallvaluesonAllcmp();
@@ -119,7 +119,7 @@ export default class DxTemplateSetup extends LightningElement {
         let templateName = docname;
         this.allDocumentTemplates.splice(0, 0, docrecord);
         this.documentsExist = false;
-        this.docGridData.splice(0, 0, { label: templateName + ' - v' + docrecord.DxCPQ__Version_Number__c, Name: this.selectedDocumentId, sObjectName: this.relatedtoTypeObj });
+        this.docGridData.splice(0, 0, { label: templateName + ' - v' + docrecord.Dx_Temp__Version_Number__c, Name: this.selectedDocumentId, sObjectName: this.relatedtoTypeObj });
         this.template.querySelector('c-menu-setup').passOn(this.docGridData);
         this.documentsExist = true;
         this.template.querySelector('c-template-designer-c-m-p').resetallvaluesonAllcmp();
@@ -182,15 +182,15 @@ export default class DxTemplateSetup extends LightningElement {
         let docTempObj = { 'sobjectType': 'Document_Template__c' };
         const fields = event.detail.fields;
         docTempObj.Name = fields.Name;
-        docTempObj.DxCPQ__IsActive__c = fields.DxCPQ__IsActive__c;
-        docTempObj.DxCPQ__Related_To_Type__c = fields.DxCPQ__Related_To_Type__c;
-        docTempObj.DxCPQ__Description__c = fields.DxCPQ__Description__c;
-        docTempObj.DxCPQ__Version_Number__c = fields.DxCPQ__Version_Number__c;
+        docTempObj.Dx_Temp__IsActive__c = fields.Dx_Temp__IsActive__c;
+        docTempObj.Dx_Temp__Related_To_Type__c = fields.Dx_Temp__Related_To_Type__c;
+        docTempObj.Dx_Temp__Description__c = fields.Dx_Temp__Description__c;
+        docTempObj.Dx_Temp__Version_Number__c = fields.Dx_Temp__Version_Number__c;
         this.relatedtoTypeObj = this.relatedToTypeBeforeSave;
 
         createDocumentTemplate({ docTemp: docTempObj }).then(result => {
             if (result) {
-                this.handleNewTemplateCreationwithoutEvent(result.Id, result.Name, result.DxCPQ__Related_To_Type__c, result);
+                this.handleNewTemplateCreationwithoutEvent(result.Id, result.Name, result.Dx_Temp__Related_To_Type__c, result);
                 if (this.relatedtoTypeObj != null || this.relatedtoTypeObj != undefined) {
                     this.showUpdatedTemplate = true;
                     //this.template.querySelector('c-template-designer-c-m-p').resetallvaluesonAllcmp();

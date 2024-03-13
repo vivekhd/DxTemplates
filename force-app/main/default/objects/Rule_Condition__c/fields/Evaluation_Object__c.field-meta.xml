@@ -20,11 +20,6 @@
                 <label>Quote</label>
             </value>
             <value>
-                <fullName>DxCPQ__Product_Attribute__c</fullName>
-                <default>false</default>
-                <label>DxCPQ__Product_Attribute__c</label>
-            </value>
-            <value>
                 <fullName>Product2</fullName>
                 <default>false</default>
                 <label>Product2</label>
@@ -38,11 +33,6 @@
                 <fullName>Profile</fullName>
                 <default>false</default>
                 <label>Profile</label>
-            </value>
-            <value>
-                <fullName>DxCPQ__Quote__c</fullName>
-                <default>false</default>
-                <label>DxCPQ__Quote__c</label>
             </value>
         </valueSetDefinition>
     </valueSet>

@@ -313,4 +313,8 @@
         <tab>TransactionLog__c</tab>
         <visibility>Visible</visibility>
     </tabSettings>
+    <tabSettings>
+        <tab>Document_Clause__c</tab>
+        <visibility>Visible</visibility>
+    </tabSettings>
 </PermissionSet>

@@ -332,61 +332,61 @@ const createRuleConditionHierarcy=(ruleExpression, ruleConditionsMap, fieldWrap 
                     let rc = mapOfRC.get(condition);
                     tempObj.conditionName = condition;
                     tempObj.objectName = sObjectList;
-                    tempObj.selectedObject = rc.DxCPQ__Evaluation_Object__c;
+                    tempObj.selectedObject = rc.Dx_Temp__Evaluation_Object__c;
                     tempObj.Id = rc.Id;
-                    setupFieldsList(rc.DxCPQ__Evaluation_Object__c, rc.DxCPQ__Condition_Field__c, tempObj);
-                    tempObj.selectedField = rc.DxCPQ__Condition_Field__c;
-                    tempObj.operator = rc.DxCPQ__Operator__c;
+                    setupFieldsList(rc.Dx_Temp__Evaluation_Object__c, rc.Dx_Temp__Condition_Field__c, tempObj);
+                    tempObj.selectedField = rc.Dx_Temp__Condition_Field__c;
+                    tempObj.operator = rc.Dx_Temp__Operator__c;
                     tempObj.actionOptions = globalExpressionOptions;
                     tempObj.disableActionValue = false;
-                    tempObj.dataType=rc.DxCPQ__DataType__c;
-                    if (rc.DxCPQ__DataType__c) {
-                        if (rc.DxCPQ__DataType__c === "STRING") {
+                    tempObj.dataType=rc.Dx_Temp__DataType__c;
+                    if (rc.Dx_Temp__DataType__c) {
+                        if (rc.Dx_Temp__DataType__c === "STRING") {
                             setDefaultDataType(tempObj);
                             tempObj.isText = true;
 
                         }
-                        else if (rc.DxCPQ__DataType__c === "CURRENCY") {
+                        else if (rc.Dx_Temp__DataType__c === "CURRENCY") {
                             setDefaultDataType(tempObj);
                             tempObj.isCurrency = true;
                         }
-                        else if (rc.DxCPQ__DataType__c === "BOOLEAN") {
+                        else if (rc.Dx_Temp__DataType__c === "BOOLEAN") {
                             setDefaultDataType(tempObj);
                             tempObj.isCheckbox = true;
                         }
-                        else if (rc.DxCPQ__DataType__c === "DATETIME") {
+                        else if (rc.Dx_Temp__DataType__c === "DATETIME") {
                             setDefaultDataType(tempObj);
                             tempObj.isDate = true;
                         }
-                        else if (rc.DxCPQ__DataType__c === "PICKLIST") {
+                        else if (rc.Dx_Temp__DataType__c === "PICKLIST") {
                             setDefaultDataType(tempObj);
                             tempObj.ispicklist = true;
 
                         }
-                        else if (rc.DxCPQ__DataType__c === "TEXTAREA") {
+                        else if (rc.Dx_Temp__DataType__c === "TEXTAREA") {
                             setDefaultDataType(tempObj);
                             tempObj.isLongText = true;
                         }
-                        else if (rc.DxCPQ__DataType__c === "DOUBLE" || rc.DxCPQ__DataType__c === "INTEGER") {
+                        else if (rc.Dx_Temp__DataType__c === "DOUBLE" || rc.Dx_Temp__DataType__c === "INTEGER") {
                             setDefaultDataType(tempObj);
                             tempObj.isNumber = true;
                         }
-                        else if (rc.DxCPQ__DataType__c === "PERCENT") {
+                        else if (rc.Dx_Temp__DataType__c === "PERCENT") {
                             setDefaultDataType(tempObj);
                             tempObj.isPercent = true;
                         }
                     }
                     if(tempObj.isCheckbox===true){
-                        if(rc.DxCPQ__Value__c=="true"){
+                        if(rc.Dx_Temp__Value__c=="true"){
                             tempObj.value=true;
                         }else{
                             tempObj.value=false;
                         }
                     }else{
-                        tempObj.value = rc.DxCPQ__Value__c;
+                        tempObj.value = rc.Dx_Temp__Value__c;
                     }
                     
-                    tempObj._index = rc.DxCPQ__ConditionIndex__c;
+                    tempObj._index = rc.Dx_Temp__ConditionIndex__c;
                     tempObj.uKey = (new Date()).getTime() + ":" + tempObj._index;
     };
     

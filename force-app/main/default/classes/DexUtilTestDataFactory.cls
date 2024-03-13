@@ -205,7 +205,7 @@ public with sharing class DexUtilTestDataFactory {
     
     public static User CreateTestUser(){
         List<user> lstuser = new List<User>();
-        String uniqueUserName = 'dxcpq' + DateTime.now().getTime() + '@testorg.com';
+        String uniqueUserName = 'Dx_Temp' + DateTime.now().getTime() + '@testorg.com';
         Profile prof = [select id from profile where name LIKE '%System Administrator%'];
         User u = new User(Alias = 'standt', Email='standarduser@testorg.com',
         EmailEncodingKey='UTF-8', LastName='Testing', LanguageLocaleKey='en_US',

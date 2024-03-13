@@ -40,14 +40,14 @@ export default class TemplateRelatedObjects extends LightningElement {
   @track relatedObjName1;
   @track Recorddetailsnew = {
     Name: '',
-    DxCPQ__Section_Content__c: '',
-    DxCPQ__DisplaySectionName__c: false,
-    DxCPQ__New_Page__c: false,
-    DxCPQ__Document_Template__c: '',
-    DxCPQ__Sequence__c: 0,
-    DxCPQ__Type__c: '',
+    Dx_Temp__Section_Content__c: '',
+    Dx_Temp__DisplaySectionName__c: false,
+    Dx_Temp__New_Page__c: false,
+    Dx_Temp__Document_Template__c: '',
+    Dx_Temp__Sequence__c: 0,
+    Dx_Temp__Type__c: '',
     Id: '',
-    DxCPQ__RuleId__c: '',
+    Dx_Temp__RuleId__c: '',
   };
 
   ruleCondition = false;
@@ -345,15 +345,15 @@ export default class TemplateRelatedObjects extends LightningElement {
   handlecheckboxChange(event) {
     const mystring = JSON.stringify(event.detail.value);
     if (mystring.includes('New Page')) {
-      this.Recorddetailsnew.DxCPQ__New_Page__c = true;
+      this.Recorddetailsnew.Dx_Temp__New_Page__c = true;
     } else {
-      this.Recorddetailsnew.DxCPQ__New_Page__c = false;
+      this.Recorddetailsnew.Dx_Temp__New_Page__c = false;
     }
 
     if (mystring.includes('Display Section Name')) {
-      this.Recorddetailsnew.DxCPQ__DisplaySectionName__c = true;
+      this.Recorddetailsnew.Dx_Temp__DisplaySectionName__c = true;
     } else {
-      this.Recorddetailsnew.DxCPQ__DisplaySectionName__c = false;
+      this.Recorddetailsnew.Dx_Temp__DisplaySectionName__c = false;
     }
   }
 
@@ -394,13 +394,13 @@ export default class TemplateRelatedObjects extends LightningElement {
     this.documenttemplaterecordid = '';
     this.Recorddetailsnew = {
       Name: '',
-      DxCPQ__Section_Content__c: '',
-      DxCPQ__DisplaySectionName__c: false,
-      DxCPQ__New_Page__c: false,
-      DxCPQ__Document_Template__c: '',
-      DxCPQ__Sequence__c: 0,
-      DxCPQ__Type__c: '',
-      DxCPQ__RuleId__c: '',
+      Dx_Temp__Section_Content__c: '',
+      Dx_Temp__DisplaySectionName__c: false,
+      Dx_Temp__New_Page__c: false,
+      Dx_Temp__Document_Template__c: '',
+      Dx_Temp__Sequence__c: 0,
+      Dx_Temp__Type__c: '',
+      Dx_Temp__RuleId__c: '',
       Id: '',
     };
     this.value = null;
@@ -509,23 +509,23 @@ export default class TemplateRelatedObjects extends LightningElement {
         if (result != null) {
           this.isLoaded = false;
           this.Recorddetailsnew.Name = result.Name;
-          this.Recorddetailsnew.DxCPQ__Document_Template__c = result.DxCPQ__Document_Template__c;
-          this.Recorddetailsnew.DxCPQ__Sequence__c = result.DxCPQ__Sequence__c;
-          this.Recorddetailsnew.DxCPQ__Type__c = result.DxCPQ__Type__c;
-          this.Recorddetailsnew.DxCPQ__New_Page__c = result.DxCPQ__New_Page__c;
-          this.Recorddetailsnew.DxCPQ__DisplaySectionName__c = result.DxCPQ__DisplaySectionName__c;
-          this.Recorddetailsnew.DxCPQ__Section_Content__c = result.DxCPQ__Section_Content__c;
+          this.Recorddetailsnew.Dx_Temp__Document_Template__c = result.Dx_Temp__Document_Template__c;
+          this.Recorddetailsnew.Dx_Temp__Sequence__c = result.Dx_Temp__Sequence__c;
+          this.Recorddetailsnew.Dx_Temp__Type__c = result.Dx_Temp__Type__c;
+          this.Recorddetailsnew.Dx_Temp__New_Page__c = result.Dx_Temp__New_Page__c;
+          this.Recorddetailsnew.Dx_Temp__DisplaySectionName__c = result.Dx_Temp__DisplaySectionName__c;
+          this.Recorddetailsnew.Dx_Temp__Section_Content__c = result.Dx_Temp__Section_Content__c;
 
-          if (result.DxCPQ__RuleId__c != null && result.DxCPQ__RuleId__c != '') {
-            this.Recorddetailsnew.DxCPQ__RuleId__c = result.DxCPQ__RuleId__r.Id;
-            this.ruleExpression = result.DxCPQ__RuleId__r.DxCPQ__Rule_Expression__c;
+          if (result.Dx_Temp__RuleId__c != null && result.Dx_Temp__RuleId__c != '') {
+            this.Recorddetailsnew.Dx_Temp__RuleId__c = result.Dx_Temp__RuleId__r.Id;
+            this.ruleExpression = result.Dx_Temp__RuleId__r.Dx_Temp__Rule_Expression__c;
           }
-          else { this.Recorddetailsnew.DxCPQ__RuleId__c = ''; }
-          this.sectiontype = result.DxCPQ__Type__c;
+          else { this.Recorddetailsnew.Dx_Temp__RuleId__c = ''; }
+          this.sectiontype = result.Dx_Temp__Type__c;
 
           // Filtering On Load 
-          if (result.DxCPQ__RuleId__r != null) {
-            this.ruleIdCreated = result.DxCPQ__RuleId__r.Id;
+          if (result.Dx_Temp__RuleId__r != null) {
+            this.ruleIdCreated = result.Dx_Temp__RuleId__r.Id;
             this.ruleExists = true;
           } else {
             console.log('Filtering Rule Null');
@@ -542,10 +542,10 @@ export default class TemplateRelatedObjects extends LightningElement {
             this.getExistingConditions(event);
             this.ruleExists = true;
           }
-          this.newPage = result.DxCPQ__New_Page__c;
+          this.newPage = result.Dx_Temp__New_Page__c;
 
-          if (result.DxCPQ__Section_Content__c != null && result.DxCPQ__Section_Content__c != undefined) {
-            var parsedJson = JSON.parse(result.DxCPQ__Section_Content__c);
+          if (result.Dx_Temp__Section_Content__c != null && result.Dx_Temp__Section_Content__c != undefined) {
+            var parsedJson = JSON.parse(result.Dx_Temp__Section_Content__c);
             this.showPicklist = true;
             this.value = parsedJson.mainChildObject;
             var attribute = [];
@@ -922,7 +922,7 @@ export default class TemplateRelatedObjects extends LightningElement {
         obj.whereClause = '(' + this.filteringCondition + ')';
         obj.mainChildObject = this.selChildObjName;
         obj.childLookupfieldAPIname = childloopkupfieldAPIname;
-        obj.mainparentObject = this.documenttemplaterecord.DxCPQ__Related_To_Type__c;
+        obj.mainparentObject = this.documenttemplaterecord.Dx_Temp__Related_To_Type__c;
         obj.SerialNumber = this.SerialNumber;
         obj.subTotal = this.allnumValues;
         obj.displayChart = this.displayChart;
@@ -972,20 +972,20 @@ export default class TemplateRelatedObjects extends LightningElement {
 
       var currecid = this.sectionrecordid;
       if (jsonString != '' && jsonString != null) {
-        this.Recorddetailsnew.DxCPQ__Section_Content__c = jsonString;
+        this.Recorddetailsnew.Dx_Temp__Section_Content__c = jsonString;
       }
 
       if (currecid != '' && this.sectionrecordid.indexOf('NotSaved') == -1) {
         this.Recorddetailsnew.Id = this.sectionrecordid;
       }
 
-      this.Recorddetailsnew.DxCPQ__Sequence__c = this.rowcount;
-      this.Recorddetailsnew.DxCPQ__Type__c = this.sectiontype;
-      this.Recorddetailsnew.DxCPQ__Document_Template__c = this.documenttemplaterecordid;
-      this.Recorddetailsnew.DxCPQ__New_Page__c = this.newPage;
+      this.Recorddetailsnew.Dx_Temp__Sequence__c = this.rowcount;
+      this.Recorddetailsnew.Dx_Temp__Type__c = this.sectiontype;
+      this.Recorddetailsnew.Dx_Temp__Document_Template__c = this.documenttemplaterecordid;
+      this.Recorddetailsnew.Dx_Temp__New_Page__c = this.newPage;
 
       // Filtering Conditions
-      this.Recorddetailsnew.DxCPQ__RuleId__c = this.ruleIdCreated;
+      this.Recorddetailsnew.Dx_Temp__RuleId__c = this.ruleIdCreated;
 
       if (this.Recorddetailsnew.Name != '' && this.Recorddetailsnew.Name != null) {
         saveDocumentTemplateSectionDetails({ Recorddetails: this.Recorddetailsnew })
@@ -1825,20 +1825,20 @@ export default class TemplateRelatedObjects extends LightningElement {
     let actualResult = ruleExpression;
     let lst = [];
     for (let i = 0; i < lstOfConditions.length; i++) {
-      let res = '' + lstOfConditions[i].DxCPQ__Condition_Field__c + ' ';
+      let res = '' + lstOfConditions[i].Dx_Temp__Condition_Field__c + ' ';
 
-      if (lstOfConditions[i].DxCPQ__DataType__c == 'STRING' || lstOfConditions[i].DxCPQ__DataType__c == 'TEXT') {
-        if(lstOfConditions[i].DxCPQ__Operator__c != '!='){
-          res = res + 'LIKE' + ' ' + '\'%' + lstOfConditions[i].DxCPQ__Value__c + '%\'';
+      if (lstOfConditions[i].Dx_Temp__DataType__c == 'STRING' || lstOfConditions[i].Dx_Temp__DataType__c == 'TEXT') {
+        if(lstOfConditions[i].Dx_Temp__Operator__c != '!='){
+          res = res + 'LIKE' + ' ' + '\'%' + lstOfConditions[i].Dx_Temp__Value__c + '%\'';
         } else {
-          res = '( NOT ' + lstOfConditions[i].DxCPQ__Condition_Field__c + ' LIKE' + ' ' + '\'%' + lstOfConditions[i].DxCPQ__Value__c + '%\' )';
+          res = '( NOT ' + lstOfConditions[i].Dx_Temp__Condition_Field__c + ' LIKE' + ' ' + '\'%' + lstOfConditions[i].Dx_Temp__Value__c + '%\' )';
         }
       }
-      else if (lstOfConditions[i].DxCPQ__DataType__c == 'PICKLIST') {
-        res = res + lstOfConditions[i].DxCPQ__Operator__c + ' ' + '\'' + lstOfConditions[i].DxCPQ__Value__c + '\'';
+      else if (lstOfConditions[i].Dx_Temp__DataType__c == 'PICKLIST') {
+        res = res + lstOfConditions[i].Dx_Temp__Operator__c + ' ' + '\'' + lstOfConditions[i].Dx_Temp__Value__c + '\'';
       }
       else {
-        res = res + lstOfConditions[i].DxCPQ__Operator__c + ' ' + lstOfConditions[i].DxCPQ__Value__c;
+        res = res + lstOfConditions[i].Dx_Temp__Operator__c + ' ' + lstOfConditions[i].Dx_Temp__Value__c;
       }
       lst.push(res);
     }
