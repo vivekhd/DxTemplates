@@ -8,12 +8,15 @@
 					onchange={handlename} disabled=true>
 				</lightning-input>
 			</div>
-			<div class="slds-col slds-text-align_right">
+			<div class="slds-col slds-text-align_right slds-p-top_x-small">
 				<label class="slds-form-element__label">&nbsp;</label>
 				<lightning-checkbox-group label="Section Properties" class="green-checkbox checkboxlabel dx-chk-h"
 					checked={showBool} options={sectionItemsToselect} value={value} onchange={handlecheckboxChange}
 					disabled={isDisabled} variant="label-hidden">
 				</lightning-checkbox-group>
+			</div>
+			<div class="slds-is-relative slds-col_bump-left">
+				<lightning-button-icon icon-name="utility:help_doc_ext" onclick={handlehelp} alternative-text="Open Section Guide : Footer" title="Open Section Guide : Footer" size="medium" variant="bare" class="slds-is-absolute slds-button_icon-help" style="right:0px"></lightning-button-icon>
 			</div>
 		</div>
 		<div class="slds-m-horizontal_large">

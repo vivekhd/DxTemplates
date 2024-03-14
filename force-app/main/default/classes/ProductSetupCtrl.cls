@@ -15,5 +15,17 @@ public with sharing class ProductSetupCtrl {
         }  
     }
     
+    @AuraEnabled
+    public static List<DxTemplates_PDFLink__mdt> getPDFLinks(){
+        List<DxTemplates_PDFLink__mdt> linkLst = [select Id,MasterLabel,DeveloperName, Section_PDF_URL__c from DxTemplates_PDFLink__mdt with USER_MODE ];
+        return linkLst;
+    }
+    
+    @AuraEnabled
+    public static String getOriginalImageCVID(String contentVersionId) {
+        ContentVersion cvData = [SELECT Id, Title, VersionData FROM ContentVersion WHERE Id = :contentVersionId LIMIT 1]  ;
+        return EncodingUtil.base64Encode(cvData.VersionData);
+    }
+    
     public class SafeClassException extends Exception{}    
 }

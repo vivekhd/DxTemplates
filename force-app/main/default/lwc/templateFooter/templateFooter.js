@@ -3,8 +3,9 @@ import getContentVersions from '@salesforce/apex/FooterClass.getContentVersions'
 import saveDocumentTemplateSectionDetails from '@salesforce/apex/SaveDocumentTemplatesection.saveDocumentTemplateSectionDetails';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 import gettemplatesectiondata from '@salesforce/apex/SaveDocumentTemplatesection.gettemplatesectiondata';
+import { NavigationMixin } from 'lightning/navigation';
 
-export default class TemplateFooter extends LightningElement {
+export default class TemplateFooter extends NavigationMixin(LightningElement) {
   imageUrls = [];
   showimages = false;
   isModalOpen = false;
@@ -18,6 +19,7 @@ export default class TemplateFooter extends LightningElement {
   @api sectionrecordid;
   @api isDisabled = false;
   @api selectedObjectName;
+  @api pdfLinks;
 
   richtextVal = 'All Right Reserved.';
   sectionItemsToselect = [{ label: 'Display Page Number Sequence', value: 'Display Page Number Sequence' }];
@@ -237,5 +239,17 @@ export default class TemplateFooter extends LightningElement {
       });
       this.dispatchEvent(Errormsg);
     }
+  }
+
+    handlehelp(){
+      let relatedObjectsMap = this.pdfLinks.find(item => item.MasterLabel === 'Footer');
+      let pdfUrl = relatedObjectsMap ? relatedObjectsMap.DxCPQ__Section_PDF_URL__c : null;
+    const config = {
+        type: 'standard__webPage',
+        attributes: {
+            url: pdfUrl
+          }
+    };
+    this[NavigationMixin.Navigate](config);
   }
 }

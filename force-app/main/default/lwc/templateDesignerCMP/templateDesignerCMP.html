@@ -24,8 +24,9 @@
 				<div class="slds-col slds-text-align_right">
 					<lightning-layout class="slds-grid slds-grid_align-end">
 						<div data-id='section menu' class="slds-col slds-grid_align-end"></div>
-
+						<lightning-button-icon icon-name="utility:help_doc_ext" onclick={handlehelp} alternative-text="Need Help?" title="Need Help?" class="slds-button_icon-help slds-m-right_small" size="medium" variant="bare" style="margin-top: 3px;" data-val="DxTemplates"></lightning-button-icon>
 						<lightning-button-group data-id='section menu items' class="slds-button-group" role="group">
+							
 							<lightning-button-icon icon-name="utility:snippet" alternative-text="Section : Context"
 								title="Section : Context" onclick={handleNewContext} disabled={disableEditing}>
 							</lightning-button-icon>
@@ -35,12 +36,12 @@
 							<lightning-button-icon icon-name="utility:task" alternative-text="Section : Clause"
 								title="Section : Clause" onclick={handleNewClause} disabled={disableEditing}>
 							</lightning-button-icon>
-							<lightning-button-icon icon-name="utility:table" alternative-text="Section : Table"
+							<!---<lightning-button-icon icon-name="utility:table" alternative-text="Section : Table"
 								title="Section : Table" onclick={handleNewTable} disabled={disableEditing}>
-							</lightning-button-icon>
+							</lightning-button-icon>-->
 							<span style="line-height:32px"> &nbsp; - &nbsp; </span>
 							<lightning-button-icon icon-name="utility:edit" alternative-text="Edit Template"
-								title="Edit Template" onclick={handleEditTemplate} disabled={disableEditing}>
+								title="Edit Template" onclick={handleEditTemplate}>
 							</lightning-button-icon>
 						</lightning-button-group>
 					</lightning-layout>
@@ -61,7 +62,7 @@
 								rowcount={header.rowCount} sectiontype={header.Type}
 								ondeletesectiondata={handledeletesectiondata} onsavesectiondata={handlesavedheaderdata}
 								recordidtoedit={recordidtoedit} sectionrecordid={header.Id}
-								documenttemplaterecord={doctemplatedetails}>
+								documenttemplaterecord={doctemplatedetails} pdf-links ={pdfLinksData}>
 							</c-template-header>
 
 							<c-template-content-details showdetails={showcontextdetails}
@@ -69,8 +70,7 @@
 								rowcount={rowCount} sectiontype={SectionTypename}
 								onsavesectiondata={handlesavedsectiondata} ondeletesectiondata={handledeletesectiondata}
 								showclausescreen={showclausescreen} recordidtoedit={recordidtoedit}
-								sectionrecordid={selectedSectionRecordID} documenttemplaterecord={doctemplatedetails}>
-							</c-template-content-details>
+								sectionrecordid={selectedSectionRecordID} documenttemplaterecord={doctemplatedetails} pdf-links ={pdfLinksData}> </c-template-content-details>
 
 
 							<c-template-table-details showtabledetails={showtabledetails}
@@ -79,7 +79,7 @@
 								onsavesectiondata={handlesavedsectiondata} ondeletesectiondata={handledeletesectiondata}
 								recordidtoedit={recordidtoedit} sectionrecordid={selectedSectionRecordID}
 								documenttemplaterecordid={doctemplatedetails.Id}
-								documenttemplaterecord={doctemplatedetails}>
+								documenttemplaterecord={doctemplatedetails} >
 							</c-template-table-details>
 
 							<c-template-related-objects showrelatedobjectdetails={showrelatedobjectdetails}
@@ -88,7 +88,7 @@
 								onsavesectiondata={handlesavedsectiondata} ondeletesectiondata={handledeletesectiondata}
 								recordidtoedit={recordidtoedit} sectionrecordid={selectedSectionRecordID}
 								documenttemplaterecordid={doctemplatedetails.Id}
-								documenttemplaterecord={doctemplatedetails}>
+								documenttemplaterecord={doctemplatedetails} pdf-links ={pdfLinksData}>
 							</c-template-related-objects>
 
 							<c-template-footer showfooterdetails={showfooterdetails}
@@ -96,7 +96,7 @@
 								rowcount={footer.rowCount} sectiontype={footer.Type}
 								ondeletesectiondata={handledeletesectiondata} onsavesectiondata={handlesavedfooterdata}
 								recordidtoedit={recordidtoedit} sectionrecordid={footer.Id}
-								documenttemplaterecord={doctemplatedetails}>
+								documenttemplaterecord={doctemplatedetails} pdf-links ={pdfLinksData}>
 							</c-template-footer>
 						</div>
 					</div>
@@ -207,7 +207,7 @@
 				</div>
 			</div>
 
-			<c-modal>
+			<c-modal onclosedialog ={handleDialogBoxClosed}>
 				<template if:true={previewModal}>
 					<span slot="header"> Preview Template </span>
 
@@ -285,18 +285,19 @@
 					<div class="slds-modal__content slds-p-around_medium" style="min-height: 240px;">
 						<lightning-record-edit-form record-id={documenttemplaterecordid}
 							object-api-name="DxCPQ__Document_Template__c" onsuccess={handleEditSuccess}>
-							<lightning-input-field field-name="Name"> </lightning-input-field>
+							<lightning-input-field field-name="Name" disabled ={readonlyVal}> </lightning-input-field>
 							<lightning-output-field field-name="DxCPQ__Related_To_Type__c"> </lightning-output-field>
-							<lightning-input-field field-name="DxCPQ__Description__c"> </lightning-input-field>
+							<lightning-input-field field-name="DxCPQ__Description__c" disabled ={readonlyVal}> </lightning-input-field>
 							<lightning-output-field field-name="DxCPQ__Version_Number__c"> </lightning-output-field>
 							<div class="slds-text-align_right">
-								<lightning-button class="slds-m-top_small" type="submit" label="Save" variant="brand">
+								<lightning-button class="slds-m-top_small" type="submit" label="Save" variant="brand" if:false={readonlyVal}>
 								</lightning-button>
 							</div>
 						</lightning-record-edit-form>
 						<div class="slds-text-align_left">
 							<lightning-button class="slds-m-top_small" type="submit" label="Watermark Settings"
 								variant="brand" onclick={handleWatermarkSettings}></lightning-button>
+								<lightning-button-icon icon-name="utility:help_doc_ext" onclick={handlehelp} alternative-text="Need Help?" title="Need Help?" class="slds-button_icon-help slds-m-right_small" size="medium" variant="bare" style="margin-top: 3px;" data-val="Watermark Settings"></lightning-button-icon>
 						</div>
 
 					</div>
@@ -333,7 +334,7 @@
 									<div
 										class="slds-col slds-size_1-of-1 slds-medium-size_4-of-12 slds-large-size_4-of-12">
 										<lightning-slider class="rotationSlider" label="Rotation" size="x-small"
-											value={rotationvalue} onchange={handleRotationChange} data-label="rotation"
+											value={rotationValue} onchange={handleRotationChange} data-label="rotation"
 											min="-180" max="180" step="5" data-type="Text" disabled ={readonlyVal}></lightning-slider>
 									</div>
 									<div
@@ -374,7 +375,7 @@
 								</div>
 
 							</lightning-tab>
-							<lightning-tab label="Image" onactive={handleTabChange} data-name="Image">
+							<lightning-tab label="Image" onactive={handleTabChange} data-name="Image" >
 								<div class="slds-grid slds-wrap slds-gutters_small slds-grid_vertical-align-center">
 									<div
 										class="slds-col slds-size_1-of-1 slds-medium-size_4-of-12 slds-large-size_4-of-12">
@@ -396,8 +397,8 @@
 										<div
 											class="slds-col slds-size_1-of-1 slds-medium-size_4-of-12 slds-large-size_4-of-12">
 											<lightning-slider class="rotationSlider" label="Rotation" size="x-small"
-												value={rotationImagevalue} onchange={handleRotationChange} disabled ={readonlyVal}
-												data-label="rotation" min="-180" max="180" step="5" data-type="Image">
+												value={rotationImagevalue} onchange={handleRotationChange}
+												data-label="rotation" min="-180" max="180" step="5" data-type="Image" disabled ={readonlyVal}>
 											</lightning-slider>
 										</div>
 
@@ -407,38 +408,37 @@
 												checked={checkedValImage} onchange={handleWatermarkPrimary} disabled ={readonlyVal}
 												data-label="imagePrimary"></lightning-input>
 										</div>
-									</div>
-									<div class="slds-grid slds-wrap slds-gutters_small">
-										<template for:each={watermarkPageOptionsImage} for:item="item">
-											<fieldset key={item.value} style="display: block; float: left;">
-												<div class="slds-form-element__control"
-													style="margin:15px 0px 10px 15px">
-													<span class="slds-radio">
-															<input name="radiogroupforImage" id={item.value} type="radio" value={item.value} onchange={handleWatermarkPageChange} disabled ={readonlyVal} checked = {item.checked}/>
-															<label class="slds-radio__label" for={item.value}>
-																<span class="slds-radio_faux"></span>
-													<span class="slds-form-element__label" style="display: inline !important;">{item.label}</span>
-													</label>
-													</span>
-												</div>
-											</fieldset>
-										</template>
-									</div>
-									<div
-										class="slds-grid slds-grid_vertical-align-center slds-grid_align-center slds-text-align_center">
-										<div class="output-container slds-col slds-size_1-of-1 slds-medium-size_12-of-12 slds-large-size_12-of-12 "
-											style="border:1px solid #333;">
-											<canvas class="canvasImage" width="800px" height="800px"></canvas>
+								</div>
+								<div class="slds-grid slds-wrap slds-gutters_small">
+									<template for:each={watermarkPageOptionsImage} for:item="item">
+										<fieldset key={item.value} style="display: block; float: left;">
+											<div class="slds-form-element__control"
+												style="margin:15px 0px 10px 15px">
+												<span class="slds-radio">
+														<input name="radiogroupforImage" id={item.value} type="radio" value={item.value} onchange={handleWatermarkPageChange} checked = {item.checked} disabled ={readonlyVal}/>
+														<label class="slds-radio__label" for={item.value}>
+															<span class="slds-radio_faux"></span>
+												<span class="slds-form-element__label" style="display: inline !important;">{item.label}</span>
+												</label>
+												</span>
+											</div>
+										</fieldset>
+									</template>
+								</div>
+								<div class="slds-grid slds-grid_vertical-align-center slds-grid_align-center slds-text-align_center">
+									<div class="output-container slds-col slds-size_1-of-1 slds-medium-size_12-of-12 slds-large-size_12-of-12 "
+										style="border:1px solid #333;">
+										<canvas class="canvasImage" width="800px" height="800px"></canvas>
 
 
-										</div>
 									</div>
+								</div>
 							</lightning-tab>
 						</lightning-tabset>
 
 					</div>
 					<div class="slds-modal__footer">
-						<button class="slds-button slds-button_neutral" aria-label="Cancel and close" onclick={handleWaterMarkCancel}>Cancel</button>
+						<button class="slds-button slds-button_neutral" aria-label="Cancel and close" onclick={handleWaterMarkCancel} >Cancel</button>
 						<button class="slds-button slds-button_brand" onclick={handleWaterMarkSave} if:false={readonlyVal}>Save</button>
 					</div>
 				</template>

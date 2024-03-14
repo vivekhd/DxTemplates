@@ -3,12 +3,14 @@ import saveDocumentTemplateSectionDetails from '@salesforce/apex/SaveDocumentTem
 import ClauseBody from '@salesforce/apex/SaveDocumentTemplatesection.ClauseBody';
 import deletetemplate from '@salesforce/apex/SaveDocumentTemplatesection.deletetemplate';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
+import { NavigationMixin } from 'lightning/navigation';
 import gettemplatesectiondata from '@salesforce/apex/SaveDocumentTemplatesection.gettemplatesectiondata';
 
-export default class TemplateContentDetails extends LightningElement {
+export default class TemplateContentDetails extends NavigationMixin(LightningElement) {
   isLoaded = false;
   showMergeFields = false;
   newpage = false;
+  @api pdfLinks;
   @api documenttemplaterecord;
   @api selectedObjectName;
   @track relatedtoTypeObjChild;
@@ -208,46 +210,6 @@ export default class TemplateContentDetails extends LightningElement {
   }
 
 
-  /* @wire(getSobjectFields, {selectedObject: this.selectedObjectName}) 
- // @wire(getSobjectFields, {selectedObject: this.documenttemplaterecord.Related_To_Type__c}) 
-    wiredSobjectfields({ error, data }) {
-      if (data) {
-          this.data = data;
-          this.error = undefined;
-      } else if (error) {
-          this.error = error;
-          console.log('occured error is '+ JSON.stringify(this.error));
-      }
-  }  */
-
-  /*
-  @wire(getSobjectFields, { selectedObject: '$selectedObjectName' })
-  wiredSobjectfields({ error, data }) {
-    if (data) {
-      console.log('date ****' + data);
-      this.data = data;
-      this.error = undefined;
-    } else if (error) {
-      this.error = error;
-      console.log('occured error is ' + JSON.stringify(this.error));
-    }
-  }
-
-  get selectedObject() {
-    return this.selectedObjectName;
-  }
-
-  get fieldOptions() {
-    var returnOptions = [];
-    if (this.data) {
-      this.data.forEach(ele => {
-        returnOptions.push({ label: ele, value: ele });
-      });
-    }
-    return returnOptions;
-  }
-  */
-
   handlemergefieldselection(event) {
     this.mergefieldname = '{!' + this.documenttemplaterecord.DxCPQ__Related_To_Type__c + '.' + event.detail.value + '}';
   }
@@ -391,5 +353,25 @@ export default class TemplateContentDetails extends LightningElement {
         this.isLoaded = false;
         console.log('Error while fetching data ' + JSON.stringify(error));
       })
+  }
+
+
+  handlehelp(){
+    let urlLink;
+    if(this.showclausescreen){ //for clause screen
+      let relatedObjectsMap = this.pdfLinks.find(item => item.MasterLabel === 'Clause');
+      urlLink = relatedObjectsMap ? relatedObjectsMap.DxCPQ__Section_PDF_URL__c : null;
+    }
+    else{//for context screen
+      let relatedObjectsMap = this.pdfLinks.find(item => item.MasterLabel === 'Context');
+      urlLink = relatedObjectsMap ? relatedObjectsMap.DxCPQ__Section_PDF_URL__c : null;
+    }
+    const config = {
+        type: 'standard__webPage',
+        attributes: {
+            url: urlLink
+          }
+    };
+    this[NavigationMixin.Navigate](config);
   }
 }

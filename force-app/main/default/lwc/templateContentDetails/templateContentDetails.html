@@ -3,13 +3,13 @@
 
 		<div class="slds-grid slds-wrap slds-m-bottom_small slds-p-around_small slds-border_bottom"
 			style="border:1px solid #e5e5e5; border-radius:5px; background: rgb(243 243 243);">
-
+			
 			<div class="slds-col slds-size_1-of-1 slds-medium-size_4-of-12 slds-large-size_4-of-12">
 				<lightning-input type="text" disabled={isDisabled} variant="standard" name="name" label="Name"
 					value={Recorddetailsnew.Name} onchange={handlename} placeholder="Type Section Name Here..." required>
 				</lightning-input>
 			</div>
-
+			
 			<template if:true={showclausescreen}>
 				<div class="slds-col slds-size_1-of-1 slds-medium-size_4-of-12 slds-large-size_4-of-12 slds-p-left_small">
 					<c-multi-lookup-component label-name="*Document Clause" object-api-name="DxCPQ__Document_Clause__c"
@@ -34,6 +34,16 @@
 					class="slds-list_horizontal" onchange={handlechange} value={newpage} disabled={isDisabled}>
 				</lightning-input>
 			</div>
+			<!-- <template if:true={showclausescreen}>
+				<div class="slds-is-relative slds-col_bump-left">					
+					<lightning-button-icon icon-name="utility:help_doc_ext" onclick={handlehelp} alternative-text="Need Help?" title="Need Help?" variant="brand" class="slds-is-absolute slds-button_icon-help" style="right:0px"></lightning-button-icon>
+				</div>
+			</template> -->
+			<!-- <template if:false={showclausescreen}> -->
+				<div class="slds-is-relative slds-col_bump-left">
+					<lightning-button-icon icon-name="utility:help_doc_ext" onclick={handlehelp} alternative-text="Need Help?" title="Need Help?" size="medium" variant="bare" class="slds-is-absolute slds-button_icon-help" style="right:0px"></lightning-button-icon>
+				</div>
+			<!-- </template> -->
 		</div>
 
 		<div class="slds-m-horizontal_large">

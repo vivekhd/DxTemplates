@@ -35,6 +35,7 @@ export default class DxTemplateSetup extends LightningElement {
   @track opacityValue = '1.0'; // Default text Opacity = 1
   @track pageTextOption = 'All Pages - Text'; // Default text page Option for watermark is selected as "ALL PAGES"
   @track pageImageOption = 'All Pages - Image'; // Default Image page Option for watermark is selected as "ALL PAGES"
+  baseDataLst = []; //stores the base 64 data of the images
   //watermarkPageOptionsText combobox options for Text Watermark
   watermarkPageOptionsText = [
         { label: 'All Pages', value: 'All Pages - Text', checked : true },
@@ -86,7 +87,6 @@ export default class DxTemplateSetup extends LightningElement {
     allConstants({ error, data }) {
         if (data) {
             this.popUpMessage = data;
-            console.log('Success');
         } else {
             this.error = error;
         }
@@ -95,7 +95,6 @@ export default class DxTemplateSetup extends LightningElement {
     connectedCallback() {
         getSFDomainBaseURL()
         .then(result => {
-            console.log('domain base URL ----> ', result);
             this.baseURL = result;
         })
         .catch(error => {
@@ -362,7 +361,6 @@ export default class DxTemplateSetup extends LightningElement {
         if(fieldMap[fieldName]) {
             this[fieldMap[fieldName]] = value;
         }
-        console.log('fieldMap after assigning >> ', fieldMap);
         if(this.activeTab == 'Text'){
           this.generateCanvas();
         }
@@ -376,7 +374,6 @@ export default class DxTemplateSetup extends LightningElement {
     */
     handleTabChange(event) {
         this.activeTab = event.currentTarget.dataset.name;
-        console.log('Tab clicked:', this.activeTab);
     }
 
     /**
@@ -405,7 +402,6 @@ export default class DxTemplateSetup extends LightningElement {
     * @param {Object} event
     */
     handleRotationChange(event){
-      console.log('rotation val >> ', event.target.value);
       let slectedRotation = event.currentTarget.dataset.type;
       if(slectedRotation == 'Text'){
         this.rotationValue = event.target.value;
@@ -424,25 +420,26 @@ export default class DxTemplateSetup extends LightningElement {
     * Once the images drawn in both cases - text & image are saved then their contentversion IDs are captured and using the updateRecord the Watermark_Data__c field on Document_Template__c object is updated based on the selected ID
     */
     handleWaterMarkSave(){
-      let baseDataLst = [];
       let canvasText = this.template.querySelector('.canvasText');
       if(canvasText && this.watermarkText !== ''){
         let dataURLText = canvasText.toDataURL();
-        baseDataLst.push({ 'text': dataURLText.split(',')[1], title:'Text' });
+        this.baseDataLst.push({ 'text': dataURLText.split(',')[1], title:'Text' });
       }
       let canvasImage = this.template.querySelector('.canvasImage');
       if(canvasImage && this.imageUrl){
         let dataURLImage = canvasImage.toDataURL();
-        baseDataLst.push({ 'Image': dataURLImage.split(',')[1], title:'Image' });
+        this.baseDataLst.push({ 'Image': dataURLImage.split(',')[1], title:'Image' });
       }
-      saveContentVersion({ title : "WatermarkImage", base64DataList : baseDataLst, templateId : this.templateId})
+      saveContentVersion({ title: "WatermarkImage", base64DataList: this.baseDataLst, templateId: this.documenttemplaterecordid, wtImage : true })
         .then(result => {
-            console.log('File saved successfully returned ContentVersion ID :', result);
             const fields ={};
             let watermarkText = (result.filter(obj => Object.keys(obj).some(key => key.includes('Text'))) || [])[0];
             let watermarkImage = (result.filter(obj => Object.keys(obj).some(key => key.includes('Image'))) || [])[0];
             watermarkText = watermarkText ? watermarkText[Object.keys(watermarkText)[0]] : null;
             watermarkImage = watermarkImage? watermarkImage[Object.keys(watermarkImage)[0]] : null;
+            let wtOriginalImage = (result.filter(obj => Object.keys(obj).some(key => key.includes('OriginalImg'))) || [])[0];
+        wtOriginalImage = wtOriginalImage ? wtOriginalImage[Object.keys(wtOriginalImage)[0]] : null;
+        this.originalImageCvId = wtOriginalImage? wtOriginalImage : this.prevoriginalImageCvId;
             const watermarkImageIdText = {
                 name: 'Text',
                 isPrimary: this.checkedValText,
@@ -464,7 +461,8 @@ export default class DxTemplateSetup extends LightningElement {
                 opacity: this.opacityImageValue,
                 rotation: this.rotationImagevalue,
                 pageImageOption: this.pageImageOption,
-                imageScale: this.imageScalingValue
+                imageScale: this.imageScalingValue,
+                originalImageCVId : this.originalImageCvId
             };
             fields[DOCUMENTTEMPLATEID_FIELD.fieldApiName] = this.templateId;
             let jsonDataLst = [watermarkImageIdText, watermarkImageIdImage];
@@ -480,6 +478,9 @@ export default class DxTemplateSetup extends LightningElement {
                     this.dispatchEvent(toastEvt);
                     this.showwatermarkbtn = false;
                     this.template.querySelector('c-modal').hide();
+                    this.resetWatermarkValues();
+                    this.baseDataLst = [];
+                    this.imageUrl = '';
                 })
                 .catch(error => {
                     const toastEvt = new ShowToastEvent({
@@ -501,9 +502,10 @@ export default class DxTemplateSetup extends LightningElement {
     * Method to hide the Watermark Screen from UI
     */
     handleWaterMarkCancel(){
-      this.showwatermarkbtn = false;
-      this.template.querySelector('c-modal').hide();
-
+        this.showwatermarkbtn = false;
+        this.template.querySelector('c-modal').hide();
+        this.resetImageWatermarkFields();
+        this.resetWatermarkValues();
     }
 
     /**
@@ -512,50 +514,66 @@ export default class DxTemplateSetup extends LightningElement {
     */
     handleUploadFinished(event) {
         const file = event.target.files[0];
+        this.resetImageWatermarkFields();
         const reader = new FileReader();
         reader.onload = () => {
-            this.imageUrl = reader.result;
-            this.drawOnCanvas(this.imageUrl);
+        this.imageUrl = reader.result;
+        try{
+            this.drawOnCanvas(this.imageUrl).then(() => {
+                this.baseDataLst = [];
+                let canvasImage = this.template.querySelector('.canvasImage');
+                if (canvasImage && this.imageUrl) {
+                    let dataURLImage = canvasImage.toDataURL();
+                    this.baseDataLst.push({ 'OriginalImg': dataURLImage.split(',')[1], title:'OriginalImg' });
+                }
+            });
+        }
+        catch(error){
+            console.log(error);
+        }
         };
         reader.readAsDataURL(file);
     }
-
     /**
     * Method to create the image of the Image watermark for the given user inputs
     * @param {Object} imageUrl
     */
      drawOnCanvas(imageUrl) {
-        const canvas = this.template.querySelector('.canvasImage');
-        const ctx = canvas.getContext('2d');
-        const image = new Image();
-        image.src = imageUrl;
-        image.onload = () => {
-            ctx.clearRect(0, 0, canvas.width, canvas.height); 
-            if (this.rotationImagevalue !== this.previousImgRotationValue) {
-                ctx.translate(canvas.width / 2, canvas.height / 2);
-                ctx.rotate((this.rotationImagevalue - this.previousImgRotationValue )* Math.PI / 180);            
-                ctx.translate(-canvas.width / 2, -canvas.height / 2);
-                this.previousImgRotationValue =  this.rotationImagevalue;
-            }
-            ctx.globalAlpha = this.opacityImageValue;
-            let imgwidth =  this.imageScalingValue == 0 ? image.width : image.width * (this.imageScalingValue / 100);
-            let imgheight = this.imageScalingValue == 0 ? image.height : image.height * (this.imageScalingValue / 100);
-            ctx.drawImage(image, (canvas.width-imgwidth)/2, (canvas.height-imgheight)/2, this.imageScalingValue == 0 ? image.width : image.width * (this.imageScalingValue / 100), this.imageScalingValue == 0 ? image.height : image.height * (this.imageScalingValue / 100));        
-        };
+        return new Promise((resolve, reject) => {
+            const canvas = this.template.querySelector('.canvasImage');
+            const ctx = canvas.getContext('2d');
+            const image = new Image();
+            image.src = imageUrl;
+            image.onload = () => {
+                ctx.clearRect(0, 0, canvas.width, canvas.height); 
+                if (this.rotationImagevalue !== this.previousImgRotationValue) {
+                    ctx.translate(canvas.width / 2, canvas.height / 2);
+                    ctx.rotate((this.rotationImagevalue - this.previousImgRotationValue )* Math.PI / 180);            
+                    ctx.translate(-canvas.width / 2, -canvas.height / 2);
+                    this.previousImgRotationValue =  this.rotationImagevalue;
+                }
+                ctx.globalAlpha = this.opacityImageValue;
+                let imgwidth =  this.imageScalingValue == 0 ? image.width : image.width * (this.imageScalingValue / 100);
+                let imgheight = this.imageScalingValue == 0 ? image.height : image.height * (this.imageScalingValue / 100);
+                ctx.drawImage(image, (canvas.width-imgwidth)/2, (canvas.height-imgheight)/2, this.imageScalingValue == 0 ? image.width : image.width * (this.imageScalingValue / 100), this.imageScalingValue == 0 ? image.height : image.height * (this.imageScalingValue / 100)); 
+                resolve();       
+            };
+        });
     }
 
     /**
     * Method to store the Watermark Page Option i.e., on what pages the watermark should be visible is handled with the following method
     * @param {Object} event
     */
-    handleWatermarkPageChange(event){
-      if(this.activeTab == "Text"){
+  handleWatermarkPageChange(event) {
+    if (this.activeTab === "Text") {
         this.pageTextOption = event.target.value;
-      }
-      else if(this.activeTab == "Image"){
+        this.updateCheckedValue(this.pageTextOption, this.watermarkPageOptionsText);
+    } else if (this.activeTab === "Image") {
         this.pageImageOption = event.target.value;
-      }
+        this.updateCheckedValue(this.pageImageOption, this.watermarkPageOptionsImage);
     }
+  }
 
     /**
     * Method to store the information about which type of watermark should be used for displaying on the final PDF
@@ -571,5 +589,66 @@ export default class DxTemplateSetup extends LightningElement {
             this.checkedValImage = isChecked;
             this.checkedValText = !this.checkedValImage;
         }
+    }
+
+    resetImageWatermarkFields(){
+        this.rotationImagevalue = '0';
+        this.imageScalingValue = '100';
+        this.opacityImageValue = '1.0';
+    }
+
+    resetWatermarkValues(){
+        this.fontSizeValue = '22';
+        this.opacityValue = '1.0';
+        this.colorValue = '#000000';
+        this.rotationValue = '0';
+        this.watermarkText = '';
+        this.checkedValText = true;
+        this.checkedValImage = false;
+        this.pageTextOption = 'All Pages - Text';
+        this.imageScalingValue ='100';
+        this.opacityImageValue ='1.0';
+        this.rotationImagevalue = '0';
+        this.pageImageOption = 'All Pages - Image';
+        this.previousImgRotationValue = '0';
+        this.previousRotationValue = '0';
+        this.updateCheckedValue(this.pageTextOption, this.watermarkPageOptionsText);
+        this.updateCheckedValue(this.pageImageOption, this.watermarkPageOptionsImage);
+
+    }
+
+    /**
+     * Method to update the checked value in the respective lists based on selected values
+     * @param optionValue Either pageTextOption/ pageImageOption
+     * @param optionsList Either watermarkPageOptionsText/ watermarkPageOptionsImage
+     */
+    updateCheckedValue(optionValue, optionsList) {
+        optionsList = optionsList.map(option => {
+            if (option.value === optionValue) {
+                return { ...option, checked: true };
+            } else {
+                return { ...option, checked: false };
+            }
+        });
+        if (optionValue.includes('Text')) {
+            this.watermarkPageOptionsText = optionsList;
+        } else if (optionValue.includes('Image')) {
+            this.watermarkPageOptionsImage = optionsList;
+        }
+    }
+
+    handleDialogBoxClosed(event){
+        this.previousImgRotationValue = '0';
+        this.previousRotationValue = '0';
+        this.fontSizeValue = '22';
+        this.opacityImageValue = '1.0';
+        this.opacityValue = '1.0';
+        this.color ='#000000';
+        this.rotationValue = '0';
+        this.rotationImagevalue = '0';
+        this.imageScalingValue = '100';
+        this.checkedValText = true;
+        this.watermarkText = '';
+        this.checkedValImage = false;
     }
 }

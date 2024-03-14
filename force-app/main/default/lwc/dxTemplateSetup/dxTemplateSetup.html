@@ -9,7 +9,14 @@
 							placeholder-text="Search Template..." onactive={handleTemplateSelection} related-type-option-data={relatedTypeOptions} 
 							onnewtemplate={handleNewTemplateCreationscreen} onfilteredvalue={handleFilterSelection}>
 						</c-menu-setup>
+						<div class="slds-col">
+							<lightning-button-group>
+								<lightning-button label="Export" onclick={exportTemplate}></lightning-button>
+								<lightning-button label="Import" onclick={importTemplate}></lightning-button>
+							</lightning-button-group>
+						</div>
 					</div>
+					
 				</div>
 			</div>
 			<div class="slds-col dx-p-left_200 ">
@@ -22,7 +29,7 @@
 			</div>
 		</div>
 
-		<c-modal>
+		<c-modal onclosedialog ={handleDialogBoxClosed}>
 			<!------Progress bar code added by Bhavya starts here ------>
 			<header style="background-color: #ffffff;padding: 1% 0;">
 				<lightning-progress-indicator current-step={currentStep} type="base" variant="base">
@@ -32,6 +39,24 @@
 					</lightning-progress-step>
 				</lightning-progress-indicator>
 			</header>
+			<template if:true={showAllTemplates}>
+				<div style="background-color: #ffffff;padding: 1% 0;">
+					<lightning-dual-listbox name="templates"
+                            label="Select Templates"
+                            source-label="Available Templates"
+                            selected-label="Selected Templates"
+                            options={templatesOptions}
+                            onchange={handleExportTemplateList}>
+					</lightning-dual-listbox>
+					<lightning-button variant="base" label="Export" title="Export Templates" onclick={exportTemplateList}></lightning-button>
+					<template if:true={showTextArea}>
+						<div>
+							<lightning-textarea name="Data" readonly value={exportList}>
+    						</lightning-textarea>
+						</div>
+					</template>
+				</div>
+			</template>
 			<!------Progress bar code added by Bhavya ends here------>
 			<template if:true={showAddNewTemplate}>
 				<span slot="header">Add New Template</span>

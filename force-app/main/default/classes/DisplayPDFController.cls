@@ -527,26 +527,33 @@ global with sharing class DisplayPDFController
      * @return         List<Map<String, String>> List of maps containing saved record types and their corresponding Ids
      */
    @AuraEnabled(cacheable=false)
-public static List<Map<String, String>> saveContentVersion(String title, List<Map<String, String>> base64DataList, String templateId) {
+public static List<Map<String, String>> saveContentVersion(String title, List<Map<String, String>> base64DataList, String templateId, Boolean wtImage) {
     try {
         
-        List<ContentVersion> contentVersionsToInsert = new List<ContentVersion>();
+        List<ContentVersion> contentVersionsToInsert = new List<ContentVersion>(); 
         List<Map<String, String>> savedIds = new List<Map<String, String>>();
         List<Id> contentVersionIdsToDelete = new List<Id>();
-        for (ContentVersion cv : [SELECT Id, ContentDocumentId  FROM ContentVersion WHERE FirstPublishLocationId = :templateId WITH USER_MODE]) {
-            contentVersionIdsToDelete.add(cv.ContentDocumentId);
+        if(wtImage){
+            for (ContentVersion cv : [SELECT Id, ContentDocumentId  FROM ContentVersion WHERE FirstPublishLocationId = :templateId  WITH USER_MODE]) {
+                contentVersionIdsToDelete.add(cv.ContentDocumentId);
+            }
         }
+        else{
+            for (ContentVersion cv : [SELECT Id, ContentDocumentId  FROM ContentVersion WHERE FirstPublishLocationId = :templateId and Title != 'OriginalImg' WITH USER_MODE]) {
+                contentVersionIdsToDelete.add(cv.ContentDocumentId);
+            } 
+        }
+        
         List<Id> contentDocumentIdsToDelete = new List<Id>();
         List<ContentDocument> cdlst = [SELECT Id FROM ContentDocument WHERE Id IN :contentVersionIdsToDelete WITH USER_MODE];
         if (!cdlst.isEmpty()) {
             delete cdlst;
         }
         for(Map<String, String> dataUrl : base64DataList) {
-            System.debug('inside for loop in savecontentversion');
             String recordType = dataUrl.keySet().iterator().next();
             String data = dataUrl.get(recordType);
             
-            if(recordType.equalsIgnoreCase('Text') || recordType.equalsIgnoreCase('Image')) {
+            if(recordType.equalsIgnoreCase('Text') || recordType.equalsIgnoreCase('Image') || recordType.equalsIgnoreCase('OriginalImg')) {
                 ContentVersion contentVersion = new ContentVersion(
                     Title = dataUrl.get('title'),
                     VersionData = EncodingUtil.base64Decode(data),
@@ -564,17 +571,14 @@ public static List<Map<String, String>> saveContentVersion(String title, List<Ma
                 savedId.put(contentVersion.Title, contentVersion.Id);
                 savedIds.add(savedId);
             }
-             System.debug('savedIds >> '+ savedIds);
              return savedIds;
          }
         else{
             LogHandler.createLog((Id) null,'DisplayPDFController.saveContentVersion()','Insufficient permissions to create ContentVersion records. ','Insufficient permissions to create ContentVersion records.', 'Insufficient permissions');
-            throw new AuraHandledException('Insufficient permissions to create ContentVersion records.');
         }
        
     } catch(Exception ex) {
          LogHandler.createLog((Id) null,'DisplayPDFController.saveContentVersion()','Failed to create the Contentversion records '+ex.getLineNumber()+ex.getStackTraceString()+ex.getCause(),ex.getMessage(),'Failed to create the Contentversion records');  
-        throw new AuraHandledException(ex.getMessage());
     }
 }
     
@@ -603,7 +607,7 @@ public static List<Map<String, String>> saveContentVersion(String title, List<Ma
     @AuraEnabled
     public static Document_Template__c getDocumentTemplateData(String templateId) {
         try {
-            Document_Template__c dtData = [SELECT Id, DxCPQ__Watermark_Data__c FROM DxCPQ__Document_Template__c  
+            Document_Template__c dtData = [SELECT Id, Watermark_Data__c FROM Document_Template__c  
                                            WHERE Id = :templateId WITH USER_MODE LIMIT 1];
             return dtData;
         } catch(Exception ex) {
