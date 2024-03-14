@@ -4,9 +4,9 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html;charset=UTF-8" />
     <style type="text/css" media="print">
-       p{
-        	margin:1em 0 0 0;
-        }
+      p{
+        margin:1em 0 0 0;
+      }
 
       div.header_left {
         position:running(header_left);
@@ -76,7 +76,7 @@
         content: counter(pages);
       }
     
-	table.page-break { page-break-inside:auto;page-break-before:always; }
+	  table.page-break { page-break-inside:auto;page-break-before:always; }
     table.no-page-break { page-break-inside:auto;}
     
     table.newPagetableMainClass {page-break-before:always;}
@@ -175,8 +175,6 @@
     <div style="position:relative; width:100%">
       <div style="position:absolute; width:100%;">
         <apex:outputText value="{!leftheadertext}" escape="false" />
-        <!--<h4>QUOTE TEMPLATE</h4>
-                <img src="{!HeaderImgUrl}" alt="User Image" style="max-height:100% ; max-width:100%; height:40px; margin:10px 20px;"/>-->
       </div>
     </div>
   </div>
@@ -184,8 +182,6 @@
     <div style="position:relative; width:100%">
       <div style="position:absolute; width:100%">
         <apex:outputText value="{!centerheadertext}" escape="false" />
-        <!--<h4>QUOTE TEMPLATE</h4>
-                <img src="{!HeaderImgUrl}" alt="User Image" style="max-height:100% ; max-width:100%; height:50px; margin:10px 20px;"/>-->
       </div>
     </div>
   </div>
@@ -216,13 +212,9 @@
         <div style="position:relative; width:100%">
             <apex:outputPanel >
                 <apex:outputText value="{!rightfootertext}" escape="false" />
-                <!--{!displaypagesequence}-->
                 <apex:outputPanel rendered="{!displaypagesequence}" style="color:#999999;font-size:11px;position:absolute; right:20px; top:10px; font:Arial">
                         Page <span class="pagenumber"/> of <span class="pagecount"/>
                     </apex:outputPanel>
-                <!--<small style="color:#999999;font-size:11px;position:absolute; right:20px; top:10px; font:Arial" rendered="{! If(displaypagesequence==true ,true,false)}">
-                    Page <span class="pagenumber"/> of <span class="pagecount"/>
-                </small>-->
              </apex:outputPanel>
         </div> 
     </div>

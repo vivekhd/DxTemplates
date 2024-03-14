@@ -36,12 +36,12 @@
 						<div class="slds-grid slds-wrap">
 
 							<div class="slds-col slds-size_5-of-12 slds-p-left_small">
-								<label class="slds-form-element__label" for="Rows">Enter Number of Rows </label>
+								<label class="slds-form-element__label" for="Rows">Enter Numer of Rows </label>
 								<input type="Number" value={rownumber} class="slds-input rows" onchange={handlerowchange} disabled={isDisabled} />
 							</div>
 
 								<div class="slds-col slds-size_5-of-12">
-									<label class="slds-form-element__label" for="Cols">Enter Number of Columns</label>
+									<label class="slds-form-element__label" for="Cols">Enter Numer of Columns</label>
 									<input type="Number" value={colnumber} class="slds-input cols" onchange={handlecolchange} disabled={isDisabled}/>
 													</div>
 
@@ -97,7 +97,7 @@
 												<label class="slds-form-element__label">S. No</label>
 												<lightning-input type="checkbox" class="slds-input serialNumber"
 													label="Include Serial Numbers" style="width:60px;"
-													onclick={handleSnoClick} disabled={isDisabled}>
+													onclick={handleSnoClick} disabled={isDisabled} checked={isSerialNumberCheck}>
 												</lightning-input>
 											</div>
 
@@ -134,30 +134,31 @@
 												<lightning-button-menu title="Borders"
 													class="slds-col slds-p-right_medium" alternative-text="Show menu"
 													icon-name="utility:steps" horizontal-align="left"
-													disabled={isDisabled}>
+													disabled={isDisabled} onselect={handleMenuItemSelect}>
 
-													<lightning-menu-item label="No Borders" value="Option1"
+													<lightning-menu-item label="No Borders" value="NoBorders"
 														onclick={handleNoBorders} icon-name={noBordersIcon}
 														alternative-text="">
 													</lightning-menu-item>
 
-													<lightning-menu-item label="All Borders" value="Option2"
+													<lightning-menu-item label="All Borders" value="AllBorders"
 														onclick={handleAllBorders} icon-name={allBordersIcon}
 														alternative-text="">
 													</lightning-menu-item>
 
-													<lightning-menu-item label="Outside Borders" value="Option3"
+													<lightning-menu-item label="Outside Borders" value="OutsideBorders"
 														onclick={handleOutsideBorders} icon-name={outsideBordersIcon}
 														alternative-text="">
 													</lightning-menu-item>
 
-													<lightning-menu-item label="Thick Outside Borders" value="Option4"
-														onclick={handleThickOutsideBorders}
+													<lightning-menu-item label="Thick Outside Borders"
+														value="ThickOutsideBorders" onclick={handleThickOutsideBorders}
 														icon-name={thickOutsideBordersIcon} alternative-text="">
 													</lightning-menu-item>
 
 													<lightning-menu-item label="Thick Outside All Borders"
-														value="Option5" onclick={handleThickOutsideAllBorders}
+														value="ThickOutsideAllBorders"
+														onclick={handleThickOutsideAllBorders}
 														icon-name={thickOutsideAllBordersIcon} alternative-text="">
 													</lightning-menu-item>
 
@@ -183,7 +184,6 @@
 								</div>
 							</div>
 							<template if:true={showtablecontent}>
-
 								<br/> <br/>
 								<div class="tableMainClass" data-id='tab'>
 									<table class="mytable" data-id="mytab"
@@ -359,12 +359,14 @@
 								</div>
 							</template>
 
+
 							<div class="slds-col slds-size_12-of-12 slds-text-align_right slds-p-top_small">
-								<lightning-button class="slds-m-left_small" disabled={disableButton} variant="brand"
-									label="Save" title="titleName" onclick={handlesectionsave}>
-								</lightning-button>
 								<lightning-button class="slds-m-left_small" disabled={disabledeleteButton}
-									variant="brand" label="Delete" title="titleName" onclick={handlesectionDelete}>
+									variant="neutral" label="Delete" title="Delete Section"
+									onclick={handlesectionDelete}>
+								</lightning-button>
+								<lightning-button class="slds-m-left_small" disabled={disableButton} variant="brand"
+									label="Save" title="Save Section" onclick={handlesectionsave}>
 								</lightning-button>
 							</div>
 		</template>

@@ -17,8 +17,6 @@ global with sharing class PdfDisplay {
         try{    
             objectName = recordId.getSObjectType().getDescribe().getName();
             objectLabel = recordId.getSObjectType().getDescribe().getLabel();
-            System.debug('Object Name: ' + objectName);
-            System.debug('Object Label: ' + objectLabel);
         }
         catch (Exception ex) {
             LogHandler.createLog((Id) null,'PdfDisplay.getObjectDetails()','recordId -> '+recordId+' '+ex.getLineNumber()+ex.getStackTraceString()+ex.getCause(),ex.getMessage(),'Exception');
@@ -28,9 +26,7 @@ global with sharing class PdfDisplay {
     
     @AuraEnabled
     public static String getDomainUrl() {
-        String domainUrl = URL.getSalesforceBaseUrl().toExternalForm();
-        System.debug('domain url '+domainUrl);
-        return domainUrl;
+        return URL.getSalesforceBaseUrl().toExternalForm();
     }
     
 }

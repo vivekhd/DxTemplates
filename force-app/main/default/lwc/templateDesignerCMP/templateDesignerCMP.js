@@ -43,6 +43,7 @@ export default class TemplateDesignerCMP extends NavigationMixin(LightningElemen
   @track opacityValue = '1.0'; // Default text Opacity = 1
   @track pageTextOption = 'All Pages - Text'; // Default text page Option for watermark is selected as "ALL PAGES"
   @track pageImageOption = 'All Pages - Image'; // Default Image page Option for watermark is selected as "ALL PAGES"
+  @track readonlyVal = false; // Boolean to make the field readonly
   //watermarkPageOptionsText combobox options for Text Watermark
   watermarkPageOptionsText = [
         { label: 'All Pages', value: 'All Pages - Text', checked : true },
@@ -514,6 +515,7 @@ popUpMessage; // Popup message.
     this.showfooterdetails = false;
     this.disableEditing = false;
     this.disableEditingHandler(this.disableEditing);
+    this.readonlyVal = false;
     this.activateTemplateLabel = 'Activate Template';
     this.rowCount = -1;
     this.template.querySelector("c-template-content-details").resetvaluesonchildcmp();
@@ -762,6 +764,7 @@ popUpMessage; // Popup message.
     this.template.querySelector('c-template-related-objects').handleActivateTemplate(isActive, this.relatedtoTypeObjName);
     this.template.querySelector('c-template-header').handleActivateTemplate(isActive, this.relatedtoTypeObjName);
     this.template.querySelector('c-template-footer').handleActivateTemplate(isActive, this.relatedtoTypeObjName);
+    this.readonlyVal = isActive? true: false;
   }
 
   /**

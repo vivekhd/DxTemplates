@@ -1,9 +1,10 @@
-import { LightningElement, track, api,wire } from 'lwc';
+import { LightningElement, track, api, wire } from 'lwc';
 import { loadStyle } from 'lightning/platformResourceLoader';
 import rte_tbl from '@salesforce/resourceUrl/rte_tbl';
 import dexcpqcartstylesCSS from '@salesforce/resourceUrl/dexcpqcartstyles';
 import saveDocumentTemplateSectionDetails from '@salesforce/apex/SaveDocumentTemplatesection.saveDocumentTemplateSectionDetails';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
+import deletetemplate from '@salesforce/apex/SaveDocumentTemplatesection.deletetemplate';
 import getAllPopupMessages from '@salesforce/apex/PopUpMessageSelector.getAllConstants';
 import gettemplatesectiondata from '@salesforce/apex/SaveDocumentTemplatesection.gettemplatesectiondata';
 import getContentVersions from '@salesforce/apex/FooterClass.getContentVersions';
@@ -29,6 +30,7 @@ export default class TemplateTableDetails extends LightningElement {
 
     imageUrls = [];
     mainimageUrls = [];
+    @track divContentArray = [];
     selectedimageid;
     @track selectedImageHeight = "75px";
     @track selectedImageWidth = "75px";
@@ -234,6 +236,17 @@ export default class TemplateTableDetails extends LightningElement {
         let key = this.selectedHeader;
         let elm = this.template.querySelector(`[data-id="${key}"]`);
         elm.innerHTML = event.detail.value;
+
+        let divElement = event.target.nextElementSibling;
+        let divContent = divElement.innerHTML;
+        let existingIndex = this.divContentArray.findIndex(item => item['data-id'] === divElement.dataset.id);
+
+        if (existingIndex !== -1) {
+            this.divContentArray[existingIndex] = { 'data-id': divElement.dataset.id, 'Content': divContent };
+        } else {
+            this.divContentArray.push({ 'data-id': divElement.dataset.id, 'Content': divContent });
+        }
+        console.log('div content array in head ' + JSON.stringify(this.divContentArray));
     }
 
     /**
@@ -245,6 +258,17 @@ export default class TemplateTableDetails extends LightningElement {
         let key = event.target.dataset.id + 'div';
         let elm = this.template.querySelector(`[data-id="${key}"]`);
         elm.innerHTML = event.detail.value;
+
+        let divElement = event.target.nextElementSibling;
+        let divContent = divElement.innerHTML;
+        let existingIndex = this.divContentArray.findIndex(item => item['data-id'] === divElement.dataset.id);
+
+        if (existingIndex !== -1) {
+            this.divContentArray[existingIndex] = { 'data-id': divElement.dataset.id, 'Content': divContent };
+        } else {
+            this.divContentArray.push({ 'data-id': divElement.dataset.id, 'Content': divContent });
+        }
+        console.log('div content array ' + JSON.stringify(this.divContentArray));
     }
 
     /**
@@ -562,6 +586,11 @@ export default class TemplateTableDetails extends LightningElement {
         this.Recorddetailsnew.Name = event.detail.value;
     }
 
+    handleMenuItemSelect(event) {
+        this.selectedBorderStyle = event.detail.value;
+        console.log('Selected value:', this.selectedBorderStyle);
+    }
+
     /**
     * Method to save the template section details into the database.
     */
@@ -571,26 +600,23 @@ export default class TemplateTableDetails extends LightningElement {
         let obj = {};
         obj.rownumber = this.rownumber;
         obj.colnumber = this.colnumber;
+        obj.serialNumberColumn = this.isSerialNumberCheck;
+        obj.headerFont = this.selectedHFontColor;
+        obj.bodyFont = this.selectedBFontColor;
+        obj.headbackground = this.selectedHbgColor;
+        obj.bodybackground = this.selectedBBgcolor;
+        obj.fontsize = this.fontsize;
+        obj.fontfamily = this.fontfamily;
+        obj.borderstyle = this.selectedBorderStyle;
+        obj.bordercolor = this.selectedBDRbgcolor;
+        console.log('div content array ' + JSON.stringify(this.divContentArray));
+        obj.sectionInfo = this.divContentArray;
+
         jsonString = JSON.stringify(obj);
         this.Recorddetailsnew.DxCPQ__Section_Details__c = jsonString;
         let tableclass = this.template.querySelector('.tableMainClass');
-        
-        
-        let tableHtmlSave = tableclass.innerHTML.replace(/\b(utility|standard|doctype|action|custom):(\w+)\b/g, (match, p1, p2) => {
-            return `
-        <span class="slds-icon_container">
-            <svg height="3.5rem" class="slds-icon" aria-hidden="true">
-                <use 
-                    xmlns:xlink="http://www.w3.org/1999/xlink"
-                    xlink:href="{!URLFOR($Asset.SLDS, 'assets/icons/${p1}-sprite/svg/symbols.svg#${p2}')}"
-                />
-            </svg>
-        </span>
-    `;
-        });
 
-        this.Recorddetailsnew.DxCPQ__Section_Content__c = tableHtmlSave.replace(/hidden=""/g, '');
-        
+        this.Recorddetailsnew.DxCPQ__Section_Content__c = tableclass.innerHTML.replace(/hidden=""/g, '');
         this.Recorddetailsnew.DxCPQ__Document_Template__c = this.documenttemplaterecordid;
         this.Recorddetailsnew.DxCPQ__Sequence__c = this.rowcount;
         this.Recorddetailsnew.DxCPQ__Type__c = this.sectiontype;
@@ -598,16 +624,16 @@ export default class TemplateTableDetails extends LightningElement {
         if (currecid != '' && this.sectionrecordid.indexOf('NotSaved') == -1) {
             this.Recorddetailsnew.Id = this.sectionrecordid;
         }
-        
+
         if (this.Recorddetailsnew.Name != '' && this.Recorddetailsnew.Name != null) {
-            
+
             saveDocumentTemplateSectionDetails({ Recorddetails: this.Recorddetailsnew })
                 .then(result => {
                     if (result != null) {
                         this.savedRecordID = result;
                         let event4 = new ShowToastEvent({
                             title: 'Success',
-                            message: this.popUpMessage.TEMPLATETABLE_DETAILS_C + ' ' + this.savedRecordID.Id,
+                            message: 'Section "' + this.Recorddetailsnew.Name + '"' + ' was Saved',
                             variant: 'success',
                         });
                         this.dispatchEvent(event4);
@@ -647,7 +673,7 @@ export default class TemplateTableDetails extends LightningElement {
     handlefontfamilyChange(event) {
         this.fontfamily = event.detail.value;
         this.template.querySelectorAll('.mytable')[0].style.fontFamily = this.fontfamily;
-        }
+    }
 
     /**
     * Method to delete template section 
@@ -666,7 +692,7 @@ export default class TemplateTableDetails extends LightningElement {
                     }
                 })
                 .catch(error => {
-                    console.log('Error while deleting the Template' + error);
+                    console.log('Error while deleting the Template' + JSON.stringify(error));
                 })
         }
     }
@@ -703,7 +729,38 @@ export default class TemplateTableDetails extends LightningElement {
                 element.value = '';
             }
         });
+
+        this.selectedBDRbgcolor = '';
+        this.selectedBBgcolor = '';
+        this.selectedBFontColor = '';
+        this.selectedHbgColor = '';
+        this.selectedHFontColor = '';
+        this.isSerialNumberCheck = false;
+        this.isNoBorders = false;
+        this.isAllBorders = false;
+        this.isOutsideBorders = false;
+        this.isOutsideThickBorders = false;
+        this.isOutsideThickAllBorders = false;
+
+        this.noBordersIcon = '';
+        this.allBordersIcon = '';
+        this.outsideBordersIcon = '';
+        this.thickOutsideBordersIcon = '';
+        this.thickOutsideAllBordersIcon = '';
+
+        let parentData = this;
+        setTimeout(function () { parentData.handleBorderStyling(); }, 100);
+
+        this.rownumber = 2;
+        this.colnumber = 2;
+
+        this.divContentArray = [];
+
+        this.fontsize = "10px";
+        this.fontfamily = "Verdana";
+
         this.isLoaded = false;
+
     }
 
     /**
@@ -724,39 +781,95 @@ export default class TemplateTableDetails extends LightningElement {
         this.tableDisplayed = true;
         this.showtablecontent = true;
 
+        this.noBordersIcon = '';
+        this.allBordersIcon = '';
+        this.outsideBordersIcon = '';
+        this.thickOutsideBordersIcon = '';
+        this.thickOutsideAllBordersIcon = '';
+
         this.Recorddetailsnew.Id = recordID;
+
+        let parsedContent;
+
         gettemplatesectiondata({ editrecordid: recordID })
             .then(result => {
                 if (result != null) {
-                    this.Recorddetailsnew.Name = result.Name;
-                    this.Recorddetailsnew.DxCPQ__Document_Template__c = result.DxCPQ__Document_Template__c;
-                    this.Recorddetailsnew.DxCPQ__Sequence__c = result.DxCPQ__Sequence__c;
-                    this.Recorddetailsnew.DxCPQ__Type__c = result.DxCPQ__Type__c;
-                    this.Recorddetailsnew.DxCPQ__New_Page__c = result.DxCPQ__New_Page__c;
-                    this.Recorddetailsnew.DxCPQ__DisplaySectionName__c = result.DxCPQ__DisplaySectionName__c;
-                    this.Recorddetailsnew.DxCPQ__Section_Content__c = result.DxCPQ__Section_Content__c;
-                    this.Recorddetailsnew.DxCPQ__Section_Details__c = result.DxCPQ__Section_Details__c;
+                    this.Recorddetailsnew = { ...this.Recorddetailsnew, ...result };
                     let parsedJson = JSON.parse(this.Recorddetailsnew.DxCPQ__Section_Details__c);
+                    parsedContent = parsedJson.sectionInfo;
+                    this.divContentArray = parsedContent;
                     this.rownumber = parsedJson.rownumber;
                     this.colnumber = parsedJson.colnumber;
-                    
-                    this.template.querySelector('.tableMainClass').innerHTML = result.DxCPQ__Section_Content__c;
+                    this.selectedBBgcolor = parsedJson.bodybackground;
+                    this.selectedBDRbgcolor = parsedJson.bordercolor;
+                    this.selectedBFontColor = parsedJson.bodyFont;
+                    this.selectedHFontColor = parsedJson.headerFont;
+                    this.selectedHbgColor = parsedJson.headbackground;
+                    this.fontfamily = parsedJson.fontfamily;
+                    this.fontsize = parsedJson.fontsize;
+                    this.isSerialNumberCheck = parsedJson.serialNumberColumn;
+                    this.selectedBorderStyle = parsedJson.borderstyle;
 
-                    this.template.querySelectorAll('lightning-checkbox-group ').forEach(element => {
-                        if (result.DxCPQ__New_Page__c != null) {
-                            element.showBool = result.DxCPQ__New_Page__c;
-                            }
-                        if (result.DxCPQ__DisplaySectionName__c != null) {
-                            element.showBool = result.DxCPQ__DisplaySectionName__c;
-                        }
-                    });
-                    this.isLoaded = false;
+                    this.handletablecreate();
                 }
             })
-            .catch(error => {
-                console.error('error caught ', error);
-                this.isLoaded = false;
+            .then(() => {
+                switch (this.selectedBorderStyle) {
+                    case 'NoBorders':
+                        return this.handleNoBorders();
+                    case 'AllBorders':
+                        return this.handleAllBorders();
+                    case 'OutsideBorders':
+                        return this.handleOutsideBorders();
+                    case 'ThickOutsideBorders':
+                        return this.handleThickOutsideBorders();
+                    case 'ThickOutsideAllBorders':
+                        return this.handleThickOutsideAllBorders();
+                    default:
+                        console.log('Border Not Selected');
+                        return Promise.resolve();
+                }
             })
+            .then(() => {
+                this.template.querySelectorAll('lightning-input-rich-text').forEach(element => {
+                    if (parsedContent != null && parsedContent != undefined) {
+                        parsedContent.forEach(item => {
+                            if (item['data-id'].startsWith(element.dataset.id) || item['data-id'].startsWith(element.dataset.head)) {
+                                if (item['Content'] != null && item['Content'] != undefined) {
+                                    element.value = item['Content'];
+                                }
+                            }
+                        });
+                    }
+                });
+
+                this.template.querySelectorAll('div[data-id]').forEach(divElement => {
+                    if (parsedContent != null && parsedContent != undefined) {
+                        parsedContent.forEach(item => {
+                            if (item['data-id'] === divElement.dataset.id) {
+                                if (item['Content'] != null && item['Content'] != undefined) {
+                                    divElement.innerHTML = item['Content'];
+                                }
+                            }
+                        });
+                    }
+                });
+
+                this.template.querySelectorAll('lightning-checkbox-group').forEach(element => {
+                    if (result.DxCPQ__New_Page__c != null) {
+                        element.showBool = result.DxCPQ__New_Page__c;
+                    }
+                    if (result.DxCPQ__DisplaySectionName__c != null) {
+                        element.showBool = result.DxCPQ__DisplaySectionName__c;
+                    }
+                });
+            })
+            .catch(error => {
+                console.error('error caught ', JSON.stringify(error));
+            })
+            .finally(() => {
+                this.isLoaded = false;
+            });
     }
 
     /**
@@ -963,7 +1076,6 @@ export default class TemplateTableDetails extends LightningElement {
     /**
     * Method to include Serial Numbers Column to the table
     */
-    
     handleSnoClick(event) {
         this.isSerialNumberCheck = event.target.checked;
         let parentData = this;
