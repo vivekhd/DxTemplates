@@ -514,8 +514,8 @@ global with sharing class DisplayPDFController
                                                WHERE CreatedDate = LAST_N_DAYS:30 WITH USER_MODE];
             return opportunities;
         } catch(Exception ex) {
-             LogHandler.createLog((Id) null,'DisplayPDFController.getOpportunities()','Template Id- '+ex.getLineNumber()+ex.getStackTraceString()+ex.getCause(),ex.getMessage(),'Exception');
-            throw new AuraHandledException(ex.getMessage());
+            LogHandler.createLog((Id) null,'DisplayPDFController.getOpportunities()','Template Id- '+ex.getLineNumber()+ex.getStackTraceString()+ex.getCause(),ex.getMessage(),'Exception');
+            return null;
         }
     }
      
@@ -575,10 +575,12 @@ public static List<Map<String, String>> saveContentVersion(String title, List<Ma
          }
         else{
             LogHandler.createLog((Id) null,'DisplayPDFController.saveContentVersion()','Insufficient permissions to create ContentVersion records. ','Insufficient permissions to create ContentVersion records.', 'Insufficient permissions');
+            return null;
         }
        
     } catch(Exception ex) {
-         LogHandler.createLog((Id) null,'DisplayPDFController.saveContentVersion()','Failed to create the Contentversion records '+ex.getLineNumber()+ex.getStackTraceString()+ex.getCause(),ex.getMessage(),'Failed to create the Contentversion records');  
+        LogHandler.createLog((Id) null,'DisplayPDFController.saveContentVersion()','Failed to create the Contentversion records '+ex.getLineNumber()+ex.getStackTraceString()+ex.getCause(),ex.getMessage(),'Failed to create the Contentversion records');  
+        return null;
     }
 }
     
@@ -607,12 +609,12 @@ public static List<Map<String, String>> saveContentVersion(String title, List<Ma
     @AuraEnabled
     public static Document_Template__c getDocumentTemplateData(String templateId) {
         try {
-            Document_Template__c dtData = [SELECT Id, Watermark_Data__c FROM Document_Template__c  
+            Document_Template__c dtData = [SELECT Id, Name,Watermark_Data__c FROM Document_Template__c  
                                            WHERE Id = :templateId WITH USER_MODE LIMIT 1];
             return dtData;
         } catch(Exception ex) {
             LogHandler.createLog((Id) null,'DisplayPDFController.getDocumentTemplateData()','Template Id- '+templateId+' '+ex.getLineNumber()+ex.getStackTraceString()+ex.getCause(),ex.getMessage(),'Exception');
-            throw new AuraHandledException(ex.getMessage());
+            return null;
         }
     }
     

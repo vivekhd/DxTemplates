@@ -1,8 +1,6 @@
-@IsTest
+@isTest
 private class DisplayPDFController_Test {
-    
-    @IsTest 
-    static void testGetTemplateSections() {
+    @isTest static void testGetTemplateSections() {
         Test.startTest();
         User us = DexUtilTestDataFactory.CreateTestUser();
         System.runAs(us){
@@ -11,32 +9,40 @@ private class DisplayPDFController_Test {
                 insert testTemplate;
                 Opportunity testOpportunity = new Opportunity(Name = 'Test Opportunity', StageName = 'Prospecting', CloseDate = Date.today());
                 insert testOpportunity;
-                Document_Template_Section__c testSection = new Document_Template_Section__c( Document_Template__c = testTemplate.Id, Section_Content__c = '<p>Test Section Content</p>', Type__c = 'Context', Sequence__c = 1 );
+                Document_Template_Section__c testSection = new Document_Template_Section__c(
+                    Document_Template__c = testTemplate.Id,
+                    Section_Content__c = '<p>Test Section Content</p>',
+                    Type__c = 'Context',
+                    Sequence__c = 1
+                );
                 insert testSection;
-                List<Document_Template_Section__c> result = DisplayPDFController.getTemplateSections( testTemplate.Id, testOpportunity.Id, 'Opportunity' );
+                List<Document_Template_Section__c> result = DisplayPDFController.getTemplateSections(
+                    testTemplate.Id, testOpportunity.Id, 'Opportunity'
+                );
                 System.assertEquals(1, result.size(), 'Expected one section');
                 System.assertEquals('<p>Test Section Content</p>', result[0].Section_Content__c);   
-            } catch(exception ex) {
+            }
+            catch(exception ex){
                 System.assert(ex.getMessage().contains('Script-thrown exception'));
             }
         }
         Test.stopTest();
     }
     
-    @IsTest 
-    static void testPdfMode() {
+    @isTest static void testPdfMode() {
         Test.startTest();
         User us = DexUtilTestDataFactory.CreateTestUser();
         System.runAs(us){
-            Map<String, String> testWrapperData = new Map<String, String>{'pdfModes1' => 'A4'};
-            String result = DisplayPDFController.pdfMode(testWrapperData);
+            Map<String, String> testWrapperData = new Map<String, String>{
+                'pdfModes1' => 'A4'
+                    };
+                        String result = DisplayPDFController.pdfMode(testWrapperData);
             System.assertEquals('A4', result);
         }
         Test.stopTest();
     }
     
-    @IsTest 
-    static void testPdfObjectName() {
+    @isTest static void testPdfObjectName() {
         Test.startTest();
         User us = DexUtilTestDataFactory.CreateTestUser();
         System.runAs(us){
@@ -48,14 +54,17 @@ private class DisplayPDFController_Test {
         Test.stopTest();
     }
     
-    @IsTest 
-    static void testGeneratePDFAttachment() {
+    @isTest static void testGeneratePDFAttachment() {
         Test.startTest();
         User us = DexUtilTestDataFactory.CreateTestUser();
         System.runAs(us){
             Document__c testDocument = new Document__c(Document_Body__c = 'Test Document Body');
             insert testDocument;       
-            Opportunity testOpp = new Opportunity( Name = 'Test Opportunity', StageName = 'Prospecting', CloseDate = Date.today());
+            Opportunity testOpp = new Opportunity(
+                Name = 'Test Opportunity',
+                StageName = 'Prospecting', 
+                CloseDate = Date.today()  
+            );
             insert testOpp;
             PageReference testPage = Page.renderAsPdfLWC;
             Test.setCurrentPage(testPage);
@@ -65,18 +74,25 @@ private class DisplayPDFController_Test {
         Test.stopTest();    
     }
     
-    @IsTest 
-    static void testGenerateDocument() {
+    @isTest static void testGenerateDocument() {
         Test.startTest();
         User us = DexUtilTestDataFactory.CreateTestUser();
         System.runAs(us){
             try{
                 Document__c testDocument = new Document__c(Document_Body__c = 'Test Document Body');
-                insert testDocument;                  
-                Opportunity testOpp = new Opportunity( Name = 'Test Opportunity', StageName = 'Prospecting', CloseDate = Date.today());
-                insert testOpp;                
-                DisplayPDFController.generateDocument( testDocument.Id, testOpp.Id, 'Test PDF Body', 'Test PDF Header/Footer' );                
-            } catch (AuraHandledException ex) {
+                insert testDocument;  
+                Opportunity testOpp = new Opportunity(
+                    Name = 'Test Opportunity',
+                    StageName = 'Prospecting', 
+                    CloseDate = Date.today()  
+                );
+                insert testOpp;
+                DisplayPDFController.generateDocument(
+                    testDocument.Id, testOpp.Id, 'Test PDF Body', 'Test PDF Header/Footer'
+                );
+                //System.assertNotEquals(null, result, 'Result should not be null');
+            }
+            catch (AuraHandledException ex) {
                 System.assert(ex.getMessage().contains('Script-thrown exception'));
             }
         }
@@ -84,33 +100,48 @@ private class DisplayPDFController_Test {
         System.assert(true);
     }
     
-    @IsTest 
-    static void testSavePDFtoQuote() {
+    @isTest static void testSavePDFtoQuote() {
         Test.startTest();
         User us = DexUtilTestDataFactory.CreateTestUser();
         System.runAs(us){
-            Opportunity testOpp = new Opportunity( Name = 'Test Opportunity', StageName = 'Prospecting', CloseDate = Date.today());
+            Opportunity testOpp = new Opportunity(
+                Name = 'Test Opportunity',
+                StageName = 'Prospecting', 
+                CloseDate = Date.today()  
+            );
             insert testOpp;
-            Attachment testAttachment = new Attachment( Name = 'Test Attachment', Body = Blob.valueOf('Test PDF Body'),ParentId = testOpp.Id );
+            Attachment testAttachment = new Attachment(
+                Name = 'Test Attachment', Body = Blob.valueOf('Test PDF Body'),ParentId = testOpp.Id
+            );
             insert testAttachment;
-            String result = DisplayPDFController.SavePDFtoQuote( testAttachment.Id, testOpp.Id, 'A4', 'Test PDF Name');
+            String result = DisplayPDFController.SavePDFtoQuote(
+                testAttachment.Id, testOpp.Id, 'A4', 'Test PDF Name'
+            );
         }
         Test.stopTest();    
         System.assert(true);
     }
     
-    @IsTest 
-    static void testSavePDFtoQuote1() {
+    @isTest static void testSavePDFtoQuote1() {
         Test.startTest();
         User us = DexUtilTestDataFactory.CreateTestUser();
         System.runAs(us){
             try{
-                Opportunity testOpp = new Opportunity( Name = 'Test Opportunity', StageName = 'Prospecting', CloseDate = Date.today());
+                Opportunity testOpp = new Opportunity(
+                    Name = 'Test Opportunity',
+                    StageName = 'Prospecting', 
+                    CloseDate = Date.today()  
+                );
                 insert testOpp;
-                Attachment testAttachment = new Attachment( Name = 'Test Attachment', Body = Blob.valueOf('Test PDF Body'),ParentId = testOpp.Id );
+                Attachment testAttachment = new Attachment(
+                    Name = 'Test Attachment', Body = Blob.valueOf('Test PDF Body'),ParentId = testOpp.Id
+                );
                 insert testAttachment;
-                DisplayPDFController.SavePDFtoQuote( null, testOpp.Id, 'A4', 'PDF Name' );
-            } catch(exception ex){
+                DisplayPDFController.SavePDFtoQuote(
+                    null, testOpp.Id, 'A4', 'PDF Name'
+                );
+            }
+            catch(exception ex){
                 System.assert(ex.getMessage().contains('Script-thrown exception'));
             }
         }
@@ -118,8 +149,7 @@ private class DisplayPDFController_Test {
         System.assert(true);
     }
     
-    @IsTest 
-    static void testAutoGenerateDocumentRecord() {
+    @isTest static void testAutoGenerateDocumentRecord() {
         Test.startTest();
         User us = DexUtilTestDataFactory.CreateTestUser();
         System.runAs(us){
@@ -143,34 +173,37 @@ private class DisplayPDFController_Test {
         System.assert(true);
     }
     
-    @IsTest 
-    static void testAutoGenerateDocumentRecord1() {
+    @isTest static void testAutoGenerateDocumentRecord1() {
         Test.startTest();
         User us = DexUtilTestDataFactory.CreateTestUser();
         System.runAs(us){
             Opportunity testOpportunity = new Opportunity(Name = 'Test Opportunity', StageName = 'Prospecting', CloseDate = Date.today());
             insert testOpportunity; 
+            
             Document_Template__c testTemplate = new Document_Template__c(Name = 'Test Template1');
             insert testTemplate; 
+            
             Document_Template_Section__c testSection = new Document_Template_Section__c(
                 Name = 'Header', Type__c = 'Header', Section_Content__c = '{"sectionsCount":"3","sectionsContent":[{"value":"","indexvar":0,"key":"1692937481560:0"},{"value":"","indexvar":2,"key":"1692937481560:2"},{"value":"<p>Rahul</p>","indexvar":1,"key":"1692937486280:1"}]}', Document_Template__c = testTemplate.Id);
             insert testSection;
+            
             Document_Template_Section__c testSection1 = new Document_Template_Section__c(
                 Name = 'Footer', Type__c = 'Footer', Section_Content__c = '{"sectionsCount":"3","sectionsContent":[{"value":"","indexvar":0,"key":"1692937481560:0"},{"value":"","indexvar":2,"key":"1692937481560:2"},{"value":"<p>Rahul</p>","indexvar":1,"key":"1692937486280:1"}]}', Document_Template__c = testTemplate.Id);
             insert testSection1;
+            
             List<documentAutomationController.recordParameters> ids = new List<documentAutomationController.recordParameters>();
             documentAutomationController.recordParameters arr = new documentAutomationController.recordParameters();
-                arr.templateId =  testTemplate.Id;
-                arr.recordId = testOpportunity.Id;
-            ids.add(arr);            
+            arr.templateId =  testTemplate.Id;
+            arr.recordId = testOpportunity.Id;
+            ids.add(arr);
+            
             documentAutomationController.autoGenerateDocumentRecord(ids);
         }
         Test.stopTest();
         System.assert(true);
     }
     
-    @IsTest 
-    static void testAutoGenerateDocumentRecord2() {
+    @isTest static void testAutoGenerateDocumentRecord2() {
         Test.startTest();
         User us = DexUtilTestDataFactory.CreateTestUser();
         System.runAs(us){
@@ -192,8 +225,8 @@ private class DisplayPDFController_Test {
             insert testSection2;
             List<documentAutomationController.recordParameters> ids = new List<documentAutomationController.recordParameters>();
             documentAutomationController.recordParameters arr = new documentAutomationController.recordParameters();
-                arr.templateId =  testTemplate.Id;
-                arr.recordId = testOpportunity.Id;
+            arr.templateId =  testTemplate.Id;
+            arr.recordId = testOpportunity.Id;
             ids.add(arr);
             documentAutomationController.autoGenerateDocumentRecord(ids);
         }
@@ -201,7 +234,7 @@ private class DisplayPDFController_Test {
         System.assert(true);
     }
     
-    @IsTest static void testAutoGenerateDocumentRecord3() {
+    @isTest static void testAutoGenerateDocumentRecord3() {
         Test.startTest();
         User us = DexUtilTestDataFactory.CreateTestUser();
         System.runAs(us){
@@ -225,7 +258,7 @@ private class DisplayPDFController_Test {
         System.assert(true);
     } 
     
-    @IsTest static void testAutoGenerateDocumentRecord4() {
+    @isTest static void testAutoGenerateDocumentRecord4() {
         Test.startTest();
         User us = DexUtilTestDataFactory.CreateTestUser();
         System.runAs(us){
@@ -239,15 +272,15 @@ private class DisplayPDFController_Test {
             insert testSection;
             List<documentAutomationController.recordParameters> ids = new List<documentAutomationController.recordParameters>();
             documentAutomationController.recordParameters arr = new documentAutomationController.recordParameters();
-                arr.templateId =  testTemplate.Id;
-                arr.recordId = testOpportunity.Id;
+            arr.templateId =  testTemplate.Id;
+            arr.recordId = testOpportunity.Id;
             ids.add(arr);
             documentAutomationController.autoGenerateDocumentRecord(ids);
         }
         Test.stopTest();
         System.assert(true);
     } 
-
+    
     @IsTest 
     static void testAutoGenerateDocumentRecordWithGrouping() {
 
@@ -279,10 +312,8 @@ private class DisplayPDFController_Test {
             documentAutomationController.autoGenerateDocumentRecord(ids);
             asyncJobCountAfter = [SELECT Id FROM AsyncApexJob].size();
             documentRecordCountAfter = [Select Id from Document__c].size();  
-            System.debug([SELECT Id FROM Attachment].size());
         }
-        Test.stopTest();
-        System.debug([SELECT Id FROM AsyncApexJob].size());        
+        Test.stopTest();      
         Assert.areNotEqual(attchCountBefore,[Select Id from Attachment].size());
         Assert.areNotEqual(documentRecordCountBefore,documentRecordCountAfter);
         Assert.areNotEqual(asyncJobCountBefore,asyncJobCountAfter);
@@ -337,7 +368,7 @@ private class DisplayPDFController_Test {
         System.assert(true);
     }
     
-    @IsTest
+    @isTest
     static void testGetReferenceObjectAPIName1() {
         Test.startTest();
         User us = DexUtilTestDataFactory.CreateTestUser();
@@ -350,7 +381,7 @@ private class DisplayPDFController_Test {
         System.assert(true);
     }
     
-    @IsTest
+    @isTest
     static void testGetSectionDataAsHTML() {
         Test.startTest();
         User us = DexUtilTestDataFactory.CreateTestUser();
@@ -370,7 +401,7 @@ private class DisplayPDFController_Test {
         System.assert(true);
     }	
     
-    @IsTest
+    @isTest
     static void testGetSectionDataAsHTML1() {
         Test.startTest();
         User us = DexUtilTestDataFactory.CreateTestUser();
@@ -387,7 +418,9 @@ private class DisplayPDFController_Test {
             String result = ROsectionAutomationController.getSectionDataAsHTML(testOpportunity.Id, testSection.Id);
             String createdDate = String.valueOf([SELECT CreatedDate FROM Opportunity WHERE Id = :testOpportunity.Id].CreatedDate);
             List<String> dateStr = createdDate.split(' ')[0].split('-');
+
             String timeStr = createdDate.split(' ')[1];
+
             Integer valKey = 0;
             String formattedDateTime = ROsectionAutomationController.handleDateTimeFormatAsSelectedbyUser(dateStr, timeStr, valKey);
         }
@@ -396,7 +429,7 @@ private class DisplayPDFController_Test {
     }
     
     
-    @IsTest
+    @isTest
     static void testGetSectionDataAsHTML2() {
         Test.startTest();
         User us = DexUtilTestDataFactory.CreateTestUser();
@@ -413,7 +446,9 @@ private class DisplayPDFController_Test {
             String result = ROsectionAutomationController.getSectionDataAsHTML(testOpportunity.Id, testSection.Id);
             String createdDate = String.valueOf([SELECT CreatedDate FROM Opportunity WHERE Id = :testOpportunity.Id].CreatedDate);
             List<String> dateStr = createdDate.split(' ')[0].split('-');
+
             String timeStr = createdDate.split(' ')[1];
+
             Integer valKey = -1;
             String formattedDateTime = ROsectionAutomationController.handleDateTimeFormatAsSelectedbyUser(dateStr, timeStr, valKey);
         }
@@ -421,7 +456,7 @@ private class DisplayPDFController_Test {
         System.assert(true);
     }
     
-    @IsTest
+    @isTest
     static void testGetSectionDataAsHTML3() {
         Test.startTest();
         User us = DexUtilTestDataFactory.CreateTestUser();
@@ -438,7 +473,9 @@ private class DisplayPDFController_Test {
             String result = ROsectionAutomationController.getSectionDataAsHTML(testOpportunity.Id, testSection.Id);
             String createdDate = String.valueOf([SELECT CreatedDate FROM Opportunity WHERE Id = :testOpportunity.Id].CreatedDate);
             List<String> dateStr = createdDate.split(' ')[0].split('-');
+
             String timeStr = createdDate.split(' ')[1];
+
             Integer valKey = 1;
             String formattedDateTime = ROsectionAutomationController.handleDateTimeFormatAsSelectedbyUser(dateStr, timeStr, valKey);
         }
@@ -446,7 +483,7 @@ private class DisplayPDFController_Test {
         System.assert(true);
     }
     
-    @IsTest
+    @isTest
     static void testGetSectionDataAsHTML4() {
         Test.startTest();
         User us = DexUtilTestDataFactory.CreateTestUser();
@@ -463,7 +500,9 @@ private class DisplayPDFController_Test {
             String result = ROsectionAutomationController.getSectionDataAsHTML(testOpportunity.Id, testSection.Id);
             String createdDate = String.valueOf([SELECT CreatedDate FROM Opportunity WHERE Id = :testOpportunity.Id].CreatedDate);
             List<String> dateStr = createdDate.split(' ')[0].split('-');
+
             String timeStr = createdDate.split(' ')[1];
+
             Integer valKey = 1;
             String formattedDateTime = ROsectionAutomationController.handleDateTimeFormatAsSelectedbyUser(dateStr, '', valKey);
         }
@@ -471,7 +510,7 @@ private class DisplayPDFController_Test {
         System.assert(true);
     }
     
-    @IsTest
+    @isTest
     static void testGetSectionDataAsHTML5() {
         Test.startTest();
         User us = DexUtilTestDataFactory.CreateTestUser();
@@ -488,7 +527,9 @@ private class DisplayPDFController_Test {
             String result = ROsectionAutomationController.getSectionDataAsHTML(testOpportunity.Id, testSection.Id);
             String createdDate = String.valueOf([SELECT CreatedDate FROM Opportunity WHERE Id = :testOpportunity.Id].CreatedDate);
             List<String> dateStr = createdDate.split(' ')[0].split('-');
+
             String timeStr = createdDate.split(' ')[1];
+
             Integer valKey = null;
             String formattedDateTime = ROsectionAutomationController.handleDateTimeFormatAsSelectedbyUser(null, null, null);
         }
@@ -497,7 +538,7 @@ private class DisplayPDFController_Test {
     }
     
     
-    @IsTest
+    @isTest
     static void testCurrencyNumberFormat() {
         Test.startTest();
         User us = DexUtilTestDataFactory.CreateTestUser();
@@ -507,16 +548,25 @@ private class DisplayPDFController_Test {
             String stringValue = String.valueOf(value);
             Decimal expected = value.setScale(Integer.valueOf(roundPattern));
             ROsectionAutomationController.handleCurrencyNumberFormat(stringValue, roundPattern);
-
-            stringValue = 'invalid_value';
-            roundPattern = '2';
-            ROsectionAutomationController.handleCurrencyNumberFormat(stringValue, roundPattern);
         }
         Test.stopTest();
         System.assert(true);
     }
     
-    @IsTest
+    @isTest
+    static void testCurrencyNumberFormatError() {
+        Test.startTest();
+        User us = DexUtilTestDataFactory.CreateTestUser();
+        System.runAs(us){
+            String value = 'invalid_value';
+            String roundPattern = '2';
+            ROsectionAutomationController.handleCurrencyNumberFormat(value, roundPattern);
+        }
+        Test.stopTest();
+        System.assert(true);
+    }
+    
+    @isTest
     static void testGetHeaderContent() {
         Test.startTest();
         User us = DexUtilTestDataFactory.CreateTestUser();
@@ -534,7 +584,7 @@ private class DisplayPDFController_Test {
         System.assert(true);
     }
     
-    @IsTest
+    @isTest
     static void testGetHeaderContentException() {
         Test.startTest();
         User us = DexUtilTestDataFactory.CreateTestUser();
@@ -546,7 +596,7 @@ private class DisplayPDFController_Test {
     }
     
     
-    @IsTest
+    @isTest
     static void testGetSectionDataAsHTML6() {
         Test.startTest();
         User us = DexUtilTestDataFactory.CreateTestUser();
@@ -576,7 +626,9 @@ private class DisplayPDFController_Test {
             );
             String createdDate = String.valueOf([SELECT CreatedDate FROM Account WHERE Id = :testAccount.Id].CreatedDate);
             List<String> dateStr = createdDate.split(' ')[0].split('-');
+
             String timeStr = createdDate.split(' ')[1];
+
             Integer valKey = null;
             String formattedDateTime = ROsectionAutomationController.handleDateTimeFormatAsSelectedbyUser(null, null, null);
         }
@@ -584,26 +636,22 @@ private class DisplayPDFController_Test {
         System.assert(true);
     }
     
-    @IsTest
+    @isTest
     static void testGetSectionDataAsHTML7() {
         Test.startTest();
         User us = DexUtilTestDataFactory.CreateTestUser();
         System.runAs(us){
             Document_Template__c testTemplate = new Document_Template__c(Name = 'Test Template');
             insert testTemplate;
-            
             Document_Template_Section__c testSection = new Document_Template_Section__c(
                 Document_Template__c = testTemplate.Id,Name = 'Test Section', Sequence__c = 1,
                 Section_Content__c = '{"whereClause":"()","mainChildObject":"Opportunity","childLookupfieldAPIname":"AccountId","mainparentObject":"Account","SerialNumber":false,"subTotal":["Amount"],"displayChart":false,"selGraphvalue":null,"chartLabel":"Chart","chartNewPage":true,"newPage":false,"tablelistValues":["CreatedDate","Type","Amount","Name","Account.Name","Account.Id"],"tablelistLabels":["Created Date","Opportunity Type","Amount","Name","Account ID.Account Name","Account ID.Account ID"],"grouping":"","dateFormat":"564/*","timeFormat":"124","numberFormat":"2","currencyFormat":"1","style":{"category":{"fontcolor":"","backgroundColor":"","fontfamily":"Times New Roman","fontsize":"14px"},"header":{"fontcolor":"#AF23F1","backgroundColor":"#40F70E","fontfamily":"Times New Roman","fontsize":"14px"}},"groupingCatVals":[{"label":"Prospecting","value":"Prospecting"},{"label":"Qualification","value":"Qualification"},{"label":"Needs Analysis","value":"Needs Analysis"},{"label":"Value Proposition","value":"Value Proposition"},{"label":"Id. Decision Makers","value":"Id. Decision Makers"},{"label":"Perception Analysis","value":"Perception Analysis"},{"label":"Proposal/Price Quote","value":"Proposal/Price Quote"},{"label":"Negotiation/Review","value":"Negotiation/Review"},{"label":"Closed Won","value":"Closed Won"},{"label":"Closed Lost","value":"Closed Lost"}]}}' );
             insert testSection; 
-
             Account testAccount = new Account(Name = 'Test Account');
             insert testAccount;
-
             Opportunity testOpportunity = new Opportunity(Name = 'Test Opportunity', StageName = 'Prospecting', CloseDate = Date.today(),Type = 'New Customer',
                                                           Amount = 244244, AccountId = testAccount.Id);
             insert testOpportunity; 
-
             String result = ROsectionAutomationController.getSectionDataAsHTML(testAccount.Id, testSection.Id);
             ROsectionAutomationController.dataFetchFromCurrentRecord(
                 new List<Object>{ 'Name' }, 
@@ -612,7 +660,9 @@ private class DisplayPDFController_Test {
             );
             String createdDate = String.valueOf([SELECT CreatedDate FROM Account WHERE Id = :testAccount.Id].CreatedDate);
             List<String> dateStr = createdDate.split(' ')[0].split('-');
+
             String timeStr = createdDate.split(' ')[1];
+
             Integer valKey = null;
             String formattedDateTime = ROsectionAutomationController.handleDateTimeFormatAsSelectedbyUser(null, null, null);
         }
@@ -621,24 +671,22 @@ private class DisplayPDFController_Test {
     }
     
     
-    @IsTest
+    @isTest
     static void testGetSectionDataAsHTML8() {
         Test.startTest();
         User us = DexUtilTestDataFactory.CreateTestUser();
         System.runAs(us){
             Document_Template__c testTemplate = new Document_Template__c(Name = 'Test Template');
             insert testTemplate;
-                Document_Template_Section__c testSection = new Document_Template_Section__c(
+            Document_Template_Section__c testSection = new Document_Template_Section__c(
                 Document_Template__c = testTemplate.Id,Name = 'Test Section', Sequence__c = 1,
                 Section_Content__c = '{"whereClause":"()","mainChildObject":"Opportunity","childLookupfieldAPIname":"AccountId","mainparentObject":"Account","SerialNumber":false,"subTotal":["Amount"],"displayChart":false,"selGraphvalue":null,"chartLabel":"Chart","chartNewPage":true,"newPage":false,"tablelistValues":["CreatedDate","Type","Amount","Name","Account.Name","DxCPQ__Custom_Object__r.Name"],"tablelistLabels":["Created Date","Opportunity Type","Amount","Name","Account ID.Account Name","Custom Object.Name"],"grouping":"","dateFormat":"564/*","timeFormat":"124","numberFormat":"2","currencyFormat":"1","style":{"category":{"fontcolor":"","backgroundColor":"","fontfamily":"Times New Roman","fontsize":"14px"},"header":{"fontcolor":"#AF23F1","backgroundColor":"#40F70E","fontfamily":"Times New Roman","fontsize":"14px"}},"groupingCatVals":[{"label":"Prospecting","value":"Prospecting"},{"label":"Qualification","value":"Qualification"},{"label":"Needs Analysis","value":"Needs Analysis"},{"label":"Value Proposition","value":"Value Proposition"},{"label":"Id. Decision Makers","value":"Id. Decision Makers"},{"label":"Perception Analysis","value":"Perception Analysis"},{"label":"Proposal/Price Quote","value":"Proposal/Price Quote"},{"label":"Negotiation/Review","value":"Negotiation/Review"},{"label":"Closed Won","value":"Closed Won"},{"label":"Closed Lost","value":"Closed Lost"}]}' );
             insert testSection; 
-
             Account testAccount = new Account(Name = 'Test Account');
             insert testAccount;
-
-            Opportunity testOpportunity = new Opportunity(Name = 'Test Opportunity', StageName = 'Prospecting', CloseDate = Date.today(),Type = 'New Customer', Amount = 244244, AccountId = testAccount.Id);
+            Opportunity testOpportunity = new Opportunity(Name = 'Test Opportunity', StageName = 'Prospecting', CloseDate = Date.today(),Type = 'New Customer',
+                                                          Amount = 244244, AccountId = testAccount.Id);
             insert testOpportunity; 
-            
             String result = ROsectionAutomationController.getSectionDataAsHTML(testAccount.Id, testSection.Id);
             ROsectionAutomationController.dataFetchFromCurrentRecord(
                 new List<Object>{ 'Name' }, 
@@ -647,7 +695,9 @@ private class DisplayPDFController_Test {
             );
             String createdDate = String.valueOf([SELECT CreatedDate FROM Account WHERE Id = :testAccount.Id].CreatedDate);
             List<String> dateStr = createdDate.split(' ')[0].split('-');
+
             String timeStr = createdDate.split(' ')[1];
+
             Integer valKey = null;
             String formattedDateTime = ROsectionAutomationController.handleDateTimeFormatAsSelectedbyUser(null, null, null);
         }
@@ -655,7 +705,7 @@ private class DisplayPDFController_Test {
         System.assert(true);
     }
     
-    @IsTest
+    @isTest
     static void testSaveDocumentTemplateSectionDetails() {
         
         Test.startTest();
@@ -664,7 +714,7 @@ private class DisplayPDFController_Test {
             try{
                 Document_Template__c testTemplate = new Document_Template__c(Name = 'Test Template');
                 insert testTemplate;
-                    Document_Template_Section__c testSection = new Document_Template_Section__c(
+                Document_Template_Section__c testSection = new Document_Template_Section__c(
                     Document_Template__c = testTemplate.Id,Name = 'Test Section', Sequence__c = 1,Type__c='Related Objects',
                     Section_Content__c = '{"whereClause":"()","mainChildObject":"Opportunity","childLookupfieldAPIname":"AccountId","mainparentObject":"Account","SerialNumber":false,"subTotal":["Amount"],"displayChart":false,"selGraphvalue":null,"chartLabel":"Chart","chartNewPage":true,"newPage":false,"tablelistValues":["CreatedDate","Type","Amount","Name","Account.Name","DxCPQ__Custom_Object__r.Name"],"tablelistLabels":["Created Date","Opportunity Type","Amount","Name","Account ID.Account Name","Custom Object.Name"],"grouping":"","dateFormat":"564/*","timeFormat":"124","numberFormat":"2","currencyFormat":"1","style":{"category":{"fontcolor":"","backgroundColor":"","fontfamily":"Times New Roman","fontsize":"14px"},"header":{"fontcolor":"#AF23F1","backgroundColor":"#40F70E","fontfamily":"Times New Roman","fontsize":"14px"}},"groupingCatVals":[{"label":"Prospecting","value":"Prospecting"},{"label":"Qualification","value":"Qualification"},{"label":"Needs Analysis","value":"Needs Analysis"},{"label":"Value Proposition","value":"Value Proposition"},{"label":"Id. Decision Makers","value":"Id. Decision Makers"},{"label":"Perception Analysis","value":"Perception Analysis"},{"label":"Proposal/Price Quote","value":"Proposal/Price Quote"},{"label":"Negotiation/Review","value":"Negotiation/Review"},{"label":"Closed Won","value":"Closed Won"},{"label":"Closed Lost","value":"Closed Lost"}]}' );
                 insert testSection; 
@@ -678,7 +728,7 @@ private class DisplayPDFController_Test {
         System.assert(true);
     }
     
-    @IsTest
+    @isTest
     static void testSaveDocumentTemplateSectionDetails1() {
         
         Test.startTest();
@@ -687,10 +737,9 @@ private class DisplayPDFController_Test {
             try{
                 Document_Template__c testTemplate = new Document_Template__c(Name = 'Test Template');
                 insert testTemplate;
-                    Document_Template_Section__c testSection = new Document_Template_Section__c(
+                Document_Template_Section__c testSection = new Document_Template_Section__c(
                     Document_Template__c = testTemplate.Id,Name = 'Test Section with Clause', Sequence__c = 1,Type__c='Context',
-                    Section_Content__c = 'Happy Testing' 
-                );
+                    Section_Content__c = 'Happy Testing' );
                 insert testSection; 
                 SaveDocumentTemplatesection.saveDocumentTemplateSectionDetails(testSection);
             }
@@ -702,21 +751,35 @@ private class DisplayPDFController_Test {
         System.assert(true);
     }
     
-    @IsTest
+    @isTest
     static void testGetSearchedContentVersions() {
         Test.startTest();
         User us = DexUtilTestDataFactory.CreateTestUser();
-        System.runAs(us) {
-            try {
+        System.runAs(us){
+            try{
                 List<ContentVersion> testContentVersions = new List<ContentVersion>{
-                    new ContentVersion(Title = 'Test Image 1', PathOnClient  = 'Test1.jpg', VersionData = Blob.valueOf('Test image data 1')),
-                    new ContentVersion(Title = 'Test Image 2', PathOnClient  = 'Test2.jpg', VersionData = Blob.valueOf('Test image data 2')),
-                    new ContentVersion(Title = 'Other File', PathOnClient  = 'Test3.jpg', VersionData = Blob.valueOf('Test image data 3'))
-                };
-                insert testContentVersions;
+                    new ContentVersion(
+                        Title = 'Test Image 1',
+                        PathOnClient  = 'Test1.jpg',
+                        VersionData = Blob.valueOf('Test image data 1')
+                    ),
+                        new ContentVersion(
+                            Title = 'Test Image 2',
+                            PathOnClient  = 'Test2.jpg',
+                            VersionData = Blob.valueOf('Test image data 2')
+                        ),
+                        new ContentVersion(
+                            Title = 'Other File',
+                            PathOnClient  = 'Test3.jpg',
+                            VersionData = Blob.valueOf('Test image data 3')
+                        )
+                        };
+                            insert testContentVersions;
                 FooterClass.getSearchedContentVersions('');
                 
-            } catch(exception ex) {
+            }
+            catch(exception ex)
+            {
                 System.assert(ex.getMessage().contains('Script-thrown exception'));
             }
         }
@@ -724,21 +787,35 @@ private class DisplayPDFController_Test {
         System.assert(true);
     }
     
-    @IsTest
+    @isTest
     static void testGetSearchedContentVersions3() {
         Test.startTest();
         User us = DexUtilTestDataFactory.CreateTestUser();
         System.runAs(us){
             try{
                 List<ContentVersion> testContentVersions = new List<ContentVersion>{
-                    new ContentVersion(Title = 'Test Image 1', PathOnClient  = 'Test1.jpg', VersionData = Blob.valueOf('Test image data 1')),
-                    new ContentVersion(Title = 'Test Image 2', PathOnClient  = 'Test2.jpg', VersionData = Blob.valueOf('Test image data 2')),
-                    new ContentVersion(Title = 'Other File', PathOnClient  = 'Test3.jpg', VersionData = Blob.valueOf('Test image data 3'))
-                };
-                insert testContentVersions;
-                FooterClass.getContentVersions();                
+                    new ContentVersion(
+                        Title = 'Test Image 1',
+                        PathOnClient  = 'Test1.jpg',
+                        VersionData = Blob.valueOf('Test image data 1')
+                    ),
+                        new ContentVersion(
+                            Title = 'Test Image 2',
+                            PathOnClient  = 'Test2.jpg',
+                            VersionData = Blob.valueOf('Test image data 2')
+                        ),
+                        new ContentVersion(
+                            Title = 'Other File',
+                            PathOnClient  = 'Test3.jpg',
+                            VersionData = Blob.valueOf('Test image data 3')
+                        )
+                        };
+                            insert testContentVersions;
+                FooterClass.getContentVersions();
+                
             }
-            catch(exception ex)  {
+            catch(exception ex)
+            {
                 System.assert(ex.getMessage().contains('Script-thrown exception'));
             }
         }
@@ -747,7 +824,7 @@ private class DisplayPDFController_Test {
     }
     
     
-    @IsTest
+    @isTest
     static void cloneDocumentTemplate() {
         Test.startTest();
         User us = DexUtilTestDataFactory.CreateTestUser();
@@ -755,7 +832,7 @@ private class DisplayPDFController_Test {
             try{
                 Document_Template__c testTemplate = new Document_Template__c(Name = 'Test Template');
                 insert testTemplate;
-                SaveDocumentTemplate.cloneDocumentTemplate(testTemplate, null);                
+                SaveDocumentTemplate.cloneDocumentTemplate(testTemplate, null);           
             } catch(exception ex) {
                 System.assert(ex.getMessage().contains('Script-thrown exception'));
             }
@@ -764,7 +841,7 @@ private class DisplayPDFController_Test {
         System.assert(true);
     }
 
-    @IsTest 
+    @isTest 
     static void testAutoGenerateDocumentRecordAutomation() {
         Test.startTest();
         User us = DexUtilTestDataFactory.CreateTestUser();
@@ -793,7 +870,7 @@ private class DisplayPDFController_Test {
         System.assert(true);
     }
 
-    @IsTest 
+    @isTest 
     static void testAutoGenerateDocumentRecordForFox() {
         Test.startTest();
         User us = DexUtilTestDataFactory.CreateTestUser();
@@ -824,7 +901,7 @@ private class DisplayPDFController_Test {
         System.assert(true);
     }
     
-    @IsTest 
+    @isTest 
     static void testDeleteTemplate() {
         Test.startTest();
         User us = DexUtilTestDataFactory.CreateTestUser();
@@ -852,5 +929,57 @@ private class DisplayPDFController_Test {
         }
         Test.stopTest();
         System.assert(true);
+    }
+    
+    
+    @isTest
+    static void testGetDocumentTemplateData() {
+        Test.startTest();
+        User us = DexUtilTestDataFactory.CreateTestUser();
+        System.runAs(us){
+            Document_Template__c testTemplate = new Document_Template__c(
+                Name = 'Test Template',
+                DxCPQ__Watermark_Data__c = 'Test watermark data'
+            );
+            insert testTemplate;
+            Document_Template__c result = DisplayPDFController.getDocumentTemplateData(testTemplate.Id);
+            System.assertNotEquals(null, result, 'Document_Template__c object should not be null');
+            System.assertEquals('Test Template', result.Name, 'Incorrect Name');
+            System.assertEquals('Test watermark data', result.DxCPQ__Watermark_Data__c, 'Incorrect Watermark Data');
+        }
+        Test.stopTest();
+        System.assert(true);
+    }
+    
+    @isTest
+    static void testGetBaseURL() {
+        User us = DexUtilTestDataFactory.CreateTestUser();
+        System.runAs(us){ 
+           DisplayPDFController.getSFDomainBaseURL();
+       	}
+        System.Assert(true);
+    }
+    
+     @isTest
+    static void testSaveContentVersion() {
+        User us = DexUtilTestDataFactory.CreateTestUser();
+        System.runAs(us){ 
+            Document_Template__c template = new Document_Template__c();
+            insert template;
+             ContentVersion testContentVersion = new ContentVersion(
+                Title = 'Test Image 123',
+                VersionData = Blob.valueOf('Test image data For Testing'),
+                PathOnClient = 'test123.png',
+               	FirstPublishLocationId = template.Id
+            );
+            insert testContentVersion;
+            List<Map<String, String>> base64DataList = new List<Map<String, String>>();
+            base64DataList.add(new Map<String, String>{'Text' => 'Test text content', 'title' => 'Text Content'});
+            base64DataList.add(new Map<String, String>{'Image' => EncodingUtil.base64Encode(Blob.valueOf('Test image data')), 'title' => 'Image Content'});
+            Test.startTest();
+            List<Map<String, String>> savedIds = DisplayPDFController.saveContentVersion('Test Title', base64DataList, template.Id, true);
+            Test.stopTest();
+            System.assertNotEquals(0, savedIds.size(), 'No ContentVersions saved');
+        }
     }
 }

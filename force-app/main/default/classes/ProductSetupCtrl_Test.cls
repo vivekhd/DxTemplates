@@ -1,8 +1,8 @@
-@IsTest
+@isTest
 private class ProductSetupCtrl_Test {
 
 	/* ProductSetupCtrl Test Class */
-    @IsTest
+    @isTest
     static void getLookupListTest(){
         Test.startTest();
         User us = DexUtilTestDataFactory.CreateTestUser();
@@ -14,7 +14,7 @@ private class ProductSetupCtrl_Test {
     }
     
     /* ProductSetupCtrl MultiSelectLookupController Class */
-    @IsTest
+    @isTest
     static void retrieveRecordsTest(){
         User us = DexUtilTestDataFactory.CreateTestUser();
         System.runAs(us){
@@ -27,7 +27,7 @@ private class ProductSetupCtrl_Test {
     }
     
     /*SaveDocumentTemplate Test Class*/        
-    @IsTest public static void getAllDocumentTemplateSections_Test1(){
+    @isTest public static void getAllDocumentTemplateSections_Test1(){
         User us = DexUtilTestDataFactory.CreateTestUser();
         System.runAs(us){
             List<Document_Template__c> documentTemplate = DexUtilTestDataFactory.createDocumentTemplate(1, true, null);
@@ -137,7 +137,7 @@ private class ProductSetupCtrl_Test {
     }
        
     
-    @IsTest public static void getAllDocumentTemplateSections_Test2(){
+    @isTest public static void getAllDocumentTemplateSections_Test2(){
         User us = DexUtilTestDataFactory.CreateTestUser();
         System.runAs(us){
              try{
@@ -537,5 +537,31 @@ private class ProductSetupCtrl_Test {
             SaveDocumentTemplate.getRelatedToTypeOptions();
         }
         System.Assert(true);
+    }
+    
+    @isTest(SeeAllData = true)
+    static void testGetPDFLinks() {
+        User us = DexUtilTestDataFactory.CreateTestUser();
+        System.runAs(us){ 
+           ProductSetupCtrl.getPDFLinks();
+       	}
+        System.Assert(true);
+    }
+    
+    @isTest
+    static void testGetOriginalImageCVID() {
+        Test.startTest();
+        User us = DexUtilTestDataFactory.CreateTestUser();
+        System.runAs(us){ 
+            ContentVersion testContentVersion = new ContentVersion(
+                Title = 'Test Image 123',
+                VersionData = Blob.valueOf('Test image data For Testing'),
+                PathOnClient = 'test123.png'
+            );
+            insert testContentVersion;
+            String result = ProductSetupCtrl.getOriginalImageCVID(testContentVersion.Id);
+            Test.stopTest();
+            System.assertNotEquals(null, result, 'ContentVersion Id should not be null');
+        }
     }
 }
