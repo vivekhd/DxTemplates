@@ -1,6 +1,6 @@
-@isTest
+@IsTest
 private class DisplayRelatedController_Test {
-    @isTest static void testDisplayRelatedController() {
+    @IsTest static void testDisplayRelatedController() {
         Test.startTest();
         User us = DexUtilTestDataFactory.CreateTestUser();
         System.runAs(us){
@@ -15,7 +15,7 @@ private class DisplayRelatedController_Test {
     }
     
     //The following methods are the test classes of DisplayRelatedObjects Apex class    
-    @isTest
+    @IsTest
     static void testGetObjectFieldTypeMap() {
         Test.startTest();
         User us = DexUtilTestDataFactory.CreateTestUser();
@@ -34,7 +34,7 @@ private class DisplayRelatedController_Test {
         Test.stopTest();
     }
     
-    @isTest
+    @IsTest
     static void testGetObjectFieldTypeMap1() {
         Test.startTest();
         User us = DexUtilTestDataFactory.CreateTestUser();
@@ -53,7 +53,7 @@ private class DisplayRelatedController_Test {
         Test.stopTest();
     }
     
-    @isTest
+    @IsTest
     static void testGetLkpObjectApi() {
         Test.startTest();
         User us = DexUtilTestDataFactory.CreateTestUser();
@@ -69,7 +69,7 @@ private class DisplayRelatedController_Test {
     }
     
     
-    @isTest
+    @IsTest
     static void testGetLkpObjectApiExceptionHandling() {
         Test.startTest();
         User us = DexUtilTestDataFactory.CreateTestUser();
@@ -87,7 +87,7 @@ private class DisplayRelatedController_Test {
     }
     
     
-    @isTest
+    @IsTest
     static void testGetsectionData() {
         Test.startTest();
         User us = DexUtilTestDataFactory.CreateTestUser();
@@ -115,7 +115,7 @@ private class DisplayRelatedController_Test {
 
     }
     
-    @isTest
+    @IsTest
     static void testGetsectionData1() {
         Test.startTest();
         User us = DexUtilTestDataFactory.CreateTestUser();
@@ -142,7 +142,7 @@ private class DisplayRelatedController_Test {
         System.assert(true, 'Only for code coverage');
     }
     
-    @isTest
+    @IsTest
     static void testGetsectionData3() {
         Test.startTest();
         User us = DexUtilTestDataFactory.CreateTestUser();
@@ -179,87 +179,55 @@ private class DisplayRelatedController_Test {
     }
     
     
-    @isTest
+    @IsTest
     static void testGetsectionData4() {
         Test.startTest();
         User us = DexUtilTestDataFactory.CreateTestUser();
         System.runAs(us){
             Account testAccount = new Account(Name = 'Test Account');
             insert testAccount;
-            Opportunity testOpportunity = new Opportunity(Name = 'Test Opportunity', StageName = 'Prospecting', LeadSource='Web',CloseDate = Date.today(),Type = 'New Customer',
-                                                          Amount = 244244, AccountId = testAccount.Id);
-            insert testOpportunity; 
-            Opportunity testOpportunity1 = new Opportunity(Name = 'Test Opportunity', StageName = 'Prospecting',  LeadSource='Web',CloseDate = Date.today(),Type = 'New Customer',
-                                                           Amount = 242144, AccountId = testAccount.Id);
-            insert testOpportunity1;  
-            Opportunity testOpportunity2 = new Opportunity(Name = 'Test Opportunity', StageName = 'Prospecting',  LeadSource='',CloseDate = Date.today(),Type = 'New Customer',
-                                                           Amount = 21244, AccountId = testAccount.Id);
-            insert testOpportunity2;  
-            Opportunity testOpportunity3 = new Opportunity(Name = 'Test Opportunity', StageName = 'Prospecting',  LeadSource='',CloseDate = Date.today(),Type = 'New Customer',
-                                                           Amount = 21244, AccountId = testAccount.Id);
-            insert testOpportunity3;  
-            Document_Template__c testTemplate = new Document_Template__c(Name = 'Test Template1');
-            insert testTemplate;   
-            Document_Template_Section__c testSection = new Document_Template_Section__c(
-                Name = 'ROI Section Testing', Type__c = 'Related Objects',New_Page__c =false, Section_Content__c = '{"whereClause":"()","mainChildObject":"Opportunity","childLookupfieldAPIname":"AccountId","mainparentObject":"Account","SerialNumber":false,"subTotal":["ExpectedRevenue"],"displayChart":false,"selGraphvalue":null,"chartLabel":"Chart","chartNewPage":true,"newPage":false,"tablelistValues":["CreatedDate","Type","Amount","Account.Name","ExpectedRevenue"],"tablelistLabels":["Created Date","Opportunity Type","Amount","Account ID.Account Name","Expected Amount"],"grouping":"leadsource","dateFormat":"564/","timeFormat":"124","numberFormat":"3","currencyFormat":"1","style":{"category":{"fontcolor":"","backgroundColor":"","fontfamily":"Times New Roman","fontsize":"14px"},"header":{"fontcolor":"#AF23F1","backgroundColor":"#40F70E","fontfamily":"Times New Roman","fontsize":"14px"}},"groupingCatVals":[{"label":"Prospecting","value":"Prospecting"},{"label":"Qualification","value":"Qualification"},{"label":"Needs Analysis","value":"Needs Analysis"},{"label":"Value Proposition","value":"Value Proposition"},{"label":"Id. Decision Makers","value":"Id. Decision Makers"},{"label":"Perception Analysis","value":"Perception Analysis"},{"label":"Proposal/Price Quote","value":"Proposal/Price Quote"},{"label":"Negotiation/Review","value":"Negotiation/Review"},{"label":"Closed Won","value":"Closed Won"},{"label":"Closed Lost","value":"Closed Lost"}]}', Document_Template__c = testTemplate.Id        		
-            );
-            insert testSection;
-            Document_Template_Section__c testSection1 = new Document_Template_Section__c(
-                Name = 'Footer Section', Type__c = 'Footer', Section_Content__c = '<h1>Test Footer</h1>', Document_Template__c = testTemplate.Id,New_Page__c =true
-            );
-            insert testSection1;
-            Document_Template_Section__c testSection2 = new Document_Template_Section__c(
-                Name = 'Header Section', Type__c = 'Header', Section_Content__c = '<h1>Test Header</h1>', Document_Template__c = testTemplate.Id,New_Page__c =true
-            );
-            insert testSection2;
-            
+            Opportunity testOpportunity = new Opportunity(Name = 'Test Opportunity', StageName = 'Prospecting', LeadSource='Web',CloseDate = Date.today(),Type = 'New Customer', Amount = 244244, AccountId = testAccount.Id);
+            Opportunity testOpportunity1 = new Opportunity(Name = 'Test Opportunity', StageName = 'Prospecting',  LeadSource='Web',CloseDate = Date.today(),Type = 'New Customer', Amount = 242144, AccountId = testAccount.Id);
+            Opportunity testOpportunity2 = new Opportunity(Name = 'Test Opportunity', StageName = 'Prospecting',  LeadSource='',CloseDate = Date.today(),Type = 'New Customer', Amount = 21244, AccountId = testAccount.Id); 
+            Opportunity testOpportunity3 = new Opportunity(Name = 'Test Opportunity', StageName = 'Prospecting',  LeadSource='',CloseDate = Date.today(),Type = 'New Customer', Amount = 21244, AccountId = testAccount.Id); 
+            insert (new List<Opportunity> {testOpportunity, testOpportunity1, testOpportunity2, testOpportunity3});
+            Document_Template__c testTemplate = new Document_Template__c (Name = 'Test Template1');
+            insert testTemplate;
+            Document_Template_Section__c testSection = new Document_Template_Section__c( Name = 'ROI Section Testing', Type__c = 'Related Objects',New_Page__c =false, Section_Content__c = '{"whereClause":"()","mainChildObject":"Opportunity","childLookupfieldAPIname":"AccountId","mainparentObject":"Account","SerialNumber":false,"subTotal":["ExpectedRevenue"],"displayChart":false,"selGraphvalue":null,"chartLabel":"Chart","chartNewPage":true,"newPage":false,"tablelistValues":["CreatedDate","Type","Amount","Account.Name","ExpectedRevenue"],"tablelistLabels":["Created Date","Opportunity Type","Amount","Account ID.Account Name","Expected Amount"],"grouping":"leadsource","dateFormat":"564/","timeFormat":"124","numberFormat":"3","currencyFormat":"1","style":{"category":{"fontcolor":"","backgroundColor":"","fontfamily":"Times New Roman","fontsize":"14px"},"header":{"fontcolor":"#AF23F1","backgroundColor":"#40F70E","fontfamily":"Times New Roman","fontsize":"14px"}},"groupingCatVals":[{"label":"Prospecting","value":"Prospecting"},{"label":"Qualification","value":"Qualification"},{"label":"Needs Analysis","value":"Needs Analysis"},{"label":"Value Proposition","value":"Value Proposition"},{"label":"Id. Decision Makers","value":"Id. Decision Makers"},{"label":"Perception Analysis","value":"Perception Analysis"},{"label":"Proposal/Price Quote","value":"Proposal/Price Quote"},{"label":"Negotiation/Review","value":"Negotiation/Review"},{"label":"Closed Won","value":"Closed Won"},{"label":"Closed Lost","value":"Closed Lost"}]}', Document_Template__c = testTemplate.Id );
+            Document_Template_Section__c testSection1 = new Document_Template_Section__c( Name = 'Footer Section', Type__c = 'Footer', Section_Content__c = '<h1>Test Footer</h1>', Document_Template__c = testTemplate.Id,New_Page__c =true );
+            Document_Template_Section__c testSection2 = new Document_Template_Section__c( Name = 'Header Section', Type__c = 'Header', Section_Content__c = '<h1>Test Header</h1>', Document_Template__c = testTemplate.Id,New_Page__c =true );
+            insert (new List<Document_Template_Section__c> {testSection, testSection1, testSection2}); 
             DisplayRelatedObjects.getsectionData(testAccount.Id, testSection.Id);
         }
         Test.stopTest();
         System.assert(true, 'Only for code coverage');
     }
     
-    @isTest
+    @IsTest
     static void testGetsectionData7() {
         Test.startTest();
         User us = DexUtilTestDataFactory.CreateTestUser();
         System.runAs(us){
             Account testAccount = new Account(Name = 'Test Account');
             insert testAccount;
-            Opportunity testOpportunity = new Opportunity(Name = 'Test Opportunity', StageName = 'Prospecting', LeadSource='Web',CloseDate = Date.today(),Type = 'New Customer',
-                                                          Amount = 244244, AccountId = testAccount.Id);
-            insert testOpportunity; 
-            Opportunity testOpportunity1 = new Opportunity(Name = 'Test Opportunity', StageName = 'Prospecting',  LeadSource='Web',CloseDate = Date.today(),Type = 'New Customer',
-                                                           Amount = 242144, AccountId = testAccount.Id);
-            insert testOpportunity1;  
-            Opportunity testOpportunity2 = new Opportunity(Name = 'Test Opportunity', StageName = 'Prospecting',  LeadSource='',CloseDate = Date.today(),Type = 'New Customer',
-                                                           Amount = 21244, AccountId = testAccount.Id);
-            insert testOpportunity2;  
-            Opportunity testOpportunity3 = new Opportunity(Name = 'Test Opportunity', StageName = 'Prospecting',  LeadSource='',CloseDate = Date.today(),Type = 'New Customer',
-                                                           Amount = 21244, AccountId = testAccount.Id);
-            insert testOpportunity3;  
+            Opportunity testOpportunity = new Opportunity(Name = 'Test Opportunity', StageName = 'Prospecting', LeadSource='Web',CloseDate = Date.today(),Type = 'New Customer', Amount = 244244, AccountId = testAccount.Id);
+            Opportunity testOpportunity1 = new Opportunity(Name = 'Test Opportunity', StageName = 'Prospecting',  LeadSource='Web',CloseDate = Date.today(),Type = 'New Customer', Amount = 242144, AccountId = testAccount.Id);
+            Opportunity testOpportunity2 = new Opportunity(Name = 'Test Opportunity', StageName = 'Prospecting',  LeadSource='',CloseDate = Date.today(),Type = 'New Customer', Amount = 21244, AccountId = testAccount.Id); 
+            Opportunity testOpportunity3 = new Opportunity(Name = 'Test Opportunity', StageName = 'Prospecting',  LeadSource='',CloseDate = Date.today(),Type = 'New Customer', Amount = 21244, AccountId = testAccount.Id); 
+            insert (new List<Opportunity> {testOpportunity, testOpportunity1, testOpportunity2, testOpportunity3});
             Document_Template__c testTemplate = new Document_Template__c(Name = 'Test Template1');
             insert testTemplate;   
-            Document_Template_Section__c testSection = new Document_Template_Section__c(
-                Name = 'ROI Section Testing', Type__c = 'Related Objects',New_Page__c =false, Section_Content__c = '{"whereClause":"()","mainChildObject":"Opportunity","childLookupfieldAPIname":"AccountId","mainparentObject":"Account","SerialNumber":false,"subTotal":["ExpectedRevenue"],"displayChart":false,"selGraphvalue":null,"chartLabel":"Chart","chartNewPage":true,"newPage":false,"tablelistValues":["CreatedDate","Type","Amount","Account.Name","ExpectedRevenue"],"tablelistLabels":["Created Date","Opportunity Type","Amount","Account ID.Account Name","Expected Amount"],"grouping":"","dateFormat":"564/","timeFormat":"124","numberFormat":"3","currencyFormat":"1","style":{"category":{"fontcolor":"","backgroundColor":"","fontfamily":"Times New Roman","fontsize":"14px"},"header":{"fontcolor":"#AF23F1","backgroundColor":"#40F70E","fontfamily":"Times New Roman","fontsize":"14px"}},"groupingCatVals":[{"label":"Prospecting","value":"Prospecting"},{"label":"Qualification","value":"Qualification"},{"label":"Needs Analysis","value":"Needs Analysis"},{"label":"Value Proposition","value":"Value Proposition"},{"label":"Id. Decision Makers","value":"Id. Decision Makers"},{"label":"Perception Analysis","value":"Perception Analysis"},{"label":"Proposal/Price Quote","value":"Proposal/Price Quote"},{"label":"Negotiation/Review","value":"Negotiation/Review"},{"label":"Closed Won","value":"Closed Won"},{"label":"Closed Lost","value":"Closed Lost"}]}', Document_Template__c = testTemplate.Id        		
-            );
-            insert testSection;
-            Document_Template_Section__c testSection1 = new Document_Template_Section__c(
-                Name = 'Footer Section', Type__c = 'Footer', Section_Content__c = '<h1>Test Footer</h1>', Document_Template__c = testTemplate.Id,New_Page__c =true
-            );
-            insert testSection1;
-            Document_Template_Section__c testSection2 = new Document_Template_Section__c(
-                Name = 'Header Section', Type__c = 'Header', Section_Content__c = '<h1>Test Header</h1>', Document_Template__c = testTemplate.Id,New_Page__c =true
-            );
-            insert testSection2;
-            
+            Document_Template_Section__c testSection = new Document_Template_Section__c( Name = 'ROI Section Testing', Type__c = 'Related Objects',New_Page__c =false, Section_Content__c = '{"whereClause":"()","mainChildObject":"Opportunity","childLookupfieldAPIname":"AccountId","mainparentObject":"Account","SerialNumber":false,"subTotal":["ExpectedRevenue"],"displayChart":false,"selGraphvalue":null,"chartLabel":"Chart","chartNewPage":true,"newPage":false,"tablelistValues":["CreatedDate","Type","Amount","Account.Name","ExpectedRevenue"],"tablelistLabels":["Created Date","Opportunity Type","Amount","Account ID.Account Name","Expected Amount"],"grouping":"","dateFormat":"564/","timeFormat":"124","numberFormat":"3","currencyFormat":"1","style":{"category":{"fontcolor":"","backgroundColor":"","fontfamily":"Times New Roman","fontsize":"14px"},"header":{"fontcolor":"#AF23F1","backgroundColor":"#40F70E","fontfamily":"Times New Roman","fontsize":"14px"}},"groupingCatVals":[{"label":"Prospecting","value":"Prospecting"},{"label":"Qualification","value":"Qualification"},{"label":"Needs Analysis","value":"Needs Analysis"},{"label":"Value Proposition","value":"Value Proposition"},{"label":"Id. Decision Makers","value":"Id. Decision Makers"},{"label":"Perception Analysis","value":"Perception Analysis"},{"label":"Proposal/Price Quote","value":"Proposal/Price Quote"},{"label":"Negotiation/Review","value":"Negotiation/Review"},{"label":"Closed Won","value":"Closed Won"},{"label":"Closed Lost","value":"Closed Lost"}]}', Document_Template__c = testTemplate.Id);
+            Document_Template_Section__c testSection1 = new Document_Template_Section__c( Name = 'Footer Section', Type__c = 'Footer', Section_Content__c = '<h1>Test Footer</h1>', Document_Template__c = testTemplate.Id,New_Page__c =true );
+            Document_Template_Section__c testSection2 = new Document_Template_Section__c( Name = 'Header Section', Type__c = 'Header', Section_Content__c = '<h1>Test Header</h1>', Document_Template__c = testTemplate.Id,New_Page__c =true );
+            insert (new List<Document_Template_Section__c> {testSection, testSection1, testSection2});
             DisplayRelatedObjects.getsectionData(testAccount.Id, testSection.Id);
         }
         Test.stopTest();
         System.assert(true, 'Only for code coverage');
     }    
     
-    @isTest
+    @IsTest
     static void testRetrieveRecords() {
         Test.startTest();
         User us = DexUtilTestDataFactory.CreateTestUser();
@@ -268,16 +236,16 @@ private class DisplayRelatedController_Test {
             Account testAccount = new Account(Name = 'Test Account');
             insert testAccount;
             result = MultiSelectLookupController.retrieveRecords('Account', 'Id,Name', 'Name', 'Test', '', '');
+            System.assertEquals(1, result.size(),'Result size is not as expected');
+            System.assertEquals(testAccount.Id, result[0].recordId,'Record ID as expected');
+            System.assertEquals(testAccount.Name, result[0].recordName,'Record name as expected');
+            System.assertEquals(testAccount.Id, result[0].recordObject.get('Id'),'Record object ID as expected');
+            System.assertEquals(testAccount.Name, result[0].recordObject.get('Name'),'Record object name as expected');
         }
         Test.stopTest();
-        System.assertEquals(1, result.size(),'Result size is not as expected');
-        System.assertEquals(testAccount.Id, result[0].recordId,'Record ID as expected');
-        System.assertEquals(testAccount.Name, result[0].recordName,'Record name as expected');
-        System.assertEquals(testAccount.Id, result[0].recordObject.get('Id'),'Record object ID as expected');
-        System.assertEquals(testAccount.Name, result[0].recordObject.get('Name'),'Record object name as expected');
     }
     
-    @isTest
+    @IsTest
     static void testRetrieveRecords2() {
         Test.startTest();
         User us = DexUtilTestDataFactory.CreateTestUser();
@@ -286,15 +254,15 @@ private class DisplayRelatedController_Test {
             Account testAccount = new Account(Name = 'Test Account');
             insert testAccount;
             result = MultiSelectLookupController.retrieveRecords('Account', 'Id,Name', 'Name', '*', '', '');
+            System.assertEquals(1, result.size(),'Unexpected result size');
+            System.assertEquals(testAccount.Id, result[0].recordId,'Record ID as expected');
+            System.assertEquals(testAccount.Name, result[0].recordName,'Record Name as expected');
         }
         Test.stopTest();
-        System.assertEquals(1, result.size(),'Unexpected result size');
-        System.assertEquals(testAccount.Id, result[0].recordId,'Record ID as expected');
-        System.assertEquals(testAccount.Name, result[0].recordName,'Record Name as expected');
     }
     
     
-    @isTest
+    @IsTest
     static void testGetLookupList() {
         List<SObject> result;
         User us = DexUtilTestDataFactory.CreateTestUser();
@@ -306,7 +274,7 @@ private class DisplayRelatedController_Test {
         System.assertEquals(result,null,'SObjectType and searchLabel is not specified');
     }
     
-    @isTest
+    @IsTest
     static void testWrapperAndRowWrapper() {
         Test.startTest();
         User us = DexUtilTestDataFactory.CreateTestUser();
@@ -314,7 +282,7 @@ private class DisplayRelatedController_Test {
             DisplayRelatedObjects.RowWrapper rowWrapper = new DisplayRelatedObjects.RowWrapper();
             rowWrapper.addValue('Value 1');
             rowWrapper.addValue('Value 2');
-            
+
             DisplayRelatedObjects.Wrapper wrapper = new DisplayRelatedObjects.Wrapper();
             wrapper.rowWrapperList = new List<DisplayRelatedObjects.RowWrapper>{rowWrapper};
             wrapper.headers = new List<String>{'Header 1', 'Header 2'};

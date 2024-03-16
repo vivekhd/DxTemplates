@@ -1,17 +1,18 @@
 /**
- 	* Class:              DexUtilTestDataFactory
-    * Developer		:     Abhishek Goel
-    * Created Date	:     30/1/2020
-    * @description	:     This generic test is used to create the records for test classes
-    * Last Modified Date: 30/1/2020
-    * Change Log: 
-    */
-    @isTest
-    public with sharing class DexUtilTestDataFactory {
+* Class:              DexUtilTestDataFactory
+* Developer		:     Abhishek Goel
+* Created Date	:     30/1/2020
+* @description	:     This generic test is used to create the records for test classes
+* Last Modified Date: 30/1/2020
+* Change Log: 
+*/
+@IsTest
+public with sharing class DexUtilTestDataFactory {
     /**
      * @description An instance of the Safely class used for safe database operations.
      */
     public static Safely safe = new Safely();
+
      /**
      * @description Creates records with optional attributes and inserts them into the database.
      * 
@@ -61,7 +62,7 @@
         return records;
     }
 
-   /**
+    /**
      * @description Creates a list of Account records with specified attributes and optionally inserts them into the database.
      * 
      * @param numToInsert  The number of Account records to create.
@@ -103,7 +104,7 @@
         return createRecords(consToInsert, doInsert, attributes);
     }
 
-   /**
+    /**
      * @description Creates a list of Opportunity records with specified attributes and optionally inserts them into the database.
      * 
      * @param numToInsert  The number of Opportunity records to create.
@@ -125,16 +126,17 @@
         }
         return createRecords(consToInsert, doInsert, attributes);
     }
-        /**
-         * @description Creates a list of Rule__c records with specified attributes and optionally inserts them into the database.
-         * 
-         * @param numToInsert  The number of Rule__c records to create.
-         * @param doInsert     Boolean flag indicating whether to insert the records into the database.
-         * @param attributes   Map of attributes to be applied to the records during creation.
-         *                     Keys represent field names, and values can be single values or lists of values
-         *                     corresponding to each record.
-         * @return             List of created Rule__c records.
- 		*/
+
+    /**
+     * @description Creates a list of Rule__c records with specified attributes and optionally inserts them into the database.
+     * 
+     * @param numToInsert  The number of Rule__c records to create.
+     * @param doInsert     Boolean flag indicating whether to insert the records into the database.
+     * @param attributes   Map of attributes to be applied to the records during creation.
+     *                     Keys represent field names, and values can be single values or lists of values
+     *                     corresponding to each record.
+     * @return             List of created Rule__c records.
+    */
     public static list<Rule__c> createRule(Integer numToInsert, Boolean doInsert, Map<String, Object> attributes){
         List<Rule__c> ruleToInsert = new List<Rule__c>();
         for(Integer i=0; i< numToInsert; i++){
@@ -145,16 +147,17 @@
         }
         return createRecords(ruleToInsert, doInsert, attributes);
     }
-        /**
-         * @description Creates a list of Rule_Condition__c records with specified attributes and optionally inserts them into the database.
-         * 
-         * @param numToInsert  The number of Rule_Condition__c records to create.
-         * @param doInsert     Boolean flag indicating whether to insert the records into the database.
-         * @param attributes   Map of attributes to be applied to the records during creation.
-         *                     Keys represent field names, and values can be single values or lists of values
-         *                     corresponding to each record.
-         * @return             List of created Rule_Condition__c records.
- 		*/
+
+    /**
+     * @description Creates a list of Rule_Condition__c records with specified attributes and optionally inserts them into the database.
+     * 
+     * @param numToInsert  The number of Rule_Condition__c records to create.
+     * @param doInsert     Boolean flag indicating whether to insert the records into the database.
+     * @param attributes   Map of attributes to be applied to the records during creation.
+     *                     Keys represent field names, and values can be single values or lists of values
+     *                     corresponding to each record.
+     * @return             List of created Rule_Condition__c records.
+    */
     public static list<Rule_Condition__c> createRuleCondition(Integer numToInsert, Boolean doInsert, Map<String, Object> attributes){
         List<Rule_Condition__c> ruleConditionToInsert = new List<Rule_Condition__c>();
         for(Integer i=0; i< numToInsert; i++){
@@ -167,7 +170,8 @@
         }
         return createRecords(ruleConditionToInsert, doInsert, attributes);
     }
-     /**
+
+    /**
      * @description Creates a list of TransactionLog__c records with specified attributes and optionally inserts them into the database.
      * 
      * @param numToInsert  The number of TransactionLog__c records to create.
@@ -186,7 +190,7 @@
         return createRecords(transactionLogToInsert, doInsert, attributes);
     }
 
-  /**
+    /**
      * @description Creates a list of Document_Template__c records with specified attributes and optionally inserts them into the database.
      * 
      * @param numToInsert  The number of Document_Template__c records to create.
@@ -241,7 +245,6 @@
      *                     corresponding to each record.
      * @return             List of created Document_Clause__c records.
      */
-
     Public static List<Document_Clause__c> createDocumentClause(Integer numToInsert, Boolean doInsert, Map<String, Object> attributes){
         List<Document_Clause__c> docClauseToInsert = New List<Document_Clause__c>();
         for(Integer i=0; i< numToInsert; i++){
@@ -256,7 +259,7 @@
         return createRecords(docClauseToInsert, doInsert, attributes);
     }
 
-   /**
+    /**
      * @description Creates a list of Document_Template_Section__c records with specified attributes and optionally inserts them into the database.
      * 
      * @param numToInsert  The number of Document_Template_Section__c records to create.
@@ -280,6 +283,7 @@
         }
         return createRecords(docTemplateSectionToInsert, doInsert, attributes);
     }
+
     /**
      * @description Creates a test User record with a unique username and assigns the System Administrator profile.
      * 
@@ -301,6 +305,7 @@
         assignPermissionSetToUsers(userId);
         return retUser[0];
     }
+
     /**
      * @description Assigns the specified Permission Set to the given set of Users.
      * 
@@ -319,10 +324,10 @@
         }
        Database.upsert(permissionSetList,false);
     }
+
 	/**
      * @description Custom exception class to handle exceptions in the SafeClass.
      * Extends the standard Exception class.
      */
-    public class SafeClassException extends Exception{
-    }
+    public class SafeClassException extends Exception{}
 }

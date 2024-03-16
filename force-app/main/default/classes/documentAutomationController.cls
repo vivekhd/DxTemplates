@@ -5,7 +5,7 @@
 * @description		: This class creates the HTML content for Document Record Generation and passes it to the Queueable Class.
 * Last Modified Date: 08/13/2023
 */
-public with sharing class DocumentAutomationController {
+public with sharing class documentAutomationController {
     /**
  * Represents an instance of the Safely class for handling safe operations.
  */

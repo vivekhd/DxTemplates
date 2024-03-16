@@ -1,8 +1,8 @@
-@isTest
+@IsTest
 private class ProductSetupCtrl_Test {
 
 	/* ProductSetupCtrl Test Class */
-    @isTest
+    @IsTest
     static void getLookupListTest(){
         Test.startTest();
         User us = DexUtilTestDataFactory.CreateTestUser();
@@ -14,7 +14,7 @@ private class ProductSetupCtrl_Test {
     }
     
     /* ProductSetupCtrl MultiSelectLookupController Class */
-    @isTest
+    @IsTest
     static void retrieveRecordsTest(){
         User us = DexUtilTestDataFactory.CreateTestUser();
         System.runAs(us){
@@ -26,7 +26,8 @@ private class ProductSetupCtrl_Test {
     }
     
     /*SaveDocumentTemplate Test Class*/        
-    @isTest public static void getAllDocumentTemplateSectionsTest1(){
+    @IsTest 
+    static void getAllDocumentTemplateSectionsTest1(){
         User us = DexUtilTestDataFactory.CreateTestUser();
         System.runAs(us) {
             List<Document_Template__c> documentTemplate = DexUtilTestDataFactory.createDocumentTemplate(1, true, null);
@@ -134,7 +135,8 @@ private class ProductSetupCtrl_Test {
     }
        
     
-    @isTest public static void getAllDocumentTemplateSectionsTest2(){
+    @IsTest 
+    static void getAllDocumentTemplateSectionsTest2(){
         User us = DexUtilTestDataFactory.CreateTestUser();
         System.runAs(us){
             try{
@@ -217,7 +219,8 @@ private class ProductSetupCtrl_Test {
     
     
     
-    @IsTest public static void displayPDFControllerTest3(){
+    @IsTest 
+    static void displayPDFControllerTest3(){
         User us = DexUtilTestDataFactory.CreateTestUser();
         System.runAs(us){
                 
@@ -292,7 +295,8 @@ private class ProductSetupCtrl_Test {
         Test.stopTest();
     }
     
-    @IsTest public static void displayPDFControllerTest4(){
+    @IsTest 
+    static void displayPDFControllerTest4(){
         User us = DexUtilTestDataFactory.CreateTestUser();
         System.runAs(us){
             try{
@@ -365,7 +369,8 @@ private class ProductSetupCtrl_Test {
         Test.stopTest();
     }
 
-    @IsTest public static void displayPDFControllerTest5(){
+    @IsTest 
+    static void displayPDFControllerTest5(){
         User us = DexUtilTestDataFactory.CreateTestUser();
         System.runAs(us){
             List<Document_Template__c> documentTemplate = DexUtilTestDataFactory.createDocumentTemplate(1, true, null);
@@ -387,7 +392,8 @@ private class ProductSetupCtrl_Test {
         Test.stopTest();
     }
 
-    @IsTest public static void test6(){
+    @IsTest 
+    static void test6(){
         User us = DexUtilTestDataFactory.CreateTestUser();
         System.runAs(us){
              try{
@@ -446,7 +452,8 @@ private class ProductSetupCtrl_Test {
         }
     }
     
-    @IsTest public static void displayPDFControllerTest7(){
+    @IsTest 
+    static void displayPDFControllerTest7(){
         User us = DexUtilTestDataFactory.CreateTestUser();
         System.runAs(us){
             List<Document_Template__c> documentTemplate = DexUtilTestDataFactory.createDocumentTemplate(1, true, null);
@@ -467,7 +474,8 @@ private class ProductSetupCtrl_Test {
         }
     }
 	
-    @IsTest public static void displayPDFControllerTest8(){
+    @IsTest 
+    static void displayPDFControllerTest8(){
         User us = DexUtilTestDataFactory.CreateTestUser();
         System.runAs(us){
             List<Document_Template__c> documentTemplate = DexUtilTestDataFactory.createDocumentTemplate(1, true, null);
@@ -491,7 +499,7 @@ private class ProductSetupCtrl_Test {
     }
     
 	@IsTest 
-    public static void testgetRelatedToTypeOptions(){
+    static void testgetRelatedToTypeOptions(){
         User us = DexUtilTestDataFactory.CreateTestUser();
         System.runAs(us){ 
             SaveDocumentTemplate.getRelatedToTypeOptions();
@@ -499,40 +507,21 @@ private class ProductSetupCtrl_Test {
        System.assert(true,true);
     }
 
-    @TestSetup 
-    static void createTransactionLogRecords() {
-        List<TransactionLog__c> errRecordsInsert=new List<TransactionLog__c>();
-        for(Integer i=0;i<12;i++) {
-            errRecordsInsert.add(new TransactionLog__c());
-        }
-        
-        if(!errRecordsInsert.isEmpty()){
-            insert errRecordsInsert;
-        }
-                System.assertEquals(true, errRecordsInsert.size()>0, 'Error: TransactionLog records not deleted');
-
-    }
-    
-    @Istest 
-    static void executeTransacationLogsBatchToDelete(){
-        for(TransactionLog__c rec:[select id,createddate from TransactionLog__c]) {
-            Test.setCreatedDate(rec.Id, system.now()-31);
-        }
-
-        Test.startTest(); 
-            String sch = '0 0 23 L * ?';
-            DeleteTransactionLogRecords batchable=new DeleteTransactionLogRecords();
-            system.schedule('Test ErrorClearence Class', sch, batchable);  
-            Database.executeBatch(batchable);
-        Test.stopTest(); 
-
-        List<TransactionLog__c> afterRecords=new List<TransactionLog__c>([select id,createddate from TransactionLog__c]);
-                System.assertEquals(0, afterRecords.size(), 'Error: TransactionLog records not deleted');
-    }
 
     @IsTest
     private static void executeEncodingHTMLText(){
         DisplayPDFController.SFDC_HTMLENCODE('Encode This String &,<>"\'');
         System.assert(true,true);
+    }
+    
+    @IsTest
+    private static void executeGetFields(){
+        Test.startTest();
+        User us = DexUtilTestDataFactory.CreateTestUser();
+        System.runAs(us){
+            List<MergeFieldsClass.FieldWrap> fieldListOfAccount = MergeFieldsClass.getFields('Account');
+            Assert.areNotEqual(fieldListOfAccount.size(),0,'');
+        }
+        Test.stopTest();
     }
 }

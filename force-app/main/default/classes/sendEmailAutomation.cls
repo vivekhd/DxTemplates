@@ -5,7 +5,7 @@
  * @description        : This class renders the pdf from Document__c record content and generates the pdf version.
  * Last Modified Date  : 08/10/2023
  */
-global class SendEmailAutomation implements Queueable, Database.AllowsCallouts {
+global class sendEmailAutomation implements Queueable, Database.AllowsCallouts {
 
     public static Safely safe = new Safely();
     private static Savepoint sp1;

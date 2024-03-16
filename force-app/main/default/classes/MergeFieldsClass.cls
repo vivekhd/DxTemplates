@@ -124,17 +124,17 @@ public with sharing class MergeFieldsClass {
      */
     @AuraEnabled
     public static List<FieldWrap> getFields(String selectedObject){
-        Map<String, Schema.SObjectType> gd = Schema.getGlobalDescribe(); 
-        Schema.SObjectType ctype = gd.get(selectedObject); 
-        Map<String, Schema.SobjectField> fmap = ctype.getDescribe().fields.getMap();   
-        List<FieldWrap> strList = new List<FieldWrap>();
+        List<FieldWrap> strList;
         try{
+            Map<String, Schema.SObjectType> gd = Schema.getGlobalDescribe(); 
+            Schema.SObjectType ctype = gd.get(selectedObject); 
+            Map<String, Schema.SobjectField> fmap = ctype.getDescribe().fields.getMap();   
+            strList = new List<FieldWrap>();
             for(String fieldName: fmap.keySet()) {
                 FieldWrap wmp = new FieldWrap();
                 String dType = String.valueOf(fmap.get(fieldName).getDescribe().getType());
                 wmp.name = fmap.get(fieldName).getDescribe().getLabel(); 
                 wmp.apiName = fmap.get(fieldName).getDescribe().getName();
-                
                 wmp.dataType = String.valueOf(fmap.get(fieldName).getDescribe().getType()); 
                 if(dType== 'REFERENCE'){
                     wmp.name=wmp.name+'>';

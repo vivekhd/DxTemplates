@@ -1,6 +1,6 @@
-@isTest
+@IsTest
 private class Safely_Test {
-	@isTest
+	@IsTest
     static void safelyTest(){
         
         Test.startTest();

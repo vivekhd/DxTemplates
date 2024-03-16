@@ -1,6 +1,6 @@
-@isTest
+@IsTest
 public class PdfDisplayTest {
-    @isTest
+    @IsTest
     public static void testGetObjectDetails() {
        
         List<Account> acc = DexUtilTestDataFactory.createAccounts(1, true, null);          
