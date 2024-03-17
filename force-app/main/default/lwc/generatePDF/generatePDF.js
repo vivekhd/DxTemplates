@@ -8,6 +8,7 @@ export default class GeneratePDF extends  NavigationMixin(LightningElement)  {
     @api recordId;
     objectApiName;
     objectLabel;
+    recordName;
     domainURL;
 
     connectedCallback() {
@@ -18,9 +19,9 @@ export default class GeneratePDF extends  NavigationMixin(LightningElement)  {
             .then(result => {
                 this.objectApiName = result.objectName;
                 this.objectLabel = result.objectLabel;
+                this.recordName = result.recordName;
             })
             .catch(() => {});
-
     }
 
     getDomainBaseURL() {
@@ -34,17 +35,14 @@ export default class GeneratePDF extends  NavigationMixin(LightningElement)  {
                 let tempError = error.toString();
                 let errorMessage = error.message || 'Unknown error message';
                 createLog({recordId:'', className:'generatePDF LWC Component', exceptionMessage:errorMessage, logData:tempError, logType:'Exception'});
-           
             });
     }
 
     handleClick() {
         const anchor = document.createElement('a');
-        let url = `/lightning/cmp/DxCPQ__NavigateToDocument?c__recordId=${this.recordId}`;
+        let url = `/lightning/cmp/DxCPQ__NavigateToDocument?c__recordId=${this.recordId}?Name=${this.recordName}`;
         anchor.href = this.domainURL + url;
         anchor.target = '_self';
         anchor.click();
     }
-
-
 }

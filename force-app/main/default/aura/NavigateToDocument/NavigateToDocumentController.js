@@ -17,13 +17,11 @@
             if (state === 'SUCCESS') {
                 cmp.set('v.objectDetails', response.getReturnValue());
                 cmp.set('v.quoteId', recordId);
-               
             } else if (state === 'ERROR') {
                 var errors = response.getError();
                 console.error(errors);
             }
         });
-
         $A.enqueueAction(action);
     },
 });

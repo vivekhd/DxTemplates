@@ -24,6 +24,7 @@ export default class DxtemplateSelectorCmp extends NavigationMixin(LightningElem
     @api recordId;
     @api objectApiName;
     @api objectLabel;
+    @api recordName;
     showpreviewbutton = false;
     showgeneratepdf = false;
     showsavepdftoquote = false;
@@ -37,9 +38,9 @@ export default class DxtemplateSelectorCmp extends NavigationMixin(LightningElem
     @track showSendEmailModal = false;
     @track modifiedPDFName;
 
-
     @wire(CurrentPageReference)
     getCurrentPageReference(currentPageReference) {
+        debugger;
         this.backtoObj = "Back to " + this.objectLabel;
         this.savePDFtoObj = "Save PDF to " + this.objectLabel;
         this.sendEmailWithAttachment = "Send Email With " + this.objectLabel + " PDF Attachment";
@@ -60,9 +61,8 @@ export default class DxtemplateSelectorCmp extends NavigationMixin(LightningElem
     connectedCallback() {
         window.clearTimeout(this.delayTimeout);
         this.delayTimeout = setTimeout(() => { }, 0);
-
         let dateKey = new Date().toLocaleString().split(', ');
-        this.modifiedPDFName = 'DX-' + this.objectLabel + '-' + dateKey[0].replaceAll('/','') + '-' + dateKey[1].split(' ')[0].replaceAll(':','');
+        this.modifiedPDFName = this.recordName + '-' + dateKey[0].replaceAll('/','') + '-' + dateKey[1].split(' ')[0].replaceAll(':','');
     }
 
     selectItemEventHandler(event) {
@@ -81,7 +81,6 @@ export default class DxtemplateSelectorCmp extends NavigationMixin(LightningElem
         this.showsavepdftoquote = false;
         this.showsendemail = false;
         this.showgeneratepdf = false;
-
     }
 
     closeModal() {
@@ -109,25 +108,25 @@ export default class DxtemplateSelectorCmp extends NavigationMixin(LightningElem
 
     savePDFtoQuote() {
         SavePDFtoQuote({ documentid: this.pdfdocumentid, quoteId: this.recordId, pdfName: this.modifiedPDFName })
-            .then((result) => {
-                this.downloadURL = '/servlet/servlet.FileDownload?file=' + result;
-                const event4 = new ShowToastEvent({
-                    title: 'Success',
-                    message: `PDF document is saved under ${this.objectLabel} successfully!`,
-                    variant: 'success',
-                });
-                this.dispatchEvent(event4);
-                this.showsavepdftoquote = false;
-                this.showsendemail = true;
-            })
-            .catch(() => {
-                const event4 = new ShowToastEvent({
-                    title: 'Error',
-                    message: `An Error occurred while saving the PDF document. Please contact the System Administrator.`,
-                    variant: 'error',
-                });
-                this.dispatchEvent(event4);
-            })
+        .then((result) => {
+            this.downloadURL = '/servlet/servlet.FileDownload?file=' + result;
+            const event4 = new ShowToastEvent({
+                title: 'Success',
+                message: `PDF document is saved under ${this.objectLabel} successfully!`,
+                variant: 'success',
+            });
+            this.dispatchEvent(event4);
+            this.showsavepdftoquote = false;
+            this.showsendemail = true;
+        })
+        .catch(() => {
+            const event4 = new ShowToastEvent({
+                title: 'Error',
+                message: `An Error occurred while saving the PDF document. Please contact the System Administrator.`,
+                variant: 'error',
+            });
+            this.dispatchEvent(event4);
+        })
     }
 
     handlePDFRename(event) {
@@ -141,14 +140,13 @@ export default class DxtemplateSelectorCmp extends NavigationMixin(LightningElem
             ]).then(() => {
             })
             .catch(error => {
-                  let tempError = error.toString();
-            let errorMessage = error.message || 'Unknown error message';
-            createLog({recordId:'', className:'dxtemplateSelectorCmp LWC Component', exceptionMessage:errorMessage, logData:tempError, logType:'Exception'});
+                let tempError = error.toString();
+                let errorMessage = error.message || 'Unknown error message';
+                createLog({recordId:'', className:'dxtemplateSelectorCmp LWC Component', exceptionMessage:errorMessage, logData:tempError, logType:'Exception'});
             });
     }
 
     buttonClicked; //defaulted to false
-
     @track cssMaxorMinClass2 = 'dxcappcontainer2nor';
     @track iconMaxorMinName = 'utility:new_window';
     @track titleMaxorMinName = 'Maximize Window';

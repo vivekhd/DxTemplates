@@ -16,15 +16,17 @@ global with sharing class PdfDisplay {
     public class ObjectDetails {
         @AuraEnabled public String objectName;
         @AuraEnabled public String objectLabel;
+        @AuraEnabled public String recordName;
         
-	/**
+	    /**
          * @description Constructor to initialize ObjectDetails with object name and label.
          * @param name  String representing the object name.
          * @param label String representing the object label.
          */
-        public ObjectDetails(String name, String label) {
+        public ObjectDetails(String name, String label, String recordValue) {
             objectName = name;
             objectLabel = label;
+            recordName = recordValue;
         }
     }
     
@@ -37,14 +39,17 @@ global with sharing class PdfDisplay {
     public static ObjectDetails getObjectDetails(Id recordId) {   
         String objectName;
         String objectLabel;
+        String recordName;
         try{    
             objectName = recordId.getSObjectType().getDescribe().getName();
             objectLabel = recordId.getSObjectType().getDescribe().getLabel();
+            SObject recordValue = Database.Query('Select Name from ' + objectName + ' Where Id =: recordId WITH SECURITY_ENFORCED');
+            recordName = String.valueOf(recordValue.get('Name'));
         }
         catch (Exception ex) {
             LogHandler.createLog((Id) null,'PdfDisplay.getObjectDetails()','recordId : '+recordId+' '+ex.getLineNumber()+ex.getStackTraceString()+ex.getCause(),ex.getMessage(),'Exception');
         }  
-        return new ObjectDetails(objectName, objectLabel);
+        return new ObjectDetails(objectName, objectLabel, recordName);
     }
     
 	/**
@@ -55,5 +60,4 @@ global with sharing class PdfDisplay {
     public static String getDomainUrl() {
         return URL.getOrgDomainUrl().toExternalForm();
     }
-    
 }

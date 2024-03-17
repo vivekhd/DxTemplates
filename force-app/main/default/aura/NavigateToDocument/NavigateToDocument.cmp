@@ -1,9 +1,12 @@
-<aura:component controller="PdfDisplay" implements="flexipage:availableForAllPageTypes,lightning:isUrlAddressable" access="global">
-
+<aura:component controller="PdfDisplay" implements="lightning:isUrlAddressable" access="global">
     <aura:attribute type="String" name="quoteId" />
     <aura:attribute name="objectDetails" type="Object" />
     <aura:handler name="init" value="{!this }" action="{!c.init }" />
     <aura:if isTrue="{!v.quoteId }">
-        <c:dxtemplateSelectorCmp recordId="{!v.quoteId}" objectApiName="{!v.objectDetails.objectName}" objectLabel="{!v.objectDetails.objectLabel}" />
+        <c:dxtemplateSelectorCmp recordId="{!v.quoteId}" 
+        objectApiName="{!v.objectDetails.objectName}" 
+        objectLabel="{!v.objectDetails.objectLabel}" 
+        recordName="{!v.objectDetails.recordName}"
+        />
     </aura:if>
 </aura:component>

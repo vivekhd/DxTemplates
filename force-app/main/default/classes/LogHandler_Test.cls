@@ -50,6 +50,4 @@ private class LogHandler_Test {
         }
         System.assertEquals(true, errRecordsInsert.size()>0, 'Error: TransactionLog records not deleted');
     }
-
-
 }
