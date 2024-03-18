@@ -381,20 +381,25 @@ export default class DxTemplateSetup extends LightningElement {
     * @param {Object} event
     */
     generateCanvas() {
-      const canvas = this.template.querySelector('.canvasText');
-      const context = canvas.getContext('2d');
-      context.clearRect(0, 0, canvas.width, canvas.height);
-      if (this.rotationValue !== this.previousRotationValue) {
-          context.translate(canvas.width / 2, canvas.height / 2);
-          context.rotate((this.rotationValue - this.previousRotationValue )* Math.PI / 180);            
-          context.translate(-canvas.width / 2, -canvas.height / 2);
-          this.previousRotationValue = this.rotationValue;
-      }
-      context.globalAlpha = this.opacityValue;
-      context.font = this.fontSizeValue + 'px Arial';
-      let textWidth = context.measureText(this.watermarkText).width;
-      context.fillStyle = this.colorValue;
-      context.fillText(this.watermarkText, (canvas.width/2 - textWidth/2), canvas.height / 2);
+        try{
+            const canvas = this.template.querySelector('.canvasText');
+            const context = canvas.getContext('2d');
+            context.clearRect(0, 0, canvas.width, canvas.height);
+            if (this.rotationValue !== this.previousRotationValue) {
+                context.translate(canvas.width / 2, canvas.height / 2);
+                context.rotate((this.rotationValue - this.previousRotationValue )* Math.PI / 180);            
+                context.translate(-canvas.width / 2, -canvas.height / 2);
+                this.previousRotationValue = this.rotationValue;
+            }
+            context.globalAlpha = this.opacityValue;
+            context.font = this.fontSizeValue + 'px Arial';
+            let textWidth = context.measureText(this.watermarkText).width;
+            context.fillStyle = this.colorValue;
+            context.fillText(this.watermarkText, (canvas.width/2 - textWidth/2), canvas.height / 2);
+        }
+        catch(error){
+            console.log('error while getting canvas line 401 templateSetup --> ', error);
+        }
   }
     /**
     * Method to handle rotation values for Text and Image Watermarks seperately
@@ -420,16 +425,21 @@ export default class DxTemplateSetup extends LightningElement {
     * Once the images drawn in both cases - text & image are saved then their contentversion IDs are captured and using the updateRecord the Watermark_Data__c field on Document_Template__c object is updated based on the selected ID
     */
     handleWaterMarkSave(){
-      let canvasText = this.template.querySelector('.canvasText');
-      if(canvasText && this.watermarkText !== ''){
-        let dataURLText = canvasText.toDataURL();
-        this.baseDataLst.push({ 'text': dataURLText.split(',')[1], title:'Text' });
-      }
-      let canvasImage = this.template.querySelector('.canvasImage');
-      if(canvasImage && this.imageUrl){
-        let dataURLImage = canvasImage.toDataURL();
-        this.baseDataLst.push({ 'Image': dataURLImage.split(',')[1], title:'Image' });
-      }
+        try{
+            let canvasText = this.template.querySelector('.canvasText');
+            if(canvasText && this.watermarkText !== ''){
+                let dataURLText = canvasText.toDataURL();
+                this.baseDataLst.push({ 'text': dataURLText.split(',')[1], title:'Text' });
+            }
+            let canvasImage = this.template.querySelector('.canvasImage');
+            if(canvasImage && this.imageUrl){
+                let dataURLImage = canvasImage.toDataURL();
+                this.baseDataLst.push({ 'Image': dataURLImage.split(',')[1], title:'Image' });
+            }
+        }
+        catch(error){
+            console.log('error while getting canvas line 432 templateSetup --> ', error);
+        }
       saveContentVersion({ title: "WatermarkImage", base64DataList: this.baseDataLst, templateId: this.documenttemplaterecordid, wtImage : true })
         .then(result => {
             const fields ={};
@@ -612,6 +622,7 @@ export default class DxTemplateSetup extends LightningElement {
         this.pageImageOption = 'All Pages - Image';
         this.previousImgRotationValue = '0';
         this.previousRotationValue = '0';
+        this.imageUrl = '';
         this.updateCheckedValue(this.pageTextOption, this.watermarkPageOptionsText);
         this.updateCheckedValue(this.pageImageOption, this.watermarkPageOptionsImage);
 

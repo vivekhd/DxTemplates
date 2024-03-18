@@ -1173,20 +1173,25 @@ popUpMessage; // Popup message.
     * @param {Object} event
     */
   generateCanvas() {
-    const canvas = this.template.querySelector('canvas');
-    const context = canvas.getContext('2d');
-    context.clearRect(0, 0, canvas.width, canvas.height);
-    if (this.rotationValue !== this.previousRotationValue) {
-      context.translate(canvas.width / 2, canvas.height / 2);
-      context.rotate((this.rotationValue - this.previousRotationValue) * Math.PI / 180);
-      context.translate(-canvas.width / 2, -canvas.height / 2);
-      this.previousRotationValue = this.rotationValue;
+    try{
+      const canvas = this.template.querySelector('canvas');
+      const context = canvas.getContext('2d');
+      context.clearRect(0, 0, canvas.width, canvas.height);
+      if (this.rotationValue !== this.previousRotationValue) {
+        context.translate(canvas.width / 2, canvas.height / 2);
+        context.rotate((this.rotationValue - this.previousRotationValue) * Math.PI / 180);
+        context.translate(-canvas.width / 2, -canvas.height / 2);
+        this.previousRotationValue = this.rotationValue;
+      }
+      context.globalAlpha = this.opacityValue;
+      context.font = this.fontSizeValue + 'px Arial';
+      let textWidth = context.measureText(this.watermarkText).width;
+      context.fillStyle = this.colorValue;
+      context.fillText(this.watermarkText, (canvas.width/2 - textWidth/2), canvas.height / 2);
     }
-    context.globalAlpha = this.opacityValue;
-    context.font = this.fontSizeValue + 'px Arial';
-    let textWidth = context.measureText(this.watermarkText).width;
-    context.fillStyle = this.colorValue;
-    context.fillText(this.watermarkText, (canvas.width/2 - textWidth/2), canvas.height / 2);
+    catch(error){
+      console.log('error while getting canvas line 1193 templatedesignerCMP --> ', error);
+    } 
   }
 
     /**
@@ -1213,18 +1218,22 @@ popUpMessage; // Popup message.
     * Once the images drawn in both cases - text & image are saved then their contentversion IDs are captured and using the updateRecord the Watermark_Data__c field on Document_Template__c object is updated based on the selected ID
     */
   handleWaterMarkSave() {
-    let canvasText = this.template.querySelector('.canvasText');
-    if (canvasText && this.watermarkText !== '') {
-      let dataURLText = canvasText.toDataURL();
-      this.baseDataLst.push({ 'text': dataURLText.split(',')[1], title:'Text' });
+    try{
+      let canvasText = this.template.querySelector('.canvasText');
+      if (canvasText && this.watermarkText !== '') {
+        let dataURLText = canvasText.toDataURL();
+        this.baseDataLst.push({ 'text': dataURLText.split(',')[1], title:'Text' });
+      }
+  
+      let canvasImage = this.template.querySelector('.canvasImage');
+      if (canvasImage && this.imageUrl) {
+        let dataURLImage = canvasImage.toDataURL();
+        this.baseDataLst.push({ 'Image': dataURLImage.split(',')[1], title:'Image' });
+      }
     }
-
-    let canvasImage = this.template.querySelector('.canvasImage');
-    if (canvasImage && this.imageUrl) {
-      let dataURLImage = canvasImage.toDataURL();
-      this.baseDataLst.push({ 'Image': dataURLImage.split(',')[1], title:'Image' });
+    catch(error){
+      console.log('error while getting canvas line 1230 templatedesignerCMP --> ', error);
     }
-
 
     const originalImageMap = this.baseDataLst.find(entry => entry.title === 'OriginalImg');
     this.hasOriginalImage = originalImageMap != undefined ? true : false;
@@ -1297,6 +1306,7 @@ popUpMessage; // Popup message.
               this.opacityImageValue = '1.0';
               this.updateCheckedValue(this.pageTextOption, this.watermarkPageOptionsText);
               this.updateCheckedValue(this.pageImageOption, this.watermarkPageOptionsImage);
+              this.imageUrl =  '';
               this.template.querySelector('c-modal').hide();
           })
           .catch(error => {
@@ -1335,6 +1345,7 @@ popUpMessage; // Popup message.
     this.activeTab = '';
     this.previousRotationValue = '0';
     this.previousImgRotationValue = '0';
+    this.imageUrl =  '';
   }
 
   /**
@@ -1361,7 +1372,7 @@ popUpMessage; // Popup message.
         });
       }
       catch(error){
-        console.log(error);
+        console.log('error while getting canvas line 1370 templatedesignerCMP --> ',error);
       }
     };
     reader.readAsDataURL(file);
@@ -1373,25 +1384,33 @@ popUpMessage; // Popup message.
   */
   drawOnCanvas(imageUrl) {
      return new Promise((resolve, reject) => {
-      const canvas = this.template.querySelector('.canvasImage');
-      const ctx = canvas.getContext('2d');
-      const image = new Image();
-      image.src = imageUrl;
-      image.onload = () => {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        if (this.rotationImagevalue !== this.previousImgRotationValue) {
-          ctx.translate(canvas.width / 2, canvas.height / 2);
-          ctx.rotate((this.rotationImagevalue - this.previousImgRotationValue) * Math.PI / 180);
-          ctx.translate(-canvas.width / 2, -canvas.height / 2);
-          this.previousImgRotationValue = this.rotationImagevalue;
-        }
-        ctx.globalAlpha = this.opacityImageValue;
-        let imgwidth = this.imageScalingValue == 0 ? image.width : image.width * (this.imageScalingValue / 100);
-        let imgheight = this.imageScalingValue == 0 ? image.height : image.height * (this.imageScalingValue / 100);
-        ctx.drawImage(image, (canvas.width - imgwidth) / 2, (canvas.height - imgheight) / 2, this.imageScalingValue == 0 ? image.width : image.width * (this.imageScalingValue / 100), this.imageScalingValue == 0 ? image.height : image.height * (this.imageScalingValue / 100));
 
-        resolve();
-      };
+      try{
+        const canvas = this.template.querySelector('.canvasImage');
+        const ctx = canvas.getContext('2d');
+        const image = new Image();
+        image.src = imageUrl;
+        image.onload = () => {
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
+          if (this.rotationImagevalue !== this.previousImgRotationValue) {
+            ctx.translate(canvas.width / 2, canvas.height / 2);
+            ctx.rotate((this.rotationImagevalue - this.previousImgRotationValue) * Math.PI / 180);
+            ctx.translate(-canvas.width / 2, -canvas.height / 2);
+            this.previousImgRotationValue = this.rotationImagevalue;
+          }
+          ctx.globalAlpha = this.opacityImageValue;
+          let imgwidth = this.imageScalingValue == 0 ? image.width : image.width * (this.imageScalingValue / 100);
+          let imgheight = this.imageScalingValue == 0 ? image.height : image.height * (this.imageScalingValue / 100);
+          ctx.drawImage(image, (canvas.width - imgwidth) / 2, (canvas.height - imgheight) / 2, this.imageScalingValue == 0 ? image.width : image.width * (this.imageScalingValue / 100), this.imageScalingValue == 0 ? image.height : image.height * (this.imageScalingValue / 100));
+  
+  
+          resolve();
+        };
+      }
+      catch(error){
+        console.log('error while getting canvas line 1387 templatedesignerCMP --> ', error);
+      }
+     
     });
   }
 
@@ -1542,6 +1561,7 @@ popUpMessage; // Popup message.
     this.checkedValText = true;
     this.watermarkText = '';
     this.checkedValImage = false;
+    this.imageUrl =  '';
   }
 
   resetWatermarkValues(){
@@ -1557,6 +1577,7 @@ popUpMessage; // Popup message.
     this.opacityImageValue ='1.0';
     this.rotationImagevalue = '0';
     this.pageImageOption = 'All Pages - Image';
+    this.imageUrl =  '';
     this.updateCheckedValue(this.pageTextOption, this.watermarkPageOptionsText);
     this.updateCheckedValue(this.pageImageOption, this.watermarkPageOptionsImage);
   }
