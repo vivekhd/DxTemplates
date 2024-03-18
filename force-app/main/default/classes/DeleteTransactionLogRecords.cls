@@ -2,25 +2,26 @@
 * Class			    : DeleteTransactionLogRecords
 * Developer			: Rahul Bejgam (SE - Dextara Digital)
 * Created Date		: 
-* @description		: Batch class to delete TransactionLog__c records older than 30 days.
+* @description		: Batch class to delete TransactionLog__c records older than 30 days. The test class is LogHandler_Test.
 * Last Modified Date: 
 */
 public with sharing class DeleteTransactionLogRecords implements Database.Batchable<sObject>,schedulable{
 	
+    /**
+     * @description An instance of the Safely class used for safe database operations.
+     */
+    public static Safely safe = new Safely();
+    
     /**
      * @description Method to start the batch process by querying TransactionLog__c records created more than 30 days ago.
      * @param bc The batchable context passed by the system.
      * @return Database.QueryLocator object containing the query locator for the batch job.
      */
     public Database.QueryLocator start(Database.BatchableContext bc) {
-        String query = 'SELECT Id FROM TransactionLog__c where createddate!=LAST_N_DAYS:30';
+        String retirementDate = String.valueOf ( [Select Id, Label, Wait_Time__c from Transaction_Logs_Tenure__mdt Where Label = 'Default' WITH SECURITY_ENFORCED Limit 1].Wait_Time__c );
+        String query = 'SELECT Id FROM TransactionLog__c where createddate!=LAST_N_DAYS:' + retirementDate;
         return Database.getQueryLocator(query);
     }
-
-    /**
-     * @description An instance of the Safely class used for safe database operations.
-     */
-    public static Safely safe = new Safely();
     
 	/**
      * @description Executes the batch process by deleting the provided list of TransactionLog__c records.
