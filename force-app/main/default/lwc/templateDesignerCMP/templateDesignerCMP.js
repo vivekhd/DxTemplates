@@ -1536,6 +1536,10 @@ popUpMessage; // Popup message.
     }
   }
 
+  /**
+  * Method to show up the Template/Watermark help document
+  * @param {Object} event
+  */
   handlehelp(event){
     let relatedObjectsMap = this.pdfLinksData.find(item => item.MasterLabel === event.currentTarget.dataset.val);
     let pdfUrl = relatedObjectsMap ? relatedObjectsMap.DxCPQ__Section_PDF_URL__c : null;
@@ -1548,6 +1552,10 @@ popUpMessage; // Popup message.
     this[NavigationMixin.Navigate](config);
   }
 
+  /**
+  * Method to clear the watermark fields when the modal is closed
+  * @param {Object} event
+  */
   handleDialogBoxClosed(event){
     this.previousImgRotationValue = '0';
     this.previousRotationValue = '0';
@@ -1564,6 +1572,9 @@ popUpMessage; // Popup message.
     this.imageUrl =  '';
   }
 
+  /**
+  * Method to reset the all Watermark fields both Text and Image Watermark
+  */
   resetWatermarkValues(){
     this.fontSizeValue = '22';
     this.opacityValue = '1.0';

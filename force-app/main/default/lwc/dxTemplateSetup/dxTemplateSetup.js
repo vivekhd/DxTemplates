@@ -601,12 +601,17 @@ export default class DxTemplateSetup extends LightningElement {
         }
     }
 
+    /**
+    * Method to reset the specific Watermark fields of Image Watermark
+    */
     resetImageWatermarkFields(){
         this.rotationImagevalue = '0';
         this.imageScalingValue = '100';
         this.opacityImageValue = '1.0';
     }
-
+    /**
+    * Method to reset the all Watermark fields both Text and Image Watermark
+    */
     resetWatermarkValues(){
         this.fontSizeValue = '22';
         this.opacityValue = '1.0';
@@ -648,6 +653,10 @@ export default class DxTemplateSetup extends LightningElement {
         }
     }
 
+    /**
+    * Method to clear the watermark fields when the modal is closed
+    * @param {Object} event
+    */
     handleDialogBoxClosed(event){
         this.previousImgRotationValue = '0';
         this.previousRotationValue = '0';
