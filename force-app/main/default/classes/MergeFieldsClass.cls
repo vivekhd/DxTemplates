@@ -21,7 +21,7 @@ public with sharing class MergeFieldsClass {
      * @return         List<Document_Template_Section__c> The modified template contents with merged fields
      */
       
-    public static List<Document_Template_Section__c> mergefieldsMethod(List<Document_Template_Section__c> selectedTemplateContents, Id recordId) {   
+     public static List<Document_Template_Section__c> mergefieldsMethod(List<Document_Template_Section__c> selectedTemplateContents, Id recordId,Map<String,Object> replaceData) {   
         try{
             String objectName = recordId.getSObjectType().getDescribe().getName();
             String mainstr;

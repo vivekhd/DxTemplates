@@ -268,7 +268,7 @@
     </fieldPermissions>
 <fieldPermissions>
         <editable>true</editable>
-        <field>Document_Template__c.classID__c</field>
+        <field>Document_Template__c.ClassId__c</field>
         <readable>true</readable>
     </fieldPermissions>
     <fieldPermissions>
