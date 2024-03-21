@@ -5,7 +5,7 @@
 			<div class="slds-grid slds-wrap">
 				<div class="slds-col slds-text-align_left" style="padding-top:2px;">
 					<lightning-button-group>
-						<lightning-button label={activateTemplateLabel} onclick={handleActiveTemplate}>
+						<lightning-button label={activateTemplateLabel} onclick={handleActiveTemplate} disabled={isActivateTemplateDisabled}>
 						</lightning-button>
 						<lightning-button label="Clone Template" onclick={handleCloneTemplate}></lightning-button>
 						<lightning-button label="Delete Template" onclick={handleDeleteTemplateHandler}>
@@ -36,7 +36,9 @@
 							<lightning-button-icon icon-name="utility:task" alternative-text="Section : Clause"
 								title="Section : Clause" onclick={handleNewClause} disabled={disableEditing}>
 							</lightning-button-icon>
-							<lightning-button-icon icon-name="utility:table" alternative-text="Section : Table" title="Section : Table" onclick={handleNewTable} disabled={disableEditing}> </lightning-button-icon>
+							<!---<lightning-button-icon icon-name="utility:table" alternative-text="Section : Table"
+								title="Section : Table" onclick={handleNewTable} disabled={disableEditing}>
+							</lightning-button-icon>-->
 							<span style="line-height:32px"> &nbsp; - &nbsp; </span>
 							<lightning-button-icon icon-name="utility:edit" alternative-text="Edit Template"
 								title="Edit Template" onclick={handleEditTemplate}>
@@ -296,7 +298,7 @@
 							<lightning-button class="slds-m-top_small" type="submit" label="Watermark Settings"
 								variant="brand" onclick={handleWatermarkSettings}></lightning-button>
 								<lightning-button-icon icon-name="utility:help_doc_ext" onclick={handlehelp} alternative-text="Need Help?" title="Need Help?" class="slds-button_icon-help slds-m-right_small" size="medium" variant="bare" style="margin-top: 3px;" data-val="Watermark Settings"></lightning-button-icon>
-						</div>
+												</div>
 
 					</div>
 					<footer class="slds-modal__footer"></footer>
