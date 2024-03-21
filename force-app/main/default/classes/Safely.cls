@@ -215,4 +215,22 @@ public with sharing class Safely {
             } 
             return errorList;
     }
+    /**
+      * @description this safeClassExceptionHandlerUpdate method is used to get
+      * the errors when update failed.
+      * Author : Reethika
+      */
+     public static List<String> safeClassExceptionHandlerUpdate(Database.SaveResult[] srList){
+        List<String> errorList = new List<String>();
+        for (Database.SaveResult sr : srList) {
+            if (!sr.isSuccess()) {             
+                for(Database.Error err : sr.getErrors()) {
+                    errorList.add(err.getMessage());
+                }
+            }
+        } 
+        return errorList;
+    }
+  
+    
 }

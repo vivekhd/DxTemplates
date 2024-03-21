@@ -20,7 +20,7 @@ public with sharing class MergeFieldsClass {
      * @param          recordId                  Id of the record from which fields will be merged
      * @return         List<Document_Template_Section__c> The modified template contents with merged fields
      */
-
+      
     public static List<Document_Template_Section__c> mergefieldsMethod(List<Document_Template_Section__c> selectedTemplateContents, Id recordId) {   
         try{
             String objectName = recordId.getSObjectType().getDescribe().getName();
@@ -33,7 +33,15 @@ public with sharing class MergeFieldsClass {
                 }
             }
             String mainObject=objectName;
-            
+            /* <Checks if strig contains %% if yes then customLogic method is called> */
+            if(mainstr.contains('%%') && replaceData.size()>0)
+            {           
+                for(Document_Template_Section__c sec: selectedTemplateContents)
+                {
+                    String str=customLogic( replaceData,sec.Section_Content__c);
+                    sec.Section_Content__c=sec.Section_Content__c.replace(sec.Section_Content__c, str);   
+                }
+            }
             Pattern p = Pattern.compile('\\{!.+?\\}');
             Matcher m = p.matcher(mainstr);
             String mainfields;
@@ -319,5 +327,29 @@ public with sharing class MergeFieldsClass {
         }        
         return selectedTemplateContents;
     }
-  
+     /* <customLogic method is used to replace %%data%% with the respective value from the
+         map mp which is constructed in the GenericController class as well as from the flow> */
+    public static string customLogic(map<string,object> mp,string mainstr) {      
+        Integer count=1;
+        boolean flag=false;
+        List<string> arr=mainstr.split('%');
+        for(Integer i=0;i<arr.size();i++) {
+            if(arr[i]=='') {
+                if( Math.mod(count,2) !=0){
+                    for(string s:mp.keySet()) {
+                        if(arr[i+1]==s) {
+                            arr[i+1]=(string)mp.get(s);
+                            flag=true;
+                        }                       
+                    }
+                    if(flag !=true) {
+                        arr[i+1]='%%'+arr[i+1]+'%%';
+                    }
+                flag=false;           
+                }
+                count=count+1;
+            }
+        }
+        return String.join( arr, ' ' );
+    } 
 }

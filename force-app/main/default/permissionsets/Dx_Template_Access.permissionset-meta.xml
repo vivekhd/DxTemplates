@@ -233,6 +233,11 @@
     </fieldPermissions>
     <fieldPermissions>
         <editable>true</editable>
+        <field>Document_Template__c.FlowId__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>true</editable>
         <field>Document_Template__c.IsActive__c</field>
         <readable>true</readable>
     </fieldPermissions>
@@ -261,6 +266,11 @@
         <field>Document_Template__c.Watermark_Data__c</field>
         <readable>true</readable>
     </fieldPermissions>
+<fieldPermissions>
+        <editable>true</editable>
+        <field>Document_Template__c.classID__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
     <fieldPermissions>
         <editable>true</editable>
         <field>Document__c.Document_Body__c</field>
@@ -279,6 +289,11 @@
     <fieldPermissions>
         <editable>true</editable>
         <field>Document__c.Object_Id__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+<fieldPermissions>
+        <editable>true</editable>
+        <field>Document__c.Token_Data__c</field>
         <readable>true</readable>
     </fieldPermissions>
     <fieldPermissions>

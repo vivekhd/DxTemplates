@@ -11,6 +11,8 @@ import DOCUMENTTEMPLATEID_FIELD from '@salesforce/schema/Document_Template__c.Id
 import WATERMARKDATA_FIELD from '@salesforce/schema/Document_Template__c.Watermark_Data__c';
 import getSFDomainBaseURL from '@salesforce/apex/DisplayPDFController.getSFDomainBaseURL';
 import createLog from '@salesforce/apex/LogHandler.createLog';
+import getClassNames from '@salesforce/apex/SaveDocumentTemplate.getClassNames';
+import getFlowNames from '@salesforce/apex/SaveDocumentTemplate.getFlowNames';
 
 export default class DxTemplateSetup extends LightningElement {
   //variables added by Bhavya for watermark starts here
@@ -82,6 +84,13 @@ export default class DxTemplateSetup extends LightningElement {
     relatedtoTypeObj; // stores the SObject name to which the template is related to
     relatedToTypeBeforeSave; // stores the related to type information before saving the template
     documentsExist = false; // sets if the document template is created this information or not for that related to type 
+    // variables added by reethika regarding dynamic flow or class selection
+    @track classTypeOptions;
+    @track flowTypeOptions;
+    classname;
+    flowname;
+    @track isBundled=false;
+    //variables added by reethika regarding dynamic flow or class selection ends here
 
     @wire(getAllPopupMessages)
     allConstants({ error, data }) {
@@ -95,7 +104,7 @@ export default class DxTemplateSetup extends LightningElement {
     connectedCallback() {
         getSFDomainBaseURL()
         .then(result => {
-            this.baseURL = result;
+                        this.baseURL = result;
         })
         .catch(error => {
             console.log('error while retrieving the org base URL --- > ', error);
@@ -104,6 +113,42 @@ export default class DxTemplateSetup extends LightningElement {
         this.docGridData = [];
         this.getRelatedToTypeOptionValues();
         this.getDocumentTemplatesMethod();
+        /**
+      * @description this getClassNames function is used to fetch
+      * all interface implemented classess
+      * Author : Reethika
+      */
+        getClassNames()
+            .then(result => {
+                if (result != null) {
+                    let options = [];
+                    for (var key in result) {
+                        options.push({ label: result[key], value: key });
+                    }
+                    this.classTypeOptions = options;
+                }
+            })
+            .catch(error => {
+                console.log('error', error);
+            })
+            /**
+      * @description this getFlowNames function is used to fetch
+      * all autolaunched flows.
+      * Author : Reethika
+      */
+        getFlowNames()
+            .then(result => {
+                if (result != null) {
+                    let options = [];
+                    for (var key in result) {
+                        options.push({ label: result[key], value: key });
+                    }
+                    this.flowTypeOptions = options;
+                }
+            })
+            .catch(error => {
+                console.log('error', error);
+            })
     }
 
     /**
@@ -269,6 +314,8 @@ export default class DxTemplateSetup extends LightningElement {
         var createdoccheck = event.detail.newtemplatecreation;
         if (createdoccheck == true) {
             this.showAddNewTemplate = true;
+            this.classname = [];
+            this.flowname = [];
             this.showwatermarkbtn = false;
             this.template.querySelector('c-modal').show();
         } else {
@@ -299,6 +346,13 @@ export default class DxTemplateSetup extends LightningElement {
         docTempObj.DxCPQ__Related_To_Type__c = fields.DxCPQ__Related_To_Type__c;
         docTempObj.DxCPQ__Description__c = fields.DxCPQ__Description__c;
         docTempObj.DxCPQ__Version_Number__c = fields.DxCPQ__Version_Number__c;
+        // Changes made by Reethika - < Assigning classId and FlowId to docTempObj >
+        if (this.classname.length != 0) {
+            docTempObj.DxCPQ__classID__c = this.classname[0];
+        }
+        if (this.flowname.length != 0) {
+            docTempObj.DxCPQ__FlowId__c = this.flowname[0];
+        }
         this.relatedtoTypeObj = this.relatedToTypeBeforeSave;
 
         createDocumentTemplate({ docTemp: docTempObj }).then(result => {
@@ -324,6 +378,7 @@ export default class DxTemplateSetup extends LightningElement {
                 this.showwatermarkbtn = true;
                 this.step = 2;
                 this.currentStep = "" + this.step;
+                this.isBundled=false;
             }
         }).catch(error => {
             let tempError = error.toString();
@@ -361,7 +416,7 @@ export default class DxTemplateSetup extends LightningElement {
         if(fieldMap[fieldName]) {
             this[fieldMap[fieldName]] = value;
         }
-        if(this.activeTab == 'Text'){
+                if(this.activeTab == 'Text'){
           this.generateCanvas();
         }
         else{
@@ -374,7 +429,7 @@ export default class DxTemplateSetup extends LightningElement {
     */
     handleTabChange(event) {
         this.activeTab = event.currentTarget.dataset.name;
-    }
+            }
 
     /**
     * Method to create the image of the text watermark for the given user inputs
@@ -396,18 +451,18 @@ export default class DxTemplateSetup extends LightningElement {
             let textWidth = context.measureText(this.watermarkText).width;
             context.fillStyle = this.colorValue;
             context.fillText(this.watermarkText, (canvas.width/2 - textWidth/2), canvas.height / 2);
-        }
-        catch(error){
+        } catch(error){
             console.log('error while getting canvas line 401 templateSetup --> ', error);
         }
-  }
+    }
+    
     /**
     * Method to handle rotation values for Text and Image Watermarks seperately
     * Once the rotation values are captured then the respective canvas drawing methods are called to update the final output for the captured rotation values
     * @param {Object} event
     */
     handleRotationChange(event){
-      let slectedRotation = event.currentTarget.dataset.type;
+            let slectedRotation = event.currentTarget.dataset.type;
       if(slectedRotation == 'Text'){
         this.rotationValue = event.target.value;
         this.outerContainer = `transform: rotate(${this.rotationValue}deg);`;
@@ -436,20 +491,19 @@ export default class DxTemplateSetup extends LightningElement {
                 let dataURLImage = canvasImage.toDataURL();
                 this.baseDataLst.push({ 'Image': dataURLImage.split(',')[1], title:'Image' });
             }
-        }
-        catch(error){
+        } catch(error){
             console.log('error while getting canvas line 432 templateSetup --> ', error);
         }
-      saveContentVersion({ title: "WatermarkImage", base64DataList: this.baseDataLst, templateId: this.documenttemplaterecordid, wtImage : true })
+        saveContentVersion({ title: "WatermarkImage", base64DataList: this.baseDataLst, templateId: this.documenttemplaterecordid, wtImage : true })
         .then(result => {
-            const fields ={};
+                        const fields ={};
             let watermarkText = (result.filter(obj => Object.keys(obj).some(key => key.includes('Text'))) || [])[0];
             let watermarkImage = (result.filter(obj => Object.keys(obj).some(key => key.includes('Image'))) || [])[0];
             watermarkText = watermarkText ? watermarkText[Object.keys(watermarkText)[0]] : null;
             watermarkImage = watermarkImage? watermarkImage[Object.keys(watermarkImage)[0]] : null;
             let wtOriginalImage = (result.filter(obj => Object.keys(obj).some(key => key.includes('OriginalImg'))) || [])[0];
-        wtOriginalImage = wtOriginalImage ? wtOriginalImage[Object.keys(wtOriginalImage)[0]] : null;
-        this.originalImageCvId = wtOriginalImage? wtOriginalImage : this.prevoriginalImageCvId;
+            wtOriginalImage = wtOriginalImage ? wtOriginalImage[Object.keys(wtOriginalImage)[0]] : null;
+            this.originalImageCvId = wtOriginalImage? wtOriginalImage : this.prevoriginalImageCvId;
             const watermarkImageIdText = {
                 name: 'Text',
                 isPrimary: this.checkedValText,
@@ -527,9 +581,9 @@ export default class DxTemplateSetup extends LightningElement {
         this.resetImageWatermarkFields();
         const reader = new FileReader();
         reader.onload = () => {
-        this.imageUrl = reader.result;
-        try{
-            this.drawOnCanvas(this.imageUrl).then(() => {
+            this.imageUrl = reader.result;
+            try{
+                this.drawOnCanvas(this.imageUrl).then(() => {
                 this.baseDataLst = [];
                 let canvasImage = this.template.querySelector('.canvasImage');
                 if (canvasImage && this.imageUrl) {
@@ -548,7 +602,7 @@ export default class DxTemplateSetup extends LightningElement {
     * Method to create the image of the Image watermark for the given user inputs
     * @param {Object} imageUrl
     */
-     drawOnCanvas(imageUrl) {
+    drawOnCanvas(imageUrl) {
         return new Promise((resolve, reject) => {
             const canvas = this.template.querySelector('.canvasImage');
             const ctx = canvas.getContext('2d');
@@ -565,7 +619,7 @@ export default class DxTemplateSetup extends LightningElement {
                 ctx.globalAlpha = this.opacityImageValue;
                 let imgwidth =  this.imageScalingValue == 0 ? image.width : image.width * (this.imageScalingValue / 100);
                 let imgheight = this.imageScalingValue == 0 ? image.height : image.height * (this.imageScalingValue / 100);
-                ctx.drawImage(image, (canvas.width-imgwidth)/2, (canvas.height-imgheight)/2, this.imageScalingValue == 0 ? image.width : image.width * (this.imageScalingValue / 100), this.imageScalingValue == 0 ? image.height : image.height * (this.imageScalingValue / 100)); 
+                ctx.drawImage(image, (canvas.width-imgwidth)/2, (canvas.height-imgheight)/2, this.imageScalingValue == 0 ? image.width : image.width * (this.imageScalingValue / 100), this.imageScalingValue == 0 ? image.height : image.height * (this.imageScalingValue / 100));        
                 resolve();       
             };
         });
@@ -575,15 +629,15 @@ export default class DxTemplateSetup extends LightningElement {
     * Method to store the Watermark Page Option i.e., on what pages the watermark should be visible is handled with the following method
     * @param {Object} event
     */
-  handleWatermarkPageChange(event) {
-    if (this.activeTab === "Text") {
-        this.pageTextOption = event.target.value;
-        this.updateCheckedValue(this.pageTextOption, this.watermarkPageOptionsText);
-    } else if (this.activeTab === "Image") {
-        this.pageImageOption = event.target.value;
-        this.updateCheckedValue(this.pageImageOption, this.watermarkPageOptionsImage);
+    handleWatermarkPageChange(event) {
+        if (this.activeTab === "Text") {
+            this.pageTextOption = event.target.value;
+            this.updateCheckedValue(this.pageTextOption, this.watermarkPageOptionsText);
+        } else if (this.activeTab === "Image") {
+            this.pageImageOption = event.target.value;
+            this.updateCheckedValue(this.pageImageOption, this.watermarkPageOptionsImage);
+        }
     }
-  }
 
     /**
     * Method to store the information about which type of watermark should be used for displaying on the final PDF
@@ -670,5 +724,37 @@ export default class DxTemplateSetup extends LightningElement {
         this.checkedValText = true;
         this.watermarkText = '';
         this.checkedValImage = false;
+    }
+
+    /**
+     * @description this handleClassselection event is used to get
+     * the id of the class selected
+     * Author : Reethika
+     */
+    handleClassselection(event) {
+        let val = event.detail.values;
+        this.classname = val;
+    }
+
+    /**
+     * @description this handleFlowselection event is used to get
+     * the durableid of the flow selected
+     * Author : Reethika
+     */
+    handleFlowselection(event) {
+        let val = event.detail.values;
+        this.flowname = val;
+    }
+    
+    /**
+     * @description this handleRelationshipType event is used to get
+     * whether the flow is selected or class is selected
+     * Author : Reethika
+     */
+    handleRelationshipType(event){
+        this.isBundled=event.target.checked;
+        this.flowname=[];
+        this.classname=[];
+
     }
 }
