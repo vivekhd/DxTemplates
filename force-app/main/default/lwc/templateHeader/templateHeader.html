@@ -14,7 +14,7 @@
             <!-- <div class="slds-col slds-size_1-of-1 slds-medium-size_2-of-12 slds-large-size_2-of-12 slds-p-left_small">
 
                 <label class="slds-form-element__label">&nbsp;</label><br/>
-                <lightning-button  disabled={disableButton} variant="brand" label="Update" title="titleName" onclick={handlesectionsave}>
+                <lightning-button  disabled={disableButton} variant="brand" label="Update"  onclick={handlesectionsave}>
                 </lightning-button>
             </div>
             <div class="slds-col slds-text-align_right">
@@ -70,7 +70,7 @@
     height="100px"
     width="100px"/>
     <lightning-button   variant="brand" label={imagebuttonlabel}
-    title="titleName" onclick={handleImage}></lightning-button>
+     onclick={handleImage}></lightning-button>
 
     <lightning-input-rich-text value={richtextVal} onchange={handleRichTextArea}
     aria-placeholder="Enter Text here">
@@ -99,7 +99,7 @@
                             <lightning-formatted-text value={image.title} key={image.Id}></lightning-formatted-text>
 
                             <lightning-button key={image.Id} data-id={image.Id} variant="brand" label="Select"
-                            title="titleName" onclick={handleselectedImage} disabled={isDisabled}>
+                             onclick={handleselectedImage} disabled={isDisabled}>
                         </lightning-button><br key={image.Id}/><br key={image.Id}/>
                 </template>
                 </template>
@@ -113,9 +113,9 @@
     <div class="slds-col slds-size_12-of-12 slds-text-align_right slds-p-top_small">
 
             <lightning-button class="slds-m-left_small" disabled={isDisabled} variant="neutral" label="Delete"
-            title="titleName" onclick={handlesectionDelete}></lightning-button>
+             onclick={handlesectionDelete}></lightning-button>
             <lightning-button class="slds-m-left_small" disabled={isDisabled} variant="brand" label="Save"
-            title="titleName" onclick={handlesectionsave}></lightning-button>
+             onclick={handlesectionsave}></lightning-button>
     </div>
 
 

@@ -244,7 +244,7 @@ export default class TemplateFooter extends NavigationMixin(LightningElement) {
     handlehelp(){
       let relatedObjectsMap = this.pdfLinks.find(item => item.MasterLabel === 'Footer');
       let pdfUrl = relatedObjectsMap ? relatedObjectsMap.DxCPQ__Section_PDF_URL__c : null;
-    const config = {
+          const config = {
         type: 'standard__webPage',
         attributes: {
             url: pdfUrl
