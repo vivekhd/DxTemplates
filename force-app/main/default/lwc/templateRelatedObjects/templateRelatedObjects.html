@@ -6,10 +6,10 @@
 		</div>
 		<div class="slds-col slds-size_1-of-1 slds-medium-size_2-of-12 slds-large-size_2-of-12 slds-p-left_small">
 		  <label class="slds-form-element__label">&nbsp;</label>
-		  <lightning-button disabled={disableButton} variant="brand" label="Update" title="titleName" onclick={handlesectionsave}></lightning-button>
+		  <lightning-button disabled={disableButton} variant="brand" label="Update"  onclick={handlesectionsave}></lightning-button>
 		</div>
 		<div class="slds-col slds-size_1-of-1 slds-medium-size_5-of-12 slds-large-size_3-of-12 slds-p-top_x-large slds-p-left_xx-large slds-float_right">
-		  <lightning-input data-id="newPageRO" type="checkbox" label="New Page" name="New Page" class="slds-list_horizontal" onchange={handleNewPage} disabled={isDisabled}></lightning-input>
+		  <lightning-input data-id="newPageRO" type="checkbox" label="New Page" name="New Page" class="slds-list_horizontal" onchange={handleNewPage} disabled={isDisabled} title="Displays this section in the next page of the PDF"></lightning-input>
 		</div>
 		<div class="slds-is-relative slds-col_bump-left">
 			<lightning-button-icon icon-name="utility:help_doc_ext" onclick={handlehelp} alternative-text="Need Help?" title="Need Help?" size="medium" variant="bare" class="slds-is-absolute slds-button_icon-help" style="right:0px"></lightning-button-icon>
@@ -255,7 +255,7 @@
 		</div>
 	  </template>
 	  <div class="slds-col slds-size_12-of-12 slds-text-align_right slds-p-top_small">
-		<lightning-button class="slds-m-left_small" disabled={disabledeleteButton} variant="neutral" label="Delete" title="titleName" onclick={handlesectionDelete}></lightning-button>
+		<lightning-button class="slds-m-left_small" disabled={disabledeleteButton} variant="neutral" label="Delete"  onclick={handlesectionDelete}></lightning-button>
 		<lightning-button class="slds-m-left_small" disabled={disableButton} variant="brand" label="Save" title="SaveBtn" onclick={handlesectionsave}></lightning-button>
 	  </div>
 	</template>
