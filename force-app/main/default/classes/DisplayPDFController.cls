@@ -401,15 +401,14 @@ global with sharing class DisplayPDFController
                 replaceData=api.execute(tempData);                
             }
             if(!string.isEmpty(templateData[0].FlowId__c)) {
-                List <FlowDefinitionView> flownames= [SELECT  Label, ApiName,Id,DurableId FROM FlowDefinitionView where ProcessType='AutoLaunchedFlow' AND IsActive=True AND
-                                                      DurableId=:templateData[0].FlowId__c WITH SECURITY_ENFORCED];   
-                Map<String,Object> inputs=new map<String,Object>{'recordIdVal'=>recordId};
-                Flow.Interview myFlow = Flow.Interview.createInterview('DxCPQ',flownames[0].ApiName, inputs);
-                myFlow.start();
-                string data=(string)myFlow.getvariableValue('genericData');
-                if(!string.isEmpty(data)){
-                Map<String, Object>  mapdata =(Map<String, Object>) JSON.deserializeUntyped(data); 
-               replaceData.putAll(mapdata); 
+                    List <FlowDefinitionView> flownames= [SELECT  Label, ApiName,Id,DurableId FROM FlowDefinitionView where ProcessType='AutoLaunchedFlow' AND IsActive=True AND DurableId=:templateData[0].FlowId__c WITH SECURITY_ENFORCED];   
+                    Map<String,Object> inputs=new map<String,Object>{'recordIdVal'=>recordId};
+                    Flow.Interview myFlow = Flow.Interview.createInterview(flownames[0].ApiName, inputs);
+                    myFlow.start();
+                    string data=(string)myFlow.getvariableValue('genericData');
+                    if(!string.isEmpty(data)){
+                    Map<String, Object>  mapdata =(Map<String, Object>) JSON.deserializeUntyped(data); 
+                    replaceData.putAll(mapdata); 
                 }                  
             }
             List<Document__c> data=[SELECT Id from Document__c WHERE Document_Template__c =: templateId WITH SECURITY_ENFORCED];
