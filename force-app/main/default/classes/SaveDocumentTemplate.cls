@@ -292,7 +292,7 @@ public with sharing class SaveDocumentTemplate {
     */
     @AuraEnabled
     public static List<Document_Template__c> gettemplatedata(string editrecordid) {
-        List<Document_Template__c> d=[SELECT classID__c,FlowId__c FROM Document_Template__c WHERE id=:editrecordid WITH SECURITY_ENFORCED];        
+        List<Document_Template__c> d=[SELECT ClassId__c,FlowId__c FROM Document_Template__c WHERE id=:editrecordid WITH SECURITY_ENFORCED];        
         return d;
     }
 
@@ -303,9 +303,9 @@ public with sharing class SaveDocumentTemplate {
     */
     @AuraEnabled
     public static  void updateTemplateDetails(Map<String,String> templateData,string idval) {
-        List<DxCPQ__Document_Template__c> docTempList=[SELECT classID__c,FlowId__c FROM DxCPQ__Document_Template__c WHERE id=:idval WITH SECURITY_ENFORCED];
+        List<DxCPQ__Document_Template__c> docTempList=[SELECT ClassId__c,FlowId__c FROM DxCPQ__Document_Template__c WHERE id=:idval WITH SECURITY_ENFORCED];
         if(templateData.containsKey('classId')){
-            docTempList[0].DxCPQ__classID__c=templateData.get('classId');
+            docTempList[0].ClassId__c=templateData.get('classId');
         }
         if(templateData.containsKey('flowId')){
             docTempList[0].DxCPQ__FlowId__c=templateData.get('flowId');

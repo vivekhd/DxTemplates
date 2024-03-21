@@ -389,11 +389,10 @@ global with sharing class DisplayPDFController
     public static Map<String,Object> getTemplateSections(ID templateId, String recordId, String objectApiName){ 
         try{
             List<Document_Template_Section__c> selectedTemplateContents=[select id,Section_Content__c, Type__c, New_Page__c, Sequence__c from Document_Template_Section__c where Document_Template__c=:templateId WITH SECURITY_ENFORCED ORDER BY Sequence__c ASC];
-            List<DxCPQ__Document_Template__c> templateData=[SELECT DxCPQ__classID__c,DxCPQ__FlowId__c FROM DxCPQ__Document_Template__c WHERE id=:templateId WITH SECURITY_ENFORCED];
+            List<DxCPQ__Document_Template__c> templateData=[SELECT ClassId__c,FlowId__c FROM Document_Template__c WHERE id=:templateId WITH SECURITY_ENFORCED];
             Map<String,Object> replaceData=new Map<String,Object>();
-            if(!string.isEmpty(templateData[0].DxCPQ__classID__c))
-            {
-                List<ApexClass> classnames= [SELECT Name FROM ApexClass WHERE Id=:templateData[0].DxCPQ__classID__c WITH SECURITY_ENFORCED];
+            if(!string.isEmpty(templateData[0].ClassId__c)) {
+                List<ApexClass> classnames= [SELECT Name FROM ApexClass WHERE Id=:templateData[0].ClassId__c WITH SECURITY_ENFORCED];
                 Type t = Type.forName(classnames[0].Name);
                 DXHandlerInterface api = (DXHandlerInterface)t.newInstance();
                 Map<String,Object> tempData= new Map<String,Object>();
@@ -401,10 +400,9 @@ global with sharing class DisplayPDFController
                 tempData.put('recordId',recordId);
                 replaceData=api.execute(tempData);                
             }
-            if(!string.isEmpty(templateData[0].DxCPQ__FlowId__c))
-            {
+            if(!string.isEmpty(templateData[0].FlowId__c)) {
                 List <FlowDefinitionView> flownames= [SELECT  Label, ApiName,Id,DurableId FROM FlowDefinitionView where ProcessType='AutoLaunchedFlow' AND IsActive=True AND
-                                                      DurableId=:templateData[0].DxCPQ__FlowId__c WITH SECURITY_ENFORCED];   
+                                                      DurableId=:templateData[0].FlowId__c WITH SECURITY_ENFORCED];   
                 Map<String,Object> inputs=new map<String,Object>{'recordIdVal'=>recordId};
                 Flow.Interview myFlow = Flow.Interview.createInterview('DxCPQ',flownames[0].ApiName, inputs);
                 myFlow.start();
@@ -412,26 +410,25 @@ global with sharing class DisplayPDFController
                 if(!string.isEmpty(data)){
                 Map<String, Object>  mapdata =(Map<String, Object>) JSON.deserializeUntyped(data); 
                replaceData.putAll(mapdata); 
-                }
-                              
+                }                  
             }
             List<Document__c> data=[SELECT Id from Document__c WHERE Document_Template__c =: templateId WITH SECURITY_ENFORCED];
             Id docid;
             List<Document__c> doclist=new List<Document__c>();
             Document__c doc= new Document__c();
             doc.Document_Template__c=templateId;
-            if(!string.isEmpty(templateData[0].DxCPQ__FlowId__c) || !string.isEmpty(templateData[0].DxCPQ__classID__c)){
+            if(!string.isEmpty(templateData[0].FlowId__c) || !string.isEmpty(templateData[0].ClassId__c)){
                 doc.Token_Data__c=JSON.serialize(replaceData);
             }
            
             if(data.size() ==0){
-                 doclist.add(doc); 
-            }
-            else{
+                doclist.add(doc); 
+            } else {
                 doc.Id=data[0].Id;
                 docid=data[0].Id;
                 doclist.add(doc); 
             }
+
             Savepoint sp = Database.setSavepoint();
             Database.UpsertResult[] urList2 = safe.doUpsert(doclist);
             List<String> errorList = Safely.safeClassExceptionHandlerUpsert(urList2);
@@ -439,6 +436,7 @@ global with sharing class DisplayPDFController
                 Database.rollback(sp);
                 throw new SafeClassException(String.join( errorList, ', ' ));
             }
+
             for(Integer i=0;i<urList2.size();i++) {
                 if (urList2.get(i).isSuccess()) {
                     docid=urList2.get(i).getId();
@@ -447,6 +445,7 @@ global with sharing class DisplayPDFController
                     LogHandler.createLog((Id) null,'DisplayPDFController.getTemplateSections()','Template Id- '+templateId+' '+'Database Error while saving the result --> ',String.valueof(error),'Exception');
                 }               
             }
+
             selectedTemplateContents = MergeFieldsClass.mergefieldsMethod(selectedTemplateContents,recordId,replaceData);            
             Map<String,Object> templatecontentsData=new Map<String,Object>();
             templatecontentsData.put('selectedTemplateContents',selectedTemplateContents);            
@@ -465,8 +464,7 @@ global with sharing class DisplayPDFController
             List<Document_Template_Section__c> selectedTemplateContents=[select id,Section_Content__c, Type__c, New_Page__c, Sequence__c from Document_Template_Section__c where Document_Template__c=:templateId WITH SECURITY_ENFORCED ORDER BY Sequence__c ASC];
             selectedTemplateContents = MergeFieldsClass.mergefieldsMethodMultiple(selectedTemplateContents,recordIdLst);
             return selectedTemplateContents;
-        }
-        catch (Exception ex) {
+        } catch (Exception ex) {
             LogHandler.createLog((Id) null,'DisplayPDFController.getTemplateSections()','templateId ->  '+templateId+' '+ex.getLineNumber()+ex.getStackTraceString()+ex.getCause(),ex.getMessage(),'Exception');
             throw new AuraHandledException(ex.getMessage());
         }  

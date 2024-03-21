@@ -146,7 +146,7 @@ export default class TemplateDesignerCMP extends NavigationMixin(LightningElemen
   @track doctemplatedetails = {
     Id: '',
     Name: '',
-    DxCPQ__classID__c: '',
+    DxCPQ__ClassId__c: '',
     DxCPQ__FlowId__c: '',
     DxCPQ__Related_To_Type__c: '',
     DxCPQ__IsActive__c: false,
@@ -870,10 +870,10 @@ export default class TemplateDesignerCMP extends NavigationMixin(LightningElemen
     gettemplatedata({ editrecordid: this.recordId })
       .then(result => {
         console.log('result', result);
-        if (typeof result[0].DxCPQ__classID__c !== 'undefined') {
+        if (typeof result[0].DxCPQ__ClassId__c !== 'undefined') {
          
           this.classTypeOptions.forEach(className => {
-            if (className.value == result[0].DxCPQ__classID__c) {
+            if (className.value == result[0].DxCPQ__ClassId__c) {
               console.log('result1', className.value);
               this.isBundled = true;
               attribute.push({ label: className.label, value: className.value, selected: true });

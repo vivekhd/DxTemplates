@@ -348,7 +348,7 @@ export default class DxTemplateSetup extends LightningElement {
         docTempObj.DxCPQ__Version_Number__c = fields.DxCPQ__Version_Number__c;
         // Changes made by Reethika - < Assigning classId and FlowId to docTempObj >
         if (this.classname.length != 0) {
-            docTempObj.DxCPQ__classID__c = this.classname[0];
+            docTempObj.DxCPQ__ClassId__c = this.classname[0];
         }
         if (this.flowname.length != 0) {
             docTempObj.DxCPQ__FlowId__c = this.flowname[0];
