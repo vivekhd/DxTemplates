@@ -13,7 +13,7 @@
 						<lightning-button label="Refresh Template" onclick={handleRefreshTemplateHandler}>
 						</lightning-button>
 						<template if:true={showPreview}>
-							<lightning-button label="Preview Template" title="preview" onclick={handlePreview}>
+							<lightning-button label="Preview Template" onclick={handlePreview}>
 							</lightning-button>
 						</template>
 					</lightning-button-group>
@@ -24,7 +24,7 @@
 				<div class="slds-col slds-text-align_right">
 					<lightning-layout class="slds-grid slds-grid_align-end">
 						<div data-id='section menu' class="slds-col slds-grid_align-end"></div>
-						<lightning-button-icon icon-name="utility:help_doc_ext" onclick={handlehelp} alternative-text="Need Help?" title="Need Help?" class="slds-button_icon-help slds-m-right_small" size="medium" variant="bare" style="margin-top: 3px;" data-val="DxTemplates"></lightning-button-icon>
+						<lightning-button-icon icon-name="utility:help_doc_ext" onclick={handlehelp} alternative-text="Need Help?" title="Need Help?" class="slds-button_icon-help slds-m-right_small" size="medium" variant="bare" data-val="DxTemplates" style="padding-top:5px;"></lightning-button-icon>
 						<lightning-button-group data-id='section menu items' class="slds-button-group" role="group">
 							
 							<lightning-button-icon icon-name="utility:snippet" alternative-text="Section : Context"
@@ -298,7 +298,8 @@
 							<lightning-button class="slds-m-top_small" type="submit" label="Watermark Settings"
 								variant="brand" onclick={handleWatermarkSettings}></lightning-button>
 								<lightning-button-icon icon-name="utility:help_doc_ext" onclick={handlehelp} alternative-text="Need Help?" title="Need Help?" class="slds-button_icon-help slds-m-right_small" size="medium" variant="bare" style="margin-top: 3px;" data-val="Watermark Settings"></lightning-button-icon>
-												</div>
+						
+						</div>
 
 					</div>
 					<footer class="slds-modal__footer"></footer>
