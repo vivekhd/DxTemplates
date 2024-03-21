@@ -276,10 +276,9 @@ public with sharing class SaveDocumentTemplate {
     */
     @AuraEnabled
     public static Map<string,string> getFlowNames() {        
-       List <FlowDefinitionView> classnames= [SELECT  Label, ApiName, DurableId, NamespacePrefix, Id FROM FlowDefinitionView WHERE ProcessType='AutoLaunchedFlow' AND IsActive=True WITH SECURITY_ENFORCED];
+       List <FlowDefinitionView> classnames= [SELECT  Label, ApiName, DurableId, NamespacePrefix, Id FROM FlowDefinitionView WHERE ProcessType='AutoLaunchedFlow' AND NamespacePrefix = '' AND IsActive=True WITH SECURITY_ENFORCED];
        Map<String,String> FlowId=new Map<string,string>();
-        for(FlowDefinitionView a:classnames)
-        {
+        for(FlowDefinitionView a:classnames) {
             FlowId.put(a.DurableId,a.Label);
         }             
         return FlowId;
