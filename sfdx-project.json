@@ -27,7 +27,7 @@
       "path": "force-app",
       "package": "DxTemplates_ManagedPackage",
       "versionName": "ver 0.1",
-      "versionNumber": "0.1.0.NEXT",
+      "versionNumber": "0.4.1.NEXT",
       "default": false,
       "versionDescription": ""
     }
@@ -83,6 +83,7 @@
     "DxTemplates_ManagedPackage": "0HoQm00000000zJKAQ",
     "Dx_Templates@0.5.0-6": "04tQm000000nHpJIAU",
     "Dx_Templates@0.5.0-7": "04tQm000000nHvlIAE",
-    "Dx_Templates@0.5.0-8": "04tQm000000nIGjIAM"
+    "Dx_Templates@0.5.0-8": "04tQm000000nIGjIAM",
+    "Dx_Templates@0.5.0-9": "04tQm000000o5PVIAY"
   }
 }
