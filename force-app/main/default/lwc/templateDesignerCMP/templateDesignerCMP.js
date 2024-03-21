@@ -741,6 +741,43 @@ export default class TemplateDesignerCMP extends NavigationMixin(LightningElemen
       }, 2000)
 
     }
+
+    /**
+      * @description this getClassNames function is used to fetch
+      * all interface implemented classess
+      * Author : Reethika
+      */
+    getClassNames()
+      .then(result => {
+        if (result != null) {
+          let options = [];
+          for (var key in result) {
+            options.push({ label: result[key], value: key });
+          }
+          this.classTypeOptions = options;
+        }
+      })
+      .catch(error => {
+        console.log('error', error);
+      })
+
+    /* @description this getFlowNames function is used to fetch
+    * all autolaunched flows.
+    * Author : Reethika
+    */
+    getFlowNames()
+      .then(result => {
+        if (result != null) {
+          let options = [];
+          for (var key in result) {
+            options.push({ label: result[key], value: key });
+          }
+          this.flowTypeOptions = options;
+        }
+      })
+      .catch(error => {
+        console.log('error', error);
+      })
   }
 
   /**
@@ -968,11 +1005,23 @@ export default class TemplateDesignerCMP extends NavigationMixin(LightningElemen
   * @param {Object} event
   */
   handleEditSuccess(event) {
-        const toastEvt = new ShowToastEvent({
+    /**
+    * @description this updateTemplateDetails function is used to update
+    * the class and flow selected for the template
+    * Author : Reethika
+    */
+    updateTemplateDetails({ templateData: this.editTemp, idval: this.recordId })
+    .then(result1 => { })
+    .catch(error => {
+        console.log('error', error);
+    })
+      
+    const toastEvt = new ShowToastEvent({
       title: 'Success',
       message: 'Template "' + event.detail.fields.Name.value + '"' + this.popUpMessage.TEMPLATE_DESIGN_UPDATED,//'Edited Successfully',
       variant: 'Success',
     });
+
     this.dispatchEvent(toastEvt);
     let createdDocumentTemplateId = event.detail.id;
     let name = event.detail.fields.Name.value;
