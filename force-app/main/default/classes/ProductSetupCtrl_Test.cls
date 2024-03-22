@@ -184,7 +184,7 @@ private class ProductSetupCtrl_Test {
                  cv.PathOnClient='test';
                  insert cv;
                  String wmark='[{"name":"Text","isPrimary":true,"contentVersionID":"'+cv.id+'","pageOption":"All Pages","fontsize":"28","opacity":"1","color":"#5DFF05","rotation":"45","textVal":"gabbbbbbbb","pageTextOption":"All Pages"},{"name":"Image","isPrimary":false,"contentVersionID":null,"pageOption":"All Pages","opacity":"1","rotation":"0","pageImageOption":"All Pages","imageScale":100}]';
-                doctemplate2.DxCPQ__Watermark_Data__c=wmark;
+                doctemplate2.Watermark_Data__c=wmark;
                  insert doctemplate2;
                  
                 List<Object> headerListObject=new List<Object>();
@@ -425,8 +425,8 @@ private class ProductSetupCtrl_Test {
             try{
             List<Document_Template__c> documentTemplate = DexUtilTestDataFactory.createDocumentTemplate(1, true, null);
             List<Id> documentTemplateId = new List<Id>{documentTemplate[0].Id};
-                Map<String, Object> docTemplateSectionAttributes = new Map<String, Object>{'Document_Template__c'=>documentTemplateId};
-                    List<Document_Template_Section__c> docTemplateSections = DexUtilTestDataFactory.createDocumentTemplateSection(1, true, docTemplateSectionAttributes);
+            Map<String, Object> docTemplateSectionAttributes = new Map<String, Object>{'Document_Template__c'=>documentTemplateId};
+            List<Document_Template_Section__c> docTemplateSections = DexUtilTestDataFactory.createDocumentTemplateSection(1, true, docTemplateSectionAttributes);
             Document_Template__c docTemplate = new Document_Template__c();
             docTemplate.IsActive__c = true;
             docTemplate.Previously_Active__c = true;

@@ -389,7 +389,7 @@ global with sharing class DisplayPDFController
     public static Map<String,Object> getTemplateSections(ID templateId, String recordId, String objectApiName){ 
         try{
             List<Document_Template_Section__c> selectedTemplateContents=[select id,Section_Content__c, Type__c, New_Page__c, Sequence__c from Document_Template_Section__c where Document_Template__c=:templateId WITH SECURITY_ENFORCED ORDER BY Sequence__c ASC];
-            List<DxCPQ__Document_Template__c> templateData=[SELECT ClassId__c,FlowId__c FROM Document_Template__c WHERE id=:templateId WITH SECURITY_ENFORCED];
+            List<Document_Template__c> templateData=[SELECT ClassId__c,FlowId__c FROM Document_Template__c WHERE id=:templateId WITH SECURITY_ENFORCED];
             Map<String,Object> replaceData=new Map<String,Object>();
             if(!string.isEmpty(templateData[0].ClassId__c)) {
                 List<ApexClass> classnames= [SELECT Name FROM ApexClass WHERE Id=:templateData[0].ClassId__c WITH SECURITY_ENFORCED];

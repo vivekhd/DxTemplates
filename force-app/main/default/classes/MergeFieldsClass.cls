@@ -268,12 +268,10 @@ public with sharing class MergeFieldsClass {
                             Document_Template_Section__c tempSec = (Document_Template_Section__c) JSON.deserialize(JSON.serialize(sec), Document_Template_Section__c.class);
                             if(executeHeadFoot == 0){
                                 executeVar = true;
-                            }
-                            else{
-                                if(!tempSec.DxCPQ__Type__c.equals('Header')  &&	 !tempSec.DxCPQ__Type__c.equals('Footer')  ){
+                            } else{
+                                if(!tempSec.Type__c.equals('Header') && !tempSec.Type__c.equals('Footer')){
                                     executeVar = true;
-                            	}
-                                else{
+                            	} else{
                                     executeVar = false;
                                 }
                             }
@@ -304,8 +302,7 @@ public with sharing class MergeFieldsClass {
                                         if(finalvalue!=null)  {
                                             string mergefieldsyntax='{!'+mainObject+'.'+str+'}';
                                             tempSec.Section_Content__c=tempSec.Section_Content__c.replace(mergefieldsyntax, finalvalue); 
-                                        }
-                                        else{
+                                        } else{
                                             string mergefieldsyntax='{!'+mainObject+'.'+str+'}';
                                             tempSec.Section_Content__c=tempSec.Section_Content__c.replace(mergefieldsyntax, ''); 
                                         }

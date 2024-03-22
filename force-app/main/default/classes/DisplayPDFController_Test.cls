@@ -951,13 +951,13 @@ private class DisplayPDFController_Test {
         System.runAs(us){
             Document_Template__c testTemplate = new Document_Template__c(
                 Name = 'Test Template',
-                DxCPQ__Watermark_Data__c = 'Test watermark data'
+                Watermark_Data__c = 'Test watermark data'
             );
             insert testTemplate;
             Document_Template__c result = DisplayPDFController.getDocumentTemplateData(testTemplate.Id);
             System.assertNotEquals(null, result, 'Document_Template__c object should not be null');
             System.assertEquals('Test Template', result.Name, 'Incorrect Name');
-            System.assertEquals('Test watermark data', result.DxCPQ__Watermark_Data__c, 'Incorrect Watermark Data');
+            System.assertEquals('Test watermark data', result.Watermark_Data__c, 'Incorrect Watermark Data');
         }
         Test.stopTest();
         System.assert(true);

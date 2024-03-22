@@ -302,12 +302,12 @@ public with sharing class SaveDocumentTemplate {
     */
     @AuraEnabled
     public static  void updateTemplateDetails(Map<String,String> templateData,string idval) {
-        List<DxCPQ__Document_Template__c> docTempList=[SELECT ClassId__c,FlowId__c FROM DxCPQ__Document_Template__c WHERE id=:idval WITH SECURITY_ENFORCED];
+        List<Document_Template__c> docTempList=[SELECT ClassId__c,FlowId__c FROM Document_Template__c WHERE id=:idval WITH SECURITY_ENFORCED];
         if(templateData.containsKey('classId')){
             docTempList[0].ClassId__c=templateData.get('classId');
         }
         if(templateData.containsKey('flowId')){
-            docTempList[0].DxCPQ__FlowId__c=templateData.get('flowId');
+            docTempList[0].FlowId__c=templateData.get('flowId');
         }
         if (sp1 == null) sp1 = Database.setSavepoint();
         Database.SaveResult[] urList2 = safe.doUpdate(docTempList);
