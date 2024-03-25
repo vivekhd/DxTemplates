@@ -527,77 +527,60 @@ global with sharing class DisplayPDFController
      * @return         List<Map<String, String>> List of maps containing saved record types and their corresponding Ids
      */
    @AuraEnabled(cacheable=false)
-public static List<Map<String, String>> saveContentVersion(String title, List<Map<String, String>> base64DataList, String templateId, Boolean wtImage) {
-    try {
-        
-        List<ContentVersion> contentVersionsToInsert = new List<ContentVersion>(); 
-        List<Map<String, String>> savedIds = new List<Map<String, String>>();
-        List<Id> contentVersionIdsToDelete = new List<Id>();
-        if(wtImage){
-            for (ContentVersion cv : [SELECT Id, ContentDocumentId  FROM ContentVersion WHERE FirstPublishLocationId = :templateId  WITH USER_MODE]) {
-                contentVersionIdsToDelete.add(cv.ContentDocumentId);
-            }
-        }
-        else{
-            for (ContentVersion cv : [SELECT Id, ContentDocumentId  FROM ContentVersion WHERE FirstPublishLocationId = :templateId and Title != 'OriginalImg' WITH USER_MODE]) {
-                contentVersionIdsToDelete.add(cv.ContentDocumentId);
-            } 
-        }
-        
-        List<Id> contentDocumentIdsToDelete = new List<Id>();
-        List<ContentDocument> cdlst = [SELECT Id FROM ContentDocument WHERE Id IN :contentVersionIdsToDelete WITH USER_MODE];
-        if (!cdlst.isEmpty()) {
-            delete cdlst;
-        }
-        for(Map<String, String> dataUrl : base64DataList) {
-            String recordType = dataUrl.keySet().iterator().next();
-            String data = dataUrl.get(recordType);
-            
-            if(recordType.equalsIgnoreCase('Text') || recordType.equalsIgnoreCase('Image') || recordType.equalsIgnoreCase('OriginalImg')) {
-                ContentVersion contentVersion = new ContentVersion(
-                    Title = dataUrl.get('title'),
-                    VersionData = EncodingUtil.base64Decode(data),
-                    PathOnClient = title + '.png',
-                    FirstPublishLocationId = templateId
-                );
-                
-                contentVersionsToInsert.add(contentVersion);
-            }
-        }
-         if (Schema.sObjectType.ContentVersion.isCreateable()) {
-            insert contentVersionsToInsert;
-            for(ContentVersion contentVersion : contentVersionsToInsert) {
-                Map<String, String> savedId = new Map<String, String>();
-                savedId.put(contentVersion.Title, contentVersion.Id);
-                savedIds.add(savedId);
-            }
-             return savedIds;
-         }
-        else{
-            LogHandler.createLog((Id) null,'DisplayPDFController.saveContentVersion()','Insufficient permissions to create ContentVersion records. ','Insufficient permissions to create ContentVersion records.', 'Insufficient permissions');
-            return null;
-        }
-       
-    } catch(Exception ex) {
-        LogHandler.createLog((Id) null,'DisplayPDFController.saveContentVersion()','Failed to create the Contentversion records '+ex.getLineNumber()+ex.getStackTraceString()+ex.getCause(),ex.getMessage(),'Failed to create the Contentversion records');  
-        return null;
-    }
-}
-    
-    
-    
-    /**
-    * @description    Retrieves the base URL of the Salesforce domain
-    * @return         String Base URL of the Salesforce domain
-    */
-    @AuraEnabled(cacheable=false)
-    public static String getSFDomainBaseURL() {
+    public static List<Map<String, String>> saveContentVersion(String title, List<Map<String, String>> base64DataList, String templateId, Boolean wtImage) {
         try {
-            String baseURL = URL.getOrgDomainURL().toExternalForm();
-            return baseURL;
+            
+            List<ContentVersion> contentVersionsToInsert = new List<ContentVersion>(); 
+            List<Map<String, String>> savedIds = new List<Map<String, String>>();
+            List<Id> contentVersionIdsToDelete = new List<Id>();
+            if(wtImage){
+                for (ContentVersion cv : [SELECT Id, ContentDocumentId  FROM ContentVersion WHERE FirstPublishLocationId = :templateId  WITH USER_MODE]) {
+                    contentVersionIdsToDelete.add(cv.ContentDocumentId);
+                }
+            } else {
+                for (ContentVersion cv : [SELECT Id, ContentDocumentId  FROM ContentVersion WHERE FirstPublishLocationId = :templateId and Title != 'OriginalImg' WITH USER_MODE]) {
+                    contentVersionIdsToDelete.add(cv.ContentDocumentId);
+                } 
+            }
+            
+            List<Id> contentDocumentIdsToDelete = new List<Id>();
+            List<ContentDocument> cdlst = [SELECT Id FROM ContentDocument WHERE Id IN :contentVersionIdsToDelete WITH USER_MODE];
+            if (!cdlst.isEmpty()) {
+                delete cdlst;
+            }
+            
+            for(Map<String, String> dataUrl : base64DataList) {
+                String recordType = dataUrl.keySet().iterator().next();
+                String data = dataUrl.get(recordType);
+                
+                if(recordType.equalsIgnoreCase('Text') || recordType.equalsIgnoreCase('Image') || recordType.equalsIgnoreCase('OriginalImg')) {
+                    ContentVersion contentVersion = new ContentVersion(
+                        Title = dataUrl.get('title'),
+                        VersionData = EncodingUtil.base64Decode(data),
+                        PathOnClient = title + '.png',
+                        FirstPublishLocationId = templateId
+                    );
+                    
+                    contentVersionsToInsert.add(contentVersion);
+                }
+            }
+            if (Schema.sObjectType.ContentVersion.isCreateable()) {
+                insert contentVersionsToInsert;
+                for(ContentVersion contentVersion : contentVersionsToInsert) {
+                    Map<String, String> savedId = new Map<String, String>();
+                    savedId.put(contentVersion.Title, contentVersion.Id);
+                    savedIds.add(savedId);
+                }
+                return savedIds;
+            }
+            else{
+                LogHandler.createLog((Id) null,'DisplayPDFController.saveContentVersion()','Insufficient permissions to create ContentVersion records. ','Insufficient permissions to create ContentVersion records.', 'Insufficient permissions');
+                return null;
+            }
+        
         } catch(Exception ex) {
-            LogHandler.createLog((Id) null,'DisplayPDFController.getSFDomainBaseURL()','Template Id- '+' '+ex.getLineNumber()+ex.getStackTraceString()+ex.getCause(),ex.getMessage(),'Exception');
-            throw new AuraHandledException(ex.getMessage());
+            LogHandler.createLog((Id) null,'DisplayPDFController.saveContentVersion()','Failed to create the Contentversion records '+ex.getLineNumber()+ex.getStackTraceString()+ex.getCause(),ex.getMessage(),'Failed to create the Contentversion records');  
+            return null;
         }
     }
     
