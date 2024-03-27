@@ -134,7 +134,7 @@ global with sharing class DisplayPDFController
                     showAllPages = false;
                 }
                 deFaultCSS = false;
-                imageURL = getSFDomainBaseURL() + '/sfc/servlet.shepherd/version/renditionDownload?rendition=ORIGINAL_Png&versionId=' + contentVersionID; 
+                imageURL = PdfDisplay.getDomainUrl() + '/sfc/servlet.shepherd/version/renditionDownload?rendition=ORIGINAL_Png&versionId=' + contentVersionID; 
             }
             else{
                 showAllPages = false;
