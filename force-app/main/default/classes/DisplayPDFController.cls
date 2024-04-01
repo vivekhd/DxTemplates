@@ -20,6 +20,8 @@ global with sharing class DisplayPDFController
      */
     public static Safely safe = new Safely();
     
+     public String sampleStyle {get; set;}
+     public Map<String,String> styleList {get; set;} 
     /**
      * @description URL of the image to be displayed.
      */
@@ -28,7 +30,7 @@ global with sharing class DisplayPDFController
     /**
      * @description Flag indicating whether to display all pages.
      */
-    public Boolean showAllPages {get; set;}
+    public String showAllPages {get; set;}
     
     /**
      * @description Flag indicating whether to use default CSS styles.
@@ -105,13 +107,23 @@ global with sharing class DisplayPDFController
     */
     public DisplayPDFController() {
         try {
-            showAllPages =  true;
+            styleList = new Map<String,String>();
+            //sampleStyle = '@page { size: A4;  margin-left: 0px;  margin-right: 0px; margin-top: 90px;  margin-bottom: 80px; <apex:outputText rendered="{!if(headersectionsCount== 1,true,false)}"> @top-left { content:element(header_left);  width:100%;} </apex:outputText> <apex:outputText rendered="{!if(headersectionsCount== 2,true,false)}"> @top-left { content:element(header_left);width:50%;} @top-right { content:element(header_center);width:50%;} </apex:outputText> <apex:outputText rendered="{!if(headersectionsCount== 3,true,false)}"> @top-left { content:element(header_left);} @top-center { content:element(header_center);} @top-right { content:element(header_right);} </apex:outputText> <apex:outputText rendered="{!if(footersectionsCount== 1,true,false)}"> @bottom-left { content:element(footer_left); width:100%; } </apex:outputText> <apex:outputText rendered="{!if(footersectionsCount== 2,true,false)}"> @bottom-left { content:element(footer_left); width:50%;} @bottom-right { content:element(footer_center);width:50%; } </apex:outputText> <apex:outputText rendered="{!if(footersectionsCount== 3,true,false)}"> @bottom-left { content:element(footer_left);} @bottom-center { content:element(footer_center);}@bottom-right { content:element(footer_right);}</apex:outputText>}';
+            showAllPages =  'All Pages';
             displaypagesequence = false;
             String inputparam = ApexPages.currentPage().getParameters().get('documentid');
             inputparam = String.escapeSingleQuotes(inputparam);
             Document__c docrec = [SELECT Id, Document_Body__c, Document_Content__c, Document_Template__r.Watermark_Data__c  
                                   FROM Document__c 
                                   WHERE Id = :inputparam WITH SECURITY_ENFORCED];
+            DxTemplates_VF_Style__mdt[] stylesLst = [select Id, Label, MasterLabel,DeveloperName,  CSS_Style_List__c from DxTemplates_VF_Style__mdt with USER_MODE];
+            //System.debug('stylesLst ---> '+ stylesLst);
+            for(DxTemplates_VF_Style__mdt style: stylesLst){
+                //System.debug('style.label ---> '+ style.label);
+                //System.debug('style.CSS_Style_List__c ---> '+ style.CSS_Style_List__c);
+                //System.debug('styleList variable ---> '+ styleList);
+                styleList.put(style.label, style.CSS_Style_List__c);
+            }
             if (docrec.Document_Template__r.Watermark_Data__c != null) {
                 String inputStr =  docrec.Document_Template__r.Watermark_Data__c;
                 String contentVersionID;
@@ -128,20 +140,16 @@ global with sharing class DisplayPDFController
                     }
                 }
                 System.debug('pageOption >> '+ pageOption);
-                if(pageOption == 'All Pages'){
-                    showAllPages = true;
-                } else {
-                    showAllPages = false;
-                }
+				showAllPages = pageOption;
                 deFaultCSS = false;
-                imageURL = PdfDisplay.getDomainUrl() + '/sfc/servlet.shepherd/version/renditionDownload?rendition=ORIGINAL_Png&versionId=' + contentVersionID; 
+                imageURL = getSFDomainBaseURL() + '/sfc/servlet.shepherd/version/renditionDownload?rendition=ORIGINAL_Png&versionId=' + contentVersionID; 
             }
             else{
-                showAllPages = false;
+                showAllPages = 'All Pages';
                 defaultCSS = true;  
             } 
             if(inputparam != null){
-                displayText = String.escapeSingleQuotes(docrec.Document_Body__c).replace('\\', '');        
+                displayText = String.escapeSingleQuotes(docrec.Document_Body__c);        
             } else {
                 displayText = 'ID not found ' + inputparam;
             }
@@ -167,7 +175,6 @@ global with sharing class DisplayPDFController
                         }
                     }
                 }
-
                 if(mapjson.containsKey('footer')){
                     List<Object> footerListObject = new List<Object>();
                     Map<String, Object> footerMap = (Map<String, Object>) mapjson.get('footer');
@@ -191,8 +198,10 @@ global with sharing class DisplayPDFController
             } else {
                 displayText = 'ID not found';
             }      
+            sampleStyle = '@page { size: A4; margin-left: 0px; margin-right: 0px; margin-top: 90px; margin-bottom: 80px; <apex:outputText rendered="{!if(headersectionsCount== 1,true,false)}"> @top-left { content:element(header_left);  width:100%;} </apex:outputText> <apex:outputText rendered="{!if(headersectionsCount== 2,true,false)}"> @top-left { content:element(header_left);width:50%;} @top-right { content:element(header_center);width:50%;} </apex:outputText> <apex:outputText rendered="{!if(headersectionsCount== 3,true,false)}"> @top-left { content:element(header_left);} @top-center	 { content:element(header_center);} @top-right { content:element(header_right);} </apex:outputText> <apex:outputText rendered="{!if(footersectionsCount== 1,true,false)}"> @bottom-left { content:element(footer_left); width:100%; } </apex:outputText> <apex:outputText rendered="{!if(footersectionsCount== 2,true,false)}"> @bottom-left { content:element(footer_left); width:50%;} @bottom-right { content:element(footer_center);width:50%; } </apex:outputText> <apex:outputText rendered="{!if(footersectionsCount== 3,true,false)}"> @bottom-left { content:element(footer_left);} @bottom-center { content:element(footer_center);} @bottom-right { content:element(footer_right);} </apex:outputText>}';           
+            displayText += '<h1>PDF Fonts Test Page</h1><p>This text, which has no styles applied, is styled in the default font for the Visualforce PDF rendering engine.</p><p>The fonts available when rendering a page as a PDF are as follows. The first listed <code>font-family</code> value for each typeface is the recommended choice.</p><table border="1" cellpadding="6"><tr><th>Font Name</th><th>Style <code>font-family</code> Value to Use (Synonyms)</th></tr><tr><td><span style="font-family: Arial Unicode MS; font-size: 14pt;">Arial Unicode MS</span></td><td><ul><li><span style="font-family: Arial Unicode MS; font-size: 14pt;">Arial Unicode MS</span></li></ul></td></tr><tr><td><span style="font-family: Helvetica; font-size: 14pt;">Helvetica</span></td><td><ul><li><span style="font-family: sans-serif; font-size: 14pt;">sans-serif</span></li><li><span style="font-family: SansSerif; font-size: 14pt;">SansSerif</span></li><li><span style="font-family: Dialog; font-size: 14pt;">Dialog</span></li></ul></td></tr><tr><td><span style="font-family: Times; font-size: 14pt;">Times</span></td><td><ul><li><span style="font-family: serif; font-size: 14pt;">serif</span></li><li><span style="font-family: Times; font-size: 14pt;">Times</span></li></ul></td></tr><tr><td><span style="font-family: Courier; font-size: 14pt;">Courier</span></td><td><ul><li><span style="font-family: monospace; font-size: 14pt;">monospace</span></li><li><span style="font-family: Courier; font-size: 14pt;">Courier</span></li><li><span style="font-family: Monospaced; font-size: 14pt;">Monospaced</span></li><li><span style="font-family: DialogInput; font-size: 14pt;">DialogInput</span></li></ul></td></tr></table>';
         } catch(Exception ex) {
-             LogHandler.createLog((Id) null,'DisplayPDFController.DisplayPDFController() - Constructor','Template Id-  '+ex.getLineNumber()+ex.getStackTraceString()+ex.getCause(),ex.getMessage(),'Exception');
+             //LogHandler.createLog((Id) null,'DisplayPDFController.DisplayPDFController() - Constructor','Template Id-  '+ex.getLineNumber()+ex.getStackTraceString()+ex.getCause(),ex.getMessage(),'Exception');
             throw new AuraHandledException(ex.getMessage());
         }
     }
@@ -527,61 +536,61 @@ global with sharing class DisplayPDFController
      * @return         List<Map<String, String>> List of maps containing saved record types and their corresponding Ids
      */
    @AuraEnabled(cacheable=false)
-    public static List<Map<String, String>> saveContentVersion(String title, List<Map<String, String>> base64DataList, String templateId, Boolean wtImage) {
-        try {
-            
-            List<ContentVersion> contentVersionsToInsert = new List<ContentVersion>(); 
-            List<Map<String, String>> savedIds = new List<Map<String, String>>();
-            List<Id> contentVersionIdsToDelete = new List<Id>();
-            if(wtImage){
-                for (ContentVersion cv : [SELECT Id, ContentDocumentId  FROM ContentVersion WHERE FirstPublishLocationId = :templateId  WITH USER_MODE]) {
-                    contentVersionIdsToDelete.add(cv.ContentDocumentId);
-                }
-            } else {
-                for (ContentVersion cv : [SELECT Id, ContentDocumentId  FROM ContentVersion WHERE FirstPublishLocationId = :templateId and Title != 'OriginalImg' WITH USER_MODE]) {
-                    contentVersionIdsToDelete.add(cv.ContentDocumentId);
-                } 
-            }
-            
-            List<Id> contentDocumentIdsToDelete = new List<Id>();
-            List<ContentDocument> cdlst = [SELECT Id FROM ContentDocument WHERE Id IN :contentVersionIdsToDelete WITH USER_MODE];
-            if (!cdlst.isEmpty()) {
-                delete cdlst;
-            }
-            
-            for(Map<String, String> dataUrl : base64DataList) {
-                String recordType = dataUrl.keySet().iterator().next();
-                String data = dataUrl.get(recordType);
-                
-                if(recordType.equalsIgnoreCase('Text') || recordType.equalsIgnoreCase('Image') || recordType.equalsIgnoreCase('OriginalImg')) {
-                    ContentVersion contentVersion = new ContentVersion(
-                        Title = dataUrl.get('title'),
-                        VersionData = EncodingUtil.base64Decode(data),
-                        PathOnClient = title + '.png',
-                        FirstPublishLocationId = templateId
-                    );
-                    
-                    contentVersionsToInsert.add(contentVersion);
-                }
-            }
-            if (Schema.sObjectType.ContentVersion.isCreateable()) {
-                insert contentVersionsToInsert;
-                for(ContentVersion contentVersion : contentVersionsToInsert) {
-                    Map<String, String> savedId = new Map<String, String>();
-                    savedId.put(contentVersion.Title, contentVersion.Id);
-                    savedIds.add(savedId);
-                }
-                return savedIds;
-            }
-            else{
-                LogHandler.createLog((Id) null,'DisplayPDFController.saveContentVersion()','Insufficient permissions to create ContentVersion records. ','Insufficient permissions to create ContentVersion records.', 'Insufficient permissions');
-                return null;
-            }
+public static List<Map<String, String>> saveContentVersion(String title, List<Map<String, String>> base64DataList, String templateId, Boolean wtImage) {
+    try {
         
-        } catch(Exception ex) {
-            LogHandler.createLog((Id) null,'DisplayPDFController.saveContentVersion()','Failed to create the Contentversion records '+ex.getLineNumber()+ex.getStackTraceString()+ex.getCause(),ex.getMessage(),'Failed to create the Contentversion records');  
+        List<ContentVersion> contentVersionsToInsert = new List<ContentVersion>(); 
+        List<Map<String, String>> savedIds = new List<Map<String, String>>();
+        List<Id> contentVersionIdsToDelete = new List<Id>();
+        if(wtImage){
+            for (ContentVersion cv : [SELECT Id, ContentDocumentId  FROM ContentVersion WHERE FirstPublishLocationId = :templateId  WITH USER_MODE]) {
+                contentVersionIdsToDelete.add(cv.ContentDocumentId);
+            }
+        }
+        else{
+            for (ContentVersion cv : [SELECT Id, ContentDocumentId  FROM ContentVersion WHERE FirstPublishLocationId = :templateId and Title != 'OriginalImg' WITH USER_MODE]) {
+                contentVersionIdsToDelete.add(cv.ContentDocumentId);
+            } 
+        }
+        
+        List<Id> contentDocumentIdsToDelete = new List<Id>();
+        List<ContentDocument> cdlst = [SELECT Id FROM ContentDocument WHERE Id IN :contentVersionIdsToDelete WITH USER_MODE];
+        if (!cdlst.isEmpty()) {
+            delete cdlst;
+        }
+        for(Map<String, String> dataUrl : base64DataList) {
+            String recordType = dataUrl.keySet().iterator().next();
+            String data = dataUrl.get(recordType);
+            
+            if(recordType.equalsIgnoreCase('Text') || recordType.equalsIgnoreCase('Image') || recordType.equalsIgnoreCase('OriginalImg')) {
+                ContentVersion contentVersion = new ContentVersion(
+                    Title = dataUrl.get('title'),
+                    VersionData = EncodingUtil.base64Decode(data),
+                    PathOnClient = title + '.png',
+                    FirstPublishLocationId = templateId
+                );
+                
+                contentVersionsToInsert.add(contentVersion);
+            }
+        }
+         if (Schema.sObjectType.ContentVersion.isCreateable()) {
+            insert contentVersionsToInsert;
+            for(ContentVersion contentVersion : contentVersionsToInsert) {
+                Map<String, String> savedId = new Map<String, String>();
+                savedId.put(contentVersion.Title, contentVersion.Id);
+                savedIds.add(savedId);
+            }
+             return savedIds;
+         }
+        else{
+            LogHandler.createLog((Id) null,'DisplayPDFController.saveContentVersion()','Insufficient permissions to create ContentVersion records. ','Insufficient permissions to create ContentVersion records.', 'Insufficient permissions');
             return null;
         }
+       
+    } catch(Exception ex) {
+        LogHandler.createLog((Id) null,'DisplayPDFController.saveContentVersion()','Failed to create the Contentversion records '+ex.getLineNumber()+ex.getStackTraceString()+ex.getCause(),ex.getMessage(),'Failed to create the Contentversion records');  
+        return null;
+            }
     }
     
    /**

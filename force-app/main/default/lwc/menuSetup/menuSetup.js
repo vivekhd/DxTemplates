@@ -24,21 +24,21 @@ export default class DxCpqMenuSetup extends LightningElement {
 
 
     connectedCallback() {
-        this.passOn();
+        this.passOn(); 
     }
 
     //Changes by Kapil - Fix for Sobj Filtering
     handleFilterSelection(event) {
-
+        
         this.templateValue = event.detail.value;
-        const filterObjectEvt = new CustomEvent('filteredvalue', {
+            const filterObjectEvt = new CustomEvent('filteredvalue', {
             detail: { value: this.templateValue }, bubbles: true
-        });
-        this.dispatchEvent(filterObjectEvt);
+            });
+            this.dispatchEvent(filterObjectEvt);
     }
+    
 
-
-    @api
+    @api 
     passOn(event) {
         this.mapOfParentToChild = new Map();
         this.mapOfIndexToRow = new Map();
@@ -65,10 +65,10 @@ export default class DxCpqMenuSetup extends LightningElement {
                 index++;
                 obj.isVisible = true;
                 obj.isExpanded = obj.isExpanded ? obj.isExpanded : false;
-                if (first) {
+                if (first) { 
                     obj.selected = 'active';
                     first = false;
-                } else {
+                } else { 
                     obj.selected = '';
                 }
                 obj.ukey = (new Date()).getTime() + "" + index;
@@ -128,7 +128,7 @@ export default class DxCpqMenuSetup extends LightningElement {
         }, []);
     }
 
-    @api setupRow(updatedGridRow) {
+    @api setupRow(updatedGridRow) {   
         this.gridDataSet = JSON.parse(JSON.stringify(updatedGridRow));
         this.updateUniqueKey(this.gridDataSet);
     }
@@ -169,7 +169,7 @@ export default class DxCpqMenuSetup extends LightningElement {
             chld.selectable = '';
             chld.ukey = (new Date()).getTime() + "" + chld._index;
             childIndex++;
-        })
+        })  
         obj._children = this.returnedRecords;
         this.gridDataSet[obj.Id] = obj;
         this.getTreeRow(this.gridDataSet);
@@ -200,13 +200,13 @@ export default class DxCpqMenuSetup extends LightningElement {
             if (grid._index == index) {
                 this.globalSelectedIndex = index;
                 grid.selected = 'active';
-            } else {
+            } else { 
                 grid.selected = '';
             }
         });
         const selectedEvent = new CustomEvent("active",
-            { detail: { id: wrapperId, row: row } }
-        );
+                    { detail: { id: wrapperId, row: row } }
+                    );
         this.dispatchEvent(selectedEvent);
     }
 
@@ -221,34 +221,34 @@ export default class DxCpqMenuSetup extends LightningElement {
                 this.listArr.sort((a, b) => {
                     if (a._index < b._index) {
                         return -1;
-                    }
-                    if (a._index > b._index) {
+                      }
+                      if (a._index > b._index) {
                         return 1;
-                    }
-                    return 0;
+                      }
+                      return 0;
                 });
             }
         }
     }
 
     filterData(event) {
-        let searchParam = event.target.value;
-        this.gridDataSet = this.masterData;
-        searchParam.length > 0 && (this.gridDataSet = this.gridDataSet.filter(data => {
-            return (data.label.toLowerCase()).includes(searchParam.toLowerCase());
-        }));
-        searchParam.length == 0 && (this.gridDataSet.forEach(data => {
-            (data._index == this.globalSelectedIndex) && (data.selected = 'active');
-            (data._index != this.globalSelectedIndex) && (data.selected = '');
-        }));
+       let searchParam = event.target.value;
+       this.gridDataSet = this.masterData;
+      searchParam.length > 0 && (this.gridDataSet = this.gridDataSet.filter(data => {
+        return (data.label.toLowerCase()).includes(searchParam.toLowerCase());
+       }));
+       searchParam.length == 0 && (this.gridDataSet.forEach(data => {
+        (data._index == this.globalSelectedIndex) && (data.selected = 'active');
+        (data._index != this.globalSelectedIndex) && (data.selected = '');
+       }));
     }
 
     //Added below method for template creation - VIVEK
     createNewTemplateHandler() {
         const newDocTempEvt = new CustomEvent('newtemplate', {
             detail: { newtemplatecreation: true }, bubbles: true
-        });
-        this.dispatchEvent(newDocTempEvt);
+            });
+            this.dispatchEvent(newDocTempEvt);
     }
 
 }
