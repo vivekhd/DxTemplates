@@ -2,6 +2,12 @@ import { LightningElement, track, wire, api } from 'lwc';
 import getDocumentTemplates from '@salesforce/apex/SaveDocumentTemplate.getDocumentTemplates';
 import createDocumentTemplate from '@salesforce/apex/SaveDocumentTemplate.createDocumentTemplate';
 import getRelatedToTypeOptions from '@salesforce/apex/SaveDocumentTemplate.getRelatedToTypeOptions';
+import getAllDocumentTemplatesData from '@salesforce/apex/ImportExportData.getAllDocumentTemplatesData';
+import createImportedTemplates from '@salesforce/apex/ImportExportData.createImportedTemplates';
+import createImportedTemplateSections from '@salesforce/apex/ImportExportData.createImportedTemplateSections';
+import createImportedClauses from '@salesforce/apex/ImportExportData.createImportedClauses';
+import createImportedRules from '@salesforce/apex/ImportExportData.createImportedRules';
+import createImportedRuleConditions from '@salesforce/apex/ImportExportData.createImportedRuleConditions';
 
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 import getAllPopupMessages from '@salesforce/apex/PopUpMessageSelector.getAllConstants';
@@ -9,7 +15,7 @@ import saveContentVersion from '@salesforce/apex/DisplayPDFController.saveConten
 import { updateRecord } from 'lightning/uiRecordApi';
 import DOCUMENTTEMPLATEID_FIELD from '@salesforce/schema/Document_Template__c.Id';
 import WATERMARKDATA_FIELD from '@salesforce/schema/Document_Template__c.Watermark_Data__c';
-import getSFDomainBaseURL from '@salesforce/apex/PdfDisplay.getDomainUrl';
+import getSFDomainBaseURL from '@salesforce/apex/DisplayPDFController.getSFDomainBaseURL';
 import createLog from '@salesforce/apex/LogHandler.createLog';
 
 export default class DxTemplateSetup extends LightningElement {
@@ -18,6 +24,18 @@ export default class DxTemplateSetup extends LightningElement {
   currentStep = "1"; // It reflects the current (or) active step in the progress bar
   baseURL; // domain base url of the ORG
   imageUrl; // it stores the data of the uploaded image
+  importedTemplates;
+  _selected = [];
+  showTextArea=false;
+  exportList;
+  showAllTemplates=false;
+  showImportTemplates=false;
+  allTemplates;
+  templatesOptions=[];
+  previewLabel='Show Preview'
+  @track jsonData;
+
+
   @track activeTab =''; // It stores the active tab value
   @track outerContainer = ''; //The styling of the container which holds the canvas
   @track watermarkText  = ''; // The input text value with which text watermark is being created
@@ -87,6 +105,7 @@ export default class DxTemplateSetup extends LightningElement {
     allConstants({ error, data }) {
         if (data) {
             this.popUpMessage = data;
+            console.log('Success');
         } else {
             this.error = error;
         }
@@ -95,6 +114,7 @@ export default class DxTemplateSetup extends LightningElement {
     connectedCallback() {
         getSFDomainBaseURL()
         .then(result => {
+            console.log('domain base URL ----> ', result);
             this.baseURL = result;
         })
         .catch(error => {
@@ -361,7 +381,7 @@ export default class DxTemplateSetup extends LightningElement {
         if(fieldMap[fieldName]) {
             this[fieldMap[fieldName]] = value;
         }
-        if(this.activeTab == 'Text'){
+                if(this.activeTab == 'Text'){
           this.generateCanvas();
         }
         else{
@@ -374,29 +394,29 @@ export default class DxTemplateSetup extends LightningElement {
     */
     handleTabChange(event) {
         this.activeTab = event.currentTarget.dataset.name;
-    }
+            }
 
     /**
     * Method to create the image of the text watermark for the given user inputs
     * @param {Object} event
     */
     generateCanvas() {
-        try{
-            const canvas = this.template.querySelector('.canvasText');
-            const context = canvas.getContext('2d');
-            context.clearRect(0, 0, canvas.width, canvas.height);
-            if (this.rotationValue !== this.previousRotationValue) {
-                context.translate(canvas.width / 2, canvas.height / 2);
-                context.rotate((this.rotationValue - this.previousRotationValue )* Math.PI / 180);            
-                context.translate(-canvas.width / 2, -canvas.height / 2);
-                this.previousRotationValue = this.rotationValue;
-            }
-            context.globalAlpha = this.opacityValue;
-            context.font = this.fontSizeValue + 'px Arial';
-            let textWidth = context.measureText(this.watermarkText).width;
-            context.fillStyle = this.colorValue;
-            context.fillText(this.watermarkText, (canvas.width/2 - textWidth/2), canvas.height / 2);
-        }
+try{
+      const canvas = this.template.querySelector('.canvasText');
+      const context = canvas.getContext('2d');
+      context.clearRect(0, 0, canvas.width, canvas.height);
+      if (this.rotationValue !== this.previousRotationValue) {
+          context.translate(canvas.width / 2, canvas.height / 2);
+          context.rotate((this.rotationValue - this.previousRotationValue )* Math.PI / 180);            
+          context.translate(-canvas.width / 2, -canvas.height / 2);
+          this.previousRotationValue = this.rotationValue;
+      }
+      context.globalAlpha = this.opacityValue;
+      context.font = this.fontSizeValue + 'px Arial';
+      let textWidth = context.measureText(this.watermarkText).width;
+      context.fillStyle = this.colorValue;
+      context.fillText(this.watermarkText, (canvas.width/2 - textWidth/2), canvas.height / 2);
+}
         catch(error){
             console.log('error while getting canvas line 401 templateSetup --> ', error);
         }
@@ -407,7 +427,7 @@ export default class DxTemplateSetup extends LightningElement {
     * @param {Object} event
     */
     handleRotationChange(event){
-      let slectedRotation = event.currentTarget.dataset.type;
+            let slectedRotation = event.currentTarget.dataset.type;
       if(slectedRotation == 'Text'){
         this.rotationValue = event.target.value;
         this.outerContainer = `transform: rotate(${this.rotationValue}deg);`;
@@ -425,24 +445,24 @@ export default class DxTemplateSetup extends LightningElement {
     * Once the images drawn in both cases - text & image are saved then their contentversion IDs are captured and using the updateRecord the Watermark_Data__c field on Document_Template__c object is updated based on the selected ID
     */
     handleWaterMarkSave(){
-        try{
-            let canvasText = this.template.querySelector('.canvasText');
-            if(canvasText && this.watermarkText !== ''){
-                let dataURLText = canvasText.toDataURL();
-                this.baseDataLst.push({ 'text': dataURLText.split(',')[1], title:'Text' });
-            }
-            let canvasImage = this.template.querySelector('.canvasImage');
-            if(canvasImage && this.imageUrl){
-                let dataURLImage = canvasImage.toDataURL();
-                this.baseDataLst.push({ 'Image': dataURLImage.split(',')[1], title:'Image' });
-            }
+try{
+      let canvasText = this.template.querySelector('.canvasText');
+      if(canvasText && this.watermarkText !== ''){
+        let dataURLText = canvasText.toDataURL();
+        this.baseDataLst.push({ 'text': dataURLText.split(',')[1], title:'Text' });
+      }
+      let canvasImage = this.template.querySelector('.canvasImage');
+      if(canvasImage && this.imageUrl){
+        let dataURLImage = canvasImage.toDataURL();
+        this.baseDataLst.push({ 'Image': dataURLImage.split(',')[1], title:'Image' });
+}
         }
         catch(error){
             console.log('error while getting canvas line 432 templateSetup --> ', error);
-        }
+      }
       saveContentVersion({ title: "WatermarkImage", base64DataList: this.baseDataLst, templateId: this.documenttemplaterecordid, wtImage : true })
         .then(result => {
-            const fields ={};
+                        const fields ={};
             let watermarkText = (result.filter(obj => Object.keys(obj).some(key => key.includes('Text'))) || [])[0];
             let watermarkImage = (result.filter(obj => Object.keys(obj).some(key => key.includes('Image'))) || [])[0];
             watermarkText = watermarkText ? watermarkText[Object.keys(watermarkText)[0]] : null;
@@ -601,14 +621,172 @@ export default class DxTemplateSetup extends LightningElement {
         }
     }
 
-    /**
-    * Method to reset the specific Watermark fields of Image Watermark
-    */
     resetImageWatermarkFields(){
         this.rotationImagevalue = '0';
         this.imageScalingValue = '100';
         this.opacityImageValue = '1.0';
     }
+
+    /* Import Export Functionality*/
+    exportTemplate(){
+        this.showAllTemplates=true;
+        this.showAddNewTemplate=false;
+        getAllDocumentTemplatesData()
+        .then(data => {
+            let exportTemplateData = JSON.parse(data);
+            console.log('exportTemplate', exportTemplateData);
+            this.allTemplates= exportTemplateData;
+            this.templatesOptions = exportTemplateData.Templates.map(exportTemplatelst => ({
+                label: exportTemplatelst.Name + ' - v'+ exportTemplatelst.DxCPQ__Version_Number__c,
+                value: exportTemplatelst.Id
+            }));
+        })
+        .catch(error => {
+            console.log('Error -> exportTemplate' + error);
+        })
+        this.template.querySelector('c-modal').show();
+    }
+
+    importTemplate(){
+        this.showImportTemplates=true;
+        this.showAddNewTemplate=false;
+        getDocumentTemplates()
+        .then(data => {
+            console.log('exportTemplate', data);
+        })
+        .catch(error => {
+            console.log('Error -> exportTemplate' + error);
+        })
+        this.template.querySelector('c-modal').show();
+    }
+
+    handleJSONUpload(event){
+        const file = event.target.files[0];
+        const reader = new FileReader();
+        reader.onload = () => {
+            try {
+                const jsonContent = JSON.parse(reader.result);
+                this.jsonData = JSON.stringify(jsonContent, null, 4);
+            } catch (error) {
+                console.error('Error parsing JSON file:', error);
+            }
+        };
+        reader.readAsText(file);
+    }
+    createTemplateData(){
+        console.log('createTemplateData got triggered');
+        try{
+            let createImportedRecords = JSON.parse(this.jsonData);
+            createImportedRecords.Templates.forEach(importTemplates => {
+                importTemplates.DxCPQ__External_ID__c=importTemplates.Id;
+                importTemplates.Id= undefined;
+            });
+            let templatesjson = JSON.stringify(createImportedRecords.Templates);
+            createImportedTemplates({tempLst:templatesjson})
+            .then(data=> {
+                data.forEach(item =>{
+                    let newTempId= item.Id;
+                    let oldTempId= item.ExternalId;
+                    createImportedRecords['Template Sections'].forEach(tempSecItem => {
+                        if (tempSecItem.DxCPQ__Document_Template__c == oldTempId){
+                            tempSecItem.DxCPQ__Document_Template__c= newTempId;
+                        }
+                        tempSecItem.Id=undefined;
+                    });
+                });
+            })
+            .then(()=>{
+                createImportedRecords.Rules.forEach(importRules => {
+                    importRules.DxCPQ__External_Id__c= importRules.Id;
+                    importRules.Id= undefined;
+                })
+                let rulesjson = JSON.stringify(createImportedRecords.Rules);
+                createImportedRules({tempRuleLst:rulesjson})
+                .then(data => {
+                    data.forEach(item=>{
+                        let newTempId = item.Id;
+                        let oldTempId= item.ExternalId;
+                        createImportedRecords['Template Sections'].forEach(tempSecItem =>{
+                            if(tempSecItem.DxCPQ__RuleId__c == oldTempId){
+                                tempSecItem.DxCPQ__RuleId__c = newTempId;
+                            }
+                        })
+                        createImportedRecords['Rule Conditions'].forEach(importRuleConds => {
+                            if(importRuleConds.DxCPQ__Rule__c == oldTempId){
+                                importRuleConds.DxCPQ__Rule__c = newTempId;
+                            }
+                            importRuleConds.Id= undefined;
+                        })
+                    })
+                })
+                .then(()=>{
+                    let ruleConditionjson = JSON.stringify(createImportedRecords['Rule Conditions']);
+                    createImportedRuleConditions({tempRuleCondLst:ruleConditionjson});
+                    console.log('Rule Condtions Created');
+                })
+            })
+            .then(()=>{
+                createImportedRecords['Document Clauses'].forEach(importClauses => {
+                    importClauses.DxCPQ__External_ID__c= importClauses.Id;
+                    importClauses.Id= undefined;
+                })
+                let clausesjson = JSON.stringify(createImportedRecords['Document Clauses']);
+                createImportedClauses({tempClausesLst:clausesjson})
+                .then(data=> {
+                    data.forEach(item =>{
+                        let newTempId= item.Id;
+                        let oldTempId= item.ExternalId;
+                        createImportedRecords['Template Sections'].forEach(tempSecItem => {
+                            if (tempSecItem.DxCPQ__Document_Clause__c == oldTempId){
+                                tempSecItem.DxCPQ__Document_Clause__c = newTempId;
+                            }
+                        });
+                    });
+                })
+                .then(()=>{
+                    let templatesectionjson = JSON.stringify(createImportedRecords['Template Sections']);
+                    createImportedTemplateSections({tempSecLst:templatesectionjson});
+                    console.log('Template Section created!');
+                })
+            })
+        }
+        catch (error){
+            console.error('Error in creating the data- ',error);
+        }
+    }
+
+    handleExportTemplateList(event){
+        this._selected = event.detail.value;
+        const exportTmpList= JSON.parse(JSON.stringify(this.allTemplates));;
+        //this.exportList= this.allTemplates;
+        exportTmpList.Templates= exportTmpList.Templates.filter(item => this._selected.includes(item.Id));
+        exportTmpList['Template Sections']= exportTmpList['Template Sections'].filter(item => this._selected.includes(item.DxCPQ__Document_Template__c));
+        this.exportList= JSON.stringify(exportTmpList,null, 4);
+        console.log('The selected templates are- ',this._selected);
+        console.log('The json data is', this.exportList);
+    }
+
+    exportTemplateList(e){
+        console.log('The selected templates are- ',this._selected);
+        this.previewLabel = this.previewLabel === 'Show Preview' ? 'Hide Preview' : 'Show Preview';
+        this.showTextArea = !this.showTextArea;
+    }
+
+    // jsonDataAssign(event){
+    //     this.jsonData=event.target.value;
+    // }
+
+    downloadJson(){
+        const element = document.createElement('a');
+        const file = new Blob([this.exportList], {type: 'application/json'});
+        element.href = URL.createObjectURL(file);
+        element.download = 'Templates Information.json';
+        document.body.appendChild(element);
+        element.click();
+        document.body.removeChild(element);
+    }
+
+    /*Import Export Functionality End*/
     /**
     * Method to reset the all Watermark fields both Text and Image Watermark
     */
@@ -653,7 +831,7 @@ export default class DxTemplateSetup extends LightningElement {
         }
     }
 
-    /**
+/**
     * Method to clear the watermark fields when the modal is closed
     * @param {Object} event
     */
@@ -670,5 +848,13 @@ export default class DxTemplateSetup extends LightningElement {
         this.checkedValText = true;
         this.watermarkText = '';
         this.checkedValImage = false;
+        this.showAllTemplates=false;
+        this.showImportTemplates=false;
+        this.exportList='';
+        this.showAddNewTemplate=false;
+        this.showwatermarkbtn=false;
+        this.previewLabel='Show Preview';
+        this.showTextArea=false;
+        this.jsonData='';
     }
 }

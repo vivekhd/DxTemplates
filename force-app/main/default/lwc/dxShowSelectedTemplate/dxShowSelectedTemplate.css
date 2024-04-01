@@ -1,0 +1,12 @@
+.clearfix {
+	clear: both;
+}
+.row {
+	display: block;
+}
+.col {
+	float: left;
+}
+.size-1-of-2 {
+	width: 48%;
+}

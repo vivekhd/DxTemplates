@@ -1,3 +1,8 @@
-.dummy{
-	color : black;
+:host {
+  --slds-c-textarea-sizing-min-height: 150px;
+}
+
+.custom_button{
+  height: 32px;
+  width: 100px;
 }

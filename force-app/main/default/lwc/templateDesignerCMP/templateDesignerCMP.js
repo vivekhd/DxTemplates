@@ -132,7 +132,7 @@ export default class TemplateDesignerCMP extends NavigationMixin(LightningElemen
   allConstants({ error, data }) {
     if (data) {
       this.popUpMessage = data;
-    } else {
+          } else {
       this.error = error;
     }
   }
@@ -188,7 +188,7 @@ export default class TemplateDesignerCMP extends NavigationMixin(LightningElemen
     * @param {String} sectionid The ID of the section.
     */
   handlechildcomponents(selectedOption, isNewSection, sectionid) {
-    if (selectedOption == 'Clause') {
+        if (selectedOption == 'Clause') {
       this.showclausescreen = true;
       this.showtabledetails = false;
       this.showrelatedobjectdetails = false;
@@ -257,7 +257,7 @@ export default class TemplateDesignerCMP extends NavigationMixin(LightningElemen
       this.showcontextdetails = false;
       this.showheaderdetails = false;
       this.showfooterdetails = false;
-      if (isNewSection == true) {
+            if (isNewSection == true) {
         this.rowCount += 1;
         this.optionsList.push({ Id: selectedOption + 'NotSaved', Type: selectedOption, rowCount: this.rowCount });
         this.selectedSectionRecordID = selectedOption + 'NotSaved';
@@ -273,7 +273,7 @@ export default class TemplateDesignerCMP extends NavigationMixin(LightningElemen
       this.showtabledetails = false;
       this.showrelatedobjectdetails = false;
       this.SectionTypename = 'Header';
-      this.opensection = true;
+            this.opensection = true;
       this.showcontextdetails = false;
       this.showheaderdetails = true;
       this.showfooterdetails = false;
@@ -378,7 +378,7 @@ export default class TemplateDesignerCMP extends NavigationMixin(LightningElemen
   handlesavedheaderdata(event) {
     this.header.Id = event.detail.Id;
     if (this.showPreview == false) { this.showPreview = true; }
-  }
+      }
 
   /**
    * Method to save the footer data when clicked Save/update
@@ -386,7 +386,7 @@ export default class TemplateDesignerCMP extends NavigationMixin(LightningElemen
   handlesavedfooterdata(event) {
     this.footer.Id = event.detail.Id;
     if (this.showPreview == false) { this.showPreview = true; }
-  }
+      }
 
   /**
  * Method to delete the section of the current template
@@ -574,7 +574,7 @@ export default class TemplateDesignerCMP extends NavigationMixin(LightningElemen
     this.isActivateTemplateDisabled = true;
     getSFDomainBaseURL()
       .then(result => {
-        this.baseURL = result;
+          this.baseURL = result;
       })
       .catch(error => {
         console.log('error while retrieving the org base URL --- > ', error);
@@ -582,7 +582,7 @@ export default class TemplateDesignerCMP extends NavigationMixin(LightningElemen
     //get PDFlinks from custom metdata
     getPDFLinks()
       .then(result => {
-        this.pdfLinksData = result;
+          this.pdfLinksData = result;
       })
       .catch(error => {
         console.log('error while retrieving the PDF Links --- > ', error);
@@ -598,10 +598,9 @@ export default class TemplateDesignerCMP extends NavigationMixin(LightningElemen
         .then(result => {
           if (result != null) {
             if (result.length > 0) {
-              let activateTemplateDisabled = true;
               result.forEach(res => {
-                if (res.DxCPQ__Type__c !== 'Header' && res.DxCPQ__Type__c !== 'Footer' && this.activateTemplateDisabled) {
-                  this.activateTemplateDisabled = false;
+                if (res.DxCPQ__Type__c !== 'Header' && res.DxCPQ__Type__c !== 'Footer' && this.isActivateTemplateDisabled) {
+                  this.isActivateTemplateDisabled = false;
                 }
               });
              
@@ -1236,27 +1235,27 @@ try{
    */
   handleWaterMarkSave() {
     try{
-      let canvasText = this.template.querySelector('.canvasText');
-      if (canvasText && this.watermarkText !== '') {
-        let dataURLText = canvasText.toDataURL();
-        this.baseDataLst.push({ 'text': dataURLText.split(',')[1], title:'Text' });
-      }
+    let canvasText = this.template.querySelector('.canvasText');
+    if (canvasText && this.watermarkText !== '') {
+      let dataURLText = canvasText.toDataURL();
+      this.baseDataLst.push({ 'text': dataURLText.split(',')[1], title:'Text' });
+    }
 
-      let canvasImage = this.template.querySelector('.canvasImage');
-      if (canvasImage && this.imageUrl) {
-        let dataURLImage = canvasImage.toDataURL();
-        this.baseDataLst.push({ 'Image': dataURLImage.split(',')[1], title:'Image' });
-      }
+    let canvasImage = this.template.querySelector('.canvasImage');
+    if (canvasImage && this.imageUrl) {
+      let dataURLImage = canvasImage.toDataURL();
+      this.baseDataLst.push({ 'Image': dataURLImage.split(',')[1], title:'Image' });
+}
     }
     catch(error){
       console.log('error while getting canvas line 1230 templatedesignerCMP --> ', error);
     }
 
-    const originalImageMap = this.baseDataLst.find(entry => entry.title === 'OriginalImg');
+        const originalImageMap = this.baseDataLst.find(entry => entry.title === 'OriginalImg');
     this.hasOriginalImage = originalImageMap != undefined ? true : false;
     saveContentVersion({ title: "WatermarkImage", base64DataList: this.baseDataLst, templateId: this.documenttemplaterecordid, wtImage : this.hasOriginalImage })
       .then(result => {
-        this.imageSavedId = result;
+                this.imageSavedId = result;
         const fields = {};
         this.baseDataLst =[];
         let watermarkText = (result.filter(obj => Object.keys(obj).some(key => key.includes('Text'))) || [])[0];
@@ -1290,13 +1289,13 @@ try{
           rotation: this.rotationImagevalue,
           pageImageOption: this.pageImageOption,
           imageScale: this.imageScalingValue,
-          originalImageCVId : this.originalImageCvId
+          originalImageCVId: this.originalImageCvId
         };
         fields[DOCUMENTTEMPLATEID_FIELD.fieldApiName] = this.documenttemplaterecordid;
         let jsonDataLst = [watermarkImageIdText, watermarkImageIdImage];
         fields[WATERMARKDATA_FIELD.fieldApiName] = JSON.stringify(jsonDataLst);
         const recordInput = { fields };
-
+        
         updateRecord(recordInput)
           .then(() => {
             const toastEvt = new ShowToastEvent({
@@ -1309,17 +1308,17 @@ try{
             //resetting previous Text Totation & Image Rotation values
             this.previousRotationValue = '0';
             this.showwatermarkbtn = false;
-            this.fontSizeValue ='22';
-            this.opacityValue ='1.0';
+            this.fontSizeValue = '22';
+            this.opacityValue = '1.0';
             this.watermarkText = '';
             this.colorValue = '';
-            this.rotationValue ='0';
+            this.rotationValue = '0';
             this.checkedValText = true;
-            this.checkedValImage =  false;
+            this.checkedValImage = false;
             this.pageTextOption = 'All Pages - Text';
-            this.pageImageOption =  'All Pages -  Image';
+            this.pageImageOption = 'All Pages -  Image';
             this.imageScalingValue = '100';
-            this.rotationImagevalue ='0';
+            this.rotationImagevalue = '0';
             this.opacityImageValue = '1.0';
             this.callImage = 0;
             this.updateCheckedValue(this.pageTextOption, this.watermarkPageOptionsText);
@@ -1560,7 +1559,7 @@ try{
   handlehelp(event){
     let relatedObjectsMap = this.pdfLinksData.find(item => item.MasterLabel === event.currentTarget.dataset.val);
     let pdfUrl = relatedObjectsMap ? relatedObjectsMap.DxCPQ__Section_PDF_URL__c : null;
-        const config = {
+     const config = {
       type: 'standard__webPage',
       attributes: {
         url: pdfUrl
@@ -1579,7 +1578,7 @@ try{
     this.fontSizeValue = '22';
     this.opacityImageValue = '1.0';
     this.opacityValue = '1.0';
-    this.color ='#000000';
+    this.color = '#000000';
     this.rotationValue = '0';
     this.rotationImagevalue = '0';
     this.imageScalingValue = '100';
@@ -1602,8 +1601,8 @@ try{
     this.checkedValText = true;
     this.checkedValImage = false;
     this.pageTextOption = 'All Pages - Text';
-    this.imageScalingValue ='100';
-    this.opacityImageValue ='1.0';
+    this.imageScalingValue = '100';
+    this.opacityImageValue = '1.0';
     this.rotationImagevalue = '0';
     this.pageImageOption = 'All Pages - Image';
     this.callImage = 0;

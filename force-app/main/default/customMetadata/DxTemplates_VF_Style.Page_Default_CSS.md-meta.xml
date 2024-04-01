@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomMetadata xmlns="http://soap.sforce.com/2006/04/metadata" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+    <label>Page Default CSS</label>
+    <protected>false</protected>
+    <values>
+        <field>CSS_Style_List__c</field>
+        <value xsi:type="xsd:string">@page {
+	    size: A4; 
+            margin-left: 0px; 
+            margin-right: 0px;  
+            margin-top: 90px; 
+            margin-bottom: 80px;
+             &lt;apex:outputText rendered=&quot;{!if(headersectionsCount== 1,true,false)}&quot;&gt;
+                 @top-left { content:element(header_left);  width:100%;}
+             &lt;/apex:outputText&gt;
+             &lt;apex:outputText rendered=&quot;{!if(headersectionsCount== 2,true,false)}&quot;&gt;
+             	 @top-left { content:element(header_left);width:50%;}
+                 @top-right { content:element(header_center);width:50%;}
+             &lt;/apex:outputText&gt;
+             &lt;apex:outputText rendered=&quot;{!if(headersectionsCount== 3,true,false)}&quot;&gt;
+             	 @top-left { content:element(header_left);}
+             	 @top-center { content:element(header_center);}
+                 @top-right { content:element(header_right);}
+             &lt;/apex:outputText&gt;
+        
+        	&lt;!--------Code for Footer------------&gt;
+         	 &lt;apex:outputText rendered=&quot;{!if(footersectionsCount== 1,true,false)}&quot;&gt;
+                 @bottom-left { content:element(footer_left); width:100%; }
+             &lt;/apex:outputText&gt;
+             &lt;apex:outputText rendered=&quot;{!if(footersectionsCount== 2,true,false)}&quot;&gt;
+                 @bottom-left { content:element(footer_left); width:50%;}
+            	 @bottom-right { content:element(footer_center);width:50%; }
+             &lt;/apex:outputText&gt;
+             &lt;apex:outputText rendered=&quot;{!if(footersectionsCount== 3,true,false)}&quot;&gt;
+                 @bottom-left { content:element(footer_left);}
+                 @bottom-center { content:element(footer_center);}
+                 @bottom-right { content:element(footer_right);}
+             &lt;/apex:outputText&gt;           
+        }</value>
+    </values>
+</CustomMetadata>

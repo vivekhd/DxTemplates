@@ -5,12 +5,18 @@
 				<div class="ag_lp_base dx-customleftmenufixer">
 					<div class="slds-col sidenavleft">
 						<!-- Changes by Kapil - fix for SObj Filters -->
+						<lightning-button-group class="slds-float_right" style="padding-top:40px; margin: 2px 10px 0px 0px;">
+							<lightning-button-icon onclick={importTemplate} variant="border-filled" icon-name="utility:upload" style="z-index:1;"></lightning-button-icon>
+							<lightning-button-icon onclick={exportTemplate} variant="border-filled" icon-name="utility:download" style="z-index:1;"></lightning-button-icon>
+						</lightning-button-group>
 						<c-menu-setup if:true={documentsExist} grid-data={docGridData} is-template='true' template-value={templateRelatedTo}
-							placeholder-text="Search Template..." onactive={handleTemplateSelection} related-type-option-data={relatedTypeOptions} 
+							placeholder-text="Search..." onactive={handleTemplateSelection} related-type-option-data={relatedTypeOptions} 
 							onnewtemplate={handleNewTemplateCreationscreen} onfilteredvalue={handleFilterSelection}>
 						</c-menu-setup>
 					</div>
-					
+					<!-- <div class="slds-col" style="padding:44px 20px; width:200px;">
+							
+						</div> -->
 				</div>
 			</div>
 			<div class="slds-col dx-p-left_200 ">
@@ -24,17 +30,24 @@
 		</div>
 
 		<c-modal onclosedialog ={handleDialogBoxClosed}>
-			<!------Progress bar code added by Bhavya starts here ------>
-			<header style="background-color: #ffffff;padding: 1% 0;">
-				<lightning-progress-indicator current-step={currentStep} type="base" variant="base">
-					<lightning-progress-step label="" value="1" data-step = "1">
-					</lightning-progress-step>
-					<lightning-progress-step label="" value="2" data-step = "2">
-					</lightning-progress-step>
-				</lightning-progress-indicator>
-			</header>
+			<template if:true={showImportTemplates}>
+				<span slot="header">Import Templates</span>
+				<div style="background-color: #ffffff;padding: 1% 16px;">
+					<div>
+						<input type="file" accept="json/*" onchange={handleJSONUpload} class="dx-button">
+						<lightning-textarea name="import" label="Paste JSON" placeholder="paste here..." value={jsonData}></lightning-textarea>
+					</div>
+					<br>
+					<div class="slds-text-align_right">
+						<lightning-button variant="neutral" label="Create" title="Create template based on above JSON" onclick={createTemplateData}> </lightning-button>
+					</div>
+					<br>
+				</div>
+			</template>
+
 			<template if:true={showAllTemplates}>
-				<div style="background-color: #ffffff;padding: 1% 0;">
+				<span slot="header">Export templates</span>
+				<div style="background-color: #ffffff;padding: 1% 16px;">
 					<lightning-dual-listbox name="templates"
                             label="Select Templates"
                             source-label="Available Templates"
@@ -42,15 +55,27 @@
                             options={templatesOptions}
                             onchange={handleExportTemplateList}>
 					</lightning-dual-listbox>
-					<lightning-button variant="base" label="Export" title="Export Templates" onclick={exportTemplateList}></lightning-button>
+					<div class="slds-text-align_right" style="padding: 16px;">
+						<lightning-button variant="neutral" label={previewLabel} title="Preview Selected Templates" onclick={exportTemplateList} style="margin: 6px;"></lightning-button>
+						<lightning-button variant="brand" label="Download" title="Download Templates" onclick={downloadJson}></lightning-button>
+					</div>
 					<template if:true={showTextArea}>
-						<div>
-							<lightning-textarea name="Data" readonly value={exportList}>
+						<div style="padding: 16px 16px 0px 0px;">
+							<lightning-textarea label="JSON Preview" name="Data" readonly value={exportList} style="height:180px;"> 
     						</lightning-textarea>
 						</div>
 					</template>
 				</div>
 			</template>
+			<!------Progress bar code added by Bhavya starts here ------>
+			<!-- <header style="background-color: #ffffff;padding: 1% 0;">
+				<lightning-progress-indicator current-step={currentStep} type="base" variant="base">
+					<lightning-progress-step label="" value="1" data-step = "1">
+					</lightning-progress-step>
+					<lightning-progress-step label="" value="2" data-step = "2">
+					</lightning-progress-step>
+				</lightning-progress-indicator>
+			</header> -->
 			<!------Progress bar code added by Bhavya ends here------>
 			<template if:true={showAddNewTemplate}>
 				<span slot="header">Add New Template</span>

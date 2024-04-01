@@ -46,23 +46,24 @@ export default class TemplateContentDetails extends NavigationMixin(LightningEle
     DxCPQ__RuleId__c: '',
     DxCPQ__Document_Clause__c: ''
   };
-  formats = [
-    'font',
-    'size',
-    'bold',
-    'italic',
-    'underline',
-    'strike',
-    'list',
-    'indent',
-    'align',
-    'link',
-    'image',
-    'table',
-    'header',
-    'color',
-    'script',
-  ];
+    formats = [
+        'font',
+        'size',
+        'bold',
+        'italic',
+        'underline',
+        'strike',
+        'list',
+        'indent',
+        'align',
+        'link',
+        'image',
+        'table',
+        'header',
+        'color',
+        'code-block',
+        'script', 'direction'
+    ];
 
   renderedCallback() {
     if (this.documenttemplaterecord && this.documenttemplaterecord.DxCPQ__Previously_Active__c == true) {
@@ -358,14 +359,14 @@ export default class TemplateContentDetails extends NavigationMixin(LightningEle
 
   handlehelp(){
     let urlLink;
-    if(this.showclausescreen){ //for clause screen
+        if(this.showclausescreen){ //for clause screen
       let relatedObjectsMap = this.pdfLinks.find(item => item.MasterLabel === 'Clause');
       urlLink = relatedObjectsMap ? relatedObjectsMap.DxCPQ__Section_PDF_URL__c : null;
-    }
+          }
     else{//for context screen
       let relatedObjectsMap = this.pdfLinks.find(item => item.MasterLabel === 'Context');
       urlLink = relatedObjectsMap ? relatedObjectsMap.DxCPQ__Section_PDF_URL__c : null;
-    }
+          }
     const config = {
         type: 'standard__webPage',
         attributes: {

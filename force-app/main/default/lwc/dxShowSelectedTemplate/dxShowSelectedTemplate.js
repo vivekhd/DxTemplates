@@ -169,7 +169,7 @@ export default class DxShowSelectedTemplate extends LightningElement {
     }
 
     renderedCallback(){
-        this.isSectionContentLoaded=true;
+        this.isSectionContentLoaded=true; 
             let index = 0;
             this.sectionContentArr.forEach(obj=>{
                 let elementDiv = this.template.querySelector(`[data-id="${index}"]`);

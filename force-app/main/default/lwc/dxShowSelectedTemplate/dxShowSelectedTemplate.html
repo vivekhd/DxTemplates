@@ -35,6 +35,53 @@
 				</template>
 			</template>
 		</template>
+
+		<!-- <template if:true={isSectionContentLoaded}>
+			<table>
+				<tr>
+					<template for:each={sectionContentArr} for:item="secarr" for:index="dataIndex">
+						<template if:true={secarr.isContext}>
+								<td key={secarr.index} style="vertical-align: top;">
+									<div lwc:dom="manual" key={secarr.index} data-id={dataIndex}></div>
+								</td>		
+						</template>
+						<template if:true={secarr.isRelated}>
+							<div lwc:dom="manual" key={secarr.index} data-id={dataIndex}></div>
+							<c-display-related-objects-data key={secarr.index} index={dataIndex} parentrecordid={objectRecordId}
+								templatesectionid={secarr.templatesectionid} onchildcontent={displayChildContent}
+								onclauseevent={handleClauseContent}>
+							</c-display-related-objects-data>
+							<div lwc:dom="manual" key={secarr.index} class="clause"></div>
+						</template>
+					</template>										
+				</tr>
+			</table>
+		</template> -->
+
+		<!-- <template if:true={isSectionContentLoaded}>
+			<table>
+				<tr>
+					<template for:each={sectionContentArr} for:item="secarr" for:index="dataIndex">
+						<template if:true={secarr.isContext}>
+							<td key={secarr.index} style="vertical-align: top;">
+								<div lwc:dom="manual" key={secarr.index} data-id={dataIndex}></div>
+							</td>		
+						</template>
+					</template>
+				</tr>
+			</table>
+			<template for:each={sectionContentArr} for:item="secarr" for:index="dataIndex">
+				<template if:true={secarr.isRelated}>
+					<div lwc:dom="manual" key={secarr.index} data-id={dataIndex}></div>
+					<c-display-related-objects-data key={secarr.index} index={dataIndex} parentrecordid={objectRecordId}
+						templatesectionid={secarr.templatesectionid} onchildcontent={displayChildContent}
+						onclauseevent={handleClauseContent}>
+					</c-display-related-objects-data>
+					<div lwc:dom="manual" key={secarr.index} class="clause"></div>
+				</template>
+			</template>
+		</template> -->
+
         
 	</div>
 
