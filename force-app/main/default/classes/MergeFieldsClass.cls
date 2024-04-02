@@ -50,7 +50,7 @@ public with sharing class MergeFieldsClass {
 
             if(mainfields!=null) {
                 mainfields = mainfields.removeEnd(', ');
-                string mainSOQL='Select '+String.escapeSingleQuotes(mainfields)+' from '+String.escapeSingleQuotes(mainObject)+' where Id= \'' + recordId + '\' WITH SECURITY_ENFORCED';
+                string mainSOQL='Select '+String.escapeSingleQuotes(mainfields)+' from '+String.escapeSingleQuotes(mainObject)+' where Id= \'' + recordId + '\' WITH SECURITY_ENFORCED LIMIT 50000';
                 sObject qrec=Database.query(mainSOQL);
                 Map<String, Object> mainMap = (Map<String, Object>) JSON.deserializeUntyped(JSON.serialize(qrec));           
                 
