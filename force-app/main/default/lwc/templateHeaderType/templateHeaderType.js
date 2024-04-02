@@ -16,13 +16,12 @@ export default class TemplateHeaderType extends LightningElement {
     richtextVal = '';
     imagesfound = false;
     showmergefield = false;
-    HeaderAlignmentType = '';
+    @api headerAlign;
     @api isDisabled = false;
     @api indexvar;
     @api documenttemplaterecord;
     @api editorcontent;
     @api objectName;
-
     @track mergefieldname;
 
     options = [{ label: 'Image', value: 'Image' },{ label: 'Text', value: 'Text' }];
@@ -48,16 +47,7 @@ export default class TemplateHeaderType extends LightningElement {
     @track selectedMergefields = [];
 
     connectedCallback() {
-        this.richtextVal = this.editorcontent;
-        if (this.indexvar == 0) {
-            this.HeaderAlignmentType = 'Left';
-        }
-        else if (this.indexvar == 1) {
-            this.HeaderAlignmentType = 'Center';
-        }
-        else if (this.indexvar == 2) {
-            this.HeaderAlignmentType = 'Right';
-        }
+        this.richtextVal = this.editorcontent;       
     }
 
     @api

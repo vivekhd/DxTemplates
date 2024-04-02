@@ -1,6 +1,6 @@
 <template>
 	<div if:true={showText}>
-		{FooterAlignmentType}
+		{footerAlign}
 		<lightning-input-rich-text value={richtextVal} formats={formats} onchange={handleRichTextArea}
 			aria-placeholder="Enter Text here" disabled={isDisabled}>
 			<lightning-rich-text-toolbar-button-group slot="toolbar" aria-label="Template Button Group">

@@ -71,7 +71,7 @@ export default class TemplateFooter extends NavigationMixin(LightningElement) {
           }
           else {
             this.columnvalueList.push(i);
-            this.footerSectionsMap.push({ "value": "", "indexvar": i, "key": (new Date()).getTime() + ":" + i })
+            this.footerSectionsMap.push({ "value": "", "indexvar": i, "key": (new Date()).getTime() + ":" + i , "columnCount": this.columnvalue, "footerVal": '' })
           }
         }
       }
@@ -82,9 +82,18 @@ export default class TemplateFooter extends NavigationMixin(LightningElement) {
     else {
       for (var i = 0; i < this.columnvalue; i++) {
         this.columnvalueList.push(i);
-        this.footerSectionsMap.push({ "value": "", "indexvar": i, "key": (new Date()).getTime() + ":" + i })
+        this.footerSectionsMap.push({ "value": "", "indexvar": i, "key": (new Date()).getTime() + ":" + i, "columnCount": this.columnvalue, "footerVal": '' })
       }
     }
+    let refData = {
+      "0":{"0":""},
+      "1":{"0":"Left", "1":"Right"},
+      "2":{"0":"Left", "1":"Center", "2":"Right"}
+    }
+    this.footerSectionsMap.forEach(item => {
+        item.columnCount = this.columnvalue;
+        item.footerVal = refData[this.columnvalue - 1][item.indexvar];
+    });
   }
 
   /* Footer Changes Start by Rahul*/
@@ -109,6 +118,15 @@ export default class TemplateFooter extends NavigationMixin(LightningElement) {
         this.footerSectionsMap.push(headerColumnsList[i]);
       }
     }
+    let refData = {
+      "0":{"0":""},
+      "1":{"0":"Left", "1":"Right"},
+      "2":{"0":"Left", "1":"Center", "2":"Right"}
+    }
+    this.footerSectionsMap.forEach(item => {
+        item.columnCount = this.columnvalue;
+        item.footerVal = refData[this.columnvalue - 1][item.indexvar];
+    });
   }
   /* Footer Changes End by Rahul */
 

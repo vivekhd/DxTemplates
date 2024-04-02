@@ -16,7 +16,7 @@ export default class TemplateFooterType extends LightningElement {
     richtextVal = '';
     imagesfound = false;
     showmergefield = false;
-    HeaderAlignmentType = '';
+    @api footerAlign;
     @api isDisabled = false;
     @api indexvar;
     @api documenttemplaterecord;
@@ -51,16 +51,6 @@ export default class TemplateFooterType extends LightningElement {
 
     connectedCallback() {
         this.richtextVal = this.editorcontent;
-
-        if (this.indexvar == 0) {
-            this.FooterAlignmentType = 'Left';
-        }
-        else if (this.indexvar == 1) {
-            this.FooterAlignmentType = 'Center';
-        }
-        else if (this.indexvar == 2) {
-            this.FooterAlignmentType = 'Right';
-        }
     }
 
     @api
@@ -68,10 +58,6 @@ export default class TemplateFooterType extends LightningElement {
         this.isDisabled = isActive;
     }
 
-    
-    // handleObjectNameSelection(objName) {
-    //     this.objectName = objName;
-    // }
 
     handleRichTextArea(event) {
         this.richtextVal = event.detail.value;

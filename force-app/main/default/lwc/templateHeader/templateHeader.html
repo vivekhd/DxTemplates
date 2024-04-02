@@ -1,17 +1,20 @@
 <template>
-    <template if:true={showheaderdetails}>
+	<template if:true={showheaderdetails}>
 
 
-        <div class="slds-grid slds-wrap slds-p-around_small slds-border_bottom" style="border:1px solid #e5e5e5; border-radius:5px; background: rgb(243 243 243);">
-            <div class="slds-col slds-size_1-of-1 slds-medium-size_5-of-12 slds-large-size_5-of-12">
-                <lightning-input type="text" variant="standard" name="name" label="Name" value={sectiontype}
-				onchange={handlename} disabled=true>
-			</lightning-input>
-            </div>
-            <div class="slds-is-relative slds-col_bump-left">
-                <lightning-button-icon icon-name="utility:help_doc_ext" onclick={handlehelp} alternative-text="Need Help?" title="Need Help?" size="medium" variant="bare" class="slds-is-absolute slds-button_icon-help" style="right:0px"></lightning-button-icon>
-            </div>
-            <!-- <div class="slds-col slds-size_1-of-1 slds-medium-size_2-of-12 slds-large-size_2-of-12 slds-p-left_small">
+		<div class="slds-grid slds-wrap slds-p-around_small slds-border_bottom"
+			style="border:1px solid #e5e5e5; border-radius:5px; background: rgb(243 243 243);">
+			<div class="slds-col slds-size_1-of-1 slds-medium-size_5-of-12 slds-large-size_5-of-12">
+				<lightning-input type="text" variant="standard" name="name" label="Name" value={sectiontype}
+					onchange={handlename} disabled=true>
+				</lightning-input>
+			</div>
+			<div class="slds-is-relative slds-col_bump-left">
+				<lightning-button-icon icon-name="utility:help_doc_ext" onclick={handlehelp}
+					alternative-text="Need Help?" title="Need Help?" size="medium" variant="bare"
+					class="slds-is-absolute slds-button_icon-help" style="right:0px"></lightning-button-icon>
+			</div>
+			<!-- <div class="slds-col slds-size_1-of-1 slds-medium-size_2-of-12 slds-large-size_2-of-12 slds-p-left_small">
 
                 <label class="slds-form-element__label">&nbsp;</label><br/>
                 <lightning-button  disabled={disableButton} variant="brand" label="Update"  onclick={handlesectionsave}>
@@ -24,13 +27,13 @@
                         value={propvalue} onchange={handlecheckboxChange} disabled={isDisabled} variant="label-hidden" >
                     </lightning-checkbox-group>
             </div> -->
-        </div>
+		</div>
 
 
 
 
 
-        <div class="slds-col slds-size_12-of-12">
+		<div class="slds-col slds-size_12-of-12">
 			<div class="slds-grid slds-gutters slds-wrap">
 				<!-- <div class="slds-col slds-size_4-of-12">
 					<Span style="font-size:14px" class="slds-align_absolute-center"> <b> Section Type </b></span></br>
@@ -44,29 +47,28 @@
 				</div>
 			</div>
 		</div>
-        <!-- Select Header Count::: -->
-        <lightning-combobox
-        name="progress"
-        label="Select column count"
-        value={columnvalue}
-        placeholder="Select column count"
-        field-level-help="Header Count"
-        options={countoptions}
-        onchange={handlecolumncomboChange} disabled={isDisabled} variant="label-stacked" >
-        
-        </lightning-combobox>
-        <!-- <lightning-helptext content="You'll receive weekly updates"></lightning-helptext> -->
-        <br/>
+		<!-- Select Header Count::: -->
+		<lightning-combobox name="progress" label="Select column count" value={columnvalue}
+			placeholder="Select column count" field-level-help="Header Count" options={countoptions}
+			onchange={handlecolumncomboChange} disabled={isDisabled} variant="label-stacked">
 
-        <!-- Changes by Kapil - Passing Obj to Header -->
-        <div class="slds-grid slds-gutters">
-            <template for:each={headerSectionsMap} for:item="loopvar">
-                <div class={classvar} key={loopvar.key}>
-                    <c-template-header-type is-disabled={isDisabled} indexvar={loopvar.indexvar} editorcontent={loopvar.value} documenttemplaterecord={documenttemplaterecord} onsaverichtextheader={saverichtextheader} object-name={selectedObjectName} ></c-template-header-type>
-                </div>
-            </template>
-        </div>
-    <!-- <img if:true={imageselected} src={selectedimageurl} alt="User Image"
+		</lightning-combobox>
+		<!-- <lightning-helptext content="You'll receive weekly updates"></lightning-helptext> -->
+		<br/>
+
+		<!-- Changes by Kapil - Passing Obj to Header -->
+		<div class="slds-grid slds-gutters">
+			<template for:each={headerSectionsMap} for:item="loopvar" for:index="index">
+				<div class={classvar} key={loopvar.key}>
+					<c-template-header-type is-disabled={isDisabled} indexvar={loopvar.indexvar}
+						editorcontent={loopvar.value} documenttemplaterecord={documenttemplaterecord}
+						onsaverichtextheader={saverichtextheader} object-name={selectedObjectName}
+						column-count={headerSectionsMap.length} col-index={index} header-align ={loopvar.headerVal}>
+                    </c-template-header-type>
+				</div>
+			</template>
+		</div>
+		<!-- <img if:true={imageselected} src={selectedimageurl} alt="User Image"
     height="100px"
     width="100px"/>
     <lightning-button   variant="brand" label={imagebuttonlabel}
@@ -76,7 +78,7 @@
     aria-placeholder="Enter Text here">
 </lightning-input-rich-text></br></br> -->
 
-    <!-- <template if:true={isModalOpen}>
+		<!-- <template if:true={isModalOpen}>
         <section role="dialog" tabindex="-1" aria-labelledby="modal-heading-01" aria-modal="true"
             aria-describedby="modal-content-id-1" class="slds-modal slds-fade-in-open">
             <div class="slds-modal__container">
@@ -110,15 +112,15 @@
     </template> -->
 
 
-    <div class="slds-col slds-size_12-of-12 slds-text-align_right slds-p-top_small">
+		<div class="slds-col slds-size_12-of-12 slds-text-align_right slds-p-top_small">
 
-            <lightning-button class="slds-m-left_small" disabled={isDisabled} variant="neutral" label="Delete"
-             onclick={handlesectionDelete}></lightning-button>
-            <lightning-button class="slds-m-left_small" disabled={isDisabled} variant="brand" label="Save"
-             onclick={handlesectionsave}></lightning-button>
-    </div>
+			<lightning-button class="slds-m-left_small" disabled={isDisabled} variant="neutral" label="Delete"
+				onclick={handlesectionDelete}></lightning-button>
+			<lightning-button class="slds-m-left_small" disabled={isDisabled} variant="brand" label="Save"
+				onclick={handlesectionsave}></lightning-button>
+		</div>
 
 
 
-</template>
+	</template>
 </template>
