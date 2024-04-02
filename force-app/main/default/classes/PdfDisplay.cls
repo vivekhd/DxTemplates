@@ -53,7 +53,13 @@ global with sharing class PdfDisplay {
      */
     @AuraEnabled
     public static String getDomainUrl() {
-        return URL.getOrgDomainUrl().toExternalForm();
+        try{
+            return URL.getOrgDomainUrl().toExternalForm();
+        }
+        catch (Exception ex) {
+            LogHandler.createLog((Id) null,'PdfDisplay.getDomainUrl()','Error while getting the domain URL -  '+ex.getLineNumber()+ex.getStackTraceString()+ex.getCause(),ex.getMessage(),'Exception');
+            return '';
+        }  
     }
     
 }

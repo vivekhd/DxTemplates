@@ -111,7 +111,7 @@ public with sharing class DisplayRelatedObjects {
                 }
                 fieldStringSet.add(grpby.tolowercase());
                 String fieldStringquery = String.join(new List<String>(fieldStringSet), ', ');             
-                String recordsQuery = 'select '+String.escapeSingleQuotes(fieldStringquery)+' from '+String.escapeSingleQuotes(childObject)+' where '+String.escapeSingleQuotes(string.valueof(jsonMap.get('childLookupfieldAPIname')))+'='+'\''+String.escapeSingleQuotes(recordid)+'\''+' '+ whereClauseinQuery+' '+String.escapeSingleQuotes(securityEnforced)+' order by '+String.escapeSingleQuotes(grpby)+' desc';
+                String recordsQuery = 'select '+String.escapeSingleQuotes(fieldStringquery)+' from '+String.escapeSingleQuotes(childObject)+' where '+String.escapeSingleQuotes(string.valueof(jsonMap.get('childLookupfieldAPIname')))+'='+'\''+String.escapeSingleQuotes(recordid)+'\''+' '+ whereClauseinQuery+' '+String.escapeSingleQuotes(securityEnforced)+' order by '+String.escapeSingleQuotes(grpby)+' desc LIMIT 50000';
                 ChildRecords = Database.query(recordsQuery);
                 
                 Map<Object, List<SObject>> recordCategoryMap = new Map<Object, List<SObject>>();
@@ -199,7 +199,7 @@ public with sharing class DisplayRelatedObjects {
                 }
             }
             else{
-                String recordsQuery = 'select '+String.escapeSingleQuotes(fieldString)+' from '+String.escapeSingleQuotes(childObject)+' where '+String.escapeSingleQuotes(string.valueof(jsonMap.get('childLookupfieldAPIname')))+'='+'\''+String.escapeSingleQuotes(recordid)+'\''+' '+ whereClauseinQuery+' '+String.escapeSingleQuotes(securityEnforced);
+                String recordsQuery = 'select '+String.escapeSingleQuotes(fieldString)+' from '+String.escapeSingleQuotes(childObject)+' where '+String.escapeSingleQuotes(string.valueof(jsonMap.get('childLookupfieldAPIname')))+'='+'\''+String.escapeSingleQuotes(recordid)+'\''+' '+ whereClauseinQuery+' '+String.escapeSingleQuotes(securityEnforced) + ' LIMIT 50000';
                 ChildRecords = Database.query(recordsQuery);
                 for(Sobject currRecord: ChildRecords) {
                     //qliRecIds.add(currRecord.get('Id'));
