@@ -51,8 +51,7 @@ public with sharing class MultiSelectLookupController {
                 result.recordObject = sobj;
                 lstReturnResult.add(result);  
             }
-        }
-        catch (Exception ex) {
+        } catch (Exception ex) {
             LogHandler.createLog((Id) null,'MultiSelectLookupController.retrieveRecords()','objectName -> '+objectName+' '+strQuery+ex.getLineNumber()+ex.getStackTraceString()+ex.getCause(),ex.getMessage(),'Exception');
         }
         return lstReturnResult;  

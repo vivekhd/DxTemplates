@@ -3,8 +3,8 @@
 * Developer			: 
 * Created Date		: 
 * @description  	: Apex class for handling merge fields in document templates.
- *              Provides methods for merging fields based on a specified record and object,
- *              transforming text to title case, and retrieving available fields for a given object.
+*                     Provides methods for merging fields based on a specified record and object,
+*                     transforming text to title case, and retrieving available fields for a given object.
 * Last Modified Date: 
 */
 public with sharing class MergeFieldsClass {
@@ -17,34 +17,33 @@ public with sharing class MergeFieldsClass {
      */
     public static List<Document_Template_Section__c> mergefieldsMethod(List<Document_Template_Section__c> selectedTemplateContents, Id recordId) {   
         try{
-            String objectName = recordId.getSObjectType().getDescribe().getName();
-            String mainstr;
-            for(Document_Template_Section__c sec: selectedTemplateContents) {
-                if(mainstr==null){
-                    mainstr=sec.Section_Content__c;
+            String mainfields;
+            String sectionContent;
+            Set<String> mainfieldsList = new Set<String>();
+            String mainObject = recordId.getSObjectType().getDescribe().getName();
+
+            for(Document_Template_Section__c templateSection: selectedTemplateContents) {
+                if(sectionContent==null){
+                    sectionContent=templateSection.Section_Content__c;
                 }else{
-                    mainstr=mainstr+sec.Section_Content__c;
+                    sectionContent=sectionContent+templateSection.Section_Content__c;
                 }
             }
-            String mainObject=objectName;
             
-            Pattern p = Pattern.compile('\\{!.+?\\}');
-            Matcher m = p.matcher(mainstr);
-            String mainfields;
-            Set<String> mainfieldsList = new Set<String>();
+            Pattern patternIdentifier = Pattern.compile('\\{!.+?\\}');
+            Matcher matcherPattern = patternIdentifier.matcher(sectionContent);
             
-            while(m.find()) {
+            while(matcherPattern.find()) {
                 String strReplace = '{!'+mainObject+'.';
-                String str = m.group(0).replace(strReplace,'').replace('}',', ');
-                String str1 = str.replace(',','');
-                mainfieldsList.add(str1);           
+                String fieldList = matcherPattern.group(0).replace(strReplace,'').replace('}',', ');
+                mainfieldsList.add(fieldList.replace(',',''));           
             }
 
-            for(String str : mainfieldsList){
+            for(String fieldList : mainfieldsList){
                 if(mainfields==null){
-                    mainfields=str;
+                    mainfields=fieldList;
                 }else{
-                    mainfields = mainfields+', '+str;  
+                    mainfields = mainfields+', '+fieldList;  
                 }
             }
 
@@ -54,33 +53,33 @@ public with sharing class MergeFieldsClass {
                 sObject qrec=Database.query(mainSOQL);
                 Map<String, Object> mainMap = (Map<String, Object>) JSON.deserializeUntyped(JSON.serialize(qrec));           
                 
-                for(Document_Template_Section__c sec: selectedTemplateContents) {
-                    for(String str:mainfieldsList)  {
-                        str = str.replaceAll('(\\s+)', '');
-                        if(mainMap.containskey(str)) {
-                            string mergefieldsyntax='{!'+mainObject+'.'+str+'}';
-                            sec.Section_Content__c=sec.Section_Content__c.replace(mergefieldsyntax, String.valueOf(mainMap.get(str)));
+                for(Document_Template_Section__c templateSection: selectedTemplateContents) {
+                    for(String fieldList:mainfieldsList)  {
+                        fieldList = fieldList.replaceAll('(\\s+)', '');
+                        if(mainMap.containskey(fieldList)) {
+                            string mergefieldsyntax='{!'+mainObject+'.'+fieldList+'}';
+                            templateSection.Section_Content__c=templateSection.Section_Content__c.replace(mergefieldsyntax, String.valueOf(mainMap.get(fieldList)));
                         } else {
                             String finalvalue;
-                            if(str.contains('.')){
-                                List<String> strList = new List<string>();
-                                strList=str.split('\\.');
+                            if(fieldList.contains('.')){
+                                List<String> fieldContent = new List<string>();
+                                fieldContent=fieldList.split('\\.');
                                 Map<String, Object> tempObj=new Map<String, Object>();
                                 tempObj=mainMap;
                                 
-                                for(Integer j=0; j<strList.size(); j++) {
-                                    if(tempObj.containskey(strList[j]))  {
-                                        if(j==strList.size()-1)   {
-                                            finalvalue=String.valueOf(tempObj.get(strList[j]));
-                                        }else  {
-                                            tempObj=(Map<String, Object>)tempObj.get(strList[j]);                                            
+                                for(Integer fieldIndex=0; fieldIndex<fieldContent.size(); fieldIndex++) {
+                                    if(tempObj.containskey(fieldContent[fieldIndex]))  {
+                                        if(fieldIndex==fieldContent.size()-1)   {
+                                            finalvalue=String.valueOf(tempObj.get(fieldContent[fieldIndex]));
+                                        } else {
+                                            tempObj=(Map<String, Object>)tempObj.get(fieldContent[fieldIndex]);                                            
                                         }
                                     }
                                 }
                             }
                             if(finalvalue!=null)  {
-                                string mergefieldsyntax='{!'+mainObject+'.'+str+'}';
-                                sec.Section_Content__c=sec.Section_Content__c.replace(mergefieldsyntax, finalvalue); 
+                                string mergefieldsyntax='{!'+mainObject+'.'+ fieldList+'}';
+                                templateSection.Section_Content__c=templateSection.Section_Content__c.replace(mergefieldsyntax, finalvalue); 
                             }
                         }
                     }
@@ -127,39 +126,38 @@ public with sharing class MergeFieldsClass {
         Map<String, Schema.SObjectType> gd = Schema.getGlobalDescribe(); 
         Schema.SObjectType ctype = gd.get(selectedObject); 
         Map<String, Schema.SobjectField> fmap = ctype.getDescribe().fields.getMap();   
-        List<FieldWrap> strList = new List<FieldWrap>();
+        List<FieldWrap> fieldDetailsWrapper = new List<FieldWrap>();
         try{
             for(String fieldName: fmap.keySet()) {
-                FieldWrap wmp = new FieldWrap();
-                String dType = String.valueOf(fmap.get(fieldName).getDescribe().getType());
-                wmp.name = fmap.get(fieldName).getDescribe().getLabel(); 
-                wmp.apiName = fmap.get(fieldName).getDescribe().getName();
+                FieldWrap fieldDetailWrapper = new FieldWrap();
+                String fieldDataType = String.valueOf(fmap.get(fieldName).getDescribe().getType());
+                fieldDetailWrapper.name = fmap.get(fieldName).getDescribe().getLabel(); 
+                fieldDetailWrapper.apiName = fmap.get(fieldName).getDescribe().getName();
                 
-                wmp.dataType = String.valueOf(fmap.get(fieldName).getDescribe().getType()); 
-                if(dType== 'REFERENCE'){
-                    wmp.name=wmp.name+'>';
+                fieldDetailWrapper.dataType = String.valueOf(fmap.get(fieldName).getDescribe().getType()); 
+                if(fieldDataType== 'REFERENCE'){
+                    fieldDetailWrapper.name=fieldDetailWrapper.name+'>';
                     Schema.DescribeFieldResult f = fmap.get(fieldName).getDescribe();
                     for(Schema.SObjectType reference : f.getReferenceTo()) {
-                        wmp.sObjectName = String.valueOf(reference.getDescribe().getName());
+                        fieldDetailWrapper.sObjectName = String.valueOf(reference.getDescribe().getName());
                     }
-                    wmp.relationshipName=String.valueOf(fmap.get(fieldName).getDescribe().getRelationshipName());
+                    fieldDetailWrapper.relationshipName=String.valueOf(fmap.get(fieldName).getDescribe().getRelationshipName());
                 }
                 
-                if(wmp.dataType=='PICKLIST'){
-                    
+                if(fieldDetailWrapper.dataType=='PICKLIST'){
                     List<String> plistValues = new List<String> ();
                     List<Schema.PicklistEntry> plist = fmap.get(fieldName).getDescribe().getPickListValues();
                     for(Schema.PicklistEntry pl : plist){
                         plistValues.add(pl.getValue());
                     }
-                    wmp.values = plistValues;
+                    fieldDetailWrapper.values = plistValues;
                 }   
-                strList.add(wmp);
+                fieldDetailsWrapper.add(fieldDetailWrapper);
             }
         } catch(Exception ex) {
             LogHandler.createLog((Id) null,'MergeFieldsClass Error',ex.getLineNumber()+ex.getStackTraceString()+ex.getCause(),ex.getMessage(),'Exception');
         }
-        return strList;    
+        return fieldDetailsWrapper;    
     }
     
 	/**

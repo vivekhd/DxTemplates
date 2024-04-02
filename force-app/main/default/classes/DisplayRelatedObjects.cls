@@ -1,17 +1,16 @@
 /** Class			: DisplayRelatedObjects
-* Developer			:          
+* Developer			: Rahul Bejgam      
 * Created Date		: 05/01/2023
 * @description		: This class creates the data-wrapper require for the pdf generation. This class performs the dataquery, numerical calculation on QLIs, gathers the ConfigAttributes thereby passing it to the VF Page.
 * The associated test class is in SectionSetupCtrl_Test
 * Last Modified Date: 15/02/2023
 */
 public with sharing class DisplayRelatedObjects {    
-    
-    public static Map<String,Decimal> currencyFieldSubTotals; 
-    public static Map<String,Decimal> currencyFieldTotals; 
+    public static Id currentTemplate;
     public static String errType = null;
-    public static Id currTemplate;
     public static String rOHtmlContent = '<tbody>';
+    public static Map<String,Decimal> currencyFieldTotals;
+    public static Map<String,Decimal> currencyFieldSubTotals; 
     
     /**
      * @description Retrieves section data based on record ID and template section ID
@@ -21,120 +20,103 @@ public with sharing class DisplayRelatedObjects {
      */
     @AuraEnabled
     public static string getsectionData(String recordid,String templatesectionid){
-        currTemplate = templatesectionid;
+        currentTemplate = templatesectionid;
         List<RowWrapper> rowWrapperList=new List<RowWrapper>(); 
-        
-        List<sObject> childRecords=new List<sObject>();
-        try
-        {
-            Document_Template_Section__c dsrec=[select id,Section_Content__c from Document_Template_Section__c where id=:templatesectionid WITH SECURITY_ENFORCED];
+        List<sObject> relatedObjectRecords=new List<sObject>();
+        try {
+            String whereClauseinQuery = '';
+            List<string> fieldsList= new List<string> ();
+            List<String> headerStyles = new List<String>();
+            List<String> recordStyles = new List<String>();
+
+            Document_Template_Section__c dsrec=[select id,Section_Content__c from Document_Template_Section__c where id=:templatesectionid WITH SECURITY_ENFORCED LIMIT 5000];
             Map<string,Object> jsonMap = (Map<string,Object>)JSON.deserializeUntyped(dsrec.Section_Content__c);
-                        
-            
             List<Object> fieldsObjList = (List<Object>) jsonMap.get('tablelistValues');
             List<Object> fieldsObjListValues = (List<Object>) jsonMap.get('tablelistLabels');
             Map<String,Object> tableStyleList = (Map<String,Object>) jsonMap.get('style');
-            
+
             // User Selected fields for Subtotal Calculation
             List<Object> subTotFieldNames = (List<Object>) jsonMap.get('subTotal');
             
             Boolean newPage = (Boolean) jsonMap.get('newPage');
-            Boolean serialNumber = (Boolean) jsonMap.get('SerialNumber');
+            String chartLabel = (String) jsonMap.get('chartLabel');
             String dateFormat = (String) jsonMap.get('dateFormat');
+            String grpby = String.valueof(jsonMap.get('grouping'));
             String timeFormat = (String) jsonMap.get('timeFormat');
-            String numberFormat = (String) jsonMap.get('numberFormat');
-            String currencyFormat = (String) jsonMap.get('currencyFormat');
             String phoneFormat = (String) jsonMap.get('phoneFormat');
+            String numberFormat = (String) jsonMap.get('numberFormat');
             String selGraphvalue = (String) jsonMap.get('selGraphvalue');
             Boolean displayChart = (Boolean) jsonMap.get('displayChart');
-            String chartLabel = (String) jsonMap.get('chartLabel');
             Boolean chartNewPage = (Boolean) jsonMap.get('chartNewPage');
-            String grpby = String.valueof(jsonMap.get('grouping'));
+            Boolean serialNumber = (Boolean) jsonMap.get('SerialNumber');
+            String currencyFormat = (String) jsonMap.get('currencyFormat');
             String childObject = String.valueof(jsonMap.get('mainChildObject'));
             String barChartColor = String.valueOf(jsonMap.get('chartBarColor'));
             
-            // Where Clause in the Query
-            String whereClauseinQuery = '';
-            if(jsonMap.get('whereClause')!='' && jsonMap.get('whereClause')!=null &&  jsonMap.get('whereClause')!='()'){
+            if(jsonMap.get('whereClause')!='' && jsonMap.get('whereClause')!=null &&  jsonMap.get('whereClause')!='()') {
                 whereClauseinQuery = ' AND ' + (String) jsonMap.get('whereClause');
             }
             
-            List<String> headerStyles = new List<String>();
-            List<String> recordStyles = new List<String>();
-            
-            for(Object styleType : tableStyleList.keySet())
-            {
+            for(Object styleType : tableStyleList.keySet()) {
                 String atrType = (String) styleType;
                 Map<String,Object> styleAttributes = (Map<String,Object>) tableStyleList.get(atrType);
-                for(Object attribute : styleAttributes.keySet())
-                {
+                for(Object attribute : styleAttributes.keySet()) {
                     String attributeType = (String) attribute;
                     String attributeVal = (String) styleAttributes.get(attributeType);
-                    if(atrType == 'header')
-                    {
+                    if(atrType == 'header') {
                         headerStyles.add(attributeVal);
-                    }
-                    else
-                    {
+                    } else {
                         recordStyles.add(attributeVal);
                     }
                 }
             }
                         
-            List<string> fieldsList= new List<string> ();
-            for(Object rec: fieldsObjList){
+            for(Object rec: fieldsObjList) {
                 fieldsList.add(String.valueOf(rec));
             }
             string fieldString = string.join(fieldsList,',');
             Map<String,String> fieldNameType = getObjectFieldTypeMap(childObject, fieldsList);
             
             currencyFieldTotals = new Map<String,Decimal> {};
-                for(Object currTempField : subTotFieldNames)
-            {
+            for(Object currTempField : subTotFieldNames) {
                 currencyFieldTotals.put((String) currTempField,0);
             }
             currencyFieldSubTotals = currencyFieldTotals.clone();
             
             List<string> headerValues= new List<string> ();
-            for(Object rec: fieldsObjListValues){
+            for(Object rec: fieldsObjListValues) {
                 headerValues.add(String.valueOf(rec));
             }
             
             String securityEnforced=' WITH SECURITY_ENFORCED';
             //if grouping category is selected
-            if(grpby!=null && grpby!='')
-            {
+            if(grpby!=null && grpby!='') {
                 Set<String> fieldStringSet = new Set<String>();
-                for(String field : fieldsList)
-                {
+                for(String field : fieldsList) {
                     fieldStringSet.add(field.tolowercase());
                 }
                 fieldStringSet.add(grpby.tolowercase());
                 String fieldStringquery = String.join(new List<String>(fieldStringSet), ', ');             
-                String recordsQuery = 'select '+String.escapeSingleQuotes(fieldStringquery)+' from '+String.escapeSingleQuotes(childObject)+' where '+String.escapeSingleQuotes(string.valueof(jsonMap.get('childLookupfieldAPIname')))+'='+'\''+String.escapeSingleQuotes(recordid)+'\''+' '+ whereClauseinQuery+' '+String.escapeSingleQuotes(securityEnforced)+' order by '+String.escapeSingleQuotes(grpby)+' desc LIMIT 50000';
-                ChildRecords = Database.query(recordsQuery);
+                String recordsQuery = 'select '+String.escapeSingleQuotes(fieldStringquery)+' from '+String.escapeSingleQuotes(childObject)+' where '+String.escapeSingleQuotes(string.valueof(jsonMap.get('childLookupfieldAPIname')))+'='+'\''+String.escapeSingleQuotes(recordid)+'\''+' '+ whereClauseinQuery+' '+String.escapeSingleQuotes(securityEnforced)+' order by '+String.escapeSingleQuotes(grpby)+' desc LIMIT 5000';
+                relatedObjectRecords = Database.query(recordsQuery);
                 
                 Map<Object, List<SObject>> recordCategoryMap = new Map<Object, List<SObject>>();
                 String ptrfield = (String) grpby;
-                for(Sobject ptrRecord : ChildRecords){
-                    
-                    if(!recordCategoryMap.containsKey(ptrRecord.get(ptrfield)) && ptrRecord.get(ptrfield)!=null){
+                for(Sobject ptrRecord : relatedObjectRecords) {
+                    if(!recordCategoryMap.containsKey(ptrRecord.get(ptrfield)) && ptrRecord.get(ptrfield)!=null) {
                         List<SObject> recordList = new  List<SObject>();
                         recordList.add(ptrRecord);
                         recordCategoryMap.put(ptrRecord.get(ptrfield),recordList);
-                    }
-                    else if(recordCategoryMap.containsKey(ptrRecord.get(ptrfield)) && ptrRecord.get(ptrfield)!=null){
+                    } else if(recordCategoryMap.containsKey(ptrRecord.get(ptrfield)) && ptrRecord.get(ptrfield)!=null) {
                         List<SObject> recordList= recordCategoryMap.get(ptrRecord.get(ptrfield));
                         recordList.add(ptrRecord); 
                         recordCategoryMap.put(ptrRecord.get(ptrfield),recordList);
-                    }
-                    else{
+                    } else {
                         if(recordCategoryMap.containsKey('Others')){
                             List<SObject> recordList= recordCategoryMap.get('Others');
                             recordList.add(ptrRecord); 
                             recordCategoryMap.put('Others',recordList);    
-                        }
-                        else{
+                        } else {
                             List<SObject> recordList = new  List<SObject>();
                             recordList.add(ptrRecord);
                             recordCategoryMap.put('Others',recordList);
@@ -184,12 +166,10 @@ public with sharing class DisplayRelatedObjects {
                 //GrandTotals to wrapper
                 RowWrapper totType = new RowWrapper();
                 totType.type='Total';
-                for(Object ptrFieldTotal : fieldsObjList)
-                {
+                for(Object ptrFieldTotal : fieldsObjList) {
                     if(currencyFieldTotals.containsKey((String) ptrFieldTotal) && subTotFieldNames.contains(ptrFieldTotal)){
                         totType.addValue(currencyFieldTotals.get((String) ptrFieldTotal));
-                    }
-                    else{
+                    }else{
                         totType.addValue('Empty');
                     }
                 }
@@ -197,32 +177,28 @@ public with sharing class DisplayRelatedObjects {
                 if(subTotFieldNames.size() > 0){
                     rowWrapperList.add(totType);
                 }
-            }
-            else{
-                String recordsQuery = 'select '+String.escapeSingleQuotes(fieldString)+' from '+String.escapeSingleQuotes(childObject)+' where '+String.escapeSingleQuotes(string.valueof(jsonMap.get('childLookupfieldAPIname')))+'='+'\''+String.escapeSingleQuotes(recordid)+'\''+' '+ whereClauseinQuery+' '+String.escapeSingleQuotes(securityEnforced) + ' LIMIT 50000';
-                ChildRecords = Database.query(recordsQuery);
-                for(Sobject currRecord: ChildRecords) {
-                    //qliRecIds.add(currRecord.get('Id'));
-                    rOHtmlContent += '<tr>';                   
-                    //Function Call
+            }  else {
+                String recordsQuery = 'select '+String.escapeSingleQuotes(fieldString)+' from '+String.escapeSingleQuotes(childObject)+' where '+String.escapeSingleQuotes(string.valueof(jsonMap.get('childLookupfieldAPIname')))+'='+'\''+String.escapeSingleQuotes(recordid)+'\''+' '+ whereClauseinQuery+' '+String.escapeSingleQuotes(securityEnforced);
+                relatedObjectRecords = Database.query(recordsQuery);
+                for(Sobject currRecord: relatedObjectRecords) {
+                    rOHtmlContent += '<tr>';
                     RowWrapper recType = recordDataWrapperCreation(fieldsObjList, currRecord, fieldNameType);
-                    //Function Call
                     rowWrapperList.add(recType);
                     rOHtmlContent += '</tr>';
                 }
                 //Adding GrandTotals to WrapperList
                 RowWrapper totType = new RowWrapper();
-                //totType.addValue('End');
                 totType.type='Total';
+
                 for(Object ptrFieldTotal : fieldsObjList) {
                     if(currencyFieldTotals.containsKey((String) ptrFieldTotal) && subTotFieldNames.contains(ptrFieldTotal)) {
                         totType.addValue(currencyFieldTotals.get((String) ptrFieldTotal));
-                    }
-                    else {
+                    } else {
                         totType.addValue('Empty');
                     }
                 }
-                if(subTotFieldNames.size() > 0){
+
+                if(subTotFieldNames.size() > 0) {
                     rowWrapperList.add(totType);
                 }                
             }
@@ -259,10 +235,8 @@ public with sharing class DisplayRelatedObjects {
             string jsonstring = JSON.serialize(masterWrapper);
             rOHtmlContent += '</tbody>';
             return jsonstring;
-        }
-        catch(Exception ex)
-        {
-            LogHandler.createLog((Id) templatesectionid,'DisplayRelatedObjects.getsectionData()','Template Id- '+currTemplate+' '+ex.getLineNumber()+ex.getStackTraceString()+ex.getCause(),ex.getMessage(),'Exception');   
+        } catch(Exception ex) {
+            LogHandler.createLog((Id) templatesectionid,'DisplayRelatedObjects.getsectionData()','Template Id- '+currentTemplate+' '+ex.getLineNumber()+ex.getStackTraceString()+ex.getCause(),ex.getMessage(),'Exception');   
         }
         return '';
     }
@@ -315,15 +289,13 @@ public with sharing class DisplayRelatedObjects {
         public List<Object> values;
         public String type;
         
-        // constructor
 		/**
  		* @description : constructor of RowWrapper
  		*/ 
         public RowWrapper(){
             values=new List<object>();
         }
-        
-        
+
          /** 
 		 * @description : append a value (cell) to the row 
 		 * @param value
@@ -372,10 +344,11 @@ public with sharing class DisplayRelatedObjects {
                 }
             }}
         catch(Exception ex){
-            LogHandler.createLog((Id) null,'DisplayRelatedObjects.getObjectFieldTypeMap()','Template Id- '+currTemplate+' '+ex.getLineNumber()+ex.getStackTraceString()+ex.getCause(),ex.getMessage(),'Exception');   
+            LogHandler.createLog((Id) null,'DisplayRelatedObjects.getObjectFieldTypeMap()','Template Id- '+currentTemplate+' '+ex.getLineNumber()+ex.getStackTraceString()+ex.getCause(),ex.getMessage(),'Exception');   
         }
         return fieldNameType;
     }
+
     /**
      * @description Retrieves the API name of the lookup object for the specified lookup field on the given object.
      * @param fromObjName  The API name of the object containing the lookup field.
@@ -383,16 +356,13 @@ public with sharing class DisplayRelatedObjects {
      * @return             The API name of the related object.
      */
     public static string getLkpObjectApi(String fromObjName, String lkpField){
-        try{
-            
+        try {
             Schema.DescribeFieldResult scehmaMap = Schema.getGlobalDescribe().get(fromObjName).getDescribe().fields.getMap().get(lkpField).getDescribe();
-            for(Schema.SObjectType reference : scehmaMap.getReferenceTo()) 
-            {
+            for(Schema.SObjectType reference : scehmaMap.getReferenceTo()) {
                 return reference.getDescribe().getName();
             }
-        }
-        catch(Exception ex){
-            LogHandler.createLog((Id) null,'DisplayRelatedObjects.getLkpObjectApi()','Template Id- '+currTemplate+' '+ex.getLineNumber()+ex.getStackTraceString()+ex.getCause(),ex.getMessage(),'Exception');
+        } catch(Exception ex) {
+            LogHandler.createLog((Id) null,'DisplayRelatedObjects.getLkpObjectApi()','Template Id- '+currentTemplate+' '+ex.getLineNumber()+ex.getStackTraceString()+ex.getCause(),ex.getMessage(),'Exception');
         }
         return '';
     }
@@ -407,72 +377,61 @@ public with sharing class DisplayRelatedObjects {
     public Static RowWrapper recordDataWrapperCreation(List<Object> fieldsObjList, Sobject currRecord, Map<String,String> fieldNameType){
         RowWrapper recType = new RowWrapper();
         recType.type='Record';
-       
-        	try{
-                for(Object field : fieldsObjList){
-                    String fieldStr = (String) field;
-                    Object recVal;             
-                    recType.addValue(fieldNameType.get(fieldStr));
-                    Map<String, Object> currRecordLkpData = (Map<String, Object>) JSON.deserializeUntyped(JSON.serialize(currRecord));
-                    
-                    if(fieldStr.contains('__r')) {
-                        List<String> lkpFieldSplit = fieldStr.split('\\.');
-                        if(currRecordLkpData.containsKey(lkpFieldSplit[0])) {	
-                            Map<String, Object> childLkpData = (Map<String, Object>) currRecordLkpData.get(lkpFieldSplit[0]);
-                            recVal = childLkpData.get(lkpFieldSplit[1]);
-                            
-                            if(currencyFieldTotals.containsKey(fieldStr))
-                            {
-                                if(recVal == null) {recVal = 0;}
-                                
-                                Decimal tempValueTotal = currencyFieldTotals.get(fieldStr) + (Decimal) recVal;
-                                currencyFieldTotals.put(fieldStr, tempValueTotal);
-                                
-                                Decimal tempValueSubTotal = currencyFieldSubTotals.get(fieldStr) + (Decimal) recVal;
-                                currencyFieldSubTotals.put(fieldStr, tempValueSubTotal);
-                            } 
-                        }
-                        else{
-                            recVal = ' ';
-                        }
-                    }
-                    else if(!fieldStr.contains('__r') && fieldStr.contains('.')){
-                        List<String> lkpFieldSplit = fieldStr.split('\\.');
+        try{
+            for(Object field : fieldsObjList){
+                String fieldStr = (String) field;
+                Object recVal;             
+                recType.addValue(fieldNameType.get(fieldStr));
+                Map<String, Object> currRecordLkpData = (Map<String, Object>) JSON.deserializeUntyped(JSON.serialize(currRecord));
+                
+                if(fieldStr.contains('__r')) {
+                    List<String> lkpFieldSplit = fieldStr.split('\\.');
+                    if(currRecordLkpData.containsKey(lkpFieldSplit[0])) {	
                         Map<String, Object> childLkpData = (Map<String, Object>) currRecordLkpData.get(lkpFieldSplit[0]);
                         recVal = childLkpData.get(lkpFieldSplit[1]);
+                        
                         if(currencyFieldTotals.containsKey(fieldStr)) {
                             if(recVal == null) {recVal = 0;}
-                            
                             Decimal tempValueTotal = currencyFieldTotals.get(fieldStr) + (Decimal) recVal;
                             currencyFieldTotals.put(fieldStr, tempValueTotal);
-                            
-                            Decimal tempValueSubTotal = currencyFieldSubTotals.get(fieldStr) + (Decimal) recVal;
-                            currencyFieldSubTotals.put(fieldStr, tempValueSubTotal);
-                        }
-                    }
-                    else {
-                        recVal = currRecord.get(fieldStr);
-                        if(currencyFieldTotals.containsKey(fieldStr))  {
-                            if(recVal == null) {recVal = 0;}
-                            
-                            Decimal tempValueTotal = currencyFieldTotals.get(fieldStr) + (Decimal) recVal;
-                            currencyFieldTotals.put(fieldStr, tempValueTotal);
-                            
                             Decimal tempValueSubTotal = currencyFieldSubTotals.get(fieldStr) + (Decimal) recVal;
                             currencyFieldSubTotals.put(fieldStr, tempValueSubTotal);
                         } 
+                    } else {
+                        recVal = ' ';
                     }
-                    rOHtmlContent = rOHtmlContent + '<td scope="col" style="border: 1px solid black; text-align: center;">' + recVal + '</td>';
-                    recType.addValue(recVal);
+                } else if(!fieldStr.contains('__r') && fieldStr.contains('.')) {
+                    List<String> lkpFieldSplit = fieldStr.split('\\.');
+                    Map<String, Object> childLkpData = (Map<String, Object>) currRecordLkpData.get(lkpFieldSplit[0]);
+                    recVal = childLkpData.get(lkpFieldSplit[1]);
+                    if(currencyFieldTotals.containsKey(fieldStr)) {
+                        if(recVal == null) {recVal = 0;}
+                        Decimal tempValueTotal = currencyFieldTotals.get(fieldStr) + (Decimal) recVal;
+                        currencyFieldTotals.put(fieldStr, tempValueTotal);
+                        Decimal tempValueSubTotal = currencyFieldSubTotals.get(fieldStr) + (Decimal) recVal;
+                        currencyFieldSubTotals.put(fieldStr, tempValueSubTotal);
+                    }
+                } else {
+                    recVal = currRecord.get(fieldStr);
+                    if(currencyFieldTotals.containsKey(fieldStr))  {
+                        if(recVal == null) {recVal = 0;}
+                        
+                        Decimal tempValueTotal = currencyFieldTotals.get(fieldStr) + (Decimal) recVal;
+                        currencyFieldTotals.put(fieldStr, tempValueTotal);
+                        
+                        Decimal tempValueSubTotal = currencyFieldSubTotals.get(fieldStr) + (Decimal) recVal;
+                        currencyFieldSubTotals.put(fieldStr, tempValueSubTotal);
+                    } 
                 }
+                rOHtmlContent = rOHtmlContent + '<td scope="col" style="border: 1px solid black; text-align: center;">' + recVal + '</td>';
+                recType.addValue(recVal);
             }
-        Catch(Exception ex) {
+        } catch(Exception ex) {
             if(errType==null){
                 errType = ex.getTypeName();
-                LogHandler.createLog((Id) null,'DisplayRelatedObjects.recordDataWrapperCreation()','Template Id- '+currTemplate+' '+ex.getLineNumber()+ex.getStackTraceString()+ex.getCause(),ex.getMessage(),'Exception');
-            }
-            else if(ex.getTypeName()!=errType) {
-                LogHandler.createLog((Id) null,'DisplayRelatedObjects.recordDataWrapperCreation()','Template Id- '+currTemplate+' '+ex.getLineNumber()+ex.getStackTraceString()+ex.getCause(),ex.getMessage(),'Exception');
+                LogHandler.createLog((Id) null,'DisplayRelatedObjects.recordDataWrapperCreation()','Template Id- '+currentTemplate+' '+ex.getLineNumber()+ex.getStackTraceString()+ex.getCause(),ex.getMessage(),'Exception');
+            } else if(ex.getTypeName()!=errType) {
+                LogHandler.createLog((Id) null,'DisplayRelatedObjects.recordDataWrapperCreation()','Template Id- '+currentTemplate+' '+ex.getLineNumber()+ex.getStackTraceString()+ex.getCause(),ex.getMessage(),'Exception');
             }
         }
         return recType;
