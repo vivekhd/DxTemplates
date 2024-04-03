@@ -48,51 +48,27 @@ export default class DxtemplateSelectorCmp extends NavigationMixin(LightningElem
 
     @wire(CurrentPageReference)
     getCurrentPageReference(currentPageReference) {
-
-         this.backtoObj="Back to "+this.objectLabel;
-         this.savePDFtoObj = "Save PDF to "+this.objectLabel;
-         this.sendEmailWithAttachment = "Send Email With "+ this.objectLabel+" PDF Attachment";
-         
-          this.templateWhereClause2 = " Related_To_Type__c = "+ "\'"+this.objectApiName+ "\'";
-          console.log('templateWhereClause2 '+this.templateWhereClause2);
-        console.log('CurrentPageReference Method',currentPageReference);
-      this.currentPageReference = currentPageReference;
-      console.log(this.currentPageReference.state.c__recordId);
-      if( this.recordId != this.currentPageReference.state.c__recordId){
-        console.log(' IF CurrentPageReference Method');
-
-        this.selectedTemplateId=undefined;
-        this.showTemplate=false;
-        this.showpreviewbutton =false;
-        this.showsavepdftoquote=false;
-        this.showsendemail = false;
-        this.showgeneratepdf=false;
-        this.recordId = this.currentPageReference.state.c__recordId;
-        this.template.querySelector('c-multi-lookup-component').clearPills();
-        console.log('Inside-->'+this.currentPageReference.state.c__recordId);
-      }else{
-        console.log('ELSE CurrentPageReference Method');
-      }
+        this.backtoObj="Back to "+this.objectLabel;
+        this.savePDFtoObj = "Save PDF to "+this.objectLabel;
+        this.sendEmailWithAttachment = "Send Email With "+ this.objectLabel+" PDF Attachment";
+        this.templateWhereClause2 = " Related_To_Type__c = "+ "\'"+this.objectApiName+ "\'";
+        this.currentPageReference = currentPageReference;
+        if( this.recordId != this.currentPageReference.state.c__recordId){
+            this.selectedTemplateId=undefined;
+            this.showTemplate=false;
+            this.showpreviewbutton =false;
+            this.showsavepdftoquote=false;
+            this.showsendemail = false;
+            this.showgeneratepdf=false;
+            this.recordId = this.currentPageReference.state.c__recordId;
+            this.template.querySelector('c-multi-lookup-component').clearPills();
+        }
     }
 
     connectedCallback() {
-       
-    //    console.log('objectApiName '+this.objectName);
-    //    SObject record = this.recordId.getSObject();
-    //    sObjectName = record.getSObjectType().getDescribe().getName();
-    
-        // if(this.flag1 === true)
-        // {
-        //     window.location.reload();
-        //     this.flag1 = false;
-        // }
-
-        console.log('QUOTEID',this.recordId);
-       window.clearTimeout(this.delayTimeout);
-        this.delayTimeout = setTimeout(() => {
-
+        window.clearTimeout(this.delayTimeout);
+            this.delayTimeout = setTimeout(() => {
         }, 0);
-      
     }
 
     selectItemEventHandler(event){
@@ -118,125 +94,80 @@ export default class DxtemplateSelectorCmp extends NavigationMixin(LightningElem
         this.showModal=false;
     }
 
-    handlePDF()
-    {
+    handlePDF() {
         this.isLoaded=true;        
         this.template.querySelector('c-dx-show-selected-template').handlePDF();
         this.modifiedPDFName = this.recordId;
     }
 
-    handlepdfgeneration(event)
-    {
+    handlepdfgeneration(event) {
         this.showgeneratepdf = false;
         this.showpreviewbutton=true;
         this.showsavepdftoquote =true;
-        console.log('handlepdfgeneration-',JSON.stringify(event));
         this.downloadURL=event.detail.downloadURL;
         this.pdfdocumentid=event.detail.attachmentid;
         this.isLoaded=false;
     }   
 
-    previewPDF()
-    {
-        // this.showpreview=true;
-        // this.template.querySelector('c-modal').show();
-        
+    previewPDF() {
         var url = this.downloadURL; // get from processing apex response
         window.open(url, "_blank");
-         
     }
 
-    onpdfselection(event)
-    {
+    onpdfselection(event) {
         this.pdfmodeValue = event.detail.value;
         this.pdf.pdfModes1=this.pdfmodeValue;
-        console.log('helloWorld',this.pdfmodeValue);
-        console.log('this.pdf',this.pdf);
         this.pdfSize();
     }
 
-    pdfSize()
-    {
-        console.log('kkk',this.pdf);
-        pdfModefun({wrapperdata: this.pdf})
-        .then(kushik => {             
-            console.log('send Data',kushik);  
-        })
-        .catch(error =>{
-            console.log('error in JS',error);
-        });
+    pdfSize() {
+        // commented
     }
 
-    savePDFtoQuote()
-    {
-        console.log('savePDFtoQuote-',this.pdfdocumentid);
-        if(this.modifiedPDFName==" " || this.modifiedPDFName==null || this.modifiedPDFName.split(' ').length-1 == this.modifiedPDFName.length){
-            this.modifiedPDFName = this.recordId;
-        }
+    savePDFtoQuote() {
         SavePDFtoQuote({documentid : this.pdfdocumentid, quoteId:this.recordId, pdfName:this.modifiedPDFName})
-        
         .then((result) => {            
-            console.log('this is result'+JSON.parse(JSON.stringify(result)));
-            console.log('this is result',result);
             this.downloadURL = '/servlet/servlet.FileDownload?file='+result;
-            const event4 = new ShowToastEvent({
-                title: 'Success',
-                message:
-                'Saved as attachment to the record!',
-                variant: 'success',
-                });
-
-                this.dispatchEvent(event4);
-                this.showsavepdftoquote =false;
-                this.showsendemail=true;            
+            this.dispatchEvent(new ShowToastEvent({ title: 'Success', message: `PDF saved as an Attachment to the ${this.objectLabel} successfully.`, variant: 'success'}));
+            this.showsavepdftoquote =false;
+            this.showsendemail=true;            
         })
-        .catch((err) => {
-            console.log('this is error savePDFtoQuote',err);
+        .catch((error) => {
+            this.dispatchEvent(new ShowToastEvent({ title: 'Success', message: `PDF couldn't be saved as an Attachment to the ${this.objectLabel}, Please contact System Administrator.`, variant: 'error'}));
+            console.log('Attachment saving failed! ', JSON.stringify(error));
         });
     }
-    // selectedTemplateHandler(){
-    //     if(this.selectedTemplateId!=undefined){
-    //         this.showTemplate=true;
-    //         this.showTemplateSelector=true;
-    //     }
-    // }
 
     handlePDFRename(event){
-        console.log('Renaming ' + event);
         this.modifiedPDFName = event.detail.value;
     }
 
-    renderedCallback(){
-        console.log('Inside RenderedCallback');
-        Promise.all([
-          loadStyle(this, rte_tbl + '/rte_tbl1.css'),
-          loadStyle( this, dexcpqcartstylesCSS )
-          ]).then(() => {
-              console.log( 'Files loaded');
-          })
-          .catch(error => {
-              console.log( error.body.message );
-      });
-      }
+    renderedCallback() {
+        Promise.all([ loadStyle(this, rte_tbl + '/rte_tbl1.css'), loadStyle( this, dexcpqcartstylesCSS )])
+        .then(() => {
+            console.log( 'Files loaded');
+        })
+        .catch(error => {
+            console.log( error.body.message );
+        });
+    }
 
-      buttonClicked; //defaulted to false
+    buttonClicked; //defaulted to false
+    @track cssMaxorMinClass2 = 'dxcappcontainer2nor';
+    @track iconMaxorMinName = 'utility:new_window';
+    @track titleMaxorMinName = 'Maximize Window';
+    productBundleRelationship;
 
-      @track cssMaxorMinClass2 = 'dxcappcontainer2nor';
-      @track iconMaxorMinName = 'utility:new_window';
-      @track titleMaxorMinName = 'Maximize Window';
-      productBundleRelationship;
-
-      //Handles click on the 'Show/hide content'button
-      minorMaxWindow() {
-          this.buttonClicked = !this.buttonClicked; //set to true if false, false if true.
-          this.cssMaxorMinClass2 = this.buttonClicked ? 'dxcappcontainer2max': 'dxcappcontainer2nor';
-          this.iconMaxorMinName = this.buttonClicked ? 'utility:pop_in': 'utility:new_window';
-          this.titleMaxorMinName =  this.buttonClicked ? 'Minimize Window': 'Maximize Window';
-      }
+    //Handles click on the 'Show/hide content'button
+    minorMaxWindow() {
+        this.buttonClicked = !this.buttonClicked; //set to true if false, false if true.
+        this.cssMaxorMinClass2 = this.buttonClicked ? 'dxcappcontainer2max': 'dxcappcontainer2nor';
+        this.iconMaxorMinName = this.buttonClicked ? 'utility:pop_in': 'utility:new_window';
+        this.titleMaxorMinName =  this.buttonClicked ? 'Minimize Window': 'Maximize Window';
+    }
 
     // Modified by Rahul
     handleBacktoQuote(event){
-        //history.back();
         this[NavigationMixin.Navigate]({
             type: 'standard__recordPage',
             attributes: {
@@ -247,23 +178,16 @@ export default class DxtemplateSelectorCmp extends NavigationMixin(LightningElem
         });
     }
 
-    //js for calling screen flow in seperate modal
-
-    showSendEmailMethod(event)
-    {
+    //js for calling screen flow in seperate moda
+    showSendEmailMethod(event) {
         this.showSendEmailModal = true;
-        //this.isDisabled = true;
-        // const flowStatus = this.template.querySelector('c-call-flow').handleInputChange();
-        // console.log('flowStatus->',flowStatus );
     }
 
-    submitDetails()
-    {
+    submitDetails() {
         this.showSendEmailModal = false;
     }
 
-    closeModal()
-    {
+    closeModal() {
         this.showSendEmailModal = false;
     }
 

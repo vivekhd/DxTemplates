@@ -13,7 +13,7 @@ import saveContentVersion from '@salesforce/apex/DisplayPDFController.saveConten
 import { updateRecord } from 'lightning/uiRecordApi';
 import DOCUMENTTEMPLATEID_FIELD from '@salesforce/schema/Document_Template__c.Id';
 import WATERMARKDATA_FIELD from '@salesforce/schema/Document_Template__c.Watermark_Data__c';
-import getSFDomainBaseURL from '@salesforce/apex/DisplayPDFController.getSFDomainBaseURL';
+import getSFDomainBaseURL from '@salesforce/apex/PdfDisplay.getDomainUrl';
 import getDocumentTemplateData from '@salesforce/apex/DisplayPDFController.getDocumentTemplateData';
 import createLog from '@salesforce/apex/LogHandler.createLog';
 import getPDFLinks from '@salesforce/apex/ProductSetupCtrl.getPDFLinks';
