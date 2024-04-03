@@ -15,7 +15,7 @@ import saveContentVersion from '@salesforce/apex/DisplayPDFController.saveConten
 import { updateRecord } from 'lightning/uiRecordApi';
 import DOCUMENTTEMPLATEID_FIELD from '@salesforce/schema/Document_Template__c.Id';
 import WATERMARKDATA_FIELD from '@salesforce/schema/Document_Template__c.Watermark_Data__c';
-import getSFDomainBaseURL from '@salesforce/apex/DisplayPDFController.getSFDomainBaseURL';
+import getSFDomainBaseURL from '@salesforce/apex/PdfDisplay.getDomainUrl';
 import createLog from '@salesforce/apex/LogHandler.createLog';
 
 export default class DxTemplateSetup extends LightningElement {
@@ -462,7 +462,7 @@ try{
       }
       saveContentVersion({ title: "WatermarkImage", base64DataList: this.baseDataLst, templateId: this.documenttemplaterecordid, wtImage : true })
         .then(result => {
-                        const fields ={};
+            const fields ={};
             let watermarkText = (result.filter(obj => Object.keys(obj).some(key => key.includes('Text'))) || [])[0];
             let watermarkImage = (result.filter(obj => Object.keys(obj).some(key => key.includes('Image'))) || [])[0];
             watermarkText = watermarkText ? watermarkText[Object.keys(watermarkText)[0]] : null;
@@ -787,7 +787,7 @@ try{
     }
 
     /*Import Export Functionality End*/
-    /**
+/**
     * Method to reset the all Watermark fields both Text and Image Watermark
     */
     resetWatermarkValues(){
