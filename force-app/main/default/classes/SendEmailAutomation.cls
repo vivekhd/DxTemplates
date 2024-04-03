@@ -7,12 +7,14 @@
  */
 global class SendEmailAutomation implements Queueable, Database.AllowsCallouts {
 
-    public static Safely safe = new Safely();
-    private static Savepoint sp1;
-
-    Id documentRecordInserted;    
-    Id attachmentParentId;
     String attachmentName;
+    Id attachmentParentId;
+    Id documentRecordInserted;
+    
+    /**
+     * @description : Custom exception class used for handling safe operations.
+     */
+    public static Safely safe = new Safely();
 
     /**
      * @description        : Custom exception class for safe handling of exceptions in this context.

@@ -12,11 +12,6 @@ public with sharing class DocumentAutomationController {
     public static Safely safe = new Safely();
 
     /**
-     * Represents a savepoint for rollback operations.
-     */
-    private static Savepoint sp1;
-
-    /**
      * @description : Custom exception class used for handling safe operations.
      */
     public class SafeClassException extends Exception {  }
