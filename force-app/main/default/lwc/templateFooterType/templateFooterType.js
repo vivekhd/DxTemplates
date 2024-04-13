@@ -52,27 +52,37 @@ export default class TemplateFooterType extends LightningElement {
 
     connectedCallback() {
         this.richtextVal = this.editorcontent;
-
         if (this.indexvar == 0) {
             this.FooterAlignmentType = 'Left';
-        }
-        else if (this.indexvar == 1) {
+        } else if (this.indexvar == 1) {
             this.FooterAlignmentType = 'Center';
-        }
-        else if (this.indexvar == 2) {
+        } else if (this.indexvar == 2) {
             this.FooterAlignmentType = 'Right';
         }
+
+        getContentVersions()
+            .then ((data) => {
+                if (data != null) {
+                    data.forEach((val) => {
+                        this.imageUrls.push({ Id: val.Id, URL: '/sfc/servlet.shepherd/version/download/' + val.Id, title: val.Title });
+                    });
+                    this.showimages = true;
+                    this.mainimageUrls = this.imageUrls;
+                    if (this.imageUrls.length > 0) {
+                        this.imagesfound = true;
+                    }
+                }
+            })
+            .catch((error) =>{ 
+                let tempError = error.toString();
+                let errorMessage = error.message || 'Unknown error message';
+                createLog({recordId:'', className:'templateFooterType LWC Component', exceptionMessage:errorMessage, logData:tempError, logType:'Exception'});
+            });
     }
 
-    @api
-    handleActivateTemplate(isActive) {
+    @api handleActivateTemplate(isActive) {
         this.isDisabled = isActive;
     }
-
-    
-    // handleObjectNameSelection(objName) {
-    //     this.objectName = objName;
-    // }
 
     handleRichTextArea(event) {
         this.richtextVal = event.detail.value;
@@ -112,16 +122,10 @@ export default class TemplateFooterType extends LightningElement {
         this.isModalOpen = false;
     }
 
-
-
     getMergeFieldCopy() {
         const mergeField = this.template.querySelector('c-dx-lookup-fields-displaycmp').getMergeField();
         if (mergeField != undefined) {
-
-            // Changes by Kapil - Merge field first time fix
-            //this.mergefieldname = '{!' + this.documenttemplaterecord.DxCPQ__Related_To_Type__c + '.' + mergeField + '}';
             this.mergefieldname = '{!' + this.objectName + '.' + mergeField + '}';         
-       
             let tag = document.createElement('textarea');
             tag.setAttribute('id', 'input_test_id');
             tag.value = this.mergefieldname;
@@ -129,7 +133,6 @@ export default class TemplateFooterType extends LightningElement {
             document.getElementById('input_test_id').select();
             document.execCommand('copy');
             document.getElementById('input_test_id').remove();
-            alert(' Copy success ');
             this.selectedMergefields.push(this.mergefieldname);
         }
         this.template.querySelector('c-modal').hide();
@@ -139,9 +142,7 @@ export default class TemplateFooterType extends LightningElement {
     getMergeField() {
         const mergeField = this.template.querySelector('c-dx-lookup-fields-displaycmp').getMergeField();
         if (mergeField != undefined) {
-          //  this.mergefieldname = '{!' + this.documenttemplaterecord.DxCPQ__Related_To_Type__c + '.' + mergeField + '}';
             this.mergefieldname = '{!' + this.objectName + '.' + mergeField + '}';
-
             this.richtextVal += this.mergefieldname;
             this.selectedMergefields.push(this.mergefieldname);
         }
@@ -159,7 +160,6 @@ export default class TemplateFooterType extends LightningElement {
     }
 
     handleselectedImage(event) {
-
         this.selectedimageid = event.currentTarget.dataset.id;
         this.isModalOpen = false;
         this.imageselected = true;
@@ -169,26 +169,6 @@ export default class TemplateFooterType extends LightningElement {
         this.richtextVal = '<img src="' + this.selectedimageurl + '"/>';
         this.template.querySelector('c-modal').hide();
         this.isModalOpen = false;
-    }
-
-    @wire(getContentVersions) wiredcontentversions({ error, data }) {
-        if (data) {
-            if (data != null) {
-                data.forEach((val) => {
-                    this.imageUrls.push({ Id: val.Id, URL: '/sfc/servlet.shepherd/version/download/' + val.Id, title: val.Title });
-                });
-                this.showimages = true;
-                this.mainimageUrls = this.imageUrls;
-                if (this.imageUrls.length > 0) {
-                    this.imagesfound = true;
-                }
-            }
-        } else if (error) { 
-            let tempError = error.toString();
-            let errorMessage = error.message || 'Unknown error message';
-            createLog({recordId:'', className:'templateFooterType LWC Component', exceptionMessage:errorMessage, logData:tempError, logType:'Exception'});
-
-        }
     }
 
     handleSearch(event) {

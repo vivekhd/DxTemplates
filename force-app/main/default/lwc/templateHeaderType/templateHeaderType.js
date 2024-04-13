@@ -1,6 +1,7 @@
 import { LightningElement, wire, api, track } from 'lwc';
 import getContentVersions from '@salesforce/apex/FooterClass.getContentVersions';
 import getSearchedContentVersions from '@salesforce/apex/FooterClass.getSearchedContentVersions';
+import createLog from '@salesforce/apex/LogHandler.createLog';
 
 export default class TemplateHeaderType extends LightningElement {
     imageUrls = [];
@@ -51,13 +52,30 @@ export default class TemplateHeaderType extends LightningElement {
         this.richtextVal = this.editorcontent;
         if (this.indexvar == 0) {
             this.HeaderAlignmentType = 'Left';
-        }
-        else if (this.indexvar == 1) {
+        } else if (this.indexvar == 1) {
             this.HeaderAlignmentType = 'Center';
-        }
-        else if (this.indexvar == 2) {
+        } else if (this.indexvar == 2) {
             this.HeaderAlignmentType = 'Right';
         }
+
+        getContentVersions()
+        .then ((data) => {
+            if (data != null) {
+                data.forEach((val) => {
+                    this.imageUrls.push({ Id: val.Id, URL: '/sfc/servlet.shepherd/version/download/' + val.Id, title: val.Title });
+                });
+                this.showimages = true;
+                this.mainimageUrls = this.imageUrls;
+                if (this.imageUrls.length > 0) {
+                    this.imagesfound = true;
+                }
+            }
+        })
+        .catch((error) =>{ 
+            let tempError = error.toString();
+            let errorMessage = error.message || 'Unknown error message';
+            createLog({recordId:'', className:'templateHeaderType LWC Component', exceptionMessage:errorMessage, logData:tempError, logType:'Exception'});
+        });
     }
 
     @api
@@ -108,9 +126,7 @@ export default class TemplateHeaderType extends LightningElement {
         if (mergeField != undefined) {
 
             // Changes by Kapil - Merge field first time fix
-            //this.mergefieldname = '{!' + this.documenttemplaterecord.DxCPQ__Related_To_Type__c + '.' + mergeField + '}';
             this.mergefieldname = '{!' + this.objectName + '.' + mergeField + '}';         
-
             let tag = document.createElement('textarea');
             tag.setAttribute('id', 'input_test_id');
             tag.value = this.mergefieldname;
@@ -127,9 +143,7 @@ export default class TemplateHeaderType extends LightningElement {
     getMergeField() {
         const mergeField = this.template.querySelector('c-dx-lookup-fields-displaycmp').getMergeField();
         if (mergeField != undefined) {
-           // this.mergefieldname = '{!' + this.documenttemplaterecord.DxCPQ__Related_To_Type__c + '.' + mergeField + '}';
             this.mergefieldname = '{!' + this.objectName + '.' + mergeField + '}'
-
             this.richtextVal += this.mergefieldname;
             this.selectedMergefields.push(this.mergefieldname);
         }
@@ -146,10 +160,6 @@ export default class TemplateHeaderType extends LightningElement {
         this.isModalOpen = false;
     }
 
-    // handleObjectNameSelection(objName) {
-    //     this.objectName = objName;
-    // }
-
     handleselectedImage(event) {
         this.selectedimageid = event.currentTarget.dataset.id;
         this.isModalOpen = false;
@@ -160,21 +170,6 @@ export default class TemplateHeaderType extends LightningElement {
         this.richtextVal = '<img src="' + this.selectedimageurl + '"/>';
         this.template.querySelector('c-modal').hide();
         this.isModalOpen = false;
-    }
-
-    @wire(getContentVersions) wiredcontentversions({ error, data }) {
-        if (data) {
-            if (data != null) {
-                data.forEach((val) => {
-                    this.imageUrls.push({ Id: val.Id, URL: '/sfc/servlet.shepherd/version/download/' + val.Id, title: val.Title });
-                });
-                this.showimages = true;
-                this.mainimageUrls = this.imageUrls;
-                if (this.imageUrls.length > 0) {
-                    this.imagesfound = true;
-                }
-            }
-        } else if (error) {  }
     }
 
     handleSearch(event) {

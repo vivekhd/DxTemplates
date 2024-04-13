@@ -42,21 +42,21 @@ export default class TemplateFooter extends LightningElement {
     DxCPQ__Document_Clause__c: ''
   };
 
-  @wire(getContentVersions) wiredcontentversions({ error, data }) {
-    if (data) {
+  connectedCallback(){
+    getContentVersions() 
+    .then((data) => {
       if (data != null) {
         data.forEach((val) => {
           this.imageUrls.push({ Id: val.Id, URL: '/sfc/servlet.shepherd/version/download/' + val.Id, title: val.Title });
         });
         this.showimages = true;
       }
-    }
-    else if (error) {
-      let tempError = error.toString();
-            let errorMessage = error.message || 'Unknown error message';
-            createLog({recordId:'', className:'templateFooter LWC Component', exceptionMessage:errorMessage, logData:tempError, logType:'Exception'});
-     }
+    })
+    .catch ((error) => {
+      createLog({recordId:'', className:'templateFooter LWC Component', exceptionMessage:(error.message || 'Unknown error message'), logData:error.toString(), logType:'Exception'});
+    });
   }
+ 
 
   @api handleActivateTemplate(isActive) {
     this.isDisabled = isActive;
@@ -71,18 +71,15 @@ export default class TemplateFooter extends LightningElement {
         for (let i = this.footerSectionsMap.length; i < this.columnvalue; i++) {
           if (this.oldFooterColumnList[i]) {
             this.footerSectionsMap.push(this.oldFooterColumnList[i]);
-          }
-          else {
+          } else {
             this.columnvalueList.push(i);
             this.footerSectionsMap.push({ "value": "", "indexvar": i, "key": (new Date()).getTime() + ":" + i })
           }
         }
-      }
-      else if (this.footerSectionsMap.length > this.columnvalue) {
+      } else if (this.footerSectionsMap.length > this.columnvalue) {
         this.handleColumnRemoval();
       }
-    }
-    else {
+    } else {
       for (let i = 0; i < this.columnvalue; i++) {
         this.columnvalueList.push(i);
         this.footerSectionsMap.push({ "value": "", "indexvar": i, "key": (new Date()).getTime() + ":" + i })
@@ -100,8 +97,7 @@ export default class TemplateFooter extends LightningElement {
       if (tempColumnDetail.indexvar < this.columnvalue) {
         headerColumnsList[tempColumnDetail.indexvar] = tempColumnDetail;
         size += 1;
-      }
-      else {
+      } else {
         this.oldFooterColumnList[tempColumnDetail.indexvar] = tempColumnDetail;
       }
     }
