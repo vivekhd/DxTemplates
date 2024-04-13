@@ -54,6 +54,15 @@ public with sharing class ROsectionAutomationController {
 
             /* Subtotal and Total Fields for Calculation */
             List<Object> subTotFieldNames = (List<Object>) contentAndStylingMap.get('subTotal');
+            
+            Map<String,Object> rowStyleList = (Map<String,Object>) contentAndStylingMap.get('style');
+            Map<String,Object> totalRowStyles = (Map<String,Object>) rowStyleList.get('total');
+            Map<String,Object> subTotalRowStyles = (Map<String,Object>) rowStyleList.get('subTotal');
+
+            String totalRowBGcolor = String.valueOf(totalRowStyles.get('totalRowBGcolor'));
+            String totalRowFontcolor = String.valueOf(totalRowStyles.get('totalRowFontcolor'));
+            String subTotalRowBGColor = String.valueOf(subTotalRowStyles.get('subTotalRowBGColor'));            
+            String subTotalRowFontColor = String.valueOf(subTotalRowStyles.get('subTotalRowFontColor'));
 
             /* Styling Options given for the user from Template Builder */
             dateFormat = (String) contentAndStylingMap.get('dateFormat');
@@ -66,8 +75,8 @@ public with sharing class ROsectionAutomationController {
             /* Html Inline style for Category <td> */
             Map<String,Object> tableStyleList = (Map<String,Object>) contentAndStylingMap.get('style');  
             Map<String,Object> categoryStyleAttributes = (Map<String,Object>) tableStyleList.get('category');
-            String categoryInlineStyle = 'border: 1px solid black ; background-color:' + categoryStyleAttributes.get('backgroundColor') + '; color:'+ categoryStyleAttributes.get('fontcolor') +'; font-size:' + categoryStyleAttributes.get('fontsize') + '; font-family:'+ categoryStyleAttributes.get('fontfamily') + ';' ;
             Integer dataColSpanForCategory = (displaySerialNumber) ? selectedFieldsAsHeaderLabelList.size()+1 : selectedFieldsAsHeaderLabelList.size();       
+            String categoryInlineStyle = 'border: 1px solid black ; background-color:' + categoryStyleAttributes.get('backgroundColor') + '; color:'+ categoryStyleAttributes.get('fontcolor') +'; font-size:' + categoryStyleAttributes.get('fontsize') + '; font-family:'+ categoryStyleAttributes.get('fontfamily') + ';' ;
             
             /* fieldlist String preparation for Querying */
             List<string> fieldsList= new List<string> ();
@@ -161,14 +170,14 @@ public with sharing class ROsectionAutomationController {
                     firstTDblock = displaySerialNumber;
                     if(currencyFieldTotals.size() > 0) {
                         roHtmlContent += '<tr>';
-                        roHtmlContent = roHtmlContent + '<td colspan="1" scope="col" style="border: 1px solid black; background-color:#0077b6 ; color: white; border-right-style: none; font-size: 12px">Sub Total</td>';
+                        roHtmlContent = roHtmlContent + '<td colspan="1" scope="col" style="border: 1px solid black; background-color:' + subTotalRowBGColor + ';color:' + subTotalRowFontColor + ';border-right-style: none; font-size: 12px">Sub Total</td>';
                         for(Object ptrFieldSubTotal : selectedFieldAsHeaderAPIList) {
                             if(currencyFieldTotals.containsKey((String) ptrFieldSubTotal) && subTotFieldNames.contains(ptrFieldSubTotal)) {
-                                roHtmlContent += '<td colspan="1" scope="col" style="border: 1px solid black; color:#ffffff; background-color:#0077b6; text-align: center; border-right-style:none; border-left-style:none;\">' + currencyFieldSubTotals.get((String) ptrFieldSubTotal) + '</td>';
+                                roHtmlContent += '<td colspan="1" scope="col" style="border: 1px solid black; background-color:' + subTotalRowBGColor + ';color:' + subTotalRowFontColor + '; text-align: center; border-right-style:none; border-left-style:none;\">' + currencyFieldSubTotals.get((String) ptrFieldSubTotal) + '</td>';
                             }
                             else {
                                 if(firstTDblock)  {
-                                    roHtmlContent += '<td colspan="1" scope="col" style="border: 1px solid black; background-color:#0077b6 ;border-right-style: none;border-left-style:none;\"> </td>';
+                                    roHtmlContent += '<td colspan="1" scope="col" style="border: 1px solid black; background-color:' + subTotalRowBGColor + ';color:' + subTotalRowFontColor + ';border-right-style: none;border-left-style:none;\"> </td>';
                                 }                                
                                 firstTDblock = true;
                             }
@@ -186,15 +195,14 @@ public with sharing class ROsectionAutomationController {
                 firstTDblock = displaySerialNumber;
                 if(currencyFieldTotals.size() > 0)  {
                     roHtmlContent += '<tr>';
-                    roHtmlContent += '<td colspan="1" scope="col" style="border: 1px solid black; background-color:#03045e ; color: white; border-right-style: none; font-size: 12px">Grand Total</td>';
+                    roHtmlContent += '<td colspan="1" scope="col" style="border: 1px solid black; background-color:' + totalRowBGcolor  + ' ; color: ' + totalRowFontcolor + ' ; border-right-style: none; font-size: 12px">Grand Total</td>';
                     
                     for(Object ptrFieldTotal : selectedFieldAsHeaderAPIList) {
                         if(currencyFieldTotals.containsKey((String) ptrFieldTotal) && subTotFieldNames.contains(ptrFieldTotal)) {
-                            roHtmlContent += '<td colspan="1" scope="col" style="border: 1px solid black; color:#ffffff; background-color:#03045e; border-right-style:none; text-align: center; border-left-style:none;\">' + currencyFieldTotals.get((String) ptrFieldTotal) + '</td>';
-                        }
-                        else {
+                            roHtmlContent += '<td colspan="1" scope="col" style="border: 1px solid black; background-color:' + totalRowBGcolor  + ';color:' + totalRowFontcolor + ';border-right-style:none; text-align: center; border-left-style:none;\">' + currencyFieldTotals.get((String) ptrFieldTotal) + '</td>';
+                        } else {
                             if(firstTDblock)  {
-                                roHtmlContent += '<td colspan="1" scope="col" style="border: 1px solid black; background-color:#03045e ;border-right-style: none;border-left-style:none;\"> </td>';
+                                roHtmlContent += '<td colspan="1" scope="col" style="border: 1px solid black; background-color:' + totalRowBGcolor  + ';color:' + totalRowFontcolor + ';border-right-style: none; border-left-style:none;\"> </td>';
                             }
                             firstTDblock = true;
                         }
@@ -222,14 +230,14 @@ public with sharing class ROsectionAutomationController {
                 Boolean firstTDblock = displaySerialNumber;
                 if(currencyFieldTotals.size() > 0)  {
                     roHtmlContent += '<tr>';
-                    roHtmlContent += '<td colspan="1" scope="col" style="border: 1px solid black; background-color:#03045e ; color: white; border-right-style: none; font-size: 12px">Grand Total</td>';
+                    roHtmlContent += '<td colspan="1" scope="col" style="border: 1px solid black; background-color:' + totalRowBGcolor  + ';color: ' + totalRowFontcolor + ';border-right-style: none; font-size: 12px">Grand Total</td>';
                     for(Object ptrFieldTotal : selectedFieldAsHeaderAPIList) {
                         if(currencyFieldTotals.containsKey((String) ptrFieldTotal) && subTotFieldNames.contains(ptrFieldTotal)) {
-                            roHtmlContent += '<td colspan="1" scope="col" style="border: 1px solid black; color:#ffffff; background-color:#03045e; border-right-style:none; border-left-style:none;\">' + currencyFieldTotals.get((String) ptrFieldTotal) + '</td>';
+                            roHtmlContent += '<td colspan="1" scope="col" style="border: 1px solid black; background-color:' + totalRowBGcolor  + ';color:' + totalRowFontcolor + ';border-right-style:none; border-left-style:none;\">' + currencyFieldTotals.get((String) ptrFieldTotal) + '</td>';
                         }
                         else {
                             if(firstTDblock)  {
-                                roHtmlContent += '<td colspan="1" scope="col" style="border: 1px solid black; background-color:#03045e ;border-right-style: none;border-left-style:none;\"> </td>';
+                                roHtmlContent += '<td colspan="1" scope="col" style="border: 1px solid black; background-color:' + totalRowBGcolor  + ' ; color: ' + totalRowFontcolor + ';border-right-style: none;border-left-style:none;\"> </td>';
                             }                            
                             firstTDblock = true;
                         }
@@ -248,8 +256,8 @@ public with sharing class ROsectionAutomationController {
                 chartContent += '<tbody> <tr> <td style="width: 3%; text-align: center; writing-mode: vertical-rl; text-orientation: upright;">' + chartYAxis + '</td>';
                 
                 Map<String,String> chartStaticResourceStyle = new Map<String,String> {};
-                for(DxCPQ__ChartAutomationStyleResources__mdt chartStyleAttribute :  [SELECT Id,Label,DxCPQ__Style_Composition__c FROM DxCPQ__ChartAutomationStyleResources__mdt]){
-                    chartStaticResourceStyle.put(chartStyleAttribute.label,chartStyleAttribute.DxCPQ__Style_Composition__c );
+                for(ChartAutomationStyleResources__mdt chartStyleAttribute :  [SELECT Id,Label,Style_Composition__c FROM ChartAutomationStyleResources__mdt]){
+                    chartStaticResourceStyle.put(chartStyleAttribute.label,chartStyleAttribute.Style_Composition__c );
                 }
 
                 /*Bar height Calculation*/

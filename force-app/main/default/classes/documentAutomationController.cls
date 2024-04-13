@@ -45,11 +45,9 @@ public with sharing class documentAutomationController {
             for(Document_Template_Section__c singleDataSection : allDataSections) {
                 if(singleDataSection.Type__c == 'Header') {
                     headerFooterSectionMap.put('\"header\"',singleDataSection.Section_Content__c);
-                    //headerFooterContent = '{ \"header\":'+ singleDataSection.Section_Content__c;
                 }
                 else if (singleDataSection.Type__c == 'Footer') {
                     headerFooterSectionMap.put('\"footer\"',singleDataSection.Section_Content__c);
-                    //headerFooterContent = headerFooterContent + ', \"footer\":'+ singleDataSection.Section_Content__c + '}';
                 }
                 else if(singleDataSection.Type__c != 'Related Objects') {
                     documentContent = documentContent + singleDataSection.Section_Content__c;
@@ -67,7 +65,6 @@ public with sharing class documentAutomationController {
             sectionContentRecord.Document_Body__c = documentContent;
             sectionContentRecord.Document_Template__c = templateId;
             sectionContentRecord.Document_Content__c = String.valueof(headerFooterSectionMap).replace('\"header\"=','\"header\":').replace('\"footer\"=','\"footer\":');
-            //sectionContentRecord.Document_Content__c = headerFooterContent;
             sectionContentRecord.Object_Id__c = recordId;            
             documentToInsert.add(sectionContentRecord);
             

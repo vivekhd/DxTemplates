@@ -25,12 +25,9 @@ public with sharing class DisplayRelatedObjects {
         List<RowWrapper> rowWrapperList=new List<RowWrapper>(); 
         
         List<sObject> childRecords=new List<sObject>();
-        try
-        {
+        try {
             Document_Template_Section__c dsrec=[select id,Section_Content__c from Document_Template_Section__c where id=:templatesectionid WITH SECURITY_ENFORCED];
             Map<string,Object> jsonMap = (Map<string,Object>)JSON.deserializeUntyped(dsrec.Section_Content__c);
-                        
-            
             List<Object> fieldsObjList = (List<Object>) jsonMap.get('tablelistValues');
             List<Object> fieldsObjListValues = (List<Object>) jsonMap.get('tablelistLabels');
             Map<String,Object> tableStyleList = (Map<String,Object>) jsonMap.get('style');
@@ -59,28 +56,11 @@ public with sharing class DisplayRelatedObjects {
                 whereClauseinQuery = ' AND ' + (String) jsonMap.get('whereClause');
             }
             
-            List<String> headerStyles = new List<String>();
-            List<String> recordStyles = new List<String>();
-            
-            for(Object styleType : tableStyleList.keySet())
-            {
-                String atrType = (String) styleType;
-                Map<String,Object> styleAttributes = (Map<String,Object>) tableStyleList.get(atrType);
-                for(Object attribute : styleAttributes.keySet())
-                {
-                    String attributeType = (String) attribute;
-                    String attributeVal = (String) styleAttributes.get(attributeType);
-                    if(atrType == 'header')
-                    {
-                        headerStyles.add(attributeVal);
-                    }
-                    else
-                    {
-                        recordStyles.add(attributeVal);
-                    }
-                }
-            }
-                        
+            Map<String,Object> headerStyles = (Map<String,Object>) tableStyleList.get('header');
+            Map<String,Object> totalRowStyles = (Map<String,Object>) tableStyleList.get('total');
+            Map<String,Object> categoryStyles = (Map<String,Object>) tableStyleList.get('category');
+            Map<String,Object> subTotalRowStyles = (Map<String,Object>) tableStyleList.get('subTotal');
+
             List<string> fieldsList= new List<string> ();
             for(Object rec: fieldsObjList){
                 fieldsList.add(String.valueOf(rec));
@@ -89,8 +69,7 @@ public with sharing class DisplayRelatedObjects {
             Map<String,String> fieldNameType = getObjectFieldTypeMap(childObject, fieldsList);
             
             currencyFieldTotals = new Map<String,Decimal> {};
-                for(Object currTempField : subTotFieldNames)
-            {
+            for(Object currTempField : subTotFieldNames) {
                 currencyFieldTotals.put((String) currTempField,0);
             }
             currencyFieldSubTotals = currencyFieldTotals.clone();
@@ -102,11 +81,9 @@ public with sharing class DisplayRelatedObjects {
             
             String securityEnforced=' WITH SECURITY_ENFORCED';
             //if grouping category is selected
-            if(grpby!=null && grpby!='')
-            {
+            if(grpby!=null && grpby!='') {
                 Set<String> fieldStringSet = new Set<String>();
-                for(String field : fieldsList)
-                {
+                for(String field : fieldsList) {
                     fieldStringSet.add(field.tolowercase());
                 }
                 fieldStringSet.add(grpby.tolowercase());
@@ -127,14 +104,12 @@ public with sharing class DisplayRelatedObjects {
                         List<SObject> recordList= recordCategoryMap.get(ptrRecord.get(ptrfield));
                         recordList.add(ptrRecord); 
                         recordCategoryMap.put(ptrRecord.get(ptrfield),recordList);
-                    }
-                    else{
+                    } else {
                         if(recordCategoryMap.containsKey('Others')){
                             List<SObject> recordList= recordCategoryMap.get('Others');
                             recordList.add(ptrRecord); 
                             recordCategoryMap.put('Others',recordList);    
-                        }
-                        else{
+                        } else {
                             List<SObject> recordList = new  List<SObject>();
                             recordList.add(ptrRecord);
                             recordCategoryMap.put('Others',recordList);
@@ -184,12 +159,10 @@ public with sharing class DisplayRelatedObjects {
                 //GrandTotals to wrapper
                 RowWrapper totType = new RowWrapper();
                 totType.type='Total';
-                for(Object ptrFieldTotal : fieldsObjList)
-                {
+                for(Object ptrFieldTotal : fieldsObjList) {
                     if(currencyFieldTotals.containsKey((String) ptrFieldTotal) && subTotFieldNames.contains(ptrFieldTotal)){
                         totType.addValue(currencyFieldTotals.get((String) ptrFieldTotal));
-                    }
-                    else{
+                    } else {
                         totType.addValue('Empty');
                     }
                 }
@@ -202,7 +175,6 @@ public with sharing class DisplayRelatedObjects {
                 String recordsQuery = 'select '+String.escapeSingleQuotes(fieldString)+' from '+String.escapeSingleQuotes(childObject)+' where '+String.escapeSingleQuotes(string.valueof(jsonMap.get('childLookupfieldAPIname')))+'='+'\''+String.escapeSingleQuotes(recordid)+'\''+' '+ whereClauseinQuery+' '+String.escapeSingleQuotes(securityEnforced);
                 ChildRecords = Database.query(recordsQuery);
                 for(Sobject currRecord: ChildRecords) {
-                    //qliRecIds.add(currRecord.get('Id'));
                     rOHtmlContent += '<tr>';                   
                     //Function Call
                     RowWrapper recType = recordDataWrapperCreation(fieldsObjList, currRecord, fieldNameType);
@@ -228,40 +200,41 @@ public with sharing class DisplayRelatedObjects {
             }
             
             //Wrapper Creation
-            Wrapper  masterWrapper =new Wrapper();
-            masterWrapper.headers = headerValues;
-            masterWrapper.rowWrapperList = rowWrapperList ;
+            Wrapper  masterWrapper = new Wrapper();
             masterWrapper.newPage = newPage;
-            
-            masterWrapper.catFontClr = recordStyles[0]; 
-            masterWrapper.catBgClr = recordStyles[1]; 
-            masterWrapper.catFontFam = recordStyles[2];
-            masterWrapper.catFontSize = recordStyles[3];
-            
-            masterWrapper.headFontClr = headerStyles[0]; 
-            masterWrapper.headBgClr = headerStyles[1];
-            masterWrapper.headFontFam = headerStyles[2]; 
-            masterWrapper.headFontSize = headerStyles[3];
-            
+            masterWrapper.headers = headerValues;
             masterWrapper.showSlNo = serialNumber;
             masterWrapper.dateFormat = dateFormat;
             masterWrapper.timeFormat = timeFormat;
-            masterWrapper.numberFormat = numberFormat;
-            masterWrapper.currencyFormat = currencyFormat;
-            masterWrapper.phoneFormat = phoneFormat;
-            masterWrapper.barChartColor = barChartColor;
-            
-            masterWrapper.selGraphvalue = selGraphvalue;
-            masterWrapper.displayChart = displayChart;
             masterWrapper.chartLabel = chartLabel;
             masterWrapper.chartNewPage = chartNewPage;
-              
+            masterWrapper.displayChart = displayChart;
+            masterWrapper.numberFormat = numberFormat;
+            masterWrapper.barChartColor = barChartColor;
+            masterWrapper.selGraphvalue = selGraphvalue;
+            masterWrapper.currencyFormat = currencyFormat;
+            masterWrapper.rowWrapperList = rowWrapperList;    
+
+            masterWrapper.catFontSize = String.valueOf(categoryStyles.get('fontsize'));
+            masterWrapper.catFontClr = String.valueOf(categoryStyles.get('fontcolor')); 
+            masterWrapper.catFontFam = String.valueOf(categoryStyles.get('fontfamily'));
+            masterWrapper.catBgClr = String.valueOf(categoryStyles.get('backgroundColor')); 
+
+            masterWrapper.headFontSize = String.valueOf(headerStyles.get('fontsize'));
+            masterWrapper.headFontClr = String.valueOf(headerStyles.get('fontcolor')); 
+            masterWrapper.headFontFam = String.valueOf(headerStyles.get('fontfamily'));
+            masterWrapper.headBgClr = String.valueOf(headerStyles.get('backgroundColor'));
+
+            masterWrapper.totalRowBGcolor = String.valueOf(totalRowStyles.get('totalRowBGcolor'));
+            masterWrapper.totalRowFontcolor = String.valueOf(totalRowStyles.get('totalRowFontColor'));
+            masterWrapper.subTotalRowBGColor = String.valueOf(subTotalRowStyles.get('subTotalRowBGColor'));
+            masterWrapper.subTotalRowFontColor = String.valueOf(subTotalRowStyles.get('subTotalRowFontColor'));
+            
             string jsonstring = JSON.serialize(masterWrapper);
             rOHtmlContent += '</tbody>';
             return jsonstring;
         }
-        catch(Exception ex)
-        {
+        catch(Exception ex) {
             LogHandler.createLog((Id) templatesectionid,'DisplayRelatedObjects.getsectionData()','Template Id- '+currTemplate+' '+ex.getLineNumber()+ex.getStackTraceString()+ex.getCause(),ex.getMessage(),'Exception');   
         }
         return '';
@@ -275,9 +248,9 @@ public with sharing class DisplayRelatedObjects {
 		/**
 		* @description the values (cells) making up this row
 		*/
-        public List<RowWrapper> rowWrapperList;
-        public List<String> headers;
         public Boolean newPage;
+        public List<String> headers;
+        public List<RowWrapper> rowWrapperList;        
         
         public String catFontClr;
         public String catBgClr;
@@ -297,6 +270,11 @@ public with sharing class DisplayRelatedObjects {
         public String currencyFormat;
         public String phoneFormat;
         public String barChartColor;
+
+        public String totalRowBGcolor;
+        public String totalRowFontcolor;
+        public String subTotalRowBGColor;
+        public String subTotalRowFontColor;
         
         // Chart Params
         public Boolean chartNewPage;

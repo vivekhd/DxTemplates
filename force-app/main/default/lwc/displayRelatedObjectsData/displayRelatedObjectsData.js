@@ -9,8 +9,7 @@ export default class DisplayRelatedObjectsData extends LightningElement {
     @api templatesectionid;
     @api index;
 
-    @track showSpinner = true;
-
+    showSpinner = true;
     showtablecontent = false;
     tableheaders = [];
     tablerows = [];
@@ -31,7 +30,7 @@ export default class DisplayRelatedObjectsData extends LightningElement {
     currencyLabel;
     currencyIndexCounter = [];
 
-     // Chart Params
+    // Chart Params
     chartLabel = 'Quote Chart';
     chartClass = 'page-break';
     dateFormatStr = '';
@@ -42,7 +41,6 @@ export default class DisplayRelatedObjectsData extends LightningElement {
     HeadStyle = "border: 1px solid black; text-align: center";
     styleRowNum = 1;
     barChartColor;
-   
 
     /**
      * In ConnectedCallback function, 
@@ -52,22 +50,25 @@ export default class DisplayRelatedObjectsData extends LightningElement {
             .then(result => {
                 if (result != null) {
                     var parsedjson = JSON.parse(result);
+                    this.currencyLabel = "USD";
                     this.showslno = parsedjson.showSlNo;
+                    this.chartLabel = parsedjson.chartLabel;
                     this.dateFormatStr = parsedjson.dateFormat;
                     this.timeFormatStr = parsedjson.timeFormat;
+                    this.displayChart = parsedjson.displayChart;
+                    this.selGraphvalue = parsedjson.selGraphvalue;
+                    this.barChartColor = parsedjson.barChartColor;
                     this.numberFormat = Number(parsedjson.numberFormat);
                     this.currencyFormat = Number(parsedjson.currencyFormat);
-                    this.selGraphvalue = parsedjson.selGraphvalue;
-                    this.chartLabel = parsedjson.chartLabel;
-                    this.displayChart = parsedjson.displayChart;
-                    this.barChartColor = parsedjson.barChartColor;
-                    this.currencyLabel = "USD"
+
                     parsedjson.headers.forEach((element) => {
                         this.tableheaders.push(element);
                     });
+
                     if (this.showslno) {
                         this.tableheaders.unshift('Sl No');
                     }
+
                     this.HeadStyle = 'width:10px; border: 1px solid black ; background-color:' + parsedjson.headBgClr + ' ; color:' + parsedjson.headFontClr + '; font-size:' + parsedjson.headFontSize + '; font-family:' + parsedjson.headFontFam + '; text-align: center;';
                     parsedjson.rowWrapperList.forEach((element, index) => {
                         const rowData = new Object();
@@ -92,8 +93,7 @@ export default class DisplayRelatedObjectsData extends LightningElement {
                             }
                             rowData.columns = cellList;
                             this.tablerows.push(rowData);
-                        }
-                        else if (element.type == "Category") {
+                        } else if (element.type == "Category") {
                             rowData.rowType = 'Category';
 
                             let records = element.values;
@@ -108,8 +108,7 @@ export default class DisplayRelatedObjectsData extends LightningElement {
                             rowData.columns = cellList;
                             this.tablerows.push(rowData);
                             this.subtotalLabel.push(cellData.value);
-                        }
-                        else if (element.type == "Total" || element.type == "SubTotal") {
+                        } else if (element.type == "Total" || element.type == "SubTotal") {
                             rowData.rowType = 'Totals';
 
                             let records = element.values;
@@ -143,11 +142,10 @@ export default class DisplayRelatedObjectsData extends LightningElement {
                                     if (find) {
                                         if (element.type == 'SubTotal') {
                                             cellData.value = 'Sub Total';
-                                            cellData.style = 'border: 1px solid black; background-color: #0077b6 ; color: white; border-right-style: none; font-size: 12px';
-                                        }
-                                        else {
+                                            cellData.style = `border: 1px solid black; background-color: ${parsedjson.subTotalRowBGColor}; color : ${parsedjson.subTotalRowFontColor}; border-right-style:none; font-size: 12px`;
+                                        } else {
                                             cellData.value = 'Grand Total';
-                                            cellData.style = 'border: 1px solid black; background-color:#03045e ; color: white; border-right-style: none; font-size: 12px';
+                                            cellData.style = `border: 1px solid black; background-color: ${parsedjson.totalRowBGcolor}; color : ${parsedjson.totalRowFontcolor}; border-right-style:none; font-size: 12px`;
                                         }
                                         cellData.colspan = span + 1;
                                         find = false;
@@ -157,24 +155,20 @@ export default class DisplayRelatedObjectsData extends LightningElement {
 
                                     if (element.type == 'SubTotal') {
                                         cellData.value = '';
-                                        cellData.style = 'border: 1px solid black; background-color: #0077b6 ; color: white; border-left-style: none; border-right-style: none;';
-                                    }
-                                    else {
+                                        cellData.style = `border: 1px solid black; background-color: ${parsedjson.subTotalRowBGColor}; color : ${parsedjson.subTotalRowFontColor}; border-left-style: none; border-right-style: none;`;
+                                    } else {
                                         cellData.value = '';
-                                        cellData.style = 'border: 1px solid black; background-color:#03045e ; color: white; border-left-style: none; border-right-style: none;';
+                                        cellData.style = `border: 1px solid black; background-color: ${parsedjson.totalRowBGcolor}; color : ${parsedjson.totalRowFontcolor}; border-left-style: none; border-right-style: none;`;
                                     }
-                                }
-                                else {
+                                } else {
                                     if (element.type == 'SubTotal') {
                                         if(this.currencyIndexCounter.includes(i)) {cellData.value = this.currencySymbols[this.currencyLabel] + '' + Number(records[i]).toFixed(this.currencyFormat);}
-                                        else{cellData.value = Number(records[i]).toFixed(this.currencyFormat);}
-                                        //cellData.value = Number(records[i]).toFixed(this.currencyFormat);
-                                        cellData.style = 'border: 1px solid black; background-color: #0077b6 ; color: white; font-size: 12px; text-align: center;';
-                                    }
-                                    else {
+                                        else {cellData.value = Number(records[i]).toFixed(this.currencyFormat);}
+                                        cellData.style = `border: 1px solid black; background-color: ${parsedjson.subTotalRowBGColor}; color : ${parsedjson.subTotalRowFontColor}; font-size: 12px; text-align: center;`;
+                                    } else {
                                         if(this.currencyIndexCounter.includes(i)) {cellData.value = this.currencySymbols[this.currencyLabel] + '' + Number(records[i]).toFixed(this.currencyFormat);}
-                                        else{cellData.value = Number(records[i]).toFixed(this.currencyFormat);}
-                                        cellData.style = 'border: 1px solid black; background-color:#03045e ; color: white; font-size: 12px; text-align: center;';
+                                        else {cellData.value = Number(records[i]).toFixed(this.currencyFormat);}
+                                        cellData.style = `border: 1px solid black; background-color: ${parsedjson.totalRowBGcolor}; color : ${parsedjson.totalRowFontcolor}; font-size: 12px; text-align: center;`;
                                     }
                                 }
                                 cellList.push(cellData);
@@ -192,8 +186,7 @@ export default class DisplayRelatedObjectsData extends LightningElement {
                         this.handleChart();
                     }
 
-                    if(parsedjson.newPage)
-                    {
+                    if(parsedjson.newPage) {
                         setTimeout(()=> {this.className = 'newPagetableMainClass';});
                     }
                 }
@@ -212,8 +205,7 @@ export default class DisplayRelatedObjectsData extends LightningElement {
                         variant: 'error',
                     });
                     this.dispatchEvent(errEvt);
-                }
-                else {
+                } else {
                     const errEvt = new ShowToastEvent({
                         title: 'Error',
                         message: error.message + '. The Quote can\'t be generated. Please contact the System Administrator.',
@@ -221,7 +213,7 @@ export default class DisplayRelatedObjectsData extends LightningElement {
                     });
                     this.dispatchEvent(errEvt);
                 }
-            })      
+            })
     }
 
 
@@ -306,20 +298,18 @@ export default class DisplayRelatedObjectsData extends LightningElement {
             var numDateFormat;
             var dateFormatSep;
             if(dateFormatStr.includes('*')){
-                 numDateFormat = Number(dateFormatStr.substring(0, dateFormatStr.length - 2));
-                 dateFormatSep = dateFormatStr.charAt(dateFormatStr.length - 2);
-            }
-            else{
-                 numDateFormat = Number(dateFormatStr.substring(0, dateFormatStr.length - 1));
-                 dateFormatSep = dateFormatStr.charAt(dateFormatStr.length - 1);
+                numDateFormat = Number(dateFormatStr.substring(0, dateFormatStr.length - 2));
+                dateFormatSep = dateFormatStr.charAt(dateFormatStr.length - 2);
+            } else {
+                numDateFormat = Number(dateFormatStr.substring(0, dateFormatStr.length - 1));
+                dateFormatSep = dateFormatStr.charAt(dateFormatStr.length - 1);
             }  
 
             while (numDateFormat > 0) {
                 let rem = Number(numDateFormat % 10);
                 if ((Number(rem - 4)) < 0) {
                     dateIndex.unshift(0);
-                }
-                else {
+                } else {
                     let key = Number(rem) - 4;
                     dateIndex.unshift(key);
                 }
@@ -328,16 +318,13 @@ export default class DisplayRelatedObjectsData extends LightningElement {
 
             if (dateFormatStr.includes('4') && !dateFormatStr.includes('*')) {
                 dateFormatted = dateList[dateIndex[0]] + dateFormatSep + dateList[dateIndex[1]] + dateFormatSep + dateList[dateIndex[2]];
-            }
-            else if (dateFormatStr.includes('2') && !dateFormatStr.includes('*')) {
+            } else if (dateFormatStr.includes('2') && !dateFormatStr.includes('*')) {
                 dateFormatted = dateList[dateIndex[0]] + dateFormatSep + dateList[dateIndex[1]] + dateFormatSep + dateList[dateIndex[2]].substring(2);
-            }
-            else if (dateFormatStr.includes('4') && dateFormatStr.includes('*')) {
+            } else if (dateFormatStr.includes('4') && dateFormatStr.includes('*')) {
                 let mnthIndex = dateIndex.indexOf(1);
                 dateList[dateIndex[mnthIndex]] = this.monthLstHalf[Number(dateList[1])];
                 dateFormatted = dateList[dateIndex[0]] + dateFormatSep + dateList[dateIndex[1]] + dateFormatSep + dateList[dateIndex[2]];
-            }
-            else if (dateFormatStr.includes('2') && dateFormatStr.includes('*')) {
+            } else if (dateFormatStr.includes('2') && dateFormatStr.includes('*')) {
                     let mnthIndex = dateIndex.indexOf(1);
                     dateList[dateIndex[mnthIndex]] = this.monthLstHalf[Number(dateList[1])];
                dateFormatted = dateList[dateIndex[0]] + dateFormatSep + dateList[dateIndex[1]] + dateFormatSep + dateList[dateIndex[2]].substring(2);
@@ -346,25 +333,20 @@ export default class DisplayRelatedObjectsData extends LightningElement {
 
         if (timeStr != null && timeFormatStr != null) {
             if (timeFormatStr.includes('4')) {
-
                 time = String(timeStr).split(':');
                 let hr = Number(String(timeStr).split(':')[0]);
-
                 if (hr <= 12) {
                     if (timeFormatStr.includes('3'))
                         timeFormatted = timeStr + ' AM';
                     else
                         timeFormatted = time[0] + ':' + time[1] + ' AM';
-                }
-                else {
-
+                } else {
                     if (timeFormatStr.includes('3'))
                         timeFormatted = (Number(String(timeStr).split(':')[0])-12) + ':' + String(timeStr).split(':')[1] + ':' + String(timeStr).split(':')[2] + ' PM';
                     else
                         timeFormatted = (Number(String(timeStr).split(':')[0])-12) + ':' + String(timeStr).split(':')[1]  + ' PM';
                 }
-            }
-            else {
+            } else {
                 if (timeFormatStr.includes('3'))
                     timeFormatted = timeStr;
                 else
@@ -374,11 +356,9 @@ export default class DisplayRelatedObjectsData extends LightningElement {
 
         if (valKey == 0) {
             return dateFormatted + ' ' + timeFormatted;
-        }
-        else if (valKey < 0) {
+        } else if (valKey < 0) {
             return dateFormatted;
-        }
-        else if (valKey > 0) {
+        } else if (valKey > 0) {
             return timeFormatted;
         }
     }

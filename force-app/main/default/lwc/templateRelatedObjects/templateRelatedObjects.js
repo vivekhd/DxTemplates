@@ -38,7 +38,6 @@ export default class TemplateRelatedObjects extends LightningElement {
     @track Recorddetailsnew = {
         Name: '',
         DxCPQ__Section_Content__c: '',
-        //DxCPQ__DisplaySectionName__c: false,
         DxCPQ__New_Page__c: false,
         DxCPQ__Document_Template__c: '',
         DxCPQ__Sequence__c: 0,
@@ -72,6 +71,12 @@ export default class TemplateRelatedObjects extends LightningElement {
     numFormatvalue = '2';
     curFormatvalue = '1';
     @track renderedData = false;
+
+    //SubTotal and Total BG Color
+    selectedSubTotalBGColor = '#0077b6';
+    selectedTotalBGColor = '#03045e';
+    selectedSubTotalFontColor = '#FFFFFF';
+    selectedTotalFontColor = '#FFFFFF';
 
     // Filtering params
     listOfExistingConditions = [];
@@ -577,6 +582,10 @@ export default class TemplateRelatedObjects extends LightningElement {
         this.fontsize = '10px';
         this.SerialNumber = false;
         this.catStyle = '';
+        this.selectedTotalBGColor = '#03045e';
+        this.selectedSubTotalBGColor = '#0077b6';
+        this.selectedTotalFontColor = '#FFFFFF';
+        this.selectedSubTotalFontColor = '#FFFFFF';
 
         this.template.querySelectorAll('lightning-checkbox-group ').forEach(element => {
             if (element.value != null) {
@@ -798,6 +807,12 @@ export default class TemplateRelatedObjects extends LightningElement {
                         this.selectedHbgColor = sectionContentToLoad.style.header.backgroundColor;
                         this.selectedBFontColor = sectionContentToLoad.style.category.fontcolor;
                         this.selectedBBgcolor = sectionContentToLoad.style.category.backgroundColor;
+
+                        this.selectedSubTotalBGColor = sectionContentToLoad.style.subTotal.subTotalRowBGColor;
+                        this.selectedSubTotalFontColor = sectionContentToLoad.style.subTotal.subTotalRowFontColor;
+                        this.selectedTotalBGColor = sectionContentToLoad.style.total.totalRowBGcolor;
+                        this.selectedTotalFontColor = sectionContentToLoad.style.total.totalRowFontColor;
+                        
                         this.dateFormatvalue = sectionContentToLoad.dateFormat;
                         this.timeFormatvalue = sectionContentToLoad.timeFormat;
                         this.numFormatvalue = sectionContentToLoad.numberFormat;
@@ -1033,7 +1048,7 @@ export default class TemplateRelatedObjects extends LightningElement {
     /*
     All the data entered above will be stored in the JSON Format and will get saved in the Document Template section 
     */
-    handlesectionsave() {
+    handleSectionSave() {
         var obj = {};
         if (this.selectedChildObjectName == '' || this.Recorddetailsnew.Name == '' || this.listOfAddedFields == '') {
             this.dispatchEvent(new ShowToastEvent({
@@ -1099,11 +1114,14 @@ export default class TemplateRelatedObjects extends LightningElement {
                 head.fontcolor = this.selectedHFontColor;
                 head.backgroundColor = this.selectedHbgColor;
                 head.fontfamily = this.fontfamily;
-                head.fontsize = this.fontsize;
+                head.fontsize = this.fontsize;      
 
                 const styles = new Object();
                 styles.category = category;
                 styles.header = head;
+                styles.subTotal = {subTotalRowBGColor : this.selectedSubTotalBGColor, subTotalRowFontColor : this.selectedSubTotalFontColor};
+                styles.total = {totalRowBGcolor : this.selectedTotalBGColor, totalRowFontColor : this.selectedTotalFontColor}
+
                 obj.style = styles;
                 obj.groupingCatVals = this.getpicklistdata[this.selectchildpicklist];
                 jsonString = JSON.stringify(obj);
@@ -1663,6 +1681,19 @@ export default class TemplateRelatedObjects extends LightningElement {
         this.template.querySelectorAll('.mytable').style.border = "5px solid" + this.selectedBDRbgcolor;
     }
 
+    handleSubTotalBGColorChange(event){
+        this.selectedSubTotalBGColor = event.detail.value;
+    }
+    handleSubTotalFontColorChange(event){
+        this.selectedSubTotalFontColor = event.detail.value;
+    }
+    handleTotalBGColorChange(event){
+        this.selectedTotalBGColor = event.detail.value;
+    }
+    handleTotalFontColorChange(event){
+        this.selectedTotalFontColor = event.detail.value;
+    }
+
     handleBarChartColorChange(event) {
         this.selectedBarChartColor = event.detail.value;
         let dataIdArray = ['group-1', 'group-2', 'group-3', 'group-4', 'Others'];
@@ -1849,7 +1880,7 @@ export default class TemplateRelatedObjects extends LightningElement {
                     this.ruleConditions = [];
                     this.ruleCondition = false;
 
-                    this.handlesectionsave(null);
+                    this.handleSectionSave(null);
                 } else {
                     const Errormsg = new ShowToastEvent({
                         title: 'Error',
