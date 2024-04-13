@@ -19,7 +19,7 @@ public with sharing class DeleteTransactionLogRecords implements Database.Batcha
      */
     public Database.QueryLocator start(Database.BatchableContext bc) {
         String retirementDate = String.valueOf ( [Select Id, Label, Wait_Time__c from Transaction_Logs_Tenure__mdt Where Label = 'Default' WITH SECURITY_ENFORCED Limit 1].Wait_Time__c );
-        String query = 'SELECT Id FROM TransactionLog__c where createddate!=LAST_N_DAYS:' + retirementDate;
+        String query = 'SELECT Id FROM TransactionLog__c where createddate!=LAST_N_DAYS:' + Integer.ValueOf(retirementDate);
         return Database.getQueryLocator(query);
     }
     
