@@ -40,20 +40,19 @@ export default class DxtemplateSelectorCmp extends NavigationMixin(LightningElem
 
     @wire(CurrentPageReference)
     getCurrentPageReference(currentPageReference) {
-        debugger;
         this.backtoObj = "Back to " + this.objectLabel;
         this.savePDFtoObj = "Save PDF to " + this.objectLabel;
         this.sendEmailWithAttachment = "Send Email With " + this.objectLabel + " PDF Attachment";
         this.templateWhereClause2 = " Related_To_Type__c = " + "\'" + this.objectApiName + "\'";
         this.currentPageReference = currentPageReference;
-        if (this.recordId != this.currentPageReference.state.c__recordId) {
+        if (this.recordId != this.currentPageReference.state.c__recordId.split('?')[0]) {
             this.selectedTemplateId = undefined;
             this.showTemplate = false;
             this.showpreviewbutton = false;
             this.showsavepdftoquote = false;
             this.showsendemail = false;
             this.showgeneratepdf = false;
-            this.recordId = this.currentPageReference.state.c__recordId;
+            this.recordId = this.currentPageReference.state.c__recordId.split('?')[0];
             this.template.querySelector('c-multi-lookup-component').clearPills();
         }
     }

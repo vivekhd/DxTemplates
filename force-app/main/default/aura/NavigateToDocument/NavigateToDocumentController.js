@@ -5,7 +5,7 @@
         cmp.set('v.objectDetails',null);
         
         var myPageRef = cmp.get('v.pageReference');
-        var recordId = myPageRef.state.c__recordId;
+        var recordId = myPageRef.state.c__recordId.split('?')[0];
 
         var action = cmp.get('c.getObjectDetails');
         action.setParams({
