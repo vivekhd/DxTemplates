@@ -126,26 +126,23 @@ public with sharing class ROsectionAutomationController {
                         recordList.add(ptrRecord);
                         recordCategoryMap.put(ptrRecord.get(ptrfield),recordList);
                         categorySubTotalValueMap.put(String.valueOf(ptrRecord.get(ptrfield)),0.00);
-                    }
-                    else if(recordCategoryMap.containsKey(ptrRecord.get(ptrfield)) && ptrRecord.get(ptrfield)!=null)  {
+                    } else if(recordCategoryMap.containsKey(ptrRecord.get(ptrfield)) && ptrRecord.get(ptrfield)!=null)  {
                         List<SObject> recordList= recordCategoryMap.get(ptrRecord.get(ptrfield));
                         recordList.add(ptrRecord); 
                         recordCategoryMap.put(ptrRecord.get(ptrfield),recordList);
-                    }
-                    else {
+                    } else {
                         if(recordCategoryMap.containsKey('Others'))  {
                             List<SObject> recordList= recordCategoryMap.get('Others');
                             recordList.add(ptrRecord); 
                             recordCategoryMap.put('Others',recordList); 
                             categorySubTotalValueMap.put('Others',0.00);   
-                        }
-                        else {
+                        } else {
                             List<SObject> recordList = new  List<SObject>();
                             recordList.add(ptrRecord);
                             recordCategoryMap.put('Others',recordList);
                         }
                     }
-                }      
+                }
                 Boolean firstTDblock ;
 
                 for(Object key: recordCategoryMap.keyset())  {
