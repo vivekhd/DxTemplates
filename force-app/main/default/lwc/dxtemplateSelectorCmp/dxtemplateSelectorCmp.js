@@ -139,9 +139,7 @@ export default class DxtemplateSelectorCmp extends NavigationMixin(LightningElem
             ]).then(() => {
             })
             .catch(error => {
-                let tempError = error.toString();
-                let errorMessage = error.message || 'Unknown error message';
-                createLog({recordId:'', className:'dxtemplateSelectorCmp LWC Component', exceptionMessage:errorMessage, logData:tempError, logType:'Exception'});
+                createLog({recordId:null, className:'dxtemplateSelectorCmp LWC Component', exceptionMessage: (error.message || 'Unknown error message'), logData: error.toString(), logType:'Exception'});     
             });
     }
 

@@ -73,11 +73,9 @@ export default class TemplateFooterType extends LightningElement {
                     }
                 }
             })
-            .catch((error) =>{ 
-                let tempError = error.toString();
-                let errorMessage = error.message || 'Unknown error message';
-                createLog({recordId:'', className:'templateFooterType LWC Component', exceptionMessage:errorMessage, logData:tempError, logType:'Exception'});
-            });
+            .catch(error => {
+                createLog({recordId:null, className:'templateFooterType LWC Component', exceptionMessage: (error.message || 'Unknown error message'), logData: error.toString(), logType:'Exception'});     
+              })
     }
 
     @api handleActivateTemplate(isActive) {
@@ -186,11 +184,8 @@ export default class TemplateFooterType extends LightningElement {
                 .catch(error => {
                     this.searchData = undefined;
                     if (error) {
-                         let tempError = error.toString();
-            let errorMessage = error.message || 'Unknown error message';
-            createLog({recordId:'', className:'templateFooterType LWC Component', exceptionMessage:errorMessage, logData:tempError, logType:'Exception'});
-
-                     }
+                        createLog({recordId:null, className:'templateFooterType LWC Component', exceptionMessage: (error.message || 'Unknown error message'), logData: error.toString(), logType:'Exception'});     
+                    }
                 })
         } else {
             this.imageUrls = this.mainimageUrls;

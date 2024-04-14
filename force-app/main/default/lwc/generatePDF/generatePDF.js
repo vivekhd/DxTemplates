@@ -32,10 +32,8 @@ export default class GeneratePDF extends  NavigationMixin(LightningElement)  {
                 }
             })
             .catch(error => {
-                let tempError = error.toString();
-                let errorMessage = error.message || 'Unknown error message';
-                createLog({recordId:'', className:'generatePDF LWC Component', exceptionMessage:errorMessage, logData:tempError, logType:'Exception'});
-            });
+                createLog({recordId:null, className:'generatePDF LWC Component', exceptionMessage: (error.message || 'Unknown error message'), logData: error.toString(), logType:'Exception'});     
+            })
     }
 
     handleClick() {

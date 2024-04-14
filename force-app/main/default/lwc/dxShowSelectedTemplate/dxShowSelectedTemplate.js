@@ -183,10 +183,7 @@ export default class DxShowSelectedTemplate extends LightningElement {
       .then(() => {
       })
       .catch(error => {
-        let tempError = error.toString();
-        let errorMessage = error.message || 'Unknown error message';
-        createLog({recordId:'', className:'dxShowSelectedTemplate LWC Component', exceptionMessage:errorMessage, logData:tempError, logType:'Exception'});
-   
+        createLog({recordId:null, className:'dxShowSelectedTemplate LWC Component', exceptionMessage: (error.message || 'Unknown error message'), logData: error.toString(), logType:'Exception'});     
       });
     }
 
@@ -229,9 +226,7 @@ export default class DxShowSelectedTemplate extends LightningElement {
             }
             
         }).catch(error => {
-            let tempError = error.toString();
-            let errorMessage = error.message || 'Unknown error message';
-            createLog({recordId:'', className:'dxTemplateSetup LWC Component', exceptionMessage:errorMessage, logData:tempError, logType:'Exception'});
+            createLog({recordId:null, className:'dxShowSelectedTemplate LWC Component', exceptionMessage: (error.message || 'Unknown error message'), logData: error.toString(), logType:'Exception'});     
         });
     }
 

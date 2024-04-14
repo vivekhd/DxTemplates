@@ -71,11 +71,9 @@ export default class TemplateHeaderType extends LightningElement {
                 }
             }
         })
-        .catch((error) =>{ 
-            let tempError = error.toString();
-            let errorMessage = error.message || 'Unknown error message';
-            createLog({recordId:'', className:'templateHeaderType LWC Component', exceptionMessage:errorMessage, logData:tempError, logType:'Exception'});
-        });
+        .catch(error => {
+            createLog({recordId:null, className:'templateHeaderType LWC Component', exceptionMessage: (error.message || 'Unknown error message'), logData: error.toString(), logType:'Exception'});     
+        })
     }
 
     @api

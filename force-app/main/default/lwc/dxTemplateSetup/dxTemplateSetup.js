@@ -50,9 +50,7 @@ export default class DxTemplateSetup extends LightningElement {
                 }
             })
             .catch(error => {
-                  let tempError = error.toString();
-            let errorMessage = error.message || 'Unknown error message';
-            createLog({recordId:'', className:'dxTemplateSetup LWC Component', exceptionMessage:errorMessage, logData:tempError, logType:'Exception'});
+                createLog({recordId:null, className:'dxTemplateSetup LWC Component', exceptionMessage: (error.message || 'Unknown error message'), logData: error.toString(), logType:'Exception'});     
             })
 
     }
@@ -77,9 +75,7 @@ export default class DxTemplateSetup extends LightningElement {
             }
         })
         .catch(error => {
-              let tempError = error.toString();
-            let errorMessage = error.message || 'Unknown error message';
-            createLog({recordId:'', className:'dxTemplateSetup LWC Component', exceptionMessage:errorMessage, logData:tempError, logType:'Exception'});
+            createLog({recordId:null, className:'dxTemplateSetup LWC Component', exceptionMessage: (error.message || 'Unknown error message'), logData: error.toString(), logType:'Exception'});     
         })
     }
 
@@ -206,12 +202,9 @@ export default class DxTemplateSetup extends LightningElement {
                 this.dispatchEvent(toastEvt);
                 this.template.querySelector('c-modal').hide();
             }
-        }).catch(error => {
-            let tempError = error.toString();
-            let errorMessage = error.message || 'Unknown error message';
-            createLog({recordId:'', className:'dxTemplateSetup LWC Component', exceptionMessage:errorMessage, logData:tempError, logType:'Exception'});
-       
-
+        })
+        .catch(error => {
+            createLog({recordId:null, className:'dxTemplateSetup LWC Component', exceptionMessage: (error.message || 'Unknown error message'), logData: error.toString(), logType:'Exception'});     
         })
     }
 }

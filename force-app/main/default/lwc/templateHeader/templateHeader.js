@@ -151,10 +151,8 @@ export default class TemplateHeader extends LightningElement {
         }
       })
       .catch(error => {
-        let tempError = error.toString();
-            let errorMessage = error.message || 'Unknown error message';
-            createLog({recordId:'', className:'templateHeader LWC Component', exceptionMessage:errorMessage, logData:tempError, logType:'Exception'});                                             
-       })
+        createLog({recordId:null, className:'templateHeader LWC Component', exceptionMessage: (error.message || 'Unknown error message'), logData: error.toString(), logType:'Exception'});     
+      })
   }
 
   handlesectionsave() {
@@ -200,10 +198,8 @@ export default class TemplateHeader extends LightningElement {
           }
         })
         .catch(error => {
-            let tempError = error.toString();
-            let errorMessage = error.message || 'Unknown error message';
-            createLog({recordId:'', className:'templateHeader LWC Component', exceptionMessage:errorMessage, logData:tempError, logType:'Exception'});
-              })
+          createLog({recordId:null, className:'templateHeader LWC Component', exceptionMessage: (error.message || 'Unknown error message'), logData: error.toString(), logType:'Exception'});     
+        })
     }
   }
 }

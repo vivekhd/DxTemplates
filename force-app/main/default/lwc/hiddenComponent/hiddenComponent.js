@@ -16,10 +16,8 @@ export default class HiddenComponent extends LightningElement {
             saveData({ dataFrom: this.template.querySelector('[data-id="header"]').innerHTML , recordId : recordId})
             .then(result => {result;  })
             .catch(error => {
-                  let tempError = error.toString();
-            let errorMessage = error.message || 'Unknown error message';
-            createLog({recordId:'', className:'hiddenComponent LWC Component', exceptionMessage:errorMessage, logData:tempError, logType:'Exception'});
-              });
+                createLog({recordId:null, className:'hiddenComponent LWC Component', exceptionMessage: (error.message || 'Unknown error message'), logData: error.toString(), logType:'Exception'});     
+            })
         });
     }
 }

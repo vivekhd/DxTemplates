@@ -490,10 +490,7 @@ export default class TemplateDesignerCMP extends NavigationMixin(LightningElemen
 
         })
         .catch(error => {
-            let tempError = error.toString();
-            let errorMessage = error.message || 'Unknown error message';
-            createLog({recordId:'', className:'templateDesignerCMP LWC Component', exceptionMessage:errorMessage, logData:tempError, logType:'Exception'});
-
+          createLog({recordId:null, className:'templateDesignerCMP LWC Component', exceptionMessage: (error.message || 'Unknown error message'), logData: error.toString(), logType:'Exception'});     
           this.isLoaded2 = false;
         })
     } else if (this.isconnectedcalledonLoad == true) {
@@ -567,11 +564,8 @@ export default class TemplateDesignerCMP extends NavigationMixin(LightningElemen
         this.disableEditing = result.DxCPQ__Previously_Active__c;
       }
     }).catch(error => {
-            let tempError = error.toString();
-            let errorMessage = error.message || 'Unknown error message';
-            createLog({recordId:'', className:'templateDesignerCMP LWC Component', exceptionMessage:errorMessage, logData:tempError, logType:'Exception'});
-
-      })
+      createLog({recordId:null, className:'templateDesignerCMP LWC Component', exceptionMessage: (error.message || 'Unknown error message'), logData: error.toString(), logType:'Exception'});     
+    })
   }
 
   disableEditingHandler(isActive) {
@@ -713,12 +707,9 @@ export default class TemplateDesignerCMP extends NavigationMixin(LightningElemen
       });
       this.dispatchEvent(delEvt);
       this.template.querySelector('c-modal').hide();
-    }).catch(error => { 
-      let tempError = error.toString();
-            let errorMessage = error.message || 'Unknown error message';
-            createLog({recordId:'', className:'templateDesignerCMP LWC Component', exceptionMessage:errorMessage, logData:tempError, logType:'Exception'});
-
-     })
+    }).catch(error => {
+      createLog({recordId:null, className:'templateDesignerCMP LWC Component', exceptionMessage: (error.message || 'Unknown error message'), logData: error.toString(), logType:'Exception'});     
+    })
   }
 
   renderedCallback() {
@@ -729,11 +720,8 @@ export default class TemplateDesignerCMP extends NavigationMixin(LightningElemen
     ])
       .then(() => { })
       .catch(error => {
-        let tempError = error.toString();
-            let errorMessage = error.message || 'Unknown error message';
-            createLog({recordId:'', className:'templateDesignerCMP LWC Component', exceptionMessage:errorMessage, logData:tempError, logType:'Exception'});
-
-       });
+        createLog({recordId:null, className:'templateDesignerCMP LWC Component', exceptionMessage: (error.message || 'Unknown error message'), logData: error.toString(), logType:'Exception'});     
+      });
   }
 
   handleSubmit() {
@@ -751,12 +739,9 @@ export default class TemplateDesignerCMP extends NavigationMixin(LightningElemen
       .then(result => {
         if (result != null) { this.isLoaded = false; }
       })
-      .catch(error => { 
-        let tempError = error.toString();
-            let errorMessage = error.message || 'Unknown error message';
-            createLog({recordId:'', className:'templateDesignerCMP LWC Component', exceptionMessage:errorMessage, logData:tempError, logType:'Exception'});
-
-        this.isLoaded = false; })
+      .catch(error => {
+        createLog({recordId:null, className:'templateDesignerCMP LWC Component', exceptionMessage: (error.message || 'Unknown error message'), logData: error.toString(), logType:'Exception'});     
+      })
   }
 
   processRowNumbers() {

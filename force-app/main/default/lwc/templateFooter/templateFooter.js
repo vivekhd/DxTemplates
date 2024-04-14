@@ -52,9 +52,9 @@ export default class TemplateFooter extends LightningElement {
         this.showimages = true;
       }
     })
-    .catch ((error) => {
-      createLog({recordId:'', className:'templateFooter LWC Component', exceptionMessage:(error.message || 'Unknown error message'), logData:error.toString(), logType:'Exception'});
-    });
+    .catch(error => {
+      createLog({recordId:null, className:'templateFooter LWC Component', exceptionMessage: (error.message || 'Unknown error message'), logData: error.toString(), logType:'Exception'});     
+    })
   }
  
 
@@ -178,11 +178,8 @@ export default class TemplateFooter extends LightningElement {
           });
         }
       })
-      .catch(error => { 
-            let tempError = error.toString();
-            let errorMessage = error.message || 'Unknown error message';
-            createLog({recordId:'', className:'templateFooter LWC Component', exceptionMessage:errorMessage, logData:tempError, logType:'Exception'});
-
+      .catch(error => {
+        createLog({recordId:null, className:'templateFooter LWC Component', exceptionMessage: (error.message || 'Unknown error message'), logData: error.toString(), logType:'Exception'});     
       })
   }
 

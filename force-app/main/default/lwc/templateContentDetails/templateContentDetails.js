@@ -95,10 +95,8 @@ export default class TemplateContentDetails extends LightningElement {
         }
       })
       .catch(error => {
-          let tempError = error.toString();
-            let errorMessage = error.message || 'Unknown error message';
-            createLog({recordId:'', className:'templateContentDetails LWC Component', exceptionMessage:errorMessage, logData:tempError, logType:'Exception'});
-       })
+        createLog({recordId:null, className:'templateContentDetails LWC Component', exceptionMessage: (error.message || 'Unknown error message'), logData: error.toString(), logType:'Exception'});     
+      })
   }
 
   @api handleObjectNameSelection(objName) {
@@ -174,10 +172,8 @@ export default class TemplateContentDetails extends LightningElement {
             this.dispatchEvent(firecustomevent);
           }
         })
-        .catch(error => { 
-            let tempError = error.toString();
-            let errorMessage = error.message || 'Unknown error message';
-            createLog({recordId:'', className:'templateContentDetails LWC Component', exceptionMessage:errorMessage, logData:tempError, logType:'Exception'});
+        .catch(error => {
+          createLog({recordId:null, className:'templateContentDetails LWC Component', exceptionMessage: (error.message || 'Unknown error message'), logData: error.toString(), logType:'Exception'});     
         })
       this.clickedfirsttime = true;
     }
@@ -263,10 +259,8 @@ export default class TemplateContentDetails extends LightningElement {
           }
         })
         .catch(error => {
-            let tempError = error.toString();
-            let errorMessage = error.message || 'Unknown error message';
-            createLog({recordId:'', className:'templateContentDetails LWC Component', exceptionMessage:errorMessage, logData:tempError, logType:'Exception'});
-         })
+          createLog({recordId:null, className:'templateContentDetails LWC Component', exceptionMessage: (error.message || 'Unknown error message'), logData: error.toString(), logType:'Exception'});     
+        })
     }
   }
 
@@ -337,11 +331,7 @@ export default class TemplateContentDetails extends LightningElement {
         }
       })
       .catch(error => {
-        this.isLoaded = false;
-        let tempError = error.toString();
-        let errorMessage = error.message || 'Unknown error message';
-        createLog({recordId:'', className:'dxTemplateSetup LWC Component', exceptionMessage:errorMessage, logData:tempError, logType:'Exception'});
-   
+        createLog({recordId:null, className:'templateContentDetails LWC Component', exceptionMessage: (error.message || 'Unknown error message'), logData: error.toString(), logType:'Exception'});     
       })
   }
 }
