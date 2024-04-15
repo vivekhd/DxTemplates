@@ -206,9 +206,9 @@ export default class TemplateHeader extends NavigationMixin(LightningElement) {
   }
 
   handlehelp(){
-        let relatedObjectsMap = this.pdfLinks.find(item => item.MasterLabel === 'Header');
+    let relatedObjectsMap = this.pdfLinks.find(item => item.MasterLabel === 'Header');
     let pdfUrl = relatedObjectsMap ? relatedObjectsMap.DxCPQ__Section_PDF_URL__c : null;
-        const config = {
+    const config = {
       type: 'standard__webPage',
       attributes: {
           url: pdfUrl

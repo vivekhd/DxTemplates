@@ -184,7 +184,7 @@ private class ProductSetupCtrl_Test {
                  cv.PathOnClient='test';
                  insert cv;
                  String wmark='[{"name":"Text","isPrimary":true,"contentVersionID":"'+cv.id+'","pageOption":"All Pages","fontsize":"28","opacity":"1","color":"#5DFF05","rotation":"45","textVal":"gabbbbbbbb","pageTextOption":"All Pages"},{"name":"Image","isPrimary":false,"contentVersionID":null,"pageOption":"All Pages","opacity":"1","rotation":"0","pageImageOption":"All Pages","imageScale":100}]';
-                doctemplate2.DxCPQ__Watermark_Data__c=wmark;
+                doctemplate2.Watermark_Data__c=wmark;
                  insert doctemplate2;
                  
                 List<Object> headerListObject=new List<Object>();
@@ -422,65 +422,63 @@ private class ProductSetupCtrl_Test {
     @IsTest public static void Test6(){
         User us = DexUtilTestDataFactory.CreateTestUser();
         System.runAs(us){
-             try{
-        List<Document_Template__c> documentTemplate = DexUtilTestDataFactory.createDocumentTemplate(1, true, null);
-        List<Id> documentTemplateId = new List<Id>{documentTemplate[0].Id};
+            try{
+            List<Document_Template__c> documentTemplate = DexUtilTestDataFactory.createDocumentTemplate(1, true, null);
+            List<Id> documentTemplateId = new List<Id>{documentTemplate[0].Id};
             Map<String, Object> docTemplateSectionAttributes = new Map<String, Object>{'Document_Template__c'=>documentTemplateId};
-                List<Document_Template_Section__c> docTemplateSections = DexUtilTestDataFactory.createDocumentTemplateSection(1, true, docTemplateSectionAttributes);
-        Document_Template__c docTemplate = new Document_Template__c();
-        docTemplate.IsActive__c = true;
-        docTemplate.Previously_Active__c = true;
-        docTemplate.Related_To_Type__c = 'Account';
-        docTemplate.Parent_Template__c=documentTemplate[0].Id;
-        insert docTemplate;
-                
-        List<Object> fieldsObjList=new List<Object>();
-        fieldsObjList.add('DxCPQ__Related_To_Type__c');
-        fieldsObjList.add('DxCPQ__Parent_Template__c');
-        Map<string,Object> jsonMap=new  Map<string,Object>();
-        jsonMap.put('tablelistValues',fieldsObjList);
-        jsonMap.put('mainChildObject','DxCPQ__Document_Template__c');
-        jsonMap.put('childLookupfieldAPIname','DxCPQ__Parent_Template__c');
-        String myJSON = JSON.serialize(jsonMap);
-        Document_Template_Section__c docTemplateSection = new Document_Template_Section__c();
-        docTemplateSection.DisplaySectionName__c = true;
-        docTemplateSection.ChildObject__c = 'Test';
-        docTemplateSection.IsActive__c = true;
-        docTemplateSection.IsEditable__c = true;
-        docTemplateSection.Section_Content__c = myJSON;
-        docTemplateSection.Section_Details__c = 'test section details';
-        docTemplateSection.Sequence__c = 3;
-        docTemplateSection.Type__c = 'Context';
-        docTemplateSection.Document_Template__c=documentTemplate[0].Id;
-        insert docTemplateSection;  
-        
-        String mainstr1='{\"sectionsCount\":\"1\",\"sectionsContent\":[{\"value\":\"<p>DxCPQ__Related_To_Type__c</p>\",\"indexvar\":0,\"key\":\"1653649808603:0\"}]}';
-        String mainstr='<p>Hello<spanstyle=\"color:rgb(68,68,68);\">{!DxCPQ__Document_Template__c.Id},</span></p><p><br></p><p><spanstyle=\"color:rgb(68,68,68);\">{!DxCPQ__Document_Template__c.DxCPQ__Related_To_Type__c}</span></p><p>Status:<spanstyle=\"color:rgb(68,68,68);\">{!DxCPQ__Document_Template__c.Owner.Id}</span></p><p><br></p>';
-        
-        Document_Template_Section__c docTemplateSection1 = new Document_Template_Section__c();
-        docTemplateSection1.DisplaySectionName__c = true;
-        docTemplateSection1.ChildObject__c = 'Test';
-        docTemplateSection1.IsActive__c = true;
-        docTemplateSection1.IsEditable__c = true;
-        docTemplateSection1.Section_Content__c = mainstr;
-        docTemplateSection1.Section_Details__c = 'test section details';
-        docTemplateSection1.Sequence__c = 3;
-        docTemplateSection1.Type__c = 'Context';
-        docTemplateSection1.Document_Template__c=documentTemplate[0].Id;
-        insert docTemplateSection1;
-        List<Document_Template_Section__c> newlst=new List<Document_Template_Section__c>();
-        newlst.add(docTemplateSection1);
-        Test.startTest();
-            SaveDocumentTemplatesection.saveDocumentTemplateSectionDetails(docTemplateSection1);
-        DisplayRelatedObjects.getsectionData(documentTemplate[0].Id,docTemplateSection.Id);
-        MergeFieldsClass.mergefieldsMethod(newlst,documentTemplate[0].Id);
-        //MergeFieldsClass.mergefieldsMethod(newlst,documentTemplate[0].Id,'Document_Template__c');
-        //MergeFieldsClass.mergefieldsMethod(newlst,documentTemplate[0].Id,documentTemplate[0].Id);
-        List<MergeFieldsClass.FieldWrap> fields=MergeFieldsClass.getFields('DxCPQ__Document_Template__c');
-        MergeFieldsClass.toTitleCase('hello test MergeFieldsClass');
-        //Account res=MergeFieldsClass.createTestButtonInsert('Test Acc');
-        System.assert(true);
-                 }
+            List<Document_Template_Section__c> docTemplateSections = DexUtilTestDataFactory.createDocumentTemplateSection(1, true, docTemplateSectionAttributes);
+            Document_Template__c docTemplate = new Document_Template__c();
+            docTemplate.IsActive__c = true;
+            docTemplate.Previously_Active__c = true;
+            docTemplate.Related_To_Type__c = 'Account';
+            docTemplate.Parent_Template__c=documentTemplate[0].Id;
+            insert docTemplate;
+                    
+            List<Object> fieldsObjList=new List<Object>();
+            fieldsObjList.add('DxCPQ__Related_To_Type__c');
+            fieldsObjList.add('DxCPQ__Parent_Template__c');
+            Map<string,Object> jsonMap=new  Map<string,Object>();
+            jsonMap.put('tablelistValues',fieldsObjList);
+            jsonMap.put('mainChildObject','DxCPQ__Document_Template__c');
+            jsonMap.put('childLookupfieldAPIname','DxCPQ__Parent_Template__c');
+            String myJSON = JSON.serialize(jsonMap);
+            Document_Template_Section__c docTemplateSection = new Document_Template_Section__c();
+            docTemplateSection.DisplaySectionName__c = true;
+            docTemplateSection.ChildObject__c = 'Test';
+            docTemplateSection.IsActive__c = true;
+            docTemplateSection.IsEditable__c = true;
+            docTemplateSection.Section_Content__c = myJSON;
+            docTemplateSection.Section_Details__c = 'test section details';
+            docTemplateSection.Sequence__c = 3;
+            docTemplateSection.Type__c = 'Context';
+            docTemplateSection.Document_Template__c=documentTemplate[0].Id;
+            insert docTemplateSection;  
+            
+            String mainstr1='{\"sectionsCount\":\"1\",\"sectionsContent\":[{\"value\":\"<p>DxCPQ__Related_To_Type__c</p>\",\"indexvar\":0,\"key\":\"1653649808603:0\"}]}';
+            String mainstr='<p>Hello<spanstyle=\"color:rgb(68,68,68);\">{!DxCPQ__Document_Template__c.Id},</span></p><p><br></p><p><spanstyle=\"color:rgb(68,68,68);\">{!DxCPQ__Document_Template__c.DxCPQ__Related_To_Type__c}</span></p><p>Status:<spanstyle=\"color:rgb(68,68,68);\">{!DxCPQ__Document_Template__c.Owner.Id}</span></p><p><br></p>';
+            
+            Document_Template_Section__c docTemplateSection1 = new Document_Template_Section__c();
+            docTemplateSection1.DisplaySectionName__c = true;
+            docTemplateSection1.ChildObject__c = 'Test';
+            docTemplateSection1.IsActive__c = true;
+            docTemplateSection1.IsEditable__c = true;
+            docTemplateSection1.Section_Content__c = mainstr;
+            docTemplateSection1.Section_Details__c = 'test section details';
+            docTemplateSection1.Sequence__c = 3;
+            docTemplateSection1.Type__c = 'Context';
+            docTemplateSection1.Document_Template__c=documentTemplate[0].Id;
+            insert docTemplateSection1;
+            List<Document_Template_Section__c> newlst=new List<Document_Template_Section__c>();
+            newlst.add(docTemplateSection1);
+            Test.startTest();
+                SaveDocumentTemplatesection.saveDocumentTemplateSectionDetails(docTemplateSection1);
+                DisplayRelatedObjects.getsectionData(documentTemplate[0].Id,docTemplateSection.Id);
+                Map<string,object> replaceData= new Map<string,object>();
+                MergeFieldsClass.mergefieldsMethod(newlst,documentTemplate[0].Id,replaceData);
+                List<MergeFieldsClass.FieldWrap> fields=MergeFieldsClass.getFields('DxCPQ__Document_Template__c');
+                MergeFieldsClass.toTitleCase('hello test MergeFieldsClass');
+                System.assert(true);
+                }
             catch(exception ex){
                  System.assert(ex.getMessage().contains('Script-thrown exception'));
             }
@@ -538,7 +536,7 @@ private class ProductSetupCtrl_Test {
         }
         System.Assert(true);
     }
-    
+
     @isTest(SeeAllData = true)
     static void testGetPDFLinks() {
         User us = DexUtilTestDataFactory.CreateTestUser();

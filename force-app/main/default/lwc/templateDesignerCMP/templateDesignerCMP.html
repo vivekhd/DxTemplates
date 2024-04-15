@@ -26,7 +26,7 @@
 						<div data-id='section menu' class="slds-col slds-grid_align-end"></div>
 						<lightning-button-icon icon-name="utility:help_doc_ext" onclick={handlehelp} alternative-text="Need Help?" title="Need Help?" class="slds-button_icon-help slds-m-right_small" size="medium" variant="bare" data-val="DxTemplates" style="padding-top:5px;"></lightning-button-icon>
 						<lightning-button-group data-id='section menu items' class="slds-button-group" role="group">
-							
+
 							<lightning-button-icon icon-name="utility:snippet" alternative-text="Section : Context"
 								title="Section : Context" onclick={handleNewContext} disabled={disableEditing}>
 							</lightning-button-icon>
@@ -289,6 +289,30 @@
 							<lightning-output-field field-name="DxCPQ__Related_To_Type__c"> </lightning-output-field>
 							<lightning-input-field field-name="DxCPQ__Description__c" disabled ={readonlyVal}> </lightning-input-field>
 							<lightning-output-field field-name="DxCPQ__Version_Number__c"> </lightning-output-field>
+							<!-- Changes by Reethika - selecting apex classes and auto launched flows -->
+							<div class="slds-col slds-size_1-of-1 slds-medium-size_6-of-12">
+								<label class="slds-checkbox_toggle slds-grid">
+									<label class="slds-form-element__label slds-no-flex">PROCESS TYPE</label>
+									<input type="checkbox" class="slds-p-top_x-large" name="checkbox-toggle-16"
+										onchange={handleRelationshipType} checked={isBundled}
+										aria-describedby="checkbox-toggle-16" />
+									<span id="checkbox-toggle-16" class="slds-checkbox_faux_container" aria-live="assertive">
+										<span class="slds-checkbox_faux"></span>
+										<span class="slds-checkbox_on">APEX CLASS</span>
+										<span class="slds-checkbox_off">FLOW</span>
+									</span>
+								</label>
+							</div>
+							<template if:true={isBundled}>
+								<c-search-category has-multi-select="false" data-id="search" options={classTypeOptions}
+								label="Select the class name" searchtext="Select the class name"
+								onselectedcategoryvalues={handleClassselection} disabled={isDisabled}></c-search-category>
+							</template>
+							<template if:false={isBundled}>
+								<c-search-category has-multi-select="false" data-id="object" options={flowTypeOptions}
+								label="Select the flow name" data-search searchtext="Select the flow name"
+								onselectedcategoryvalues={handleFlowselection} disabled={isDisabled}></c-search-category>
+							</template>
 							<div class="slds-text-align_right">
 								<lightning-button class="slds-m-top_small" type="submit" label="Save" variant="brand" if:false={readonlyVal}>
 								</lightning-button>
@@ -409,31 +433,31 @@
 												checked={checkedValImage} onchange={handleWatermarkPrimary} disabled ={readonlyVal}
 												data-label="imagePrimary"></lightning-input>
 										</div>
-								</div>
-								<div class="slds-grid slds-wrap slds-gutters_small">
-									<template for:each={watermarkPageOptionsImage} for:item="item">
-										<fieldset key={item.value} style="display: block; float: left;">
-											<div class="slds-form-element__control"
-												style="margin:15px 0px 10px 15px">
-												<span class="slds-radio">
-														<input name="radiogroupforImage" id={item.value} type="radio" value={item.value} onchange={handleWatermarkPageChange} checked = {item.checked} disabled ={readonlyVal}/>
-														<label class="slds-radio__label" for={item.value}>
-															<span class="slds-radio_faux"></span>
-												<span class="slds-form-element__label" style="display: inline !important;">{item.label}</span>
-												</label>
-												</span>
-											</div>
-										</fieldset>
-									</template>
-								</div>
-								<div class="slds-grid slds-grid_vertical-align-center slds-grid_align-center slds-text-align_center">
-									<div class="output-container slds-col slds-size_1-of-1 slds-medium-size_12-of-12 slds-large-size_12-of-12 "
-										style="border:1px solid #333;">
-										<canvas class="canvasImage" width="800px" height="800px"></canvas>
-
-
 									</div>
-								</div>
+									<div class="slds-grid slds-wrap slds-gutters_small">
+										<template for:each={watermarkPageOptionsImage} for:item="item">
+											<fieldset key={item.value} style="display: block; float: left;">
+												<div class="slds-form-element__control"
+													style="margin:15px 0px 10px 15px">
+													<span class="slds-radio">
+															<input name="radiogroupforImage" id={item.value} type="radio" value={item.value} onchange={handleWatermarkPageChange} checked = {item.checked} disabled ={readonlyVal}/>
+															<label class="slds-radio__label" for={item.value}>
+																<span class="slds-radio_faux"></span>
+													<span class="slds-form-element__label" style="display: inline !important;">{item.label}</span>
+													</label>
+													</span>
+												</div>
+											</fieldset>
+										</template>
+									</div>
+									<div class="slds-grid slds-grid_vertical-align-center slds-grid_align-center slds-text-align_center">
+										<div class="output-container slds-col slds-size_1-of-1 slds-medium-size_12-of-12 slds-large-size_12-of-12 "
+											style="border:1px solid #333;">
+											<canvas class="canvasImage" width="800px" height="800px"></canvas>
+
+
+										</div>
+									</div>
 							</lightning-tab>
 						</lightning-tabset>
 

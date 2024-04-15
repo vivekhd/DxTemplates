@@ -233,43 +233,31 @@ global with sharing class DisplayPDFController
      * @param          pdfheaderfooter  Header and footer content of the PDF document
      * @return         ID               ID of the inserted document record
      */
+  /* changes done by reethika Parameter templatedId changed to documentId and document record Insertion
+   logic changed to document updation logic*/
     @AuraEnabled
-    public static string generateDocument(ID templateId, String quoteId, String pdfbody, String pdfheaderfooter){
+    public static string generateDocument(ID documentId, String quoteId, String pdfbody, String pdfheaderfooter){
         try{
             List<Document__c> doctobeinserted=new List<Document__c>();
             
             Document__c docrec=new Document__c();
             docrec.Document_Content__c=pdfheaderfooter;
             docrec.Document_Body__c=pdfbody;
-            docrec.Document_Template__c=templateId;
+            //docrec.Document_Template__c=templateId;
             docrec.Object_Id__c=quoteId;
-            
-            Id inserteddocId;
+            docrec.Id=documentId;
             doctobeinserted.add(docrec);
-            
             Savepoint sp = Database.setSavepoint();
-            List<Database.SaveResult> sResult = safe.doInsert(doctobeinserted);
+            List<Database.SaveResult> sResult = safe.doUpdate(doctobeinserted);
             List<String> errorList = Safely.safeClassExceptionHandlerInsert(sResult);
             if(errorList.size()>0) {
                 Database.rollback(sp);
                 throw new SafeClassException(String.join( errorList, ', ' ));
             }
-            
-            for(Integer i=0;i<sResult.size();i++) {
-                if (sResult.get(i).isSuccess()) {
-                    Id docid=sResult.get(i).getId();
-                    if(docid!=null){
-                        inserteddocId=docid;
-                    }
-                }else if (!sResult.get(i).isSuccess()){
-                    Database.Error error = sResult.get(i).getErrors().get(0);
-                    LogHandler.createLog((Id) null,'DisplayPDFController.generateDocument()','Template Id- '+templateId+' '+'Database Error while saving the result --> ',String.valueof(error),'Exception');
-                }               
-            }
-            return inserteddocId;
+            return documentId;
         } catch (Exception ex) {
-            LogHandler.createLog((Id) null,'DisplayPDFController.generateDocument()','Template Id- '+templateId+' '+ex.getLineNumber()+ex.getStackTraceString()+ex.getCause(),ex.getMessage(),'Exception');
-            throw new AuraHandledException(ex.getMessage());
+            LogHandler.createLog((Id) null,'DisplayPDFController.generateDocument()','document Id- '+documentId+' '+ex.getLineNumber()+ex.getStackTraceString()+ex.getCause(),ex.getMessage(),'Exception');
+            return null;
         }     
     }
     
@@ -387,35 +375,94 @@ global with sharing class DisplayPDFController
     }    
     
     /**
-     * @description    Retrieves the sections of a document template by its ID
-     * @param          templateId   ID of the document template
-     * @param          recordId     ID of the record related to the document template
-     * @param          objectApiName   API name of the object related to the document template
-     * @return         List<Document_Template_Section__c>   List of document template sections
-     */
+    * @description    Retrieves the sections of a document template by its ID. changes done by Reethika - Dynamically selected class is called using interface and map is returned from that class
+                        Dynamically selected flow will be executed and the string returned from flow is deserailised to map and final map
+                        is constructed . mergefieldsclass parameters got changed from size 3 to 4, an extra parameter of replaceData (datatype-Map)
+                        is added.
+    * @param          templateId   ID of the document template
+    * @param          recordId     ID of the record related to the document template
+    * @param          objectApiName   API name of the object related to the document template
+    * @return         Map<String,Object>  List of document template sections
+    */
     @AuraEnabled
-    public static List<Document_Template_Section__c> getTemplateSections(ID templateId, String recordId, String objectApiName){ 
+    public static Map<String,Object> getTemplateSections(ID templateId, String recordId, String objectApiName){ 
         try{
             List<Document_Template_Section__c> selectedTemplateContents=[select id,Section_Content__c, Type__c, New_Page__c, Sequence__c from Document_Template_Section__c where Document_Template__c=:templateId WITH SECURITY_ENFORCED ORDER BY Sequence__c ASC];
-            selectedTemplateContents = MergeFieldsClass.mergefieldsMethod(selectedTemplateContents,recordId);
-            return selectedTemplateContents;
-        }
-        catch (Exception ex) {
+            List<Document_Template__c> templateData=[SELECT ClassId__c,FlowId__c FROM Document_Template__c WHERE id=:templateId WITH SECURITY_ENFORCED];
+            Map<String,Object> replaceData=new Map<String,Object>();
+            if(!string.isEmpty(templateData[0].ClassId__c)) {
+                List<ApexClass> classnames= [SELECT Name FROM ApexClass WHERE Id=:templateData[0].ClassId__c WITH SECURITY_ENFORCED];
+                Type t = Type.forName(classnames[0].Name);
+                DXHandlerInterface api = (DXHandlerInterface)t.newInstance();
+                Map<String,Object> tempData= new Map<String,Object>();
+                tempData.put('templateId',templateId);
+                tempData.put('recordId',recordId);
+                replaceData=api.execute(tempData);                
+            }
+            if(!string.isEmpty(templateData[0].FlowId__c)) {
+                    List <FlowDefinitionView> flownames= [SELECT  Label, ApiName,Id,DurableId FROM FlowDefinitionView where ProcessType='AutoLaunchedFlow' AND IsActive=True AND DurableId=:templateData[0].FlowId__c WITH SECURITY_ENFORCED];   
+                    Map<String,Object> inputs=new map<String,Object>{'recordIdVal'=>recordId};
+                    Flow.Interview myFlow = Flow.Interview.createInterview(flownames[0].ApiName, inputs);
+                    myFlow.start();
+                    string data=(string)myFlow.getvariableValue('genericData');
+                    if(!string.isEmpty(data)){
+                    Map<String, Object>  mapdata =(Map<String, Object>) JSON.deserializeUntyped(data); 
+                    replaceData.putAll(mapdata); 
+                }                  
+            }
+            List<Document__c> data=[SELECT Id from Document__c WHERE Document_Template__c =: templateId WITH SECURITY_ENFORCED];
+            Id docid;
+            List<Document__c> doclist=new List<Document__c>();
+            Document__c doc= new Document__c();
+            doc.Document_Template__c=templateId;
+            if(!string.isEmpty(templateData[0].FlowId__c) || !string.isEmpty(templateData[0].ClassId__c)){
+                doc.Token_Data__c=JSON.serialize(replaceData);
+            }
+           
+            if(data.size() ==0){
+                doclist.add(doc); 
+            } else {
+                doc.Id=data[0].Id;
+                docid=data[0].Id;
+                doclist.add(doc); 
+            }
+
+            Savepoint sp = Database.setSavepoint();
+            Database.UpsertResult[] urList2 = safe.doUpsert(doclist);
+            List<String> errorList = Safely.safeClassExceptionHandlerUpsert(urList2);
+            if(errorList.size()>0){
+                Database.rollback(sp);
+                throw new SafeClassException(String.join( errorList, ', ' ));
+            }
+
+            for(Integer i=0;i<urList2.size();i++) {
+                if (urList2.get(i).isSuccess()) {
+                    docid=urList2.get(i).getId();
+                }else if (!urList2.get(i).isSuccess()){
+                    Database.Error error = urList2.get(i).getErrors().get(0);
+                    LogHandler.createLog((Id) null,'DisplayPDFController.getTemplateSections()','Template Id- '+templateId+' '+'Database Error while saving the result --> ',String.valueof(error),'Exception');
+                }               
+            }
+
+            selectedTemplateContents = MergeFieldsClass.mergefieldsMethod(selectedTemplateContents,recordId,replaceData);            
+            Map<String,Object> templatecontentsData=new Map<String,Object>();
+            templatecontentsData.put('selectedTemplateContents',selectedTemplateContents);            
+            templatecontentsData.put('documentId',docid);
+            return templatecontentsData;
+        } catch (Exception ex) {
             LogHandler.createLog((Id) null,'DisplayPDFController.getTemplateSections()','templateId ->  '+templateId+' '+ex.getLineNumber()+ex.getStackTraceString()+ex.getCause(),ex.getMessage(),'Exception');
-            throw new AuraHandledException(ex.getMessage());
+            return null;
         }  
     }
        
     //getting the template sections for the Multiple recordIds
-
     @AuraEnabled
     public static List<Document_Template_Section__c> getTemplateSectionsMulRecords(ID templateId, List<String> recordIdLst, String objectApiName){ 
         try{
             List<Document_Template_Section__c> selectedTemplateContents=[select id,Section_Content__c, Type__c, New_Page__c, Sequence__c from Document_Template_Section__c where Document_Template__c=:templateId WITH SECURITY_ENFORCED ORDER BY Sequence__c ASC];
             selectedTemplateContents = MergeFieldsClass.mergefieldsMethodMultiple(selectedTemplateContents,recordIdLst);
             return selectedTemplateContents;
-        }
-        catch (Exception ex) {
+        } catch (Exception ex) {
             LogHandler.createLog((Id) null,'DisplayPDFController.getTemplateSections()','templateId ->  '+templateId+' '+ex.getLineNumber()+ex.getStackTraceString()+ex.getCause(),ex.getMessage(),'Exception');
             throw new AuraHandledException(ex.getMessage());
         }  
@@ -433,7 +480,7 @@ global with sharing class DisplayPDFController
             DisplayPDFController.setName();
             return pageSize;
         } catch(Exception ex) {
-             LogHandler.createLog((Id) null,'DisplayPDFController.pdfMode()','Wrapper data - '+wrapperdata+' '+ex.getLineNumber()+ex.getStackTraceString()+ex.getCause(),ex.getMessage(),'Exception');
+            LogHandler.createLog((Id) null,'DisplayPDFController.pdfMode()','Wrapper data - '+wrapperdata+' '+ex.getLineNumber()+ex.getStackTraceString()+ex.getCause(),ex.getMessage(),'Exception');
             throw new AuraHandledException(ex.getMessage());
         }
     }
@@ -481,6 +528,7 @@ global with sharing class DisplayPDFController
      * @description Wrapper class for header and footer values
      */
     public class HeaderFooterWrapper {
+
 		/**
          * @description Represents a value associated with a header or footer section.
          */
@@ -552,7 +600,6 @@ global with sharing class DisplayPDFController
             for(Map<String, String> dataUrl : base64DataList) {
                 String recordType = dataUrl.keySet().iterator().next();
                 String data = dataUrl.get(recordType);
-                
                 if(recordType.equalsIgnoreCase('Text') || recordType.equalsIgnoreCase('Image') || recordType.equalsIgnoreCase('OriginalImg')) {
                     ContentVersion contentVersion = new ContentVersion(
                         Title = dataUrl.get('title'),
@@ -572,8 +619,7 @@ global with sharing class DisplayPDFController
                     savedIds.add(savedId);
                 }
                 return savedIds;
-            }
-            else{
+            }else{
                 LogHandler.createLog((Id) null,'DisplayPDFController.saveContentVersion()','Insufficient permissions to create ContentVersion records. ','Insufficient permissions to create ContentVersion records.', 'Insufficient permissions');
                 return null;
             }
@@ -600,5 +646,4 @@ global with sharing class DisplayPDFController
             return null;
         }
     }
-    
 }

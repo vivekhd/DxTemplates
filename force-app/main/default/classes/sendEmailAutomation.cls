@@ -99,9 +99,9 @@ global class sendEmailAutomation implements Queueable,Database.AllowsCallouts{
                 outputMap.put('PDFAttachment',documentAttachment);
                 outputMap.putAll(inputMap);
 
-                DxCPQ__DXTemplates_HandlerClass__mdt metaDataContent = [SELECT Id,Label,DxCPQ__HandlerClassName__c FROM DxCPQ__DXTemplates_HandlerClass__mdt where Label = 'HandlerClass'];
+                DXTemplates_HandlerClass__mdt metaDataContent = [SELECT Id,Label,HandlerClassName__c FROM DXTemplates_HandlerClass__mdt where Label = 'HandlerClass'];
                 if(metaDataContent != null) {
-                    Type objectType = Type.forName(metaDataContent.DxCPQ__HandlerClassName__c);
+                    Type objectType = Type.forName(metaDataContent.HandlerClassName__c);
                     DXHandlerInterface api = (DXHandlerInterface)objectType.newInstance();
                     Map<String,Object> replaceData = api.execute(outputMap);
                 }         
