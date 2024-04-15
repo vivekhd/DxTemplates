@@ -13,7 +13,7 @@ import saveContentVersion from '@salesforce/apex/DisplayPDFController.saveConten
 import { updateRecord } from 'lightning/uiRecordApi';
 import DOCUMENTTEMPLATEID_FIELD from '@salesforce/schema/Document_Template__c.Id';
 import WATERMARKDATA_FIELD from '@salesforce/schema/Document_Template__c.Watermark_Data__c';
-import getSFDomainBaseURL from '@salesforce/apex/DisplayPDFController.getSFDomainBaseURL';
+import getSFDomainBaseURL from '@salesforce/apex/PdfDisplay.getDomainUrl';
 import getDocumentTemplateData from '@salesforce/apex/DisplayPDFController.getDocumentTemplateData';
 import createLog from '@salesforce/apex/LogHandler.createLog';
 import getClassNames from '@salesforce/apex/SaveDocumentTemplate.getClassNames';
@@ -26,6 +26,7 @@ import getOriginalImageCVID from '@salesforce/apex/ProductSetupCtrl.getOriginalI
 export default class TemplateDesignerCMP extends NavigationMixin(LightningElement) {
   @api recordId; // Selected Template ID
   @track pdfLinksData;
+  @track isActivateTemplateDisabled = true;// to disable the Activate
   //variables added by Bhavya for watermark starts here
 
   step = 1; // progress bar increases with a step value 1
@@ -34,7 +35,7 @@ export default class TemplateDesignerCMP extends NavigationMixin(LightningElemen
   imageUrl = ''; // it stores the data of the uploaded image
   originalImageCvId; //stores the contenversion Id of the original image uploaded
   contentVersion; //stores the Image watermark - Original Image ContentVersion Information
-  @track activeTab =''; // It stores the active tab value
+  @track activeTab = ''; // It stores the active tab value
   @track outerContainer = ''; //The styling of the container which holds the canvas
   @track watermarkText = ''; // The input text value with which text watermark is being created
   @track showwatermarkbtn = false; // This variable controls the display of the Watermark Popup in HTML
@@ -55,15 +56,18 @@ export default class TemplateDesignerCMP extends NavigationMixin(LightningElemen
     baseDataLst = []; //list that stores the dataURl of Watermark Images
   hasOriginalImage = false; // Boolean to show if the watermark is new one or edit on previous one
   prevoriginalImageCvId;//stores the previously saved original watermark Content Version ID
+  callImage = 0;
   //watermarkPageOptionsText combobox options for Text Watermark
   watermarkPageOptionsText = [
-    { label: 'All Pages', value: 'All Pages - Text', checked : true },
-    { label: 'All Pages Except First Page', value: 'All Pages Except First Page - Text' , checked : false},
+    { label: 'All Pages', value: 'All Pages - Text', checked: true },
+    { label: 'All Pages Except First Page', value: 'All Pages Except First Page - Text', checked: false },
+    { label: 'Only First Page', value: 'Only First Page - Text', checked: false },
   ];
   //watermarkPageOptionsImage combobox options for Image Watermark
   watermarkPageOptionsImage = [
-    { label: 'All Pages', value: 'All Pages - Image' , checked : true},
-    { label: 'All Pages Except First Page', value: 'All Pages Except First Page - Image', checked : false },
+    { label: 'All Pages', value: 'All Pages - Image', checked: true },
+    { label: 'All Pages Except First Page', value: 'All Pages Except First Page - Image', checked: false },
+    { label: 'Only First Page', value: 'Only First Page - Text', checked: false },
   ];
   //fontSizeOptions combobox options for Text Watermark
   get fontSizeOptions() {
@@ -377,6 +381,7 @@ export default class TemplateDesignerCMP extends NavigationMixin(LightningElemen
     this.selectedSectionRecordID = secrecordId;
     this.connectedCallback();
     if (this.showPreview == false) { this.showPreview = true; }
+    if (this.isActivateTemplateDisabled == true) { this.isActivateTemplateDisabled = false; }
   }
 
   /**
@@ -544,10 +549,11 @@ export default class TemplateDesignerCMP extends NavigationMixin(LightningElemen
     this.showPreview = false;
   }
 
-  resetImageWatermarkFields(){
+  resetImageWatermarkFields() {
     this.rotationImagevalue = '0';
     this.imageScalingValue = '100';
     this.opacityImageValue = '1.0';
+    this.callImage = 0;
   }
 
   /**
@@ -578,6 +584,7 @@ export default class TemplateDesignerCMP extends NavigationMixin(LightningElemen
 
 
   connectedCallback() {
+    this.isActivateTemplateDisabled = true;
     getSFDomainBaseURL()
       .then(result => {
                 this.baseURL = result;
@@ -604,6 +611,15 @@ export default class TemplateDesignerCMP extends NavigationMixin(LightningElemen
       getAllDocumentTemplateSections({ docTempId: this.documenttemplaterecordid })
         .then(result => {
           if (result != null) {
+            if (result.length > 0) {
+              let activateTemplateDisabled = true;
+              result.forEach(res => {
+                if (res.DxCPQ__Type__c !== 'Header' && res.DxCPQ__Type__c !== 'Footer' && this.activateTemplateDisabled) {
+                  this.activateTemplateDisabled = false;
+                }
+              });
+             
+            }
             var headerselected = false;
             this.isconnectedcalledonLoad = true;
             this.footer.rowCount = result.length;
@@ -714,7 +730,7 @@ export default class TemplateDesignerCMP extends NavigationMixin(LightningElemen
           this.isLoaded2 = false;
           let tempError = error.toString();
           let errorMessage = error.message || 'Unknown error message';
-          createLog({recordId:'', className:'templateDesignerCMP LWC Component - connectedCallback()', exceptionMessage:errorMessage, logData:tempError, logType:'Exception'});
+          createLog({ recordId: '', className: 'templateDesignerCMP LWC Component - connectedCallback()', exceptionMessage: errorMessage, logData: tempError, logType: 'Exception' });
         })
     } else if (this.isconnectedcalledonLoad == true) {
       this.sections = this.optionsList;
@@ -836,7 +852,7 @@ export default class TemplateDesignerCMP extends NavigationMixin(LightningElemen
     this.template.querySelector('c-template-related-objects').handleActivateTemplate(isActive, this.relatedtoTypeObjName);
     this.template.querySelector('c-template-header').handleActivateTemplate(isActive, this.relatedtoTypeObjName);
     this.template.querySelector('c-template-footer').handleActivateTemplate(isActive, this.relatedtoTypeObjName);
-    this.readonlyVal = isActive? true: false;
+    this.readonlyVal = isActive ? true : false;
   }
 
   /**
@@ -1078,7 +1094,7 @@ export default class TemplateDesignerCMP extends NavigationMixin(LightningElemen
       console.log('error handleDeleteTemplateHandler', JSON.stringify(error));
       let tempError = error.toString();
       let errorMessage = error.message || 'Unknown error message';
-      createLog({recordId:'', className:'templateDesignerCMP LWC Component - permanantDeleteHandler()', exceptionMessage:errorMessage, logData:tempError, logType:'Exception'});
+      createLog({ recordId: '', className: 'templateDesignerCMP LWC Component - permanantDeleteHandler()', exceptionMessage: errorMessage, logData: tempError, logType: 'Exception' });
     })
   }
 
@@ -1114,7 +1130,7 @@ export default class TemplateDesignerCMP extends NavigationMixin(LightningElemen
         this.isLoaded = false;
         let tempError = error.toString();
         let errorMessage = error.message || 'Unknown error message';
-        createLog({recordId:'', className:'templateDesignerCMP LWC Component - handleSubmit()', exceptionMessage:errorMessage, logData:tempError, logType:'Exception'});
+        createLog({ recordId: '', className: 'templateDesignerCMP LWC Component - handleSubmit()', exceptionMessage: errorMessage, logData: tempError, logType: 'Exception' });
       })
   }
 
@@ -1267,8 +1283,9 @@ export default class TemplateDesignerCMP extends NavigationMixin(LightningElemen
     */
   handleTabChange(event) {
     this.activeTab = event.currentTarget.dataset.name;
-    if(this.activeTab == 'Image' && this.imageOriginalImage != ''){
+    if (this.activeTab == 'Image' && this.imageOriginalImage != '' && this.callImage == 0) {
       this.getSavedDocTempWatermarkData();
+      this.callImage++;
     }
   }
 
@@ -1278,20 +1295,20 @@ export default class TemplateDesignerCMP extends NavigationMixin(LightningElemen
     */
   generateCanvas() {
     try{
-      const canvas = this.template.querySelector('canvas');
-      const context = canvas.getContext('2d');
-      context.clearRect(0, 0, canvas.width, canvas.height);
-      if (this.rotationValue !== this.previousRotationValue) {
-        context.translate(canvas.width / 2, canvas.height / 2);
-        context.rotate((this.rotationValue - this.previousRotationValue) * Math.PI / 180);
-        context.translate(-canvas.width / 2, -canvas.height / 2);
-        this.previousRotationValue = this.rotationValue;
-      }
-      context.globalAlpha = this.opacityValue;
-      context.font = this.fontSizeValue + 'px Arial';
-      let textWidth = context.measureText(this.watermarkText).width;
-      context.fillStyle = this.colorValue;
-      context.fillText(this.watermarkText, (canvas.width/2 - textWidth/2), canvas.height / 2);
+        const canvas = this.template.querySelector('canvas');
+        const context = canvas.getContext('2d');
+        context.clearRect(0, 0, canvas.width, canvas.height);
+        if (this.rotationValue !== this.previousRotationValue) {
+          context.translate(canvas.width / 2, canvas.height / 2);
+          context.rotate((this.rotationValue - this.previousRotationValue) * Math.PI / 180);
+          context.translate(-canvas.width / 2, -canvas.height / 2);
+          this.previousRotationValue = this.rotationValue;
+        }
+        context.globalAlpha = this.opacityValue;
+        context.font = this.fontSizeValue + 'px Arial';
+        let textWidth = context.measureText(this.watermarkText).width;
+        context.fillStyle = this.colorValue;
+        context.fillText(this.watermarkText, (canvas.width/2 - textWidth/2), canvas.height / 2);
     } catch(error){
       console.log('error while getting canvas line 1193 templatedesignerCMP --> ', error);
     } 
@@ -1322,19 +1339,19 @@ export default class TemplateDesignerCMP extends NavigationMixin(LightningElemen
    */
   handleWaterMarkSave() {
     try{
-        let canvasText = this.template.querySelector('.canvasText');
-        if (canvasText && this.watermarkText !== '') {
-          let dataURLText = canvasText.toDataURL();
-          this.baseDataLst.push({ 'text': dataURLText.split(',')[1], title:'Text' });
-        }
+      let canvasText = this.template.querySelector('.canvasText');
+      if (canvasText && this.watermarkText !== '') {
+        let dataURLText = canvasText.toDataURL();
+        this.baseDataLst.push({ 'text': dataURLText.split(',')[1], title:'Text' });
+      }
 
-        let canvasImage = this.template.querySelector('.canvasImage');
-        if (canvasImage && this.imageUrl) {
-          let dataURLImage = canvasImage.toDataURL();
-          this.baseDataLst.push({ 'Image': dataURLImage.split(',')[1], title:'Image' });
-        }
+      let canvasImage = this.template.querySelector('.canvasImage');
+      if (canvasImage && this.imageUrl) {
+        let dataURLImage = canvasImage.toDataURL();
+        this.baseDataLst.push({ 'Image': dataURLImage.split(',')[1], title:'Image' });
+      }
     } catch(error) {
-    console.log('error while getting canvas line 1230 templatedesignerCMP --> ', error);
+      console.log('error while getting canvas line 1230 templatedesignerCMP --> ', error);
     }
 
     const originalImageMap = this.baseDataLst.find(entry => entry.title === 'OriginalImg');
@@ -1406,6 +1423,7 @@ export default class TemplateDesignerCMP extends NavigationMixin(LightningElemen
             this.imageScalingValue = '100';
             this.rotationImagevalue ='0';
             this.opacityImageValue = '1.0';
+            this.callImage = 0;
             this.updateCheckedValue(this.pageTextOption, this.watermarkPageOptionsText);
             this.updateCheckedValue(this.pageImageOption, this.watermarkPageOptionsImage);
             this.imageUrl =  '';
@@ -1439,15 +1457,15 @@ export default class TemplateDesignerCMP extends NavigationMixin(LightningElemen
     this.watermarkText = '';
     this.opacityValue = '1.0';
     this.rotationValue = '0';
-    this.checkedValText =  true;
-    this.checkedValImage =  false;
+    this.checkedValText = true;
+    this.checkedValImage = false;
     this.rotationImagevalue = '0';
     this.opacityImageValue = '1.0';
     this.imageScalingValue = '100';
     this.activeTab = '';
     this.previousRotationValue = '0';
     this.previousImgRotationValue = '0';
-    this.imageUrl =  '';
+    this.callImage = 0;
   }
 
   /**
@@ -1463,18 +1481,18 @@ this.resetImageWatermarkFields();
     const reader = new FileReader();
     reader.onload = () => {
       this.imageUrl = reader.result;
-      try{
-          this.drawOnCanvas(this.imageUrl).then(() => {
-            this.baseDataLst = [];
-            let canvasImage = this.template.querySelector('.canvasImage');
-            if (canvasImage && this.imageUrl) {
-                let dataURLImage = canvasImage.toDataURL();
-                this.baseDataLst.push({ 'OriginalImg': dataURLImage.split(',')[1], title:'OriginalImg' });
-            }
+      try {
+        this.drawOnCanvas(this.imageUrl).then(() => {
+          this.baseDataLst = [];
+          let canvasImage = this.template.querySelector('.canvasImage');
+          if (canvasImage && this.imageUrl) {
+            let dataURLImage = canvasImage.toDataURL();
+            this.baseDataLst.push({ 'OriginalImg': dataURLImage.split(',')[1], title: 'OriginalImg' });
+          }
         });
       }
-      catch(error){
-        console.log('error while getting canvas line 1370 templatedesignerCMP --> ',error);
+      catch (error) {
+        console.log(error);
       }
     };
     reader.readAsDataURL(file);
@@ -1486,8 +1504,7 @@ this.resetImageWatermarkFields();
   */
   drawOnCanvas(imageUrl) {
     return new Promise((resolve, reject) => {
-
-      try{
+      try {
         const canvas = this.template.querySelector('.canvasImage');
         const ctx = canvas.getContext('2d');
         const image = new Image();
@@ -1500,19 +1517,17 @@ this.resetImageWatermarkFields();
             ctx.translate(-canvas.width / 2, -canvas.height / 2);
             this.previousImgRotationValue = this.rotationImagevalue;
           }
-        ctx.globalAlpha = this.opacityImageValue;
-        let imgwidth = this.imageScalingValue == 0 ? image.width : image.width * (this.imageScalingValue / 100);
-        let imgheight = this.imageScalingValue == 0 ? image.height : image.height * (this.imageScalingValue / 100);
-        ctx.drawImage(image, (canvas.width - imgwidth) / 2, (canvas.height - imgheight) / 2, this.imageScalingValue == 0 ? image.width : image.width * (this.imageScalingValue / 100), this.imageScalingValue == 0 ? image.height : image.height * (this.imageScalingValue / 100));
-
-
+          ctx.globalAlpha = this.opacityImageValue;
+          let imgwidth = this.imageScalingValue == 0 ? image.width : image.width * (this.imageScalingValue / 100);
+          let imgheight = this.imageScalingValue == 0 ? image.height : image.height * (this.imageScalingValue / 100);
+          ctx.drawImage(image, (canvas.width - imgwidth) / 2, (canvas.height - imgheight) / 2, this.imageScalingValue == 0 ? image.width : image.width * (this.imageScalingValue / 100), this.imageScalingValue == 0 ? image.height : image.height * (this.imageScalingValue / 100));
           resolve();
         };
       }
-      catch(error){
+      catch (error) {
         console.log('error while getting canvas line 1387 templatedesignerCMP --> ', error);
       }
-     
+
     });
   }
 
@@ -1537,17 +1552,17 @@ this.resetImageWatermarkFields();
    * @param optionsList Either watermarkPageOptionsText/ watermarkPageOptionsImage
    */
   updateCheckedValue(optionValue, optionsList) {
-      optionsList = optionsList.map(option => {
-          if (option.value === optionValue) {
-              return { ...option, checked: true };
-          } else {
-              return { ...option, checked: false };
-          }
-      });
-      if (optionValue.includes('Text')) {
-          this.watermarkPageOptionsText = optionsList;
-      } else if (optionValue.includes('Image')) {
-          this.watermarkPageOptionsImage = optionsList;
+    optionsList = optionsList.map(option => {
+      if (option.value === optionValue) {
+        return { ...option, checked: true };
+      } else {
+        return { ...option, checked: false };
+      }
+    });
+    if (optionValue.includes('Text')) {
+      this.watermarkPageOptionsText = optionsList;
+    } else if (optionValue.includes('Image')) {
+      this.watermarkPageOptionsImage = optionsList;
     }
   }
 
@@ -1618,17 +1633,17 @@ this.resetImageWatermarkFields();
             this.updateCheckedValue(this.pageImageOption, this.watermarkPageOptionsImage);
             //displaying the image watermark - original image on canvas
             if(imageOriginalImage != ''){
-                getOriginalImageCVID({ contentVersionId : imageOriginalImage }).then(result => {
+              getOriginalImageCVID({ contentVersionId : imageOriginalImage }).then(result => {
                 if (result != null) {
                   this.contentVersion = result;
                   this.imageUrl = 'data:image/png;base64,' + this.contentVersion;
                   this.drawOnCanvas(this.imageUrl).then(() => {});
-        }
-      }).catch(error => {
-        console.log('error activation', error);
-      })
-    }
-          }        
+                }
+              }).catch(error => {
+                console.log('error activation', error);
+              })
+            }
+          }
         }
       }).catch(error => {
         console.log('error activation', error);
@@ -1645,11 +1660,11 @@ this.resetImageWatermarkFields();
   handlehelp(event){
     let relatedObjectsMap = this.pdfLinksData.find(item => item.MasterLabel === event.currentTarget.dataset.val);
     let pdfUrl = relatedObjectsMap ? relatedObjectsMap.DxCPQ__Section_PDF_URL__c : null;
-    const config = {
-        type: 'standard__webPage',
-        attributes: {
-            url: pdfUrl
-          }
+        const config = {
+      type: 'standard__webPage',
+      attributes: {
+        url: pdfUrl
+      }
     };
     this[NavigationMixin.Navigate](config);
   }
@@ -1670,6 +1685,7 @@ this.resetImageWatermarkFields();
     this.imageScalingValue = '100';
     this.checkedValText = true;
     this.watermarkText = '';
+    this.callImage = 0;
     this.checkedValImage = false;
     this.imageUrl =  '';
   }
@@ -1690,6 +1706,7 @@ this.resetImageWatermarkFields();
     this.opacityImageValue ='1.0';
     this.rotationImagevalue = '0';
     this.pageImageOption = 'All Pages - Image';
+    this.callImage = 0;
     this.imageUrl =  '';
     this.updateCheckedValue(this.pageTextOption, this.watermarkPageOptionsText);
     this.updateCheckedValue(this.pageImageOption, this.watermarkPageOptionsImage);

@@ -4,6 +4,6 @@
     <protected>false</protected>
     <values>
         <field>Section_PDF_URL__c</field>
-        <value xsi:type="xsd:string">https://drive.google.com/file/d/1iFN0hcoE_VSpACC1QCgP8HLsBl9Dn7Hh/view?usp=sharing</value>
+        <value xsi:type="xsd:string">https://drive.google.com/file/d/1LZH71vFr6tLoEWrnsw8-TjqVne9k47jd/view?usp=drive_link</value>
     </values>
 </CustomMetadata>

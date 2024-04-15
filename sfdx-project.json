@@ -22,6 +22,14 @@
       "versionDescription": "",
       "postInstallScript": "PostInstallDataCreation",
       "ancestorVersion": "HIGHEST"
+    },
+    {
+      "path": "force-app",
+      "package": "DxTemplates_ManagedPackage",
+      "versionName": "ver 0.1",
+      "versionNumber": "0.4.1.NEXT",
+      "default": false,
+      "versionDescription": ""
     }
   ],
   "name": "DxTemplates",
@@ -69,10 +77,14 @@
     "Dx_Templates@0.3.0-11": "04tQm000000jnsbIAA",
     "Dx_Templates@0.3.0-12": "04tQm000000k4ILIAY",
     "Dx_Templates@0.4.0-1": "04tQm000000kdRNIAY",
-    "DxTemplates_Unlocked@0.1.0-17": "04tQm000000o5R7IAI",
-    "DxTemplates_Unlocked@0.1.0-18": "04tQm000000o5pJIAQ",
-    "DxTemplates_Unlocked@0.1.0-19": "04tQm000000o6obIAA",
-    "DxTemplates_Unlocked@0.1.0-21": "04tQm000000o74jIAA",
-    "DxTemplates_Unlocked@0.1.0-22": "04tQm000000oBMrIAM"
+    "Dx_Templates@0.5.0-2": "04tQm000000mnHlIAI",
+    "Dx_Templates@0.5.0-3": "04tQm000000mnODIAY",
+    "Dx_Templates@0.5.0-4": "04tQm000000mnPpIAI",
+    "DxTemplates_ManagedPackage": "0HoQm00000000zJKAQ",
+    "Dx_Templates@0.5.0-6": "04tQm000000nHpJIAU",
+    "Dx_Templates@0.5.0-7": "04tQm000000nHvlIAE",
+    "Dx_Templates@0.5.0-8": "04tQm000000nIGjIAM",
+    "Dx_Templates@0.5.0-9": "04tQm000000o5PVIAY",
+    "Dx_Templates@0.6.0-1": "04tQm000000o60bIAA"
   }
 }

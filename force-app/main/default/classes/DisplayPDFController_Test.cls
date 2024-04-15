@@ -963,16 +963,7 @@ private class DisplayPDFController_Test {
         System.assert(true);
     }
     
-    @IsTest
-    static void testGetBaseURL() {
-        User us = DexUtilTestDataFactory.CreateTestUser();
-        System.runAs(us){ 
-           DisplayPDFController.getSFDomainBaseURL();
-       	}
-        System.Assert(true);
-    }
-    
-    @IsTest
+    @isTest
     static void testSaveContentVersion() {
         User us = DexUtilTestDataFactory.CreateTestUser();
         System.runAs(us){ 
