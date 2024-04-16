@@ -142,7 +142,7 @@ global with sharing class DisplayPDFController
                 System.debug('pageOption >> '+ pageOption);
 				showAllPages = pageOption;
                 deFaultCSS = false;
-                imageURL = getSFDomainBaseURL() + '/sfc/servlet.shepherd/version/renditionDownload?rendition=ORIGINAL_Png&versionId=' + contentVersionID; 
+                imageURL = PdfDisplay.getDomainUrl() + '/sfc/servlet.shepherd/version/renditionDownload?rendition=ORIGINAL_Png&versionId=' + contentVersionID; 
             }
             else{
                 showAllPages = 'All Pages';
