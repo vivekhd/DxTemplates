@@ -381,7 +381,6 @@ export default class TemplateContentDetails extends NavigationMixin(LightningEle
         { label: 'Times New Roman', value: 'serif' },
         { label: 'Arial', value: 'sans-serif' },
         { label: 'serif', value: 'serif' },
-        { label: 'Times', value: 'Times' },
         { label: 'Courier', value: 'courier' },
     ];
   }
