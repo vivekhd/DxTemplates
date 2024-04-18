@@ -92,10 +92,9 @@ public with sharing class MergeFieldsClass {
                                     }
                                 }
                             }
-                            if(finalvalue!=null)  {
-                                string mergefieldsyntax='{!'+mainObject+'.'+str+'}';
-                                sec.Section_Content__c=sec.Section_Content__c.replace(mergefieldsyntax, finalvalue); 
-                            }
+                            String mergefieldsyntax = '{!' + mainObject + '.' + str + '}';
+                            String finalvalueReplaced = (finalvalue != null) ? finalvalue : '';
+                            sec.Section_Content__c = sec.Section_Content__c.replace(mergefieldsyntax, finalvalueReplaced);
                         }
                     }
                 }
