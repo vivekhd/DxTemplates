@@ -46,23 +46,23 @@ export default class TemplateContentDetails extends NavigationMixin(LightningEle
     DxCPQ__RuleId__c: '',
     DxCPQ__Document_Clause__c: ''
   };
-  formats = [
-    'font',
-    'size',
-    'bold',
-    'italic',
-    'underline',
-    'strike',
-    'list',
-    'indent',
-    'align',
-    'link',
-    'image',
-    'table',
-    'header',
-    'color',
-    'script',
-  ];
+    formats = [
+        'font',
+        'size',
+        'bold',
+        'italic',
+        'underline',
+        'strike',
+        'list',
+        'indent',
+        'align',
+        'link',
+        'image',
+        'table',
+        'header',
+        'color',
+        'script',
+    ];
 
   renderedCallback() {
     if (this.documenttemplaterecord && this.documenttemplaterecord.DxCPQ__Previously_Active__c == true) {
@@ -358,14 +358,14 @@ export default class TemplateContentDetails extends NavigationMixin(LightningEle
 
   handlehelp(){
     let urlLink;
-    if(this.showclausescreen){ //for clause screen
+        if(this.showclausescreen){ //for clause screen
       let relatedObjectsMap = this.pdfLinks.find(item => item.MasterLabel === 'Clause');
       urlLink = relatedObjectsMap ? relatedObjectsMap.DxCPQ__Section_PDF_URL__c : null;
-    }
+          }
     else{//for context screen
       let relatedObjectsMap = this.pdfLinks.find(item => item.MasterLabel === 'Context');
       urlLink = relatedObjectsMap ? relatedObjectsMap.DxCPQ__Section_PDF_URL__c : null;
-    }
+          }
     const config = {
         type: 'standard__webPage',
         attributes: {
@@ -374,4 +374,26 @@ export default class TemplateContentDetails extends NavigationMixin(LightningEle
     };
     this[NavigationMixin.Navigate](config);
   }
+
+  //code added by Bhavya for adding Custom Font-family list - compatible with VF PDF generation
+  get fontFamilies() {
+    return [
+        { label: 'Times New Roman', value: 'serif' },
+        { label: 'Arial', value: 'sans-serif' },
+        { label: 'serif', value: 'serif' },
+        { label: 'Times', value: 'Times' },
+        { label: 'Courier', value: 'courier' },
+    ];
+  }
+
+      handleFontFamilySelection(event){
+        let applySelectedFormats = {
+            font: event.target.value,
+        };
+        let selection = window.getSelection().toString();
+        let editor = this.template.querySelector('lightning-input-rich-text');
+        editor.setFormat(applySelectedFormats);
+    }
+
+
 }
