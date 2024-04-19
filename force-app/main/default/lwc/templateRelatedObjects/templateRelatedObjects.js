@@ -1738,11 +1738,20 @@ export default class TemplateRelatedObjects extends NavigationMixin(LightningEle
   }
 
   handleBarChartColorChange(event) {
-      this.selectedBarChartColor = event.detail.value;
-      let dataIdArray = ['group-1', 'group-2', 'group-3', 'group-4', 'Others'];
-      dataIdArray.forEach((item) => {
-          this.template.querySelector(`[data-id=${item}]`).style.background = this.selectedBarChartColor;
-      });
+    if(this.chartControl){
+        this.selectedBarChartColor = event.detail.value;
+        let dataIdArray = ['group-1', 'group-2', 'group-3', 'group-4', 'Others'];
+        dataIdArray.forEach((item) => {
+            this.template.querySelector(`[data-id=${item}]`).style.background = this.selectedBarChartColor;
+        });
+    } else {
+        const errorMsg = new ShowToastEvent({
+            title: 'Error',
+            message: 'Select the Category field, Sub Total field and enable Configure Chart.',
+            variant: 'Error'
+        });
+        this.dispatchEvent(errorMsg);
+    }
   }
 
   newfontsize() {
