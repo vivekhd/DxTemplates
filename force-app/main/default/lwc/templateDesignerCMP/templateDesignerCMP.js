@@ -619,15 +619,6 @@ this.readonlyVal = false;
       getAllDocumentTemplateSections({ docTempId: this.documenttemplaterecordid })
         .then(result => {
           if (result != null) {
-if (result.length > 0) {
-              let activateTemplateDisabled = true;
-              result.forEach(res => {
-                if (res.DxCPQ__Type__c !== 'Header' && res.DxCPQ__Type__c !== 'Footer' && this.activateTemplateDisabled) {
-                  this.activateTemplateDisabled = false;
-                }
-              });
-             
-            }
             var headerselected = false;
             this.isconnectedcalledonLoad = true;
             this.footer.rowCount = result.length;
