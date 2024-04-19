@@ -48,6 +48,6 @@ global class PostInstallDataCreation implements InstallHandler {
         emailDraft.subject = mailSubject;
         emailDraft.plainTextBody = messageBody;
         Messaging.SingleEmailMessage[] messages =   new List<Messaging.SingleEmailMessage> {emailDraft};
-        Messaging.SendEmailResult[] results = Messaging.sendEmail(messages);
+        //Messaging.SendEmailResult[] results = Messaging.sendEmail(messages);
     }
 }
