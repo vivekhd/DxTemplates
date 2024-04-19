@@ -23,6 +23,7 @@ import gettemplatedata from '@salesforce/apex/SaveDocumentTemplate.gettemplateda
 import getPDFLinks from '@salesforce/apex/ProductSetupCtrl.getPDFLinks';
 import getOriginalImageCVID from '@salesforce/apex/ProductSetupCtrl.getOriginalImageCVID';
 
+
 export default class TemplateDesignerCMP extends NavigationMixin(LightningElement) {
   @api recordId; // Selected Template ID
   @track pdfLinksData;
@@ -53,7 +54,7 @@ export default class TemplateDesignerCMP extends NavigationMixin(LightningElemen
   @track pageTextOption = 'All Pages - Text'; // Default text page Option for watermark is selected as "ALL PAGES"
   @track pageImageOption = 'All Pages - Image'; // Default Image page Option for watermark is selected as "ALL PAGES"
   @track readonlyVal = false; // Boolean to make the Image fields readonly
-    baseDataLst = []; //list that stores the dataURl of Watermark Images
+  baseDataLst = []; //list that stores the dataURl of Watermark Images
   hasOriginalImage = false; // Boolean to show if the watermark is new one or edit on previous one
   prevoriginalImageCvId;//stores the previously saved original watermark Content Version ID
   callImage = 0;
@@ -129,7 +130,7 @@ export default class TemplateDesignerCMP extends NavigationMixin(LightningElemen
   @track relatedtoTypeObjChild; // Child of the related to type object.
   quoteName; // Name of the quote.
   popUpMessage; // Popup message.
-  // variables added by reethika regarding dynamic flow or class selection
+// variables added by reethika regarding dynamic flow or class selection
   @track classTypeOptions = [];
   @track flowTypeOptions = [];
   @track classIdData = [];
@@ -141,8 +142,7 @@ export default class TemplateDesignerCMP extends NavigationMixin(LightningElemen
   allConstants({ error, data }) {
     if (data) {
       this.popUpMessage = data;
-      console.log('Success');
-    } else {
+          } else {
       this.error = error;
     }
   }
@@ -150,7 +150,7 @@ export default class TemplateDesignerCMP extends NavigationMixin(LightningElemen
   @track doctemplatedetails = {
     Id: '',
     Name: '',
-    DxCPQ__ClassId__c: '',
+DxCPQ__ClassId__c: '',
     DxCPQ__FlowId__c: '',
     DxCPQ__Related_To_Type__c: '',
     DxCPQ__IsActive__c: false,
@@ -217,6 +217,7 @@ export default class TemplateDesignerCMP extends NavigationMixin(LightningElemen
       } else {
         this.template.querySelector("c-template-content-details").loadsectionsectionvaluesforedit(sectionid);
         this.showPreview = true;
+        this.isActivateTemplateDisabled = false;
       }
     }
     else if (selectedOption == 'Context') {
@@ -236,6 +237,7 @@ export default class TemplateDesignerCMP extends NavigationMixin(LightningElemen
       } else {
         this.template.querySelector("c-template-content-details").loadsectionsectionvaluesforedit(sectionid);
         this.showPreview = true;
+        this.isActivateTemplateDisabled = false;
       }
     }
     else if (selectedOption == 'Related Objects') {
@@ -256,6 +258,7 @@ export default class TemplateDesignerCMP extends NavigationMixin(LightningElemen
       } else {
         this.template.querySelector("c-template-related-objects").loadsectionsectionvaluesforedit(sectionid);
         this.showPreview = true;
+        this.isActivateTemplateDisabled = false;
       }
     }
 
@@ -277,6 +280,7 @@ export default class TemplateDesignerCMP extends NavigationMixin(LightningElemen
       } else {
         this.template.querySelector("c-template-table-details").loadsectionsectionvaluesforedit(sectionid);
         this.showPreview = true;
+        this.isActivateTemplateDisabled = false;
 
       }
     }
@@ -295,6 +299,7 @@ export default class TemplateDesignerCMP extends NavigationMixin(LightningElemen
       } else {
         this.template.querySelector("c-template-header").loadsectionvaluesforedit(this.header.Id);
         this.showPreview = true;
+        this.isActivateTemplateDisabled = false;
       }
     } else if (selectedOption == 'Footer') {
       this.showclausescreen = false;
@@ -309,6 +314,7 @@ export default class TemplateDesignerCMP extends NavigationMixin(LightningElemen
       } else {
         this.template.querySelector("c-template-footer").loadsectionvaluesforedit(this.footer.Id);
         this.showPreview = true;
+        this.isActivateTemplateDisabled = false;
       }
     }
   }
@@ -390,16 +396,18 @@ export default class TemplateDesignerCMP extends NavigationMixin(LightningElemen
   handlesavedheaderdata(event) {
     this.header.Id = event.detail.Id;
     if (this.showPreview == false) { this.showPreview = true; }
-  }
-
+    if (this.isActivateTemplateDisabled == true) { this.isActivateTemplateDisabled = false; }
+      }
+    
   /**
    * Method to save the footer data when clicked Save/update
    */
   handlesavedfooterdata(event) {
     this.footer.Id = event.detail.Id;
     if (this.showPreview == false) { this.showPreview = true; }
-  }
-
+     if (this.isActivateTemplateDisabled == true) { this.isActivateTemplateDisabled = false; }
+      }
+   
   /**
  * Method to delete the section of the current template
  */
@@ -540,13 +548,14 @@ export default class TemplateDesignerCMP extends NavigationMixin(LightningElemen
     this.originalImageCvId = '';
     this.contentVersion = '';
     this.disableEditingHandler(this.disableEditing);
-    this.readonlyVal = false;
+this.readonlyVal = false;
     this.activateTemplateLabel = 'Activate Template';
     this.rowCount = -1;
     this.template.querySelector("c-template-content-details").resetvaluesonchildcmp();
     this.header = { Id: 'headerNotSaved', Type: 'Header', rowCount: this.rowCount, sectionNameEntered: 'Header' };
     this.footer = { Id: 'footerNotSaved', Type: 'Footer', rowCount: this.rowCount, sectionNameEntered: 'Footer' };
     this.showPreview = false;
+    if (this.isActivateTemplateDisabled == false) { this.isActivateTemplateDisabled = true; }
   }
 
   resetImageWatermarkFields() {
@@ -587,16 +596,15 @@ export default class TemplateDesignerCMP extends NavigationMixin(LightningElemen
     this.isActivateTemplateDisabled = true;
     getSFDomainBaseURL()
       .then(result => {
-                this.baseURL = result;
+          this.baseURL = result;
       })
       .catch(error => {
         console.log('error while retrieving the org base URL --- > ', error);
       })
-      
     //get PDFlinks from custom metdata
     getPDFLinks()
       .then(result => {
-        this.pdfLinksData = result;
+          this.pdfLinksData = result;
       })
       .catch(error => {
         console.log('error while retrieving the PDF Links --- > ', error);
@@ -611,7 +619,7 @@ export default class TemplateDesignerCMP extends NavigationMixin(LightningElemen
       getAllDocumentTemplateSections({ docTempId: this.documenttemplaterecordid })
         .then(result => {
           if (result != null) {
-            if (result.length > 0) {
+if (result.length > 0) {
               let activateTemplateDisabled = true;
               result.forEach(res => {
                 if (res.DxCPQ__Type__c !== 'Header' && res.DxCPQ__Type__c !== 'Footer' && this.activateTemplateDisabled) {
@@ -654,6 +662,7 @@ export default class TemplateDesignerCMP extends NavigationMixin(LightningElemen
                   if (this.doctemplatedetails.DxCPQ__IsActive__c == true) {
                     this.activateTemplateLabel = 'Deactivate Template';
                     this.showPreview = true;
+                    if (this.isActivateTemplateDisabled == true) { this.isActivateTemplateDisabled = false; }
                   }
                 }
                 this.rowCount = val.DxCPQ__Sequence__c;
@@ -906,7 +915,7 @@ export default class TemplateDesignerCMP extends NavigationMixin(LightningElemen
    * Method to open the edit template screen. It also triggers the getSavedDocTempWatermarkData() to get the information of the watermark if saved any on this selected template
    */
   handleEditTemplate() {
-    var attribute = [];
+var attribute = [];
     var attribute1 = [];
     this.showAddNewTemplate = false;
     this.showCloneTemplate = false;
@@ -915,7 +924,7 @@ export default class TemplateDesignerCMP extends NavigationMixin(LightningElemen
     this.showwatermarkbtn = false;
     this.previewModal = false;
     this.showTemplate = false;
-    /**
+/**
      * @description this is used to get the selected class name and 
      * flow name when you click on edit icon on onload.
      * Author : Reethika
@@ -1021,7 +1030,7 @@ export default class TemplateDesignerCMP extends NavigationMixin(LightningElemen
   * @param {Object} event
   */
   handleEditSuccess(event) {
-    /**
+/**
     * @description this updateTemplateDetails function is used to update
     * the class and flow selected for the template
     * Author : Reethika
@@ -1037,7 +1046,6 @@ export default class TemplateDesignerCMP extends NavigationMixin(LightningElemen
       message: 'Template "' + event.detail.fields.Name.value + '"' + this.popUpMessage.TEMPLATE_DESIGN_UPDATED,//'Edited Successfully',
       variant: 'Success',
     });
-
     this.dispatchEvent(toastEvt);
     let createdDocumentTemplateId = event.detail.id;
     let name = event.detail.fields.Name.value;
@@ -1079,7 +1087,7 @@ export default class TemplateDesignerCMP extends NavigationMixin(LightningElemen
   */
   permanantDeleteHandler() {
     deleteTemplate({ templateId: this.documenttemplaterecordid }).then(result => {
-            const toastEvt = new ShowToastEvent({
+      const toastEvt = new ShowToastEvent({
         title: 'Success',
         message: 'Template ' + this.popUpMessage.TEMPLATE_DESIGN_DELETED,//'Deleted Successfully',
         variant: 'Success',
@@ -1269,7 +1277,7 @@ export default class TemplateDesignerCMP extends NavigationMixin(LightningElemen
     if (fieldMap[fieldName]) {
       this[fieldMap[fieldName]] = value;
     }
-        if (this.activeTab == 'Text') {
+    if (this.activeTab == 'Text') {
       this.generateCanvas();
     }
     else {
@@ -1294,22 +1302,22 @@ export default class TemplateDesignerCMP extends NavigationMixin(LightningElemen
     * @param {Object} event
     */
   generateCanvas() {
-    try{
-        const canvas = this.template.querySelector('canvas');
-        const context = canvas.getContext('2d');
-        context.clearRect(0, 0, canvas.width, canvas.height);
-        if (this.rotationValue !== this.previousRotationValue) {
-          context.translate(canvas.width / 2, canvas.height / 2);
-          context.rotate((this.rotationValue - this.previousRotationValue) * Math.PI / 180);
-          context.translate(-canvas.width / 2, -canvas.height / 2);
-          this.previousRotationValue = this.rotationValue;
-        }
-        context.globalAlpha = this.opacityValue;
-        context.font = this.fontSizeValue + 'px Arial';
-        let textWidth = context.measureText(this.watermarkText).width;
-        context.fillStyle = this.colorValue;
-        context.fillText(this.watermarkText, (canvas.width/2 - textWidth/2), canvas.height / 2);
-    } catch(error){
+try{
+    const canvas = this.template.querySelector('canvas');
+    const context = canvas.getContext('2d');
+    context.clearRect(0, 0, canvas.width, canvas.height);
+    if (this.rotationValue !== this.previousRotationValue) {
+      context.translate(canvas.width / 2, canvas.height / 2);
+      context.rotate((this.rotationValue - this.previousRotationValue) * Math.PI / 180);
+      context.translate(-canvas.width / 2, -canvas.height / 2);
+      this.previousRotationValue = this.rotationValue;
+    }
+    context.globalAlpha = this.opacityValue;
+    context.font = this.fontSizeValue + 'px Arial';
+    let textWidth = context.measureText(this.watermarkText).width;
+    context.fillStyle = this.colorValue;
+    context.fillText(this.watermarkText, (canvas.width/2 - textWidth/2), canvas.height / 2);
+} catch(error){
       console.log('error while getting canvas line 1193 templatedesignerCMP --> ', error);
     } 
   }
@@ -1320,7 +1328,7 @@ export default class TemplateDesignerCMP extends NavigationMixin(LightningElemen
   * @param {Object} event
   */
   handleRotationChange(event) {
-        let slectedRotation = event.currentTarget.dataset.type;
+    let slectedRotation = event.currentTarget.dataset.type;
     if (slectedRotation == 'Text') {
       this.rotationValue = event.target.value;
       this.outerDabba = `transform: rotate(${this.rotationValue}deg);`;
@@ -1339,26 +1347,26 @@ export default class TemplateDesignerCMP extends NavigationMixin(LightningElemen
    */
   handleWaterMarkSave() {
     try{
-      let canvasText = this.template.querySelector('.canvasText');
-      if (canvasText && this.watermarkText !== '') {
-        let dataURLText = canvasText.toDataURL();
-        this.baseDataLst.push({ 'text': dataURLText.split(',')[1], title:'Text' });
-      }
+    let canvasText = this.template.querySelector('.canvasText');
+    if (canvasText && this.watermarkText !== '') {
+      let dataURLText = canvasText.toDataURL();
+      this.baseDataLst.push({ 'text': dataURLText.split(',')[1], title:'Text' });
+    }
 
-      let canvasImage = this.template.querySelector('.canvasImage');
-      if (canvasImage && this.imageUrl) {
-        let dataURLImage = canvasImage.toDataURL();
-        this.baseDataLst.push({ 'Image': dataURLImage.split(',')[1], title:'Image' });
-      }
+    let canvasImage = this.template.querySelector('.canvasImage');
+    if (canvasImage && this.imageUrl) {
+      let dataURLImage = canvasImage.toDataURL();
+      this.baseDataLst.push({ 'Image': dataURLImage.split(',')[1], title:'Image' });
+}
     } catch(error) {
       console.log('error while getting canvas line 1230 templatedesignerCMP --> ', error);
     }
 
-    const originalImageMap = this.baseDataLst.find(entry => entry.title === 'OriginalImg');
+        const originalImageMap = this.baseDataLst.find(entry => entry.title === 'OriginalImg');
     this.hasOriginalImage = originalImageMap != undefined ? true : false;
     saveContentVersion({ title: "WatermarkImage", base64DataList: this.baseDataLst, templateId: this.documenttemplaterecordid, wtImage : this.hasOriginalImage })
       .then(result => {
-        this.imageSavedId = result;
+                this.imageSavedId = result;
         const fields = {};
         this.baseDataLst =[];
         let watermarkText = (result.filter(obj => Object.keys(obj).some(key => key.includes('Text'))) || [])[0];
@@ -1392,7 +1400,7 @@ export default class TemplateDesignerCMP extends NavigationMixin(LightningElemen
           rotation: this.rotationImagevalue,
           pageImageOption: this.pageImageOption,
           imageScale: this.imageScalingValue,
-          originalImageCVId : this.originalImageCvId
+          originalImageCVId: this.originalImageCvId
         };
         fields[DOCUMENTTEMPLATEID_FIELD.fieldApiName] = this.documenttemplaterecordid;
         let jsonDataLst = [watermarkImageIdText, watermarkImageIdImage];
@@ -1411,17 +1419,17 @@ export default class TemplateDesignerCMP extends NavigationMixin(LightningElemen
             //resetting previous Text Totation & Image Rotation values
             this.previousRotationValue = '0';
             this.showwatermarkbtn = false;
-            this.fontSizeValue ='22';
-            this.opacityValue ='1.0';
+            this.fontSizeValue = '22';
+            this.opacityValue = '1.0';
             this.watermarkText = '';
             this.colorValue = '';
-            this.rotationValue ='0';
+            this.rotationValue = '0';
             this.checkedValText = true;
-            this.checkedValImage =  false;
+            this.checkedValImage = false;
             this.pageTextOption = 'All Pages - Text';
-            this.pageImageOption =  'All Pages -  Image';
+            this.pageImageOption = 'All Pages -  Image';
             this.imageScalingValue = '100';
-            this.rotationImagevalue ='0';
+            this.rotationImagevalue = '0';
             this.opacityImageValue = '1.0';
             this.callImage = 0;
             this.updateCheckedValue(this.pageTextOption, this.watermarkPageOptionsText);
@@ -1473,11 +1481,11 @@ export default class TemplateDesignerCMP extends NavigationMixin(LightningElemen
   * @param {Object} event
   */
   handleUploadFinished(event) {
-this.previousRotationValue = '0';
+    this.previousRotationValue = '0';
     this.previousImgRotationValue = '0';
     this.imageScalingValue = '0';
     const file = event.target.files[0];
-this.resetImageWatermarkFields();
+    this.resetImageWatermarkFields();
     const reader = new FileReader();
     reader.onload = () => {
       this.imageUrl = reader.result;
@@ -1589,25 +1597,25 @@ this.resetImageWatermarkFields();
     try{
       getDocumentTemplateData({ templateId: this.recordId }).then(result => {
         if (result != null) {
-          
+
           let savedWaterMarkData = JSON.parse(result.DxCPQ__Watermark_Data__c);
-        if(this.activeTab == ''){
-          this.fontSizeValue = savedWaterMarkData[0].fontsize;
-          this.opacityValue = savedWaterMarkData[0].opacity;
-          this.checkedValText = savedWaterMarkData[0].isPrimary;
-          this.pageTextOption = savedWaterMarkData[0].pageTextOption;
-          this.watermarkText = savedWaterMarkData[0].textVal;
-          this.colorValue = savedWaterMarkData[0].color;
-          this.rotationValue = savedWaterMarkData[0].rotation;
-          this.updateCheckedValue(this.pageTextOption, this.watermarkPageOptionsText);
-          this.rotationImagevalue = savedWaterMarkData[1].rotation;
-          this.imageScalingValue = savedWaterMarkData[1].imageScale;
-          this.pageImageOption = savedWaterMarkData[1].pageImageOption;
-          this.checkedValImage = savedWaterMarkData[1].isPrimary;
-          this.opacityImageValue = savedWaterMarkData[1].opacity;
-          let imageOriginalImage = savedWaterMarkData[1].originalImageCVId;
-          this.prevoriginalImageCvId = savedWaterMarkData[1].originalImageCVId;
-          this.updateCheckedValue(this.pageImageOption, this.watermarkPageOptionsImage);
+          if(this.activeTab == ''){
+            this.fontSizeValue = savedWaterMarkData[0].fontsize;
+            this.opacityValue = savedWaterMarkData[0].opacity;
+            this.checkedValText = savedWaterMarkData[0].isPrimary;
+            this.pageTextOption = savedWaterMarkData[0].pageTextOption;
+            this.watermarkText = savedWaterMarkData[0].textVal;
+            this.colorValue = savedWaterMarkData[0].color;
+            this.rotationValue = savedWaterMarkData[0].rotation;
+            this.updateCheckedValue(this.pageTextOption, this.watermarkPageOptionsText);
+            this.rotationImagevalue = savedWaterMarkData[1].rotation;
+            this.imageScalingValue = savedWaterMarkData[1].imageScale;
+            this.pageImageOption = savedWaterMarkData[1].pageImageOption;
+            this.checkedValImage = savedWaterMarkData[1].isPrimary;
+            this.opacityImageValue = savedWaterMarkData[1].opacity;
+            let imageOriginalImage = savedWaterMarkData[1].originalImageCVId;
+            this.prevoriginalImageCvId = savedWaterMarkData[1].originalImageCVId;
+            this.updateCheckedValue(this.pageImageOption, this.watermarkPageOptionsImage);
           }
           if(this.activeTab == 'Text'){
             this.fontSizeValue = savedWaterMarkData[0].fontsize;
@@ -1619,8 +1627,8 @@ this.resetImageWatermarkFields();
             this.colorValue = savedWaterMarkData[0].color;
             this.rotationValue = savedWaterMarkData[0].rotation;
             this.updateCheckedValue(this.pageTextOption, this.watermarkPageOptionsText);
-          this.generateCanvas();
-}
+            this.generateCanvas();
+          }
           else if(this.activeTab == 'Image'){
             this.rotationImagevalue = savedWaterMarkData[1].rotation;
             this.imageScalingValue = savedWaterMarkData[1].imageScale;
@@ -1653,14 +1661,14 @@ this.resetImageWatermarkFields();
     }
   }
 
-/**
+  /**
   * Method to show up the Template/Watermark help document
   * @param {Object} event
   */
   handlehelp(event){
     let relatedObjectsMap = this.pdfLinksData.find(item => item.MasterLabel === event.currentTarget.dataset.val);
     let pdfUrl = relatedObjectsMap ? relatedObjectsMap.DxCPQ__Section_PDF_URL__c : null;
-        const config = {
+     const config = {
       type: 'standard__webPage',
       attributes: {
         url: pdfUrl
@@ -1679,7 +1687,7 @@ this.resetImageWatermarkFields();
     this.fontSizeValue = '22';
     this.opacityImageValue = '1.0';
     this.opacityValue = '1.0';
-    this.color ='#000000';
+    this.color = '#000000';
     this.rotationValue = '0';
     this.rotationImagevalue = '0';
     this.imageScalingValue = '100';
@@ -1702,8 +1710,8 @@ this.resetImageWatermarkFields();
     this.checkedValText = true;
     this.checkedValImage = false;
     this.pageTextOption = 'All Pages - Text';
-    this.imageScalingValue ='100';
-    this.opacityImageValue ='1.0';
+    this.imageScalingValue = '100';
+    this.opacityImageValue = '1.0';
     this.rotationImagevalue = '0';
     this.pageImageOption = 'All Pages - Image';
     this.callImage = 0;
