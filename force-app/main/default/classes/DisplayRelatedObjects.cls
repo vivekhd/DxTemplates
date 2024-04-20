@@ -189,8 +189,7 @@ public with sharing class DisplayRelatedObjects {
                 for(Object ptrFieldTotal : fieldsObjList) {
                     if(currencyFieldTotals.containsKey((String) ptrFieldTotal) && subTotFieldNames.contains(ptrFieldTotal)) {
                         totType.addValue(currencyFieldTotals.get((String) ptrFieldTotal));
-                    }
-                    else {
+                    } else {
                         totType.addValue('Empty');
                     }
                 }
@@ -328,23 +327,20 @@ public with sharing class DisplayRelatedObjects {
                 if(selfield.contains('.')){
                     if(selfield.contains('__r')){
                         String fieldcstm = selfield.replace('__r' , '__c');
-                        List<String> tempfield = fieldcstm.split('\\.');
-                        
+                        List<String> tempfield = fieldcstm.split('\\.');                        
                         // Related Object other than User Object
-                        String objNameLkp = getLkpObjectApi(objName,tempfield[0]);
-                        
+                        String objNameLkp = getLkpObjectApi(objName,tempfield[0]);                        
                         tempfield.remove(0);
                         Map<String,String> fieldnameTypeLookup = getObjectFieldTypeMap(objNameLkp,tempfield);
                         fieldNameType.put(selfield,fieldnameTypeLookup.get(tempfield[0]));
-                    }
-                    else{
+                    } else {
                         List<String> tempfield = selfield.split('\\.');
-                        tempfield.remove(0);
-                        Map<String,String> fieldnameTypeLookup = getObjectFieldTypeMap('User',tempfield);
-                        fieldNameType.put(selfield,fieldnameTypeLookup.get(tempfield[0]));
+                        Map<String,String> userFieldMap = new Map<String,String> {'LastModifiedBy' => 'User', 'CreatedBy' => 'User', 'Owner'=>'User', 'Parent' => tempfield[0]};
+                        String checkUserField = userFieldMap.containsKey(tempfield[0]) ? userFieldMap.get(tempfield[0]) : tempField[0];
+                        Map<String,String> fieldNameTypeLookup = getObjectFieldTypeMap(tempfield[0],new List<String> {tempfield[1]});
+                        fieldNameType.put(selfield,fieldNameTypeLookup.get(tempfield[1]));
                     }
-                }
-                else{
+                } else {
                     String fielddataType = String.valueof(fieldMap.get(selfield).getDescribe().getType());
                     fieldNameType.put(selfield,fielddataType);
                 }
@@ -385,71 +381,57 @@ public with sharing class DisplayRelatedObjects {
     public Static RowWrapper recordDataWrapperCreation(List<Object> fieldsObjList, Sobject currRecord, Map<String,String> fieldNameType){
         RowWrapper recType = new RowWrapper();
         recType.type='Record';
-       
-        	try{
-                for(Object field : fieldsObjList){
-                    String fieldStr = (String) field;
-                    Object recVal;             
-                    recType.addValue(fieldNameType.get(fieldStr));
-                    Map<String, Object> currRecordLkpData = (Map<String, Object>) JSON.deserializeUntyped(JSON.serialize(currRecord));
-                    
-                    if(fieldStr.contains('__r')) {
-                        List<String> lkpFieldSplit = fieldStr.split('\\.');
-                        if(currRecordLkpData.containsKey(lkpFieldSplit[0])) {	
-                            Map<String, Object> childLkpData = (Map<String, Object>) currRecordLkpData.get(lkpFieldSplit[0]);
-                            recVal = childLkpData.get(lkpFieldSplit[1]);
-                            
-                            if(currencyFieldTotals.containsKey(fieldStr))
-                            {
-                                if(recVal == null) {recVal = 0;}
-                                
-                                Decimal tempValueTotal = currencyFieldTotals.get(fieldStr) + (Decimal) recVal;
-                                currencyFieldTotals.put(fieldStr, tempValueTotal);
-                                
-                                Decimal tempValueSubTotal = currencyFieldSubTotals.get(fieldStr) + (Decimal) recVal;
-                                currencyFieldSubTotals.put(fieldStr, tempValueSubTotal);
-                            } 
-                        }
-                        else{
-                            recVal = ' ';
-                        }
-                    }
-                    else if(!fieldStr.contains('__r') && fieldStr.contains('.')){
-                        List<String> lkpFieldSplit = fieldStr.split('\\.');
+        try{
+            for(Object field : fieldsObjList){
+                String fieldStr = (String) field;
+                Object recVal;             
+                recType.addValue(fieldNameType.get(fieldStr));
+                Map<String, Object> currRecordLkpData = (Map<String, Object>) JSON.deserializeUntyped(JSON.serialize(currRecord));
+                
+                if(fieldStr.contains('__r')) {
+                    List<String> lkpFieldSplit = fieldStr.split('\\.');
+                    if(currRecordLkpData.containsKey(lkpFieldSplit[0])) {	
                         Map<String, Object> childLkpData = (Map<String, Object>) currRecordLkpData.get(lkpFieldSplit[0]);
-                        recVal = childLkpData.get(lkpFieldSplit[1]);
+                        recVal = childLkpData.get(lkpFieldSplit[1]);                        
                         if(currencyFieldTotals.containsKey(fieldStr)) {
-                            if(recVal == null) {recVal = 0;}
-                            
+                            recVal =  (recVal == null) ? 0 : recVal;
                             Decimal tempValueTotal = currencyFieldTotals.get(fieldStr) + (Decimal) recVal;
-                            currencyFieldTotals.put(fieldStr, tempValueTotal);
-                            
-                            Decimal tempValueSubTotal = currencyFieldSubTotals.get(fieldStr) + (Decimal) recVal;
-                            currencyFieldSubTotals.put(fieldStr, tempValueSubTotal);
-                        }
-                    }
-                    else {
-                        recVal = currRecord.get(fieldStr);
-                        if(currencyFieldTotals.containsKey(fieldStr))  {
-                            if(recVal == null) {recVal = 0;}
-                            
-                            Decimal tempValueTotal = currencyFieldTotals.get(fieldStr) + (Decimal) recVal;
-                            currencyFieldTotals.put(fieldStr, tempValueTotal);
-                            
+                            currencyFieldTotals.put(fieldStr, tempValueTotal);                            
                             Decimal tempValueSubTotal = currencyFieldSubTotals.get(fieldStr) + (Decimal) recVal;
                             currencyFieldSubTotals.put(fieldStr, tempValueSubTotal);
                         } 
+                    } else {
+                        recVal = ' ';
                     }
-                    rOHtmlContent = rOHtmlContent + '<td scope="col" style="border: 1px solid black; text-align: center;">' + recVal + '</td>';
-                    recType.addValue(recVal);
+                } else if(!fieldStr.contains('__r') && fieldStr.contains('.')){
+                    List<String> lkpFieldSplit = fieldStr.split('\\.');
+                    Map<String, Object> childLkpData = (Map<String, Object>) currRecordLkpData.get(lkpFieldSplit[0]);
+                    recVal = childLkpData.get(lkpFieldSplit[1]);
+                    if(currencyFieldTotals.containsKey(fieldStr)) {
+                        recVal =  (recVal == null) ? 0 : recVal;
+                        Decimal tempValueTotal = currencyFieldTotals.get(fieldStr) + (Decimal) recVal;
+                        currencyFieldTotals.put(fieldStr, tempValueTotal);                        
+                        Decimal tempValueSubTotal = currencyFieldSubTotals.get(fieldStr) + (Decimal) recVal;
+                        currencyFieldSubTotals.put(fieldStr, tempValueSubTotal);
+                    }
+                } else {
+                    recVal = currRecord.get(fieldStr);
+                    if(currencyFieldTotals.containsKey(fieldStr))  {
+                        recVal =  (recVal == null) ? 0 : recVal;                        
+                        Decimal tempValueTotal = currencyFieldTotals.get(fieldStr) + (Decimal) recVal;
+                        currencyFieldTotals.put(fieldStr, tempValueTotal);                        
+                        Decimal tempValueSubTotal = currencyFieldSubTotals.get(fieldStr) + (Decimal) recVal;
+                        currencyFieldSubTotals.put(fieldStr, tempValueSubTotal);
+                    } 
                 }
+                rOHtmlContent = rOHtmlContent + '<td scope="col" style="border: 1px solid black; text-align: center;">' + recVal + '</td>';
+                recType.addValue(recVal);
             }
-        Catch(Exception ex) {
+        } catch(Exception ex) {
             if(errType==null){
                 errType = ex.getTypeName();
                 LogHandler.createLog((Id) null,'DisplayRelatedObjects.recordDataWrapperCreation()','Template Id- '+currTemplate+' '+ex.getLineNumber()+ex.getStackTraceString()+ex.getCause(),ex.getMessage(),'Exception');
-            }
-            else if(ex.getTypeName()!=errType) {
+            } else if(ex.getTypeName()!=errType) {
                 LogHandler.createLog((Id) null,'DisplayRelatedObjects.recordDataWrapperCreation()','Template Id- '+currTemplate+' '+ex.getLineNumber()+ex.getStackTraceString()+ex.getCause(),ex.getMessage(),'Exception');
             }
         }

@@ -1,0 +1,17 @@
+.chart-section-visible-class {
+  animation-name : chart-section-visible; 
+  animation-duration : 2s;
+  animation-timing-function : ease-in-out;
+}
+
+@keyframes chart-section-visible {
+  0% {
+    border-radius: 5px;
+    box-shadow: 0 0 6px 6px rgba(11, 92, 171, 1);
+    transition: all 4s ease-in-out;
+  }
+  100% {
+    box-shadow: none;
+    border-radius: 5px;
+  }
+}

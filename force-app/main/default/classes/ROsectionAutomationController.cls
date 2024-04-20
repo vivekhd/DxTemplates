@@ -60,7 +60,7 @@ public with sharing class ROsectionAutomationController {
             Map<String,Object> subTotalRowStyles = (Map<String,Object>) rowStyleList.get('subTotal');
 
             String totalRowBGcolor = String.valueOf(totalRowStyles.get('totalRowBGcolor'));
-            String totalRowFontcolor = String.valueOf(totalRowStyles.get('totalRowFontcolor'));
+            String totalRowFontcolor = String.valueOf(totalRowStyles.get('totalRowFontColor'));
             String subTotalRowBGColor = String.valueOf(subTotalRowStyles.get('subTotalRowBGColor'));            
             String subTotalRowFontColor = String.valueOf(subTotalRowStyles.get('subTotalRowFontColor'));
 
@@ -93,7 +93,7 @@ public with sharing class ROsectionAutomationController {
             Boolean displayChartInNewPage = (Boolean) contentAndStylingMap.get('chartNewPage');
             String barChartColor = (String) contentAndStylingMap.get('chartBarColor');
             String chartLabel = (String) contentAndStylingMap.get('chartLabel');
-            String chartYAxis = (String) contentAndStylingMap.get('selGraphvalue');
+            String chartYAxis = (String) selectedFieldAsHeaderAPIList[selectedFieldsAsHeaderLabelList.indexOf(contentAndStylingMap.get('selGraphvalue'))];
             Map<String,Decimal> categorySubTotalValueMap = new Map<String,Decimal> {};
             Map<String,Map<String,String>> chartQuantifiers = new Map<String,Map<String,String>> {};
 			
@@ -142,7 +142,7 @@ public with sharing class ROsectionAutomationController {
                             recordCategoryMap.put('Others',recordList);
                         }
                     }
-                }
+                }      
                 Boolean firstTDblock ;
 
                 for(Object key: recordCategoryMap.keyset())  {
@@ -159,7 +159,7 @@ public with sharing class ROsectionAutomationController {
                         if(displaySerialNumber)  {
                             roHtmlContent = roHtmlContent + '<td scope="col" style="border: 1px solid black; text-align: center;">' + tableSerialNumber  + '</td>';
                         }
-                        dataFetchFromCurrentRecord(selectedFieldAsHeaderAPIList, currRecord, fieldNameType);
+                        dataFetchFromCurrentRecord(selectedFieldAsHeaderAPIList, ((Map<String, Object>) JSON.deserializeUntyped(JSON.serialize(currRecord))), fieldNameType);
                         roHtmlContent += '</tr>';
                         tableSerialNumber+=1; 
                     }                 
@@ -193,7 +193,6 @@ public with sharing class ROsectionAutomationController {
                 if(currencyFieldTotals.size() > 0)  {
                     roHtmlContent += '<tr>';
                     roHtmlContent += '<td colspan="1" scope="col" style="border: 1px solid black; background-color:' + totalRowBGcolor  + ' ; color: ' + totalRowFontcolor + ' ; border-right-style: none; font-size: 12px">Grand Total</td>';
-                    
                     for(Object ptrFieldTotal : selectedFieldAsHeaderAPIList) {
                         if(currencyFieldTotals.containsKey((String) ptrFieldTotal) && subTotFieldNames.contains(ptrFieldTotal)) {
                             roHtmlContent += '<td colspan="1" scope="col" style="border: 1px solid black; background-color:' + totalRowBGcolor  + ';color:' + totalRowFontcolor + ';border-right-style:none; text-align: center; border-left-style:none;\">' + currencyFieldTotals.get((String) ptrFieldTotal) + '</td>';
@@ -218,7 +217,7 @@ public with sharing class ROsectionAutomationController {
                     if(displaySerialNumber)  {
                         roHtmlContent = roHtmlContent + '<td scope="col" style="border: 1px solid black; text-align: center;">' + tableSerialNumber  + '</td>';
                     }
-                    dataFetchFromCurrentRecord(selectedFieldAsHeaderAPIList, currRecord, fieldNameType);                  
+                    dataFetchFromCurrentRecord(selectedFieldAsHeaderAPIList, ((Map<String, Object>) JSON.deserializeUntyped(JSON.serialize(currRecord))), fieldNameType);                  
                     roHtmlContent += '</tr>';
                     tableSerialNumber += 1;
                 }
@@ -231,8 +230,7 @@ public with sharing class ROsectionAutomationController {
                     for(Object ptrFieldTotal : selectedFieldAsHeaderAPIList) {
                         if(currencyFieldTotals.containsKey((String) ptrFieldTotal) && subTotFieldNames.contains(ptrFieldTotal)) {
                             roHtmlContent += '<td colspan="1" scope="col" style="border: 1px solid black; background-color:' + totalRowBGcolor  + ';color:' + totalRowFontcolor + ';border-right-style:none; border-left-style:none;\">' + currencyFieldTotals.get((String) ptrFieldTotal) + '</td>';
-                        }
-                        else {
+                        } else {
                             if(firstTDblock)  {
                                 roHtmlContent += '<td colspan="1" scope="col" style="border: 1px solid black; background-color:' + totalRowBGcolor  + ' ; color: ' + totalRowFontcolor + ';border-right-style: none;border-left-style:none;\"> </td>';
                             }                            
@@ -284,7 +282,6 @@ public with sharing class ROsectionAutomationController {
                 chartContent +='<tr> <td style="text-align: center;"> Categories </td> </tr> </table> </div>';
                 roHtmlContent+=chartContent;
             }
-            
             return roHtmlContent;
         }
         catch(Exception ex) {
@@ -318,21 +315,19 @@ public with sharing class ROsectionAutomationController {
                         tempfield.remove(0);
                         Map<String,String> fieldNameTypeLookup = getObjectFieldTypeMap(objNameLkp,tempfield);
                         fieldNameType.put(selfield,fieldNameTypeLookup.get(tempfield[0]));
-                    }
-                    else {
+                    } else {
                         List<String> tempfield = selfield.split('\\.');
-                        tempfield.remove(0);
-                        Map<String,String> fieldNameTypeLookup = getObjectFieldTypeMap('User',tempfield);
-                        fieldNameType.put(selfield,fieldNameTypeLookup.get(tempfield[0]));
+                        Map<String,String> userFieldMap = new Map<String,String> {'LastModifiedBy' => 'User', 'CreatedBy' => 'User', 'Owner'=>'User', 'Parent' => tempfield[0]};
+                        String checkUserField = userFieldMap.containsKey(tempfield[0]) ? userFieldMap.get(tempfield[0]) : tempField[0];
+                        Map<String,String> fieldNameTypeLookup = getObjectFieldTypeMap(tempfield[0],new List<String> {tempfield[1]});
+                        fieldNameType.put(selfield,fieldNameTypeLookup.get(tempfield[1]));
                     }
-                }
-                else {
-                    String fielddataType = String.valueof(fieldMap.get(selfield).getDescribe().getType());
+                }  else {
+                    String fielddataType = String.valueof(fieldMap.get(selfield.tolowercase()).getDescribe().getType());
                     fieldNameType.put(selfield,fielddataType);
                 }
             }
-        }
-        catch(Exception ex) {
+        } catch(Exception ex) {
             LogHandler.createLog((Id) null,'ROsectionAutomationController.getObjectFieldTypeMap()','Template Id- '+ relatedObjectSectionID + ' ' + ex.getLineNumber() + ex.getStackTraceString() + ex.getCause(),ex.getMessage(),'Exception');   
         }
         return fieldNameType;
@@ -363,15 +358,12 @@ public with sharing class ROsectionAutomationController {
  * @param currRecord Current record from which data is extracted.
  * @param fieldNameType Mapping of field API names to their data types.
  */
-    public static void dataFetchFromCurrentRecord(List<Object> selectedFieldAsHeaderAPIList, Sobject currRecord, Map<String,String> fieldNameType)  {
-       try{
+    public static void dataFetchFromCurrentRecord(List<Object> selectedFieldAsHeaderAPIList, Map<String,Object> currRecordLkpData, Map<String,String> fieldNameType)  {
+        try{
             for(Object field : selectedFieldAsHeaderAPIList) {
                 Object recVal;   
                 String fieldStr = (String) field;
                 String fieldTypeAsText = ((String) fieldNameType.get(fieldStr)).toUpperCase();
-
-                Map<String, Object> currRecordLkpData = (Map<String, Object>) JSON.deserializeUntyped(JSON.serialize(currRecord));
-                
                 if(fieldStr.contains('__r')) {
                     List<String> lkpFieldSplit = fieldStr.split('\\.');
                     if(currRecordLkpData.containsKey(lkpFieldSplit[0])) {	
@@ -379,39 +371,66 @@ public with sharing class ROsectionAutomationController {
                         recVal = childLkpData.get(lkpFieldSplit[1]);
                         
                         if(currencyFieldTotals.containsKey(fieldStr))  {
-                            if(recVal == null) {recVal = 0;}
-                            
+                            if(recVal == null){
+                                recVal = 0;
+                            } else {
+                                if (fieldTypeAsText == 'NUMBER') {
+                                    recVal = (handleCurrencyNumberFormat(String.valueOf(recVal), numberFormat));
+                                }
+                                else if (fieldTypeAsText == 'CURRENCY') {
+                                    recval = (handleCurrencyNumberFormat(String.valueOf(recVal), currencyFormat));
+                                } else {
+                                    recVal = 0;
+                                }
+                            }
                             Decimal tempValueTotal = currencyFieldTotals.get(fieldStr) + (Decimal) recVal;
                             currencyFieldTotals.put(fieldStr, tempValueTotal);
                             
                             Decimal tempValueSubTotal = currencyFieldSubTotals.get(fieldStr) + (Decimal) recVal;
                             currencyFieldSubTotals.put(fieldStr, tempValueSubTotal);
                         } 
-                    }
-                    else {
+                    } else {
                         recVal = ' ';
                     }
-                }
-                else if(!fieldStr.contains('__r') && fieldStr.contains('.'))  {
+                } else if(!fieldStr.contains('__r') && fieldStr.contains('.'))  {
                     List<String> lkpFieldSplit = fieldStr.split('\\.');
                     Map<String, Object> childLkpData = (Map<String, Object>) currRecordLkpData.get(lkpFieldSplit[0]);
                     recVal = childLkpData.get(lkpFieldSplit[1]);
                     
                     if(currencyFieldTotals.containsKey(fieldStr)) {
-                        if(recVal == null) {recVal = 0;}
-                        
+                        if(recVal == null){
+                            recVal = 0;
+                        } else {
+                            if (fieldTypeAsText == 'NUMBER') {
+                                recVal = (handleCurrencyNumberFormat(String.valueOf(recVal), numberFormat));
+                            }
+                            else if (fieldTypeAsText == 'CURRENCY') {
+                                recval = (handleCurrencyNumberFormat(String.valueOf(recVal), currencyFormat));
+                            } else {
+                                recVal = 0;
+                            }
+                        }                        
                         Decimal tempValueTotal = currencyFieldTotals.get(fieldStr) + (Decimal) recVal;
                         currencyFieldTotals.put(fieldStr, tempValueTotal);
                         
                         Decimal tempValueSubTotal = currencyFieldSubTotals.get(fieldStr) + (Decimal) recVal;
                         currencyFieldSubTotals.put(fieldStr, tempValueSubTotal);
                     }
-                }
-                else {
-                    recVal = currRecord.get(fieldStr);
+                } else {
+                    recVal = currRecordLkpData.get(fieldStr);
                     if(currencyFieldTotals.containsKey(fieldStr))  {
-                        if(recVal == null) {recVal = 0;}
-                        
+                        if(recVal == null){
+                            recVal = 0;
+                        } else {
+                            if (fieldTypeAsText == 'NUMBER') {
+                                recVal = (handleCurrencyNumberFormat(String.valueOf(recVal), numberFormat));
+                            }
+                            else if (fieldTypeAsText == 'CURRENCY') {
+                                recval = (handleCurrencyNumberFormat(String.valueOf(recVal), currencyFormat));
+                            } else {
+                                recVal = 0;
+                            }
+                        }                        
                         Decimal tempValueTotal = currencyFieldTotals.get(fieldStr) + (Decimal) recVal;
                         currencyFieldTotals.put(fieldStr, tempValueTotal);
                         
@@ -440,10 +459,12 @@ public with sharing class ROsectionAutomationController {
                     }
                     else if (fieldTypeAsText == 'NUMBER') {
                         returnedFormattedValue = String.valueOf(handleCurrencyNumberFormat(returnedFormattedValue, numberFormat));
+                        if(returnedFormattedValue == null) returnedFormattedValue = '';
                         cellTDwidth = '30px';
                     }
                     else if (fieldTypeAsText == 'CURRENCY') {
                         returnedFormattedValue = String.valueOf(handleCurrencyNumberFormat(returnedFormattedValue, currencyFormat));
+                        if(returnedFormattedValue == null) returnedFormattedValue = '';
                         cellTDwidth = '30px';
                     }
                     
@@ -580,13 +601,13 @@ public with sharing class ROsectionAutomationController {
  * @param roundPattern String representing the rounding pattern for the numerical value.
  * @return Object containing the formatted Decimal value or 'Error' if an exception occurs during the formatting.
  */
-    public static Object handleCurrencyNumberFormat(String fieldValue, String roundPattern)  {
+    public static Decimal handleCurrencyNumberFormat(String fieldValue, String roundPattern)  {
         try {
             Decimal value = (Decimal.valueOf(fieldValue)).setScale(Integer.valueOf(roundPattern));
-            return (Object) value;
+            return value;
         }
         catch(Exception ex)  {
-            return (Object) 'Error';
+            return null;
         }
     }
 

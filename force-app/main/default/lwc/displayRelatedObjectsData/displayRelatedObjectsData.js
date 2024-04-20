@@ -226,43 +226,33 @@ export default class DisplayRelatedObjectsData extends LightningElement {
             cellData.style = 'border: 1px solid black; text-align: center;';
             cellData.imgcell = true;
             cellData.width = '100px';
-        }
-        else {
+        } else {
             if (records[i] == null) {
                 cellData.value = '';
-            }
-            else if (records[i - 1] == 'DATETIME') {
+            } else if (records[i - 1] == 'DATETIME') {
                 let dateList = records[i].split('T')[0].split('-');
                 let timeStr = records[i].split('T')[1].split('.');
                 cellData.value = this.handleDateTime(dateList, this.dateFormatStr, timeStr[0], this.timeFormatStr, -1);
-
-            }
-            else if (records[i - 1] == 'TIME') {
+            } else if (records[i - 1] == 'TIME') {
                 let timeStr = records[i].split('T')[0].split('.');
                 cellData.value = this.handleDateTime(null, null, timeStr[0], this.timeFormatStr, 1);
-            }
-            else if (records[i - 1] == 'DATE') {
+            } else if (records[i - 1] == 'DATE') {
                 let dateList = records[i].split('T')[0].split('-');
                 cellData.value = this.handleDateTime(dateList, this.dateFormatStr, null, null, 0);
-            }
-            else if (records[i - 1] == 'CURRENCY') {
+            } else if (records[i - 1] == 'CURRENCY') {
                 this.currencyIndexCounter.push(Math.floor(i/2));
                 cellData.value = this.currencySymbols[this.currencyLabel]+ '' + Number(records[i]).toFixed(this.currencyFormat);
-            }
-            else if (records[i - 1] == 'NUMBER') {
+            } else if (records[i - 1] == 'NUMBER' || (records[i - 1] == 'DOUBLE')) {
                 cellData.value = Number(records[i]).toFixed(this.numberFormat);
-            }
-            else { cellData.value = records[i]; }
+            } else { cellData.value = records[i]; }
 
             cellData.style = 'border: 1px solid black; text-align: center;';
             cellData.imgcell = false;
             if (records[i - 1] == 'CURRENCY' || records[i - 1] == 'NUMBER' || records[i - 1] == 'BOOLEAN') {
                 cellData.width = '30px';
-            }
-            else if (records[i - 1] == 'ID') {
+            } else if (records[i - 1] == 'ID') {
                 cellData.width = '60px';
-            }
-            else {
+            } else {
                 cellData.width = '100px';
             }
         }

@@ -1,20 +1,21 @@
 import { LightningElement, track, api} from 'lwc';
+import rte_tbl from '@salesforce/resourceUrl/rte_tbl';
 import {loadStyle } from 'lightning/platformResourceLoader';
+import createLog from '@salesforce/apex/LogHandler.createLog';
 import { createRuleConditionHierarcy } from 'c/conditionUtil';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
-import rte_tbl from '@salesforce/resourceUrl/rte_tbl';
-import getFields from '@salesforce/apex/MergeFieldsClass.getFields';
 import dexcpqcartstylesCSS from '@salesforce/resourceUrl/dexcpqcartstyles';
 import getRelatedObjects from '@salesforce/apex/RelatedObjectsClass.getRelatedObjects';
 import getConditions from '@salesforce/apex/RelatedObjectsClass.getExistingConditions';
-import getGroupingOptions from '@salesforce/apex/RelatedObjectsClass.getGroupingValues';
 import deletetemplate from '@salesforce/apex/SaveDocumentTemplatesection.deletetemplate';
+import getSelectedRelatedObjectFields from '@salesforce/apex/MergeFieldsClass.getFields';
 import createRuleCondition from '@salesforce/apex/RelatedObjectsClass.createRuleCondition';
 import getSObjectListFiltering from '@salesforce/apex/RelatedObjectsClass.getSObjectListFiltering';
+import getSelectedObjectPicklistFields from '@salesforce/apex/RelatedObjectsClass.getGroupingValues';
 import gettemplatesectiondata from '@salesforce/apex/SaveDocumentTemplatesection.gettemplatesectiondata';
 import resetRulesForTemplate from '@salesforce/apex/RelatedObjectsClass.handleTemplateRuleResetCondition';
 import saveDocumentTemplateSectionDetails from '@salesforce/apex/SaveDocumentTemplatesection.saveDocumentTemplateSectionDetails';
-import createLog from '@salesforce/apex/LogHandler.createLog';
+
 
 export default class TemplateRelatedObjects extends LightningElement {
 
@@ -22,19 +23,15 @@ export default class TemplateRelatedObjects extends LightningElement {
     @api showrelatedobjectdetails;
     @api documenttemplaterecordid;
     @api documenttemplaterecord;
-    @api showdetails = false;
-    @api recordidtoedit = '';
     @api disableButton = false;
     @api disabledeleteButton = false;
     @api sectiontype = '';
     @api rowcount;
     @api sectionrecordid;
+
     @track showPicklist = false;
-    @track catStyle;
+    @track categoryStyleClass;
     @track showCalculatorFields = false;
-    @track tempbool = false;
-    @track flagVar = false;
-    @track relatedObjName1;
     @track Recorddetailsnew = {
         Name: '',
         DxCPQ__Section_Content__c: '',
@@ -45,32 +42,69 @@ export default class TemplateRelatedObjects extends LightningElement {
         Id: '',
         DxCPQ__RuleId__c: '',
     };
+    @track displayTableCategoryData = [];  
+    @track formats = ['font'];
+    @track listOfRelatedObjects = [];
+    @track listOfAddedFields = [];
+    @track displayTableHeaderData = [];
+    @track displayTableRowData = [];
+    @track allRelatedObjectsChoiceSet;
+    @track numericFieldsForSubTotalSelection = [];
+    @track selectedFieldsForSubTotalCalculation = [];
+    @track selectedSubTotalFieldLabelsList = [];
+    @track selectedSubTotalFieldAPIList = [];
+    referenceObjectsFieldDetailsMap = {};
 
+    listOfRemovedFields = [];
+    chartLabel = 'Chart';
+    selectedBarChartColor = '#007CBA';
+    selectedFieldToBeRemoved;
+    selectedField;
+    selectedfields;
+    showChartBox = true;
+    loadDisplayTableContent = false;
+    displaySaveTableButton = false;
+    selectedChildObjectName;
+    savedRecordID;
+    isLoaded = false;
+    fontsize = "10px";
+    selectedHFontColor = 'black';
+    selectedBFontColor = 'black';
+    selectedHbgColor = 'white';
+    selectedBBgcolor = 'white';
+    SerialNumber = false;
+    subtotal = false;
+    showdate = true;
+    showtime = true;
+    shownumber = true;
+    showcurrency = true;
+    subTotalFieldListForChartGeneration = [];
+    selectedSubTotalFieldForChartGeneration;
+    relatedRecordsGrouping = false;
+    nosubTotal = false;
+    displayChartSection = false;
+    chartControl = false;
+    chartNewPage = true;
+    newPage = false;
+    sectionSpan;
+    selectedGroupingPicklistOption = null;
     ruleCondition = false;
     selectedTableRow;
     childobjects;
     changedHeaders = [];
-    lstofchngedLabel = [];
-    @track showDone = false;
-    changedLabel;
+    renamedHeaderLabel;
     displayfields = false;
-    fieldoptions = [];
-    values = [];
     loadUp = false;
-    value = null;
-    @track tabsection = [];
-    show = false;
     showpicklistValues = false;
-    fieldsinlst = [];
-    getGroupingValues = [];
-    getpicklistdata = [];
-    getselectionfieldvalues = [];
+    selectedRelatedObjectPicklistFields = [];
+    selectedObjectAllPicklistValueSet = [];
+    selectedPicklistFieldValueSet = [];
     checkTotals = [];
     dateFormatvalue = '564/';
     timeFormatvalue = '124';
     numFormatvalue = '2';
     curFormatvalue = '1';
-    @track renderedData = false;
+    renderedData = false;
 
     //SubTotal and Total BG Color
     selectedSubTotalBGColor = '#0077b6';
@@ -84,15 +118,13 @@ export default class TemplateRelatedObjects extends LightningElement {
     selectedGlobalValue;
     ruleExpression;
     ruleConditions = [];
-    mapOfRC;
-    lstofactualConditions;
+    ruleConditionsWrapper;
+    listOfActualConditions;
     conditionExists = false;
     allConditions = [];
     ruleIdCreated = '';
     ruleExists = false;
     hasSpecialCharacter = false;
-    relationName = new Map();
-    @track formats = ['font'];
 
     get numformats() {
         return [{
@@ -229,12 +261,10 @@ export default class TemplateRelatedObjects extends LightningElement {
         ];
     }
 
+    get enableChartConfigurationOption(){
+        return this.isDisabled && this.showCalculatorFields;
+    }
 
-    @track allNumericalFields = [];
-    @track allnumValues = [];
-    @track numfieldvalue;
-    @track sectionSpan;
-    selectchildpicklist = null;
     calculateOptions = [{
             label: 'Calculate grand total',
             value: 'CalculateGrandTotal'
@@ -244,30 +274,7 @@ export default class TemplateRelatedObjects extends LightningElement {
             value: 'calculateSubTotal'
         }
     ];
-    @track listOfRelatedObjects = [];
-    @track listOfAddedFields = [];
-    lstofremovedFields = [];
-    chartLabel = 'Chart';
-    selectedBarChartColor = '#007CBA';
 
-    selectedFieldToBeRemoved;
-    selectedField;
-    showStatement = false;
-    showLstOfObj = false;
-    requiredOptions = [];
-    selectedfields;
-    showChartBox = true;
-    showtablecontent = false;
-    @track tableHeaders = [];
-    @track tablerows = [];
-    @track objectTypeOptions;
-    displaySaveTableButton = false;
-    fieldsdatamap = [];
-    selectedChildObjectName;
-    @track savedRecordID;
-    isLoaded = false;
-
-    fontsize = "10px";
     fontsizeoptions = [{
             value: '8px',
             label: '8'
@@ -323,67 +330,44 @@ export default class TemplateRelatedObjects extends LightningElement {
         }
     ];
 
-    selectedHFontColor = 'black';
-    selectedBFontColor = 'black';
-    selectedHbgColor = 'white';
-    selectedBBgcolor = 'white';
-    SerialNumber = false;
-    subtotal = false;
-    @track showNumberFields = [];
-    @track showNumberFieldsOptions = [];
-    showdate = true;
-    showtime = true;
-    shownumber = true;
-    showcurrency = true;
-    subtotalField = [];
-    subtotalFieldValue;
-    noGrouping = false;
-    nosubTotal = false;
-
-    displayChartSection = false;
-    chartControl = false;
-    chartNewPage = true;
-    newPage = false;
-
-    chartLst = [{
+    @track chartWithDemoData = [{
             "label": "group-1",
             "percent": "23%",
-            "height": `height:23%; `,
+            "height": `height:23%; background-color:${this.selectedBarChartColor}`,
             "width": "width : 13.571428571428571%;",
             "value": 2367510
         },
         {
             "label": "group-2",
             "percent": "32%",
-            "height": `height:32%; `,
+            "height": `height:32%; background-color:${this.selectedBarChartColor}`,
             "width": "width : 13.571428571428571%;",
             "value": 256372
         },
         {
             "label": "group-3",
             "percent": "20%",
-            "height": `height:20%; `,
+            "height": `height:20%; background-color:${this.selectedBarChartColor}`,
             "width": "width : 13.571428571428571%;",
             "value": 2867396
         },
         {
             "label": "group-4",
             "percent": "9%",
-            "height": `height:9%; `,
+            "height": `height:9%; background-color:${this.selectedBarChartColor}`,
             "width": "width : 13.571428571428571%;",
             "value": 1257704
         },
         {
             "label": "Others",
             "percent": "16%",
-            "height": `height:16%; `,
+            "height": `height:16%; background-color:${this.selectedBarChartColor}`,
             "width": "width : 13.571428571428571%;",
             "value": 2327405
         }
     ];
 
     //Template specific fix
-    childLookupAPI = '';
     sectionItemsToselect = [{
             label: 'New Page',
             value: 'New Page'
@@ -395,8 +379,8 @@ export default class TemplateRelatedObjects extends LightningElement {
     ];
 
     connectedCallback() {
-        this.tableHeaders = [];
-        this.tabsection = [];
+        this.displayTableHeaderData = [];
+        this.displayTableCategoryData = [];
         this.renderedData = false;
     }
 
@@ -404,7 +388,7 @@ export default class TemplateRelatedObjects extends LightningElement {
         this.renderedData = false;
         this.showPicklist = false;
         this.displayfields = false;
-        this.showtablecontent = false;
+        this.loadDisplayTableContent = false;
     }
 
     /*
@@ -417,47 +401,33 @@ export default class TemplateRelatedObjects extends LightningElement {
             ])
             .then(() => {})
             .catch(error => {
-                let tempError = error.toString();
-                let errorMessage = error.message || 'Unknown error message';
-                createLog({recordId:'', className:'templateRelatedObjects LWC Component', exceptionMessage:errorMessage, logData:tempError, logType:'Exception'});    
+                createLog({recordId:null, className:'templateRelatedObjects LWC Component', exceptionMessage: (error.message || 'Unknown error message'), logData: error.toString(), logType:'Exception'});        
             });
 
         this.newfontsize();
     }
 
-    // Changes by Kapil 
     @api handleObjectNameSelection(objName) {
-        getRelatedObjects({
-                selectedObject: objName
-            })
-            .then(result => {
-                if (result != null) {
-                    let options = [];
-                    for (var key in result) {
-                        options.push({
-                            label: key,
-                            value: key
-                        });
-                    }
-                    if (options != null && options != undefined) {
-                        this.objectTypeOptions = options;
-                        this.childobjects = result;
-                        if (!!this.objectTypeOptions && !!this.childobjects) {
-                            this.renderedData = true;
-                        }
+        getRelatedObjects({ selectedObject: objName })
+        .then(result => {
+            if (result != null) {
+                let options = Object.keys(result).map((key) => ({label: key, value: key}));
+                if (options != null && options != undefined) {
+                    this.allRelatedObjectsChoiceSet = options;
+                    this.childobjects = result;
+                    if (!!this.allRelatedObjectsChoiceSet && !!this.childobjects) {
+                        this.renderedData = true;
                     }
                 }
-            })
-            .catch(error => {
-                let tempError = error.toString();
-                let errorMessage = error.message || 'Unknown error message';
-                createLog({recordId:'', className:'templateRelatedObjects LWC Component', exceptionMessage:errorMessage, logData:tempError, logType:'Exception'});    
-            })
+            }
+        })
+        .catch(error => {
+            createLog({recordId:null, className:'templateRelatedObjects LWC Component', exceptionMessage: (error.message || 'Unknown error message'), logData: error.toString(), logType:'Exception'});     
+        })
     }
 
     @api handleActivateTemplate(isActive, objName) {
         this.selectedObjectName = objName;
-        this.relatedObjName1 = this.selectedObjectName;
         this.isDisabled = isActive;
         this.disableButton = isActive;
         this.disabledeleteButton = isActive;
@@ -470,11 +440,7 @@ export default class TemplateRelatedObjects extends LightningElement {
     */
     handlecheckboxChange(event) {
         const mystring = JSON.stringify(event.detail.value);
-        if (mystring.includes('New Page')) {
-            this.Recorddetailsnew.DxCPQ__New_Page__c = true;
-        } else {
-            this.Recorddetailsnew.DxCPQ__New_Page__c = false;
-        }
+        this.Recorddetailsnew.DxCPQ__New_Page__c = mystring.includes('New Page');
     }
 
     /*
@@ -482,28 +448,19 @@ export default class TemplateRelatedObjects extends LightningElement {
     */
     handlesectionDelete() {
         if (this.sectionrecordid.indexOf('NotSaved') !== -1) {
-            var firecustomevent = new CustomEvent('deletesectiondata', {
-                detail: this.sectionrecordid
-            });
-            this.dispatchEvent(firecustomevent);
+            this.dispatchEvent(new CustomEvent('deletesectiondata', {detail: this.sectionrecordid}));
         } else {
-            deletetemplate({
-                    secidtobedeleted: this.sectionrecordid,
-                    doctemplateid: this.documenttemplaterecordid
-                })
-                .then(result => {
-                    if (result != null) {
-                        var firecustomevent = new CustomEvent('deletesectiondata', {
-                            detail: this.sectionrecordid
-                        });
-                        this.dispatchEvent(firecustomevent);
-                    }
-                })
-                .catch(error => {
-                     let tempError = error.toString();
-            let errorMessage = error.message || 'Unknown error message';
-            createLog({recordId:'', className:'templateRelatedObjects LWC Component', exceptionMessage:errorMessage, logData:tempError, logType:'Exception'});
-                })
+            deletetemplate({ secidtobedeleted: this.sectionrecordid, doctemplateid: this.documenttemplaterecordid })
+            .then(result => {
+                if (result != null) {
+                    this.dispatchEvent(new CustomEvent('deletesectiondata', {
+                        detail: this.sectionrecordid
+                    }));
+                }
+            })
+            .catch(error => {
+                createLog({recordId:null, className:'templateRelatedObjects LWC Component', exceptionMessage: (error.message || 'Unknown error message'), logData: error.toString(), logType:'Exception'});     
+            })
         }
     }
 
@@ -530,37 +487,35 @@ export default class TemplateRelatedObjects extends LightningElement {
             DxCPQ__RuleId__c: '',
             Id: '',
         };
-        this.value = null;
-        this.values = [];
         this.selectedfields = '';
         this.selectedChildObjectName = '';
         this.displayfields = false;
-        this.showtablecontent = false;
+        this.loadDisplayTableContent = false;
         this.displaySaveTableButton = false;
-        this.tableHeaders = [];
-        this.tabsection = [];
-        this.noGrouping = false;
-        this.allnumValues = [];
+        this.displayTableHeaderData = [];
+        this.displayTableCategoryData = [];
+        this.relatedRecordsGrouping = false;
         this.chartControl = false;
         this.chartNewPage = true;
         this.listOfRelatedObjects = [];
         this.chartLabel = 'Chart';
         this.selectedBarChartColor = '#007CBA';
-        this.allNumericalFields = [];
         this.showCalculatorFields = false;
         this.displayChartSection = false;
-        this.subtotalFieldValue = '';
-        this.selectchildpicklist = '';
+        this.selectedSubTotalFieldForChartGeneration = null;
+        this.selectedGroupingPicklistOption = '';
         this.showPicklist = false;
-        this.showNumberFields = [];
-        this.subtotalField = [];
-        this.numfieldvalue = '';
+        this.numericFieldsForSubTotalSelection = [];
+        this.subTotalFieldListForChartGeneration = [];
+        this.selectedFieldsForSubTotalCalculation = [];
+        this.selectedSubTotalFieldLabelsList = [];
+        this.selectedSubTotalFieldAPIList = [];
         this.newPage = false;
         this.changedHeaders = [];
 
         // Filtering QLIs reset
         this.filteringCondition = '';
-        this.mapOfRC = new Map();
+        this.ruleConditionsWrapper = new Map();
         this.conditionsArr = [];
         this.conditionExists = false;
         this.allConditions = [];
@@ -581,21 +536,13 @@ export default class TemplateRelatedObjects extends LightningElement {
         this.fontfamily = "Verdana";
         this.fontsize = '10px';
         this.SerialNumber = false;
-        this.catStyle = '';
+        this.categoryStyleClass = '';
         this.selectedTotalBGColor = '#03045e';
         this.selectedSubTotalBGColor = '#0077b6';
         this.selectedTotalFontColor = '#FFFFFF';
         this.selectedSubTotalFontColor = '#FFFFFF';
-
-        this.template.querySelectorAll('lightning-checkbox-group ').forEach(element => {
-            if (element.value != null) {
-                element.value = '';
-            }
-        });
+        this.referenceObjectsFieldDetailsMap = {};
         this.isLoaded = false;
-        this.childLookupAPI = '';
-
-        // Changes by Kapil - Onload Fix
         this.handleObjectNameSelection(this.selectedObjectName);
     }
 
@@ -612,278 +559,269 @@ export default class TemplateRelatedObjects extends LightningElement {
       h. Colors
       i. Attributes
     */
-    @api loadsectionsectionvaluesforedit(recordID) {
+    @api 
+    async loadsectionsectionvaluesforedit(recordID) {
 
-        // Changes by Kapil - Onload Fix
         this.handleObjectNameSelection(this.selectedObjectName);
         this.isLoaded = true;
         this.sectionrecordid = recordID;
         this.Recorddetailsnew.Id = recordID;
 
-        this.tableHeaders = [];
-        this.tabsection = [];
-        this.getGroupingValues = [];
+        this.displayTableHeaderData = [];
+        this.displayTableCategoryData = [];
+        this.selectedRelatedObjectPicklistFields = [];
         this.newPage = false;
         this.ruleExists = false;
         this.changedHeaders = [];
+        this.referenceObjectsFieldDetailsMap = {};
+        this.selectedFieldsForSubTotalCalculation = [];
 
-        gettemplatesectiondata({
-                editrecordid: recordID
-            })
-            .then(result => {
-                if (result != null) {
-                    this.isLoaded = false;
-                    this.Recorddetailsnew.Name = result.Name;
-                    this.Recorddetailsnew.DxCPQ__Document_Template__c = result.DxCPQ__Document_Template__c;
-                    this.Recorddetailsnew.DxCPQ__Sequence__c = result.DxCPQ__Sequence__c;
-                    this.Recorddetailsnew.DxCPQ__Type__c = result.DxCPQ__Type__c;
-                    this.Recorddetailsnew.DxCPQ__New_Page__c = result.DxCPQ__New_Page__c;
-                    this.Recorddetailsnew.DxCPQ__Section_Content__c = result.DxCPQ__Section_Content__c;
+        const result = await gettemplatesectiondata({ editrecordid: recordID })
+        if (result != null) {
+            this.isLoaded = false;
+            this.Recorddetailsnew.Name = result.Name;
+            this.Recorddetailsnew.DxCPQ__Document_Template__c = result.DxCPQ__Document_Template__c;
+            this.Recorddetailsnew.DxCPQ__Sequence__c = result.DxCPQ__Sequence__c;
+            this.Recorddetailsnew.DxCPQ__Type__c = result.DxCPQ__Type__c;
+            this.Recorddetailsnew.DxCPQ__New_Page__c = result.DxCPQ__New_Page__c;
+            this.Recorddetailsnew.DxCPQ__Section_Content__c = result.DxCPQ__Section_Content__c;
 
-                    if (result.DxCPQ__RuleId__c != null && result.DxCPQ__RuleId__c != '') {
-                        this.Recorddetailsnew.DxCPQ__RuleId__c = result.DxCPQ__RuleId__r.Id;
-                        this.ruleExpression = result.DxCPQ__RuleId__r.DxCPQ__Rule_Expression__c;
-                    } else {
-                        this.Recorddetailsnew.DxCPQ__RuleId__c = '';
-                    }
-                    this.sectiontype = result.DxCPQ__Type__c;
+            if (result.DxCPQ__RuleId__c != null && result.DxCPQ__RuleId__c != '') {
+                this.Recorddetailsnew.DxCPQ__RuleId__c = result.DxCPQ__RuleId__r.Id;
+                this.ruleExpression = result.DxCPQ__RuleId__r.DxCPQ__Rule_Expression__c;
+            } else {
+                this.Recorddetailsnew.DxCPQ__RuleId__c = '';
+            }
+            this.sectiontype = result.DxCPQ__Type__c;
 
-                    // Filtering On Load 
-                    if (result.DxCPQ__RuleId__r != null) {
-                        this.ruleIdCreated = result.DxCPQ__RuleId__r.Id;
-                        this.ruleExists = true;
-                    } else {
-                        this.ruleIdCreated = null;
-                        this.listOfExistingConditions = [];
-                        this.conditionsArr = [];
-                        this.ruleExists = false;
-                        this.filteringCondition = '';
-                    }
+            // Filtering On Load 
+            if (result.DxCPQ__RuleId__r != null) {
+                this.ruleIdCreated = result.DxCPQ__RuleId__r.Id;
+                this.ruleExists = true;
+            } else {
+                this.ruleIdCreated = null;
+                this.listOfExistingConditions = [];
+                this.conditionsArr = [];
+                this.ruleExists = false;
+                this.filteringCondition = '';
+            }
 
-                    if (this.ruleIdCreated != null && this.ruleIdCreated != '') {
-                        this.handleRuleWrapperMaking();
-                        let event = new Object();
-                        this.getExistingConditions(event);
-                        this.ruleExists = true;
-                    }
-                    this.newPage = result.DxCPQ__New_Page__c;
+            if (this.ruleIdCreated != null && this.ruleIdCreated != '') {
+                this.handleRuleWrapperMaking();
+                let event = new Object();
+                this.getExistingConditions(event);
+                this.ruleExists = true;
+            }
+            this.newPage = result.DxCPQ__New_Page__c;
 
-                    if (result.DxCPQ__Section_Content__c != null && result.DxCPQ__Section_Content__c != undefined) {
-                        var sectionContentToLoad = JSON.parse(result.DxCPQ__Section_Content__c);
-                        this.showPicklist = true;
-                        this.value = sectionContentToLoad.mainChildObject;
-                        var attribute = [];
-                        var attribute1 = [];
-                        this.listOfRelatedObjects = [];
-                        this.loadUp = false;
-                        this.listOfAddedFields = [];
-                        this.showNumberFields = [];
-                        this.showCalculatorFields = false;
+            if (result.DxCPQ__Section_Content__c != null && result.DxCPQ__Section_Content__c != undefined) {
+                var sectionContentToLoad = JSON.parse(result.DxCPQ__Section_Content__c);
+                this.showPicklist = true;
+                this.value = sectionContentToLoad.mainChildObject;
+                this.listOfRelatedObjects = [];
+                this.loadUp = false;
+                this.listOfAddedFields = [];
+                this.numericFieldsForSubTotalSelection = [];
+                this.showCalculatorFields = false;
+                this.displayChartSection = false;
 
-                        if (sectionContentToLoad.mainChildObject) {
-                            attribute.push({
-                                label: sectionContentToLoad.mainChildObject,
-                                value: sectionContentToLoad.mainChildObject,
-                                selected: true
-                            });
-                            setTimeout(() => {
-                                this.template.querySelector('[data-id="childObject"]').setupOptions(attribute);
-                            }, 2000);
-                        }
+                if (sectionContentToLoad.mainChildObject) {
+                    setTimeout(() => {
+                        this.template.querySelector('c-search-category[data-id="childObject"]').setupOptions([{
+                            label: sectionContentToLoad.mainChildObject,
+                            value: sectionContentToLoad.mainChildObject,
+                            selected: true
+                        }]);
+                    }, 2000);
+                }
 
-                        if (sectionContentToLoad.grouping) {
-                            this.showPicklist = true;
-                            attribute1.push({
-                                label: sectionContentToLoad.grouping,
-                                value: sectionContentToLoad.grouping,
-                                selected: true
-                            });
-                            setTimeout(() => {
-                                this.template.querySelector('[data-id="picklist"]').setupOptions(attribute1);
-                            }, 1000);
-                        }
+                if (sectionContentToLoad.grouping) {
+                    this.showPicklist = true;
+                    setTimeout(() => {
+                        this.template.querySelector('c-search-category[data-id="picklist"]').setupOptions([{
+                            label: sectionContentToLoad.grouping,
+                            value: sectionContentToLoad.grouping,
+                            selected: true
+                        }]);
+                    }, 1000);
+                }
 
-                        this.handleTableDisplay(sectionContentToLoad.tablelistLabels, true);
-                        this.selectedfields = sectionContentToLoad.tablelistLabels;
-                        this.selectedChildObjectName = sectionContentToLoad.mainChildObject;
-                        this.childLookupAPI = sectionContentToLoad.childLookupfieldAPIname;
-                        this.displayfields = true;
+                this.displayfields = true;
+                this.selectedfields = sectionContentToLoad.tablelistLabels;                   
+                this.selectedChildObjectName = sectionContentToLoad.mainChildObject;
+                this.handleTableDisplay(sectionContentToLoad.tablelistLabels, true);
+                await this.handleObjectselection({ detail: { values: [sectionContentToLoad.mainChildObject] } });
 
-                        const cust = {
-                            detail: {
-                                values: [sectionContentToLoad.mainChildObject]
+                // Added Fields
+                this.loadUp = true;                
+                this.selectedSubTotalFieldAPIList = [];
+                this.selectedSubTotalFieldLabelsList = [];
+                for (let j = 0; j < sectionContentToLoad.tablelistValues.length; j++) {
+                    let duplicationFlag = true;
+                    
+                    for (let i = 0; i < this.listOfRelatedObjects[0].fieldList.length; i++) {
+                        if (this.listOfRelatedObjects[0].fieldList[i].value.toLowerCase() == sectionContentToLoad.tablelistValues[j].toLowerCase()) {
+                            this.listOfAddedFields.push(this.listOfRelatedObjects[0].fieldList[i]);
+                            if (this.listOfRelatedObjects[0].fieldList[i].dataType == "NUMBER" || this.listOfRelatedObjects[0].fieldList[i].dataType == "CURRENCY" || this.listOfRelatedObjects[0].fieldList[i].dataType == "DOUBLE") {
+                                this.numericFieldsForSubTotalSelection.push(this.listOfRelatedObjects[0].fieldList[i]);
+                                this.showCalculatorFields = true;
                             }
-                        };
-                        this.handleObjectselection(cust);
-
-                        // Added Fields
-                        this.loadUp = true;
-                        this.allNumericalFields = [];
-
-                        setTimeout(() => {
-                            for (let j = 0; j < sectionContentToLoad.tablelistValues.length; j++) {
-                                let jump = true;
-
-                                for (let i = 0; i < this.listOfRelatedObjects[0].fieldList.length; i++) {
-                                    if (this.listOfRelatedObjects[0].fieldList[i].value.toLowerCase() == sectionContentToLoad.tablelistValues[j].toLowerCase()) {
-                                        this.listOfAddedFields.push(this.listOfRelatedObjects[0].fieldList[i]);
-
-                                        if (this.listOfRelatedObjects[0].fieldList[i].dataType == "NUMBER" || this.listOfRelatedObjects[0].fieldList[i].dataType == "CURRENCY" || this.listOfRelatedObjects[0].fieldList[i].dataType == "DOUBLE") {
-                                            this.showNumberFields.push(this.listOfRelatedObjects[0].fieldList[i]);
-                                            this.showCalculatorFields = true;
-                                        }
-
-                                        sectionContentToLoad.subTotal.forEach(key => {
-                                            if (key.toLowerCase() == this.listOfRelatedObjects[0].fieldList[i].value.toLowerCase()) {
-                                                this.allNumericalFields.push(this.listOfRelatedObjects[0].fieldList[i].label);
-                                            }
-                                        });
-                                        this.listOfRelatedObjects[0].fieldList.splice(i, 1);
-                                        break;
-                                    }
-
-                                    if (sectionContentToLoad.tablelistValues[j].includes('.') && jump) {
-                                        let tempStr = sectionContentToLoad.tablelistValues[j].replace('.', '*');
-                                        let tempCount = tempStr.indexOf('*');
-                                        let strTemp = tempStr.replace(tempStr.substring(tempCount), '');
-
-                                        let referenceObject = this.listOfRelatedObjects[0].fieldWrap.filter((obj) => obj.relationshipName == strTemp);
-
-                                        if (referenceObject.length > 0 && jump) {
-                                            getFields({
-                                                    selectedObject: referenceObject[0].sObjectName
-                                                })
-                                                .then(result => {
-                                                    let tempVar = tempStr.replace(tempStr.substring(0, tempCount + 1), '');
-                                                    for (let key of result) {
-                                                        if (tempVar.toLowerCase() == key.apiName.toLowerCase() && jump) {
-                                                            if (this.listOfAddedFields.length < this.tableHeaders.length) {
-                                                                this.listOfAddedFields.push({
-                                                                    'label': referenceObject[0].name.substring(0, referenceObject[0].name.length - 1) + '.' + key.name,
-                                                                    "value": sectionContentToLoad.tablelistValues[j],
-                                                                    "dataType": key.dataType
-                                                                });
-                                                            }
-                                                            jump = false;
-                                                            if (key.dataType == "NUMBER" || key.dataType == "CURRENCY" || key.dataType == "DOUBLE") {
-                                                                this.showNumberFields.push({
-                                                                    'label': referenceObject[0].name.substring(0, referenceObject[0].name.length - 1) + '.' + key.name,
-                                                                    "value": sectionContentToLoad.tablelistValues[j],
-                                                                    "dataType": key.dataType
-                                                                });
-                                                                this.showCalculatorFields = true;
-                                                            }
-                                                        }
-                                                        if (sectionContentToLoad.subTotal.includes(sectionContentToLoad.tablelistValues[j])) {
-                                                            this.allNumericalFields.push(referenceObject[0].name.substring(0, referenceObject[0].name.length - 1) + '.' + key.name);
-                                                        }
-                                                    }
-                                                })
-                                                .catch((error) => {
-                                                     let tempError = error.toString();
-            let errorMessage = error.message || 'Unknown error message';
-            createLog({recordId:'', className:'templateRelatedObjects LWC Component', exceptionMessage:errorMessage, logData:tempError, logType:'Exception'});
-                                                })
-                                        }
-                                    }
+                            sectionContentToLoad.subTotal.forEach(key => {
+                                if (key.toLowerCase() == this.listOfRelatedObjects[0].fieldList[i].value.toLowerCase()) {
+                                    this.selectedSubTotalFieldLabelsList.push(this.listOfRelatedObjects[0].fieldList[i].label);
+                                    this.selectedSubTotalFieldAPIList.push(this.listOfRelatedObjects[0].fieldList[i].value);
+                                    this.selectedFieldsForSubTotalCalculation.push(this.listOfRelatedObjects[0].fieldList[i]);
                                 }
+                            });
+                            if (sectionContentToLoad.tablelistLabels.indexOf(sectionContentToLoad.selGraphvalue) == j) this.selectedSubTotalFieldForChartGeneration = this.listOfRelatedObjects[0].fieldList[i].label;
+                            this.listOfRelatedObjects[0].fieldList.splice(i, 1);
+                            break;
+                        }
+
+                        if (sectionContentToLoad.tablelistValues[j].includes('.') && duplicationFlag) {
+                            let referencedFieldLabel = sectionContentToLoad.tablelistValues[j].replace('.', '*');
+                            let referenceObject = this.listOfRelatedObjects[0].fieldWrap.filter((fieldDetail) => fieldDetail.relationshipName == (referencedFieldLabel.replace(referencedFieldLabel.substring(referencedFieldLabel.indexOf('*')), '')));
+                            if (referenceObject.length > 0 && duplicationFlag) {
+                                let referencedFieldDetail;
+                                let tempVar = referencedFieldLabel.replace(referencedFieldLabel.substring(0, referencedFieldLabel.indexOf('*') + 1), ''); 
+                                if(this.referenceObjectsFieldDetailsMap[referenceObject[0].sObjectName]){
+                                    referencedFieldDetail = this.referenceObjectsFieldDetailsMap[referenceObject[0].sObjectName].filter(fieldDetail => {  if(tempVar.toLowerCase() == fieldDetail.apiName.toLowerCase()) { return fieldDetail; } })[0];
+                                } else{
+                                    await getSelectedRelatedObjectFields({ selectedObject: referenceObject[0].sObjectName })
+                                    .then(result => {
+                                        this.referenceObjectsFieldDetailsMap[referenceObject[0].sObjectName] = result;
+                                        referencedFieldDetail = result.filter(fieldDetail => {  if(tempVar.toLowerCase() == fieldDetail.apiName.toLowerCase()) { return fieldDetail; } })[0];
+                                    })
+                                    .catch((error) => {
+                                        createLog({recordId:null, className:'templateRelatedObjects LWC Component', exceptionMessage: (error.message || 'Unknown error message'), logData: error.toString(), logType:'Exception'});     
+                                    })
+                                } 
+                                if (referencedFieldDetail && duplicationFlag) {
+                                    let referencedFieldLabel = this.handleReferencedFieldAdditionOnLoad(referenceObject[0], referencedFieldDetail, sectionContentToLoad.tablelistValues[j], sectionContentToLoad.subTotal);
+                                    if (sectionContentToLoad.tablelistLabels.indexOf(sectionContentToLoad.selGraphvalue) == j) {
+                                        this.selectedSubTotalFieldForChartGeneration = referencedFieldLabel;
+                                    }
+                                    duplicationFlag = false;
+                                }                               
                             }
-                        }, 1000);
-
-                        this.selectchildpicklist = sectionContentToLoad.grouping;
-                        if (sectionContentToLoad.grouping != null && sectionContentToLoad.grouping != "") {
-                            this.noGrouping = true;
-                            this.nosubTotal = false;
-                            this.chartControl = false;
-                            sectionContentToLoad.groupingCatVals.forEach((item) => {
-                                this.tabsection.push(item.label.toUpperCase());
-                            })
-                        } else {
-                            this.noGrouping = false;
-                        }
-
-                        // Styles on Load
-                        this.selectedHFontColor = sectionContentToLoad.style.header.fontcolor;
-                        this.selectedHbgColor = sectionContentToLoad.style.header.backgroundColor;
-                        this.selectedBFontColor = sectionContentToLoad.style.category.fontcolor;
-                        this.selectedBBgcolor = sectionContentToLoad.style.category.backgroundColor;
-
-                        this.selectedSubTotalBGColor = sectionContentToLoad.style.subTotal.subTotalRowBGColor;
-                        this.selectedSubTotalFontColor = sectionContentToLoad.style.subTotal.subTotalRowFontColor;
-                        this.selectedTotalBGColor = sectionContentToLoad.style.total.totalRowBGcolor;
-                        this.selectedTotalFontColor = sectionContentToLoad.style.total.totalRowFontColor;
-                        
-                        this.dateFormatvalue = sectionContentToLoad.dateFormat;
-                        this.timeFormatvalue = sectionContentToLoad.timeFormat;
-                        this.numFormatvalue = sectionContentToLoad.numberFormat;
-                        this.curFormatvalue = sectionContentToLoad.currencyFormat;
-
-
-                        this.fontfamily = sectionContentToLoad.style.header.fontfamily;
-                        this.fontsize = sectionContentToLoad.style.header.fontsize;
-
-                        // Filtering Conditions On Load
-                        if (this.ruleIdCreated != '') {
-                            this.filteringCondition = sectionContentToLoad.whereClause.substring(1, sectionContentToLoad.whereClause.length - 1);
-                        }
-
-                        // Serial Number On Load
-                        this.SerialNumber = sectionContentToLoad.SerialNumber;
-                        setTimeout(() => {
-                            this.template.querySelector('[data-id="serialNumber"]').checked = sectionContentToLoad.SerialNumber;
-                        });
-
-                        // New Page on Load
-                        this.newPage = sectionContentToLoad.newPage;
-                        setTimeout(() => {
-                            this.template.querySelector('[data-id="newPageRO"]').checked = sectionContentToLoad.newPage;
-                        });
-
-                        //Chart things On Load
-                        if (sectionContentToLoad.subTotal != null && sectionContentToLoad.subTotal != "" && sectionContentToLoad.displayChart == true) {
-                            this.displayChartSection = sectionContentToLoad.displayChart;
-                            this.chartLabel = sectionContentToLoad.chartLabel;
-                            this.selectedBarChartColor = sectionContentToLoad.chartBarColor;
-                            this.subtotalFieldValue = sectionContentToLoad.selGraphvalue;
-                            this.chartControl = true;
-                            this.showCalculatorFields = true;
-
-                            setTimeout(() => {
-                                this.template.querySelector('[data-id="chartBox"]').checked = sectionContentToLoad.displayChart;
-                                this.template.querySelectorAll(`.chart-color`).forEach(item =>{
-                                    item.style.background = this.selectedBarChartColor;
-                                });
-                            });
-
-                            setTimeout(() => {
-                                this.template.querySelector('[data-id="subtotalFieldValue"]').options = [{ 'label': this.subtotalFieldValue, 'value': this.subtotalFieldValue, selected: true }];
-                                this.template.querySelector('[data-id="subtotalFieldValue"]').value = this.subtotalFieldValue
-                                this.template.querySelector('[data-id="newChartPage"]').checked = sectionContentToLoad.chartNewPage;
-                            });
-                        } else {
-                            this.allnumValues = []
-                            this.displayChartSection = false;
-                            this.chartLabel = "Chart";
-                            this.subtotalFieldValue = null;
-                            this.chartControl = false;
+                            
                         }
                     }
                 }
-            })
-            .catch(error => {
-                let tempError = error.toString();
-            let errorMessage = error.message || 'Unknown error message';
-            createLog({recordId:'', className:'templateRelatedObjects LWC Component', exceptionMessage:errorMessage, logData:tempError, logType:'Exception'});                     
-                this.isLoaded = false;
-            })
+                this.subTotalFieldListForChartGeneration = this.selectedSubTotalFieldLabelsList.map((fieldLabel) => ({'label' : fieldLabel, 'value': fieldLabel}));
+                this.selectedGroupingPicklistOption = sectionContentToLoad.grouping;
+                if (sectionContentToLoad.grouping != null && sectionContentToLoad.grouping != "") {
+                    this.relatedRecordsGrouping = true;
+                    this.nosubTotal = false;
+                    this.chartControl = false;
+                    this.displayTableCategoryData = sectionContentToLoad.groupingCatVals.map((picklistChoice) => {return picklistChoice.toUpperCase();})
+                } else {
+                    this.relatedRecordsGrouping = false;
+                }
+
+                // Styles on Load
+                this.selectedHFontColor = sectionContentToLoad.style.header.fontcolor;
+                this.selectedHbgColor = sectionContentToLoad.style.header.backgroundColor;
+                this.selectedBFontColor = sectionContentToLoad.style.category.fontcolor;
+                this.selectedBBgcolor = sectionContentToLoad.style.category.backgroundColor;
+
+                this.selectedSubTotalBGColor = sectionContentToLoad.style.subTotal.subTotalRowBGColor;
+                this.selectedSubTotalFontColor = sectionContentToLoad.style.subTotal.subTotalRowFontColor;
+                this.selectedTotalBGColor = sectionContentToLoad.style.total.totalRowBGcolor;
+                this.selectedTotalFontColor = sectionContentToLoad.style.total.totalRowFontColor;
+                
+                this.dateFormatvalue = sectionContentToLoad.dateFormat;
+                this.timeFormatvalue = sectionContentToLoad.timeFormat;
+                this.numFormatvalue = sectionContentToLoad.numberFormat;
+                this.curFormatvalue = sectionContentToLoad.currencyFormat;
+                this.fontfamily = sectionContentToLoad.style.header.fontfamily;
+                this.fontsize = sectionContentToLoad.style.header.fontsize;
+
+                // Filtering Conditions On Load
+                if (this.ruleIdCreated != '') {
+                    this.filteringCondition = sectionContentToLoad.whereClause.substring(1, sectionContentToLoad.whereClause.length - 1);
+                }
+
+                // Serial Number On Load
+                this.SerialNumber = sectionContentToLoad.SerialNumber;
+                setTimeout(() => {
+                    this.template.querySelector('[data-id="serial-numer-option"]').checked = sectionContentToLoad.SerialNumber;
+                });
+
+                // New Page on Load
+                this.newPage = sectionContentToLoad.newPage;
+                setTimeout(() => {
+                    this.template.querySelector('[data-id="section-page-option"]').checked = sectionContentToLoad.newPage;
+                });
+
+                //Chart things On Load
+                if (sectionContentToLoad.subTotal != null && sectionContentToLoad.subTotal != "" && sectionContentToLoad.displayChart == true) {
+                    this.displayChartSection = sectionContentToLoad.displayChart;
+                    this.chartLabel = sectionContentToLoad.chartLabel;
+                    this.selectedBarChartColor = sectionContentToLoad.chartBarColor;
+                    this.chartControl = true;
+                    this.showCalculatorFields = true;
+
+                    setTimeout(() => {
+                        this.template.querySelector('[data-id="chart-configuration"]').checked = sectionContentToLoad.displayChart;
+                        this.template.querySelectorAll(`.chart-color`).forEach(item =>{
+                            item.style.background = this.selectedBarChartColor;
+                        });
+                    });
+
+                    setTimeout(() => {
+                        this.template.querySelector('[data-id="chart-subtotal-field"]').options = [{ 'label': this.selectedSubTotalFieldForChartGeneration, 'value': this.selectedSubTotalFieldForChartGeneration, selected: true }];
+                        this.template.querySelector('[data-id="chart-subtotal-field"]').value = this.selectedSubTotalFieldForChartGeneration
+                        this.template.querySelector('[data-id="chart-page-option"]').checked = sectionContentToLoad.chartNewPage;
+                    });
+                } else {
+                    this.chartControl = false;
+                    this.chartLabel = "Chart";
+                    this.selectedSubTotalFieldForChartGeneration = null;
+                    this.displayChartSection = false;
+                    this.template.querySelector(`[data-id="chart-configuration"]`).checked = this.displayChartSection;
+                }
+            }
+        } else {
+        createLog({recordId:null, className:'templateRelatedObjects LWC Component', exceptionMessage: (error.message || 'Unknown error message'), logData: error.toString(), logType:'Exception'});
+        this.isLoaded = false;
+        }
+    }
+
+    handleReferencedFieldAdditionOnLoad(referenceObject, referencedFieldDetail, fieldValueForHeader, listOfSubTotalFieldsAdded){
+        let fieldLabelsAdded = this.listOfAddedFields.map((field)=>{return field.value;})
+        if (this.listOfAddedFields.length < this.displayTableHeaderData.length && !fieldLabelsAdded.includes(fieldValueForHeader)) {
+            this.listOfAddedFields.push({
+                'label': referenceObject.name.substring(0, referenceObject.name.length - 1) + '.' + referencedFieldDetail.name,
+                "value": fieldValueForHeader,
+                "dataType": referencedFieldDetail.dataType
+            });
+        }
+        if (referencedFieldDetail.dataType == "NUMBER" || referencedFieldDetail.dataType == "CURRENCY" || referencedFieldDetail.dataType == "DOUBLE") {
+            this.numericFieldsForSubTotalSelection.push({
+                'label': referenceObject.name.substring(0, referenceObject.name.length - 1) + '.' + referencedFieldDetail.name,
+                "value": fieldValueForHeader,
+                "dataType": referencedFieldDetail.dataType
+            });
+            this.showCalculatorFields = true;
+        }
+        if (listOfSubTotalFieldsAdded.includes(fieldValueForHeader) && this.selectedFieldsForSubTotalCalculation.findIndex(({value}) => value == fieldValueForHeader) == -1) {
+            this.selectedSubTotalFieldLabelsList.push(referenceObject.name.substring(0, referenceObject.name.length - 1) + '.' + referencedFieldDetail.name);
+            this.selectedSubTotalFieldAPIList.push(fieldValueForHeader);
+            this.selectedFieldsForSubTotalCalculation.push(({
+                'label': referenceObject.name.substring(0, referenceObject.name.length - 1) + '.' + referencedFieldDetail.name,
+                "value": fieldValueForHeader,
+                "dataType": referencedFieldDetail.dataType
+            }));
+        }
+        return referenceObject.name.substring(0, referenceObject.name.length - 1) + '.' + referencedFieldDetail.name;
     }
 
     /*
       Based on the user selection on "Object Fields", the picklist fields available in that object will be displayed in another picklist
     */
-    handleObjectselection(event) {
+    async handleObjectselection(event) {
         this.showPicklist = false;
-
         const selectedRelatedObjectName = (event.detail.values && event.detail.values.length > 0) ? event.detail.values[0] : "";
         if (event.detail.values == '') {
             this.listOfRelatedObjects = [];
@@ -891,64 +829,33 @@ export default class TemplateRelatedObjects extends LightningElement {
 
         if (selectedRelatedObjectName == null || selectedRelatedObjectName == '') {
             this.displayfields = false;
-            this.showtablecontent = false;
-            this.values = [];
-            this.tableHeaders = [];
-            this.tablerows = [];
+            this.loadDisplayTableContent = false;
+            this.displayTableHeaderData = [];
+            this.displayTableRowData = [];
         } else {
             this.selectedChildObjectName = selectedRelatedObjectName;
             this.listOfAddedFields = [];
-            this.tabsection = [];
-            this.getGroupingValues = [];
+            this.displayTableCategoryData = [];
+            this.selectedRelatedObjectPicklistFields = [];
 
-            getGroupingOptions({
-                    selectedObject: this.selectedChildObjectName
-                })
-                .then((result) => {
-                    this.getpicklistdata = result;
-                    this.showPicklist = true;
-                    for (let temp in result) {
-                        this.getGroupingValues.push({
-                            'label': temp,
-                            'value': temp
-                        });
-                    }
-                })
-                .catch((error) => {
-                    let tempError = error.toString();
-            let errorMessage = error.message || 'Unknown error message';
-            createLog({recordId:'', className:'templateRelatedObjects LWC Component', exceptionMessage:errorMessage, logData:tempError, logType:'Exception'});
-                })
-
-            getFields({
-                selectedObject: this.selectedChildObjectName
-            }).then(result => {
-                if (result) {
-                    let tempObj = {};
-                    let index = 0;
-                    tempObj.index = index;
-                    tempObj.fieldList = [];
-                    result.forEach(field => {
-                        if (field.apiName != this.selectchildpicklist)
-                            tempObj.fieldList.push({
-                                label: field.name,
-                                value: field.apiName,
-                                dataType: field.dataType
-                            });
-                    });
-                    tempObj.fieldWrap = result;
-                    tempObj.uKey = (new Date()).getTime() + ":" + index;
-                    this.listOfRelatedObjects.push(tempObj);
-                    if (this.listOfRelatedObjects.length > 0) {
-                        this.showLstOfObj = true;
-                    }
-                    this.displayfields = true;
-                }
-            }).catch(error => {
-                let tempError = error.toString();
-            let errorMessage = error.message || 'Unknown error message';
-            createLog({recordId:'', className:'templateRelatedObjects LWC Component', exceptionMessage:errorMessage, logData:tempError, logType:'Exception'});
+            getSelectedObjectPicklistFields({ selectedObject: this.selectedChildObjectName })
+            .then((result) => {
+                this.selectedObjectAllPicklistValueSet = result;
+                this.showPicklist = true;
+                this.selectedRelatedObjectPicklistFields = Object.keys(result).map((key) => ({'label' : key,'value' : key}));
+            }).catch((error) => {
+                createLog({recordId:null, className:'templateRelatedObjects LWC Component', exceptionMessage:(error.message || 'Unknown error message'), logData:error.toString(), logType:'Exception'});
             })
+
+            let result = await this.handleReferenceObjectFieldsRetrieval(this.selectedChildObjectName);
+            if(result){
+                let sObjectFieldWrapper = {};
+                sObjectFieldWrapper.index = 0;
+                sObjectFieldWrapper.fieldList = result.map(({name, apiName, dataType}) => ({ label: name, value: apiName, dataType: dataType }));
+                sObjectFieldWrapper.fieldWrap = result;
+                this.listOfRelatedObjects.push(sObjectFieldWrapper);
+                this.displayfields = true;
+            }
         }
         this.handleRuleWrapperMaking();
     }
@@ -958,90 +865,68 @@ export default class TemplateRelatedObjects extends LightningElement {
     */
     handleSelectedGroupingValue(event) {
         if (event.detail.values.length != 0) {
-            this.noGrouping = true;
-            this.selectchildpicklist = event.detail.values[0];
-            this.getselectionfieldvalues = this.getpicklistdata[this.selectchildpicklist];
+            this.relatedRecordsGrouping = true;
+            this.selectedGroupingPicklistOption = event.detail.values[0];
+            this.selectedPicklistFieldValueSet = this.selectedObjectAllPicklistValueSet[this.selectedGroupingPicklistOption];
             this.showpicklistValues = true;
-            this.tabsection = [];
-            this.getselectionfieldvalues.forEach(item =>{
-                this.tabsection.push(item.value.toUpperCase());
-            });
-            if (this.tabsection.length > 0) {
-                this.showChartBox = true;
-            }
+            this.displayTableCategoryData = [];
+            this.displayTableCategoryData = this.selectedPicklistFieldValueSet.map(({value}) => { return value.toUpperCase() });
+            this.showChartBox = (this.displayTableCategoryData.length > 0) ? true : this.showChartBox;
         } else {
-            this.tabsection = [];
-            this.noGrouping = false;
-            this.selectchildpicklist = '';
+            this.displayTableCategoryData = [];
+            this.relatedRecordsGrouping = false;
+            this.selectedGroupingPicklistOption = '';
         }
-        this.chartControl = this.noGrouping && this.displayChartSection && this.nosubTotal;
-    }
-
-    get options() {
-        return this.calculateOptions;
+        this.chartControl = this.relatedRecordsGrouping && this.displayChartSection && this.nosubTotal;
     }
 
     /*
      Based on the user input on Object, the related fields are displayed in the dual list box.
      Once the user selects the fields in dual list box they will be displayed in the preview table
     */
-    handleTableDisplay(selectedfieldsArray, isonload) {
+    handleTableDisplay(selectedfieldsArray, isonload, fieldIndexToRemove) {
         if (isonload == true) {
             if (selectedfieldsArray.length > 1 && selectedfieldsArray.includes(',')) {
                 if (selectedfieldsArray.includes(',')) {
-                    let arr = selectedfieldsArray.split(',');
-                    this.tableHeaders = [...arr];
+                    let referenceField = selectedfieldsArray.split(',');
+                    this.displayTableHeaderData = [...referenceField];
                 } else {
-                    this.tableHeaders.push(selectedfieldsArray);
+                    this.displayTableHeaderData.push(selectedfieldsArray);
                 }
             }
-            if (this.tableHeaders.length < 1) {
+            if (this.displayTableHeaderData.length < 1) {
                 if (selectedfieldsArray.length > 1) {
-                    this.tableHeaders = [...selectedfieldsArray];
+                    this.displayTableHeaderData = [...selectedfieldsArray];
                 } else {
-                    this.tableHeaders.push(selectedfieldsArray);
+                    this.displayTableHeaderData.push(selectedfieldsArray);
                 }
             }
         } else {
-            let selectedfieldlabel;
-            let selectedremovingfield;
-
+            let selectedFieldLabel;
+            let selectedFieldToBeRemoved;
             for (let i = 0; i < this.listOfAddedFields.length; i++) {
                 if (this.listOfAddedFields[i].value == selectedfieldsArray) {
-                    selectedfieldlabel = this.listOfAddedFields[i].label;
+                    selectedFieldLabel = this.listOfAddedFields[i].label;
+                }
+            } 
+            for (let i = 0; i < this.listOfRemovedFields.length; i++) {
+                if (this.listOfRemovedFields[i][0].value == selectedfieldsArray) {
+                    selectedFieldToBeRemoved = this.listOfRemovedFields[i][0].label;
                 }
             }
-
-            for (let i = 0; i < this.lstofremovedFields.length; i++) {
-                if (this.lstofremovedFields[i][0].value == selectedfieldsArray) {
-                    selectedremovingfield = this.lstofremovedFields[i][0].label;
-                }
-            }
-
-            if (this.tableHeaders.includes(selectedremovingfield)) {
-                for (let i = 0; i < this.tableHeaders.length; i++) {
-                    if (this.tableHeaders[i] == selectedremovingfield) {
-                        this.tableHeaders.splice(i, 1);
-                    }
-                }
+            if (this.displayTableHeaderData.includes(selectedFieldToBeRemoved)) {
+                this.displayTableHeaderData.splice(this.displayTableHeaderData.indexOf(selectedFieldToBeRemoved), 1);
+            } else if (fieldIndexToRemove != -1 && fieldIndexToRemove != undefined) {
+                this.displayTableHeaderData.splice(fieldIndexToRemove, 1);
             } else {
-                this.tableHeaders.push(selectedfieldlabel);
+                this.displayTableHeaderData.push(selectedFieldLabel);
             }
         }
-        this.sectionSpan = this.tableHeaders.length;
-        this.catStyle = "background-color :" + this.selectedBBgcolor + "; color:" + this.selectedBFontColor + ';font-size:' + this.fontsize + ';font-family:' + this.fontfamily + ';';
-        this.tablerows = [];
-        for (var i = 0; i < 1; i++) {
-            const myObj = new Object();
-            myObj.rownumber = 'row' + i;
-            var columns = [];
-            for (var j = 0; j < this.tableHeaders.length; j++) {
-                columns.push('<data>');
-            }
-            myObj.columns = columns;
-            this.tablerows.push(myObj);
-        }
-        this.showtablecontent = true;
+        this.sectionSpan = this.displayTableHeaderData.length;
+        this.categoryStyleClass = "background-color :" + this.selectedBBgcolor + "; color:" + this.selectedBFontColor + ';font-size:' + this.fontsize + ';font-family:' + this.fontfamily + ';';
+        this.displayTableRowData = [];
+        this.displayTableRowData.push({ columns : this.displayTableHeaderData.map((key) => ('<data>')) });
+        this.loadDisplayTableContent = true;
         this.displaySaveTableButton = true;
     }
 
@@ -1049,7 +934,7 @@ export default class TemplateRelatedObjects extends LightningElement {
     All the data entered above will be stored in the JSON Format and will get saved in the Document Template section 
     */
     handleSectionSave() {
-        var obj = {};
+        let documentSectionContent = {};
         if (this.selectedChildObjectName == '' || this.Recorddetailsnew.Name == '' || this.listOfAddedFields == '') {
             this.dispatchEvent(new ShowToastEvent({
                 title: 'Error',
@@ -1057,120 +942,116 @@ export default class TemplateRelatedObjects extends LightningElement {
                 variant: 'Error'
             }));
         } else {
-            var childloopkupfieldAPIname;
-            var jsonString = '';
+            let childloopkupfieldAPIname;
+            let documentSectionContentAsString;
+            let chartSectionFlagged = true;
 
             if (this.ruleIdCreated != '' && this.ruleIdCreated != null) {
                 this.getExistingConditions({});
-                this.filteringCondition = this.handleFilterClauseMaking(this.ruleExpression, this.lstofactualConditions);
+                this.filteringCondition = this.handleFilterClauseMaking(this.ruleExpression, this.listOfActualConditions);
             } else {
                 this.filteringCondition = '';
+            }
+
+            if(this.displayChartSection){ 
+                if(this.selectedSubTotalFieldAPIList.length > 1 && this.selectedSubTotalFieldForChartGeneration != null ){
+                    chartSectionFlagged = true;
+                    documentSectionContent.displayChart = this.displayChartSection;
+                    documentSectionContent.chartBarColor = this.selectedBarChartColor;
+                    documentSectionContent.selGraphvalue = this.displayTableHeaderData[this.listOfAddedFields.findIndex(field => field.label == this.selectedSubTotalFieldForChartGeneration)];
+                } else {
+                    chartSectionFlagged = false;
+                    this.dispatchEvent(new ShowToastEvent({
+                        title: 'Error',
+                        message: 'A Sub-Total field must be selected for Chart inside PDF document. Please select all valid options.',
+                        variant: 'Error'
+                    }));
+                }
             }
 
             if (this.selectedChildObjectName != undefined) {
                 if (Object.prototype.hasOwnProperty.call(this.childobjects, this.selectedChildObjectName)) {
                     childloopkupfieldAPIname = this.childobjects[this.selectedChildObjectName];
-                    this.childLookupAPI = childloopkupfieldAPIname;
                 }
-
-                //JSON construction logic START
-                obj = {};
-                obj.whereClause = '(' + this.filteringCondition + ')';
-                obj.mainChildObject = this.selectedChildObjectName;
-                obj.childLookupfieldAPIname = childloopkupfieldAPIname;
-                obj.mainparentObject = this.documenttemplaterecord.DxCPQ__Related_To_Type__c;
-                obj.SerialNumber = this.SerialNumber;
-                obj.subTotal = this.allnumValues;
-                obj.newPage = this.newPage;
-
-                obj.displayChart = this.displayChartSection;
-                obj.selGraphvalue = this.subtotalFieldValue;
-                obj.chartLabel = this.chartLabel;
-                obj.chartNewPage = this.chartNewPage;
-                obj.chartBarColor = this.selectedBarChartColor;
-
-                let optValues = [];
-                let optLabels = [];
-                for (let i = 0; i < this.listOfAddedFields.length; i++) {
-                    optValues.push(this.listOfAddedFields[i].value);
-                    optLabels.push(this.listOfAddedFields[i].label);
-                }
-
-                obj.tablelistValues = optValues;
-                obj.tablelistLabels = optLabels;
-                obj.grouping = this.selectchildpicklist;
-                obj.dateFormat = this.dateFormatvalue;
-                obj.timeFormat = this.timeFormatvalue;
-                obj.numberFormat = this.numFormatvalue;
-                obj.currencyFormat = this.curFormatvalue;
-
-                const category = new Object();
-                category.fontcolor = this.selectedBFontColor;
-                category.backgroundColor = this.selectedBBgcolor;
-                category.fontfamily = this.fontfamily;
-                category.fontsize = this.fontsize;
-
-                const head = new Object();
-                head.fontcolor = this.selectedHFontColor;
-                head.backgroundColor = this.selectedHbgColor;
-                head.fontfamily = this.fontfamily;
-                head.fontsize = this.fontsize;      
-
-                const styles = new Object();
-                styles.category = category;
-                styles.header = head;
-                styles.subTotal = {subTotalRowBGColor : this.selectedSubTotalBGColor, subTotalRowFontColor : this.selectedSubTotalFontColor};
-                styles.total = {totalRowBGcolor : this.selectedTotalBGColor, totalRowFontColor : this.selectedTotalFontColor}
-
-                obj.style = styles;
-                obj.groupingCatVals = this.getpicklistdata[this.selectchildpicklist];
-                jsonString = JSON.stringify(obj);
+                documentSectionContent.newPage = this.newPage;
+                documentSectionContent.chartLabel = this.chartLabel;
+                documentSectionContent.SerialNumber = this.SerialNumber;
+                documentSectionContent.chartNewPage = this.chartNewPage;
+                documentSectionContent.dateFormat = this.dateFormatvalue;
+                documentSectionContent.timeFormat = this.timeFormatvalue;
+                documentSectionContent.numberFormat = this.numFormatvalue;
+                documentSectionContent.currencyFormat = this.curFormatvalue;                          
+                documentSectionContent.tablelistLabels = this.displayTableHeaderData;              
+                documentSectionContent.grouping = this.selectedGroupingPicklistOption;
+                documentSectionContent.mainChildObject = this.selectedChildObjectName;
+                documentSectionContent.whereClause = '(' + this.filteringCondition + ')';
+                documentSectionContent.childLookupfieldAPIname = childloopkupfieldAPIname;
+                documentSectionContent.subTotal = this.selectedFieldsForSubTotalCalculation.map(({value}) => {return value;});  
+                documentSectionContent.groupingCatVals = (!this.selectedGroupingPicklistOption) ? '' : this.selectedObjectAllPicklistValueSet[this.selectedGroupingPicklistOption].map(({label}) => {return label;});              
+                documentSectionContent.tablelistValues = this.listOfAddedFields.map(({value}) => (value));
+                documentSectionContent.mainparentObject = this.documenttemplaterecord.DxCPQ__Related_To_Type__c;
+                documentSectionContent.style = {
+                    category : {fontcolor  : this.selectedBFontColor, backgroundColor  : this.selectedBBgcolor, fontfamily  : this.fontfamily, fontsize  : this.fontsize},
+                    header : {fontcolor  : this.selectedHFontColor , backgroundColor  : this.selectedHbgColor , fontfamily  : this.fontfamily , fontsize  : this.fontsize},
+                    subTotal : {subTotalRowBGColor : this.selectedSubTotalBGColor, subTotalRowFontColor : this.selectedSubTotalFontColor},
+                    total : {totalRowBGcolor : this.selectedTotalBGColor, totalRowFontColor : this.selectedTotalFontColor}
+                };
+                documentSectionContentAsString = JSON.stringify(documentSectionContent);
             }
 
-            if (jsonString != '' && jsonString != null) {
-                this.Recorddetailsnew.DxCPQ__Section_Content__c = jsonString;
+            if (documentSectionContentAsString != '' && documentSectionContentAsString != null) {
+                this.Recorddetailsnew.DxCPQ__Section_Content__c = documentSectionContentAsString;
             }
-
             if (this.sectionrecordid != '' && this.sectionrecordid.indexOf('NotSaved') == -1) {
                 this.Recorddetailsnew.Id = this.sectionrecordid;
             }
-
-            this.Recorddetailsnew.DxCPQ__Sequence__c = this.rowcount;
             this.Recorddetailsnew.DxCPQ__Type__c = this.sectiontype;
-            this.Recorddetailsnew.DxCPQ__Document_Template__c = this.documenttemplaterecordid;
-            this.Recorddetailsnew.DxCPQ__New_Page__c = this.newPage;
-
-            // Filtering Conditions
+            this.Recorddetailsnew.DxCPQ__New_Page__c = this.newPage;            
+            this.Recorddetailsnew.DxCPQ__Sequence__c = this.rowcount;          
             this.Recorddetailsnew.DxCPQ__RuleId__c = this.ruleIdCreated;
-
-            if (this.Recorddetailsnew.Name != '' && this.Recorddetailsnew.Name != null) {
-                saveDocumentTemplateSectionDetails({
-                        recordDetails: this.Recorddetailsnew
-                    })
-                    .then(result => {
-                        if (result != null) {
-                            this.savedRecordID = result;
-                            const event4 = new ShowToastEvent({
-                                title: 'Success',
-                                message: 'Section "' + this.Recorddetailsnew.Name + '"' + ' was Saved',
-                                variant: 'success',
-                            });
-                            this.dispatchEvent(event4);
-                            var firecustomevent = new CustomEvent('savesectiondata', {
-                                detail: this.savedRecordID
-                            });
-                            this.dispatchEvent(firecustomevent);
-                            this.template.querySelector('c-hidden-component').callFromComponent(result.Id, this.tableHeaders, this.selectedHbgColor, this.selectedHFontColor, this.fontsize, this.fontfamily, this.SerialNumber);
-                        }
-                    })
-                    .catch(error => {
-                        let tempError = error.toString();
-            let errorMessage = error.message || 'Unknown error message';
-            createLog({recordId:'', className:'templateRelatedObjects LWC Component', exceptionMessage:errorMessage, logData:tempError, logType:'Exception'});
-                    })
+            this.Recorddetailsnew.DxCPQ__Document_Template__c = this.documenttemplaterecordid;
+            if (this.Recorddetailsnew.Name != '' && this.Recorddetailsnew.Name != null && chartSectionFlagged) {
+                this.saveSectionContentWrapper();
             }
         }
-        this.template.querySelector('c-template-designer-cmp').showPreview = true;
+    }
+
+    saveSectionContentWrapper(){
+        saveDocumentTemplateSectionDetails({ recordDetails: this.Recorddetailsnew })
+        .then(result => {
+            if (result != null) {
+                this.savedRecordID = result;
+                this.dispatchEvent(new ShowToastEvent({
+                    title: 'Success',
+                    message: 'Section "' + this.Recorddetailsnew.Name + '"' + ' was Saved',
+                    variant: 'success',
+                }));
+                this.dispatchEvent(new CustomEvent('savesectiondata', {
+                    detail: this.savedRecordID
+                }));
+                this.template.querySelector('c-hidden-component').callFromComponent(result.Id, this.displayTableHeaderData, this.selectedHbgColor, this.selectedHFontColor, this.fontsize, this.fontfamily, this.SerialNumber);
+                this.template.querySelector('c-template-designer-cmp').showPreview = true;
+            }
+        })
+        .catch(error => {
+            createLog({recordId:null, className:'templateRelatedObjects LWC Component', exceptionMessage: (error.message || 'Unknown error message'), logData: error.toString(), logType:'Exception'});
+        })
+    }
+
+    async handleReferenceObjectFieldsRetrieval(sObjectName){
+        let allFieldsWrapper;
+        if(this.referenceObjectsFieldDetailsMap[sObjectName]){
+            allFieldsWrapper = this.referenceObjectsFieldDetailsMap[sObjectName]
+        } else {
+            await getSelectedRelatedObjectFields({ selectedObject: sObjectName })
+            .then(result =>{
+                allFieldsWrapper = result;
+                this.referenceObjectsFieldDetailsMap[sObjectName] = result;
+            }).catch(error =>{
+                createLog({recordId:null, className:'templateRelatedObjects LWC Component', exceptionMessage: (error.message || 'Unknown error message'), logData: error.toString(), logType:'Exception'});
+            });
+        }
+        return allFieldsWrapper;
     }
 
     /*
@@ -1181,77 +1062,64 @@ export default class TemplateRelatedObjects extends LightningElement {
         let selectedField = event.currentTarget.value;
         let index = event.currentTarget.dataset.id;
         this.listOfRelatedObjects.splice(parseInt(index) + 1);
-        this.listOfRelatedObjects.forEach(obj => {
-            if (obj.index == index) {
-                obj.value = selectedField;
-                obj.fieldWrap.forEach(field => {
-
+        this.listOfRelatedObjects.forEach(fieldDetail => {
+            if (fieldDetail.index == index) {
+                fieldDetail.value = selectedField;
+                fieldDetail.fieldWrap.forEach(field => {
                     if (field.apiName == selectedField) {
-                        obj.selectedFieldAPIName = field.apiName;
-                        obj.selectedFieldName = field.name;
-                        obj.dataType = field.dataType;
+                        fieldDetail.selectedFieldAPIName = field.apiName;
+                        fieldDetail.selectedFieldName = field.name;
+                        fieldDetail.dataType = field.dataType;
                         if (field.dataType == 'REFERENCE') {
-                            this.showStatement = false;
-                            obj.selectedObject = field.sObjectName;
-                            obj.relationshipName = field.relationshipName;
-
+                            fieldDetail.selectedObject = field.sObjectName;
+                            fieldDetail.relationshipName = field.relationshipName;
                             let existingValues = [];
-                            let fieldArray = this.listOfAddedFields.filter((obj) => obj.value.includes(field.relationshipName));
+                            let fieldArray = this.listOfAddedFields.filter((fieldDetail) => fieldDetail.value.includes(field.relationshipName));
                             if (fieldArray.length > 0) {
                                 fieldArray.forEach(temp => {
                                     existingValues.push(temp.value.split('.')[1])
                                 });
                             }
-
-                            getFields({
-                                    selectedObject: field.sObjectName
-                                })
+                            if(this.referenceObjectsFieldDetailsMap[field.sObjectName]){
+                                let sObjectFieldWrapper = {};
+                                let index = this.listOfRelatedObjects.length;
+                                sObjectFieldWrapper.index = index;
+                                sObjectFieldWrapper.fieldList = this.referenceObjectsFieldDetailsMap[field.sObjectName].filter((fieldDetail) => (fieldDetail.dataType != "REFERENCE" && !existingValues.includes(fieldDetail.apiName))).map((fieldDetail) => ({label: fieldDetail.name, value: fieldDetail.apiName, dataType: fieldDetail.dataType}));
+                                sObjectFieldWrapper.fieldWrap = this.referenceObjectsFieldDetailsMap[field.sObjectName];
+                                this.listOfRelatedObjects.push(sObjectFieldWrapper);
+                            } else {
+                                getSelectedRelatedObjectFields({ selectedObject: field.sObjectName })
                                 .then(result => {
                                     if (result) {
-                                        let tempObj = {};
-                                        let index = this.listOfRelatedObjects.length;
-                                        tempObj.index = index;
-                                        tempObj.fieldList = [];
-
-                                        result.forEach(field => {
-                                            if (field.dataType != 'REFERENCE' && !existingValues.includes(field.apiName))
-                                                tempObj.fieldList.push({
-                                                    label: field.name,
-                                                    value: field.apiName,
-                                                    dataType: field.dataType
-                                                });
-                                        });
-
-                                        tempObj.fieldWrap = result;
-                                        tempObj.uKey = (new Date()).getTime() + ":" + index;
-                                        this.listOfRelatedObjects.push(tempObj);
-
+                                        this.referenceObjectsFieldDetailsMap[field.sObjectName] = result;
+                                        let sObjectFieldWrapper = {};
+                                        sObjectFieldWrapper.index = this.listOfRelatedObjects.length;
+                                        sObjectFieldWrapper.fieldList = result.filter((fieldDetail) => (fieldDetail.dataType != "REFERENCE" && !existingValues.includes(fieldDetail.apiName))).map((fieldDetail) => ({label: fieldDetail.name, value: fieldDetail.apiName, dataType: fieldDetail.dataType}));
+                                        sObjectFieldWrapper.fieldWrap = result;
+                                        this.listOfRelatedObjects.push(sObjectFieldWrapper);
                                     }
+                                }).catch(error => {
+                                    createLog({recordId:null, className:'templateRelatedObjects LWC Component', exceptionMessage: (error.message || 'Unknown error message'), logData: error.toString(), logType:'Exception'});
                                 })
-                                .catch(error => {
-                                    let tempError = error.toString();
-            let errorMessage = error.message || 'Unknown error message';
-            createLog({recordId:'', className:'templateRelatedObjects LWC Component', exceptionMessage:errorMessage, logData:tempError, logType:'Exception'});
-                                })
+                            }
                         } else {
-                            let tempstr;
+                            let selectedApiName;
                             for (let i = 0; i < this.listOfRelatedObjects.length; i++) {
                                 if (i == this.listOfRelatedObjects.length - 1) {
-                                    if (tempstr) {
-                                        tempstr = tempstr + '.' + this.listOfRelatedObjects[i].value;
+                                    if (selectedApiName) {
+                                        selectedApiName = selectedApiName + '.' + this.listOfRelatedObjects[i].value;
                                     } else {
-                                        tempstr = this.listOfRelatedObjects[i].value;
+                                        selectedApiName = this.listOfRelatedObjects[i].value;
                                     }
                                 } else {
-                                    if (tempstr) {
-                                        tempstr = tempstr + '.' + this.listOfRelatedObjects[i].relationshipName;
+                                    if (selectedApiName) {
+                                        selectedApiName = selectedApiName + '.' + this.listOfRelatedObjects[i].relationshipName;
                                     } else {
-                                        tempstr = this.listOfRelatedObjects[i].relationshipName;
+                                        selectedApiName = this.listOfRelatedObjects[i].relationshipName;
                                     }
                                 }
                             }
-                            this.selectedField = tempstr;
-                            this.showStatement = true;
+                            this.selectedField = selectedApiName;
                         }
                     }
                 })
@@ -1262,46 +1130,39 @@ export default class TemplateRelatedObjects extends LightningElement {
     /*
     This piece of code deals in displaying the fields for selecting the calculation of  grandtotals and subtotals of the available number and currency fields 
     */
-    handlenumberfields(bool) {
-        this.showNumberFields = [];
+    handleNumberFieldSelection(bool) {
+        this.numericFieldsForSubTotalSelection = [];
         if (bool) {
-            for (let i = 0; i < this.listOfAddedFields.length; i++) {
+            /* for (let i = 0; i < this.listOfAddedFields.length; i++) {
                 if (this.listOfAddedFields[i].dataType == 'DOUBLE' || this.listOfAddedFields[i].dataType == 'CURRENCY' ||
                     this.listOfAddedFields[i].dataType == 'NUMBER') {
-                    this.showNumberFields.push(this.listOfAddedFields[i]);
+                    this.numericFieldsForSubTotalSelection.push(this.listOfAddedFields[i]);
                 }
-            }
+            } */
+            this.numericFieldsForSubTotalSelection = this.listOfAddedFields.filter(({dataType}) => {return (dataType == 'DOUBLE' || dataType == 'CURRENCY' || dataType == 'NUMBER')});
         }
-        if (this.showNumberFields.length > 0) {
+        if (this.numericFieldsForSubTotalSelection.length > 0) {
             this.showCalculatorFields = true;
-            this.showNumberFieldsOptions = this.showNumberFields;
+            //this.numericFieldsForSubTotalSelectionOptions = this.numericFieldsForSubTotalSelection;
         }
-
     }
 
     /*
       Based on the selection of subtotals and grandtotals, the functionality to display the fields required for Graph creation is listed below
      */
-    modifyOptions() {
-        this.showNumberFields = this.showNumberFieldsOptions.filter(elem => {
-            if (!this.allNumericalFields.includes(elem.label))
-                return elem;
-        });
-        this.SubtotalfieldOptions();
+    modifyNumericalFields() {
+        /* this.numericFieldsForSubTotalSelection = this.numericFieldsForSubTotalSelectionOptions.filter(elem => {
+            if (!this.selectedSubTotalFieldLabelsList.includes(elem.label)) return elem;
+        }); */
+        this.updateSubTotalFieldListForChartGeneration();
     }
 
     /**
      The selected fields for the calculation of subtotals and grandtotals are omitted from the picklist. Addition and removal of the picklist fields is handled here (as the input is of multi-select type)
      */
-    SubtotalfieldOptions() {
-        this.subtotalField = [];
-        for (let i = 0; i < this.allNumericalFields.length; i++) {
-            this.subtotalField.push({
-                'label': this.allNumericalFields[i],
-                'value': this.allNumericalFields[i]
-            });
-        }
-        if (this.subtotalField.length > 0) {
+    updateSubTotalFieldListForChartGeneration() {
+        this.subTotalFieldListForChartGeneration = this.selectedSubTotalFieldLabelsList.map((fieldLabel) => ({'label' : fieldLabel, 'value': fieldLabel}));
+        if (this.subTotalFieldListForChartGeneration.length > 0) {
             this.nosubTotal = true;
         }
     }
@@ -1310,50 +1171,55 @@ export default class TemplateRelatedObjects extends LightningElement {
       this piece of code displays the picklist for showing the values for displaying the chart/graph
      */
     chartValueChange(event) {
-        this.subtotalFieldValue = event.detail.value;
-        if (this.subtotalFieldValue.length == 0 || (!this.noGrouping) || !(this.nosubTotal)) {
-            this.chartControl = false;
-        } else {
-            this.chartControl = true;
-        }
+        this.selectedSubTotalFieldForChartGeneration = event.detail.value;
+        this.chartControl = !(this.selectedSubTotalFieldForChartGeneration.length == 0 || (!this.relatedRecordsGrouping) || !(this.nosubTotal))
     }
 
     /*
       The piece of code is to store the value of selected Subtotal feld calculation.
      */
-    handleNumCalfields(event) {
-        this.numfieldvalue = event.target.value;
-        let numfieldlabel;
-        for (let i = 0; i < this.showNumberFields.length; i++) {
-            if (this.showNumberFields[i].value == this.numfieldvalue) {
-                numfieldlabel = this.showNumberFields[i].label;
+    handleSubTotalFieldsSelection(event) {
+        let selectedNumericFieldValueFromSubTotalFields = event.target.value;
+        let selectedNumericFieldDetail = (this.numericFieldsForSubTotalSelection.filter(({value}) => (value == selectedNumericFieldValueFromSubTotalFields)))[0];
+        /* for (let i = 0; i < this.numericFieldsForSubTotalSelection.length; i++) {
+            if (this.numericFieldsForSubTotalSelection[i].value == selectedNumericFieldValueFromSubTotalFields) {
+                numfieldlabel = this.numericFieldsForSubTotalSelection[i].label;
             }
+        } */
+        if (!this.selectedSubTotalFieldLabelsList.includes(selectedNumericFieldDetail.label)){            
+            this.selectedFieldsForSubTotalCalculation.push(selectedNumericFieldDetail);
+            this.selectedSubTotalFieldLabelsList.push(selectedNumericFieldDetail.label);
+            this.selectedSubTotalFieldAPIList.push(selectedNumericFieldDetail.value);
         }
-        if (!(this.allNumericalFields.includes(numfieldlabel))) {
-            this.allNumericalFields.push(numfieldlabel);
-            this.allnumValues.push(this.numfieldvalue);
-        }
-        this.modifyOptions();
+        this.modifyNumericalFields();
     }
 
     /*
       Removing the selected subtotal fields from pill container and moving it back to picklist is donw by the below code
      */
-    handleNumericFieldRemoval(event) {
+      handleNumericFieldRemovalFromSelectedList(event) {
         if(!this.isDisabled){
-            this.numfieldvalue = "";
-            let index = this.allNumericalFields.indexOf(event.target.name);
-            this.allNumericalFields.splice(index, 1);
-            this.allnumValues.splice(index, 1);
-            this.chartControl = (this.allNumericalFields.length == 0 || !(this.allNumericalFields.includes(this.subtotalFieldValue)) || (!this.noGrouping)) ? false : true;
-            this.modifyOptions();
+            let index = this.selectedFieldsForSubTotalCalculation.findIndex(({label}) => label == event.target.name);
+            this.selectedFieldsForSubTotalCalculation.splice(index,1);
+            this.selectedSubTotalFieldAPIList = this.selectedFieldsForSubTotalCalculation.map(({value}) => {return value;})
+            this.selectedSubTotalFieldLabelsList = this.selectedFieldsForSubTotalCalculation.map(({label}) => {return label;})
+            if(this.selectedSubTotalFieldForChartGeneration == event.target.name) {
+                this.selectedSubTotalFieldForChartGeneration = null;
+                this.dispatchEvent(new ShowToastEvent({
+                    title: 'Error',
+                    message: 'A Sub-Total field must be selected for Chart inside PDF document. Please select a valid option.',
+                    variant: 'Error'
+                }));
+            }
+            this.chartControl = (this.selectedSubTotalFieldLabelsList.length == 0 || !(this.selectedSubTotalFieldLabelsList.includes(this.selectedSubTotalFieldForChartGeneration)) || (!this.relatedRecordsGrouping)) ? false : true;
+            this.modifyNumericalFields();
         }
     }
 
     /*
     Adding the selected fields in the dual list box and the reciprocates on the table preview
      */
-    addition() {
+    handleFieldAdditionToSelectedList() {
         if (this.selectedField != '') {
             let selectedVal = this.selectedField;
             var checkDuplicate = false;
@@ -1369,11 +1235,10 @@ export default class TemplateRelatedObjects extends LightningElement {
                 }
             }
             if (selectedVal.includes('.')) {
-                let arr = selectedVal.split('.');
-                let selected2 = arr[1];
+                let referenceField = selectedVal.split('.');
                 let fieldlabel;
                 for (let i = 0; i < this.listOfRelatedObjects[0].fieldWrap.length; i++) {
-                    if (this.listOfRelatedObjects[0].fieldWrap[i].relationshipName == arr[0]) {
+                    if (this.listOfRelatedObjects[0].fieldWrap[i].relationshipName == referenceField[0]) {
                         fieldlabel = this.listOfRelatedObjects[0].fieldWrap[i].name;
                         fieldlabel = fieldlabel.replace('>', '');
                     }
@@ -1381,10 +1246,10 @@ export default class TemplateRelatedObjects extends LightningElement {
                 for (let i = 0; i < this.listOfRelatedObjects[1].fieldList.length; i++) {
                     label = this.listOfRelatedObjects[1].fieldList[i].label;
                     let temp = fieldlabel + '.' + label;
-                    if (this.tableHeaders.includes(temp)) {
+                    if (this.displayTableHeaderData.includes(temp)) {
                         checkDuplicate = true;
                     }
-                    if (this.listOfRelatedObjects[1].fieldList[i].value == selected2 && !checkDuplicate) {
+                    if (this.listOfRelatedObjects[1].fieldList[i].value == referenceField[1] && !checkDuplicate) {
                         this.listOfAddedFields.push({
                             "label": fieldlabel + '.' + label,
                             "value": selectedVal,
@@ -1394,14 +1259,16 @@ export default class TemplateRelatedObjects extends LightningElement {
                     }
                 }
             }
-            this.handlenumberfields(true);
+            this.handleNumberFieldSelection(true);
             if (!checkDuplicate) {
                 this.handleTableDisplay(selectedVal, false);
             }
         }
         this.selectedField = '';
-        if (this.showNumberFields.length === 0) {
+        if (this.numericFieldsForSubTotalSelection.length === 0) {
             this.showCalculatorFields = false;
+            this.displayChartSection = false;
+            this.template.querySelector(`[data-id="chart-configuration"]`).checked = this.displayChartSection;
         }
 
     }
@@ -1416,9 +1283,9 @@ export default class TemplateRelatedObjects extends LightningElement {
     /*
       Removing the selected field from the list of selected fields from dual list box
      */
-    Removal() {
+    handleFieldRemovalFromSelectedList() {
         if (this.selectedFieldToBeRemoved != '') {
-            if (this.changedHeaders.length > 0) {
+            /* if (this.changedHeaders.length > 0) {
                 for (let i = 0; i < this.listOfAddedFields.length; i++) {
                     for (let j = 0; j < this.changedHeaders.length; j++) {
                         if (this.listOfAddedFields[i].label == this.changedHeaders[j].current) {
@@ -1426,8 +1293,8 @@ export default class TemplateRelatedObjects extends LightningElement {
                         }
                     }
                 }
-            }
-
+            } */
+            let fieldIndex = this.listOfAddedFields.findIndex((fieldDetail) => { return fieldDetail.value == this.selectedFieldToBeRemoved});
             for (let i = 0; i < this.listOfAddedFields.length; i++) {
                 if (this.listOfAddedFields[i].value == this.selectedFieldToBeRemoved) {
                     if (this.listOfAddedFields[i].value.includes('.')) {
@@ -1436,17 +1303,17 @@ export default class TemplateRelatedObjects extends LightningElement {
                             "value": this.listOfAddedFields[i].value.split('.')[1]
                         });
                         let t = this.listOfAddedFields.splice(i, 1);
-                        this.lstofremovedFields.push(t);
+                        this.listOfRemovedFields.push(t);
                         break;
                     } else {
                         this.listOfRelatedObjects[0].fieldList.unshift(this.listOfAddedFields[i]);
                         const t = this.listOfAddedFields.splice(i, 1);
-                        this.lstofremovedFields.push(t);
+                        this.listOfRemovedFields.push(t);
                         break;
                     }
                 }
             }
-
+            /*
             if (this.changedHeaders.length > 0) {
                 for (let i = 0; i < this.listOfAddedFields.length; i++) {
                     for (let j = 0; j < this.changedHeaders.length; j++) {
@@ -1455,25 +1322,26 @@ export default class TemplateRelatedObjects extends LightningElement {
                         }
                     }
                 }
-            }
-            this.handlenumberfields(true);
-            this.handleTableDisplay(this.selectedFieldToBeRemoved, false);
+            } */
+            this.handleNumberFieldSelection(true);
+            this.handleTableDisplay(this.selectedFieldToBeRemoved, false, fieldIndex);
         }
         this.selectedFieldToBeRemoved = '';
-        if (this.showNumberFields.length === 0) {
+        if (this.numericFieldsForSubTotalSelection.length === 0) {
             this.showCalculatorFields = false;
+            this.displayChartSection = false;
+            this.template.querySelector(`[data-id="chart-configuration"]`).checked = this.displayChartSection;
         }
     }
 
     /*
     Swapping the selected fields upwards in the dual list box and the change can be seen in the preview table
      */
-    moveUpward() {
+    handleFieldToMoveUpward() {
         this.loadUp = true;
         let selectedVal = this.selectedFieldToBeRemoved;
         let addedfields = this.listOfAddedFields;
         for (let i = 0; i < this.listOfAddedFields.length; i++) {
-
             if (selectedVal == addedfields[i].value && i != 0) {
                 let temp = addedfields[i - 1];
                 addedfields[i - 1] = addedfields[i];
@@ -1482,17 +1350,13 @@ export default class TemplateRelatedObjects extends LightningElement {
             }
         }
         this.listOfAddedFields = addedfields;
-        let opt = [];
-        for (let i = 0; i < this.listOfAddedFields.length; i++) {
-            opt.push(this.listOfAddedFields[i].label);
-        }
-        this.tableHeaders = opt;
+        this.displayTableHeaderData = this.listOfAddedFields.map(({label}) => (label));
     }
 
     /*
     Swapping the selected fields downwards in the dual list box and the change can be seen in the preview table
      */
-    moveDownward() {
+    handleFieldToMoveDownward() {
         this.loadUp = true;
         let selectedVal = this.selectedFieldToBeRemoved;
         let addedfields = this.listOfAddedFields;
@@ -1505,15 +1369,7 @@ export default class TemplateRelatedObjects extends LightningElement {
             }
         }
         this.listOfAddedFields = addedfields;
-        let opt = [];
-        for (let i = 0; i < this.listOfAddedFields.length; i++) {
-            opt.push(this.listOfAddedFields[i].label);
-        }
-        this.tableHeaders = opt;
-    }
-
-    selectTotalCheckBox(event) {
-        this.checkTotals = event.detail.value;
+        this.displayTableHeaderData = this.listOfAddedFields.map(({label}) => (label));
     }
 
     /* Chart Header Changes by Rahul */
@@ -1522,7 +1378,7 @@ export default class TemplateRelatedObjects extends LightningElement {
     This piece of code is used for getting the selected header value
      */
     handleRichTextArea(event) {
-        this.changedLabel = event.detail.value;
+        this.renamedHeaderLabel = event.detail.value;
     }
 
     /*
@@ -1530,7 +1386,7 @@ export default class TemplateRelatedObjects extends LightningElement {
      */
     getSelectedTableRowHandler(event) {
         this.selectedTableRow = event.target.dataset.id;
-         this.template.querySelectorAll('[data-id="' + this.selectedTableRow + '"]')[0];
+        this.template.querySelectorAll('[data-id="' + this.selectedTableRow + '"]')[0];
         this.handleActionButtonsVisibility(this.selectedTableRow);
     }
 
@@ -1550,8 +1406,6 @@ export default class TemplateRelatedObjects extends LightningElement {
     setActionButtonsVisibility(dataId, buttons) {
         if (!!buttons && buttons.length > 0) {
             for (let sbCounter = 0; sbCounter < buttons.length; sbCounter++) {
-
-
                 let button = buttons[sbCounter];
                 if (button.dataset.id == dataId) {
                     button.classList.add('slds-show');
@@ -1567,57 +1421,46 @@ export default class TemplateRelatedObjects extends LightningElement {
     /*
     This piece of code reverts the previous value of the selected header on hitting cancel
      */
-    previousVal() {
-        for (let j = 0; j < this.changedHeaders.length; j++) {
+    revertHeaderLabelRename(event) {
+        /* for (let j = 0; j < this.changedHeaders.length; j++) {
             let ind = this.changedHeaders[j].index;
             if (this.listOfAddedFields[ind].label == this.changedHeaders[j].current) {
                 let temp = this.changedHeaders[j].previous;
                 this.listOfAddedFields[ind].label = this.changedHeaders[j].previous;
-                this.tableHeaders[ind] = '' + temp + '';
+                this.displayTableHeaderData[ind] = '' + temp + '';
             }
-        }
-
-        let headerLabelsBeforeChange = this.tableHeaders;
-        this.tableHeaders = [];
-        setTimeout(() => {
-            this.tableHeaders = headerLabelsBeforeChange;
-        }, 100);
-
+        } */
+        this.template.querySelector(`lightning-input-rich-text[data-position="${event.target.dataset.position}"]`).value = event.target.dataset.id;
+        this.displayTableHeaderData[event.target.dataset.position] = event.target.dataset.id;
         this.handleActionButtonsVisibility(null);
     }
 
     /*
     This piece of code saves the updated value of the selected header on hitting save
      */
-    saveLabel(event) {
+    handleHeaderLabelRename(event) {
+        /*         
         const selectedRecordId = event.target.dataset.id;
-        const len = this.changedLabel.length;
-        this.changedLabel = this.changedLabel.substring(3, len - 4);
+        const len = this.renamedHeaderLabel.length;
+        this.renamedHeaderLabel = this.renamedHeaderLabel.substring(3, len - 4);
         let bool = false;
-        let ind = this.tableHeaders.indexOf(selectedRecordId);
-
+        let ind = this.displayTableHeaderData.indexOf(selectedRecordId);
         for (let i = 0; i < this.changedHeaders.length; i++) {
             if (this.changedHeaders[i].previous == selectedRecordId) {
                 bool = true;
-                this.changedHeaders[i].current = this.changedLabel;
+                this.changedHeaders[i].current = this.renamedHeaderLabel;
                 break;
             }
         }
-
         if (!bool) {
             this.changedHeaders.push({
                 previous: selectedRecordId,
-                current: this.changedLabel,
+                current: this.renamedHeaderLabel,
                 index: ind
             });
-        }
-
-        for (let i = 0; i < this.listOfAddedFields.length; i++) {
-            if (this.listOfAddedFields[i].label == selectedRecordId) {
-                this.listOfAddedFields[i].label = this.changedLabel;
-            }
-        }
-
+        } 
+        */
+        this.displayTableHeaderData[event.target.dataset.position] = this.renamedHeaderLabel.substring(3, this.renamedHeaderLabel.length - 4);
         this.handleActionButtonsVisibility(null);
     }
 
@@ -1629,56 +1472,48 @@ export default class TemplateRelatedObjects extends LightningElement {
 
     handleDisplayChart(event) {
         this.displayChartSection = event.detail.checked;
-        this.chartControl = !this.noGrouping && this.displayChartSection && this.nosubTotal;
-        if (this.displayChartSection) {
-            var _this = this;
-            this.template.querySelector('.borderdiv').style.border = '3px solid #C90D0D';
-            setTimeout(function() {
-                _this.template.querySelector('.borderdiv').style.border = '0px solid transparent';
-                _this.template.querySelector('.borderdiv').style.transition = '1s';
-            }, 2000);
-        }
+        this.chartWithDemoData = this.chartWithDemoData.map(categoryData => {
+            return {...categoryData, height: `height:${categoryData.percent}; background-color:${this.selectedBarChartColor}`};
+        });
+        this.chartControl = !this.relatedRecordsGrouping && this.displayChartSection && this.nosubTotal;
+        if(this.displayChartSection) this.template.querySelector('[data-scroll="scroll-to-chart-section-start"]').scrollIntoView();
     }
 
     handleChartLabel(event) {
         this.chartLabel = event.detail.value;
     }
-
     handleChartNewPage(event) {
         this.chartNewPage = event.detail.checked;
     }
-
     handleHFontColorChange(event) {
         this.selectedHFontColor = event.detail.value;
     }
-
     handleHbgColorChange(event) {
         this.selectedHbgColor = event.detail.value;
     }
-
     handlesubtotal(event) {
         this.subtotal = event.detail.checked;
     }
 
     handlefontfamilyChange(event) {
         this.fontfamily = event.detail.value.replace('&quot;', '');
-        this.template.querySelectorAll('.mytable')[0].style.fontFamily = this.fontfamily;
-        this.catStyle = "background-color :" + this.selectedBBgcolor + "; color:" + this.selectedBFontColor + ';font-size:' + this.fontsize + ';font-family:' + this.fontfamily + ';';
+        this.template.querySelectorAll('.display-table')[0].style.fontFamily = this.fontfamily;
+        this.categoryStyleClass = "background-color :" + this.selectedBBgcolor + "; color:" + this.selectedBFontColor + ';font-size:' + this.fontsize + ';font-family:' + this.fontfamily + ';';
     }
 
     handleBFontColorChange(event) {
         this.selectedBFontColor = event.detail.value;
-        this.template.querySelectorAll('.mytable')[0].style.color = this.selectedBFontColor;
+        this.template.querySelectorAll('.display-table')[0].style.color = this.selectedBFontColor;
     }
 
     handleBBgColorchange(event) {
         this.selectedBBgcolor = event.detail.value;
-        this.template.querySelectorAll('.mytable')[0].style.backgroundColor = this.selectedBBgcolor;
+        this.template.querySelectorAll('.display-table')[0].style.backgroundColor = this.selectedBBgcolor;
     }
 
     handleBDRbgColorchange(event) {
         this.selectedBDRbgcolor = event.detail.value;
-        this.template.querySelectorAll('.mytable').style.border = "5px solid" + this.selectedBDRbgcolor;
+        this.template.querySelectorAll('.display-table').style.border = "5px solid" + this.selectedBDRbgcolor;
     }
 
     handleSubTotalBGColorChange(event){
@@ -1709,7 +1544,7 @@ export default class TemplateRelatedObjects extends LightningElement {
             this.template.querySelectorAll('th')[i].style.color = this.selectedHFontColor;
             this.template.querySelectorAll('th')[i].style.backgroundColor = this.selectedHbgColor;
         }
-        this.catStyle = "background-color :" + this.selectedBBgcolor + "; color:" + this.selectedBFontColor + ';font-size:' + this.fontsize + ';font-family:' + this.fontfamily + ';';
+        this.categoryStyleClass = "background-color :" + this.selectedBBgcolor + "; color:" + this.selectedBFontColor + ';font-size:' + this.fontsize + ';font-family:' + this.fontfamily + ';';
     }
 
     handlefontsizeChange(event) {
@@ -1718,30 +1553,26 @@ export default class TemplateRelatedObjects extends LightningElement {
         for (let i = 0; i < lenth; i++) {
             this.template.querySelectorAll('th')[i].style.fontSize = this.fontsize;
         }
-        this.catStyle = "background-color :" + this.selectedBBgcolor + "; color:" + this.selectedBFontColor + ';font-size:' + this.fontsize + ';font-family:' + this.fontfamily + ';';
+        this.categoryStyleClass = "background-color :" + this.selectedBBgcolor + "; color:" + this.selectedBFontColor + ';font-size:' + this.fontsize + ';font-family:' + this.fontfamily + ';';
     }
 
     handleDateFormat(event) {
         this.dateFormatvalue = event.detail.value;
     }
-
     handleTimeFormat(event) {
         this.timeFormatvalue = event.detail.value;
     }
-
     handleNumFormat(event) {
         this.numFormatvalue = event.detail.value;
     }
-
     handlecurFormat(event) {
         this.curFormatvalue = event.detail.value;
     }
-
     handleNewPage(event) {
         this.newPage = event.detail.checked;
     }
 
-    /* Filtering based on Objects -> All changes by Rahul */
+    /* Filtering based on Objects -> Changes by Rahul */
 
     /*Closing the modal box for filter rules creation*/
     closePreviewModal() {
@@ -1758,17 +1589,13 @@ export default class TemplateRelatedObjects extends LightningElement {
     /* The piece of code is to get the object names for selection in rules */
     handleRuleWrapperMaking() {
         if (this.selectedChildObjectName !== undefined) {
-            getSObjectListFiltering({
-                    selectedChildObjectLabel: this.selectedChildObjectName
-                })
-                .then((result) => {
-                    this.fieldWrapper = result;
-                })
-                .catch((error) => {
-                    let tempError = error.toString();
-                    let errorMessage = error.message || 'Unknown error message';
-                    createLog({recordId:'', className:'templateRelatedObjects LWC Component', exceptionMessage:errorMessage, logData:tempError, logType:'Exception'});
-             });
+            getSObjectListFiltering({ selectedChildObjectLabel: this.selectedChildObjectName })
+            .then((result) => {
+                this.fieldWrapper = result;
+            })
+            .catch((error) => {
+                createLog({recordId:null, className:'templateRelatedObjects LWC Component', exceptionMessage: (error.message || 'Unknown error message'), logData: error.toString(), logType:'Exception'});     
+            });
         }
     }
 
@@ -1778,30 +1605,26 @@ export default class TemplateRelatedObjects extends LightningElement {
     handleCreateRules() {
         const conditionChild = this.template.querySelector('c-conditioncmp').getConditionDetails();
         this.ruleExpression = conditionChild.expression;
-
         this.createRuleConditionObjects(conditionChild.listOfConditions);
         let listOfConditions = JSON.stringify(this.ruleConditions);
-
         let deleteIds = null;
         let ruleExp = JSON.stringify(this.ruleExpression);
         createRuleCondition({
-                ruleConditions: listOfConditions,
-                ruleExpression: ruleExp,
-                deleteIds: deleteIds,
-                sectionrecordid: this.sectionrecordid
-            })
-            .then(result => {
-                this.ruleIdCreated = result;
-                this.ruleExists = true;
+            ruleConditions: listOfConditions,
+            ruleExpression: ruleExp,
+            deleteIds: deleteIds,
+            sectionrecordid: this.sectionrecordid
+        })
+        .then(result => {
+            this.ruleIdCreated = result;
+            this.ruleExists = true;
 
-                let event = new Object();
-                this.getExistingConditions(event);
-            })
-            .catch(error => {
-                let tempError = error.toString();
-            let errorMessage = error.message || 'Unknown error message';
-            createLog({recordId:'', className:'templateRelatedObjects LWC Component', exceptionMessage:errorMessage, logData:tempError, logType:'Exception'});                                             
-            });
+            let event = new Object();
+            this.getExistingConditions(event);
+        })
+        .catch(error => {
+            createLog({recordId:null, className:'templateRelatedObjects LWC Component', exceptionMessage: (error.message || 'Unknown error message'), logData: error.toString(), logType:'Exception'});     
+        });
 
         this.template.querySelector('c-modal').hide();
     }
@@ -1834,25 +1657,19 @@ export default class TemplateRelatedObjects extends LightningElement {
         this.hasSpecialCharacter = false;
         let regExpr = /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]+/;
         arrayList.forEach(condition => {
-            let tempObj = {};
-            tempObj.Id = condition.Id;
-            tempObj.conditionName = condition.conditionName;
-            tempObj.dataType = condition.dataType;
-
-            if (condition.operator == '==') {
-                tempObj.operator = '==';
-            } else {
-                tempObj.operator = condition.operator;
-            }
-
-            tempObj.selectedObject = condition.selectedObject;
-            tempObj.selectedField = condition.selectedField;
-            tempObj.value = condition.value;
-            if (regExpr.test(tempObj.value)) {
+            let conditionChildWrapper = {};
+            conditionChildWrapper.Id = condition.Id;
+            conditionChildWrapper.conditionName = condition.conditionName;
+            conditionChildWrapper.dataType = condition.dataType;
+            conditionChildWrapper.operator = (condition.operator == '==') ? '==' : condition.operator;
+            conditionChildWrapper.selectedObject = condition.selectedObject;
+            conditionChildWrapper.selectedField = condition.selectedField;
+            conditionChildWrapper.value = condition.value;
+            conditionChildWrapper.conditionIndex = condition._index;
+            if (regExpr.test(conditionChildWrapper.value)) {
                 this.hasSpecialCharacter = true;
-            }
-            tempObj.conditionIndex = condition._index;
-            this.ruleConditions.push(tempObj);
+            }            
+            this.ruleConditions.push(conditionChildWrapper);
             if (condition.children && condition.children.length > 0) {
                 condition.children.forEach(child => {
                     if (child.group && child.group.length > 0) {
@@ -1864,37 +1681,24 @@ export default class TemplateRelatedObjects extends LightningElement {
     }
 
     handleFilterRuleReset() {
-
-        resetRulesForTemplate({
-                templateRuleId: this.ruleIdCreated
-            })
-            .then(result => {
-                if (result == 'Success') {
-
-                    this.ruleIdCreated = null;
-
-                    this.listOfExistingConditions = [];
-                    this.conditionsArr = [];
-                    this.ruleExists = false;
-                    this.filteringCondition = '';
-                    this.ruleConditions = [];
-                    this.ruleCondition = false;
-
-                    this.handleSectionSave(null);
-                } else {
-                    const Errormsg = new ShowToastEvent({
-                        title: 'Error',
-                        message: 'Reset didn\'t work',
-                        variant: 'Error'
-                    });
-                    this.dispatchEvent(Errormsg);
-                }
-            })
-            .catch(error => {
-                let tempError = error.toString();
-            let errorMessage = error.message || 'Unknown error message';
-            createLog({recordId:'', className:'templateRelatedObjects LWC Component', exceptionMessage:errorMessage, logData:tempError, logType:'Exception'});                                             
-            });
+        resetRulesForTemplate({ templateRuleId: this.ruleIdCreated })
+        .then(result => {
+            if (result == 'Success') {
+                this.ruleIdCreated = null;
+                this.listOfExistingConditions = [];
+                this.conditionsArr = [];
+                this.ruleExists = false;
+                this.filteringCondition = '';
+                this.ruleConditions = [];
+                this.ruleCondition = false;
+                this.handleSectionSave(null);
+            } else {
+                this.dispatchEvent(new ShowToastEvent({ title: 'Error', message: 'Reset didn\'t work', variant: 'Error' }));
+            }
+        })
+        .catch(error => {
+            createLog({recordId:null, className:'templateRelatedObjects LWC Component', exceptionMessage: (error.message || 'Unknown error message'), logData: error.toString(), logType:'Exception'});     
+        });
         this.ruleCondition = false;
         this.template.querySelector('c-modal').hide();
     }
@@ -1912,23 +1716,20 @@ export default class TemplateRelatedObjects extends LightningElement {
         let deleteIds = this.removeDeletedConditions(this.ruleConditions, this.conditionsArr);
         if (!this.hasSpecialCharacter) {
             createRuleCondition({
-                    ruleConditions: listOfConditions,
-                    ruleExpression: expression,
-                    deleteIds: deleteIds,
-                    sectionrecordid: this.sectionrecordid
-                })
-                .then(result => {
-                    this.ruleExists = true;
-                    this.ruleExpression = expression;
-
-                    let event = new Object();
-                    this.getExistingConditions(event);
-                })
-                .catch(error => {
-                    let tempError = error.toString();
-            let errorMessage = error.message || 'Unknown error message';
-            createLog({recordId:'', className:'templateRelatedObjects LWC Component', exceptionMessage:errorMessage, logData:tempError, logType:'Exception'});                                             
-                });
+                ruleConditions: listOfConditions,
+                ruleExpression: expression,
+                deleteIds: deleteIds,
+                sectionrecordid: this.sectionrecordid
+            })
+            .then(result => {
+                this.ruleExists = true;
+                this.ruleExpression = expression;
+                let event = new Object();
+                this.getExistingConditions(event);
+            })
+            .catch(error => {
+                createLog({recordId:null, className:'templateRelatedObjects LWC Component', exceptionMessage: (error.message || 'Unknown error message'), logData: error.toString(), logType:'Exception'});     
+            });
         }
         this.template.querySelector('c-modal').hide();
     }
@@ -1937,36 +1738,30 @@ export default class TemplateRelatedObjects extends LightningElement {
       The piece of code is to get the conditions of templates in onload
     */
     getExistingConditions() {
-        this.mapOfRC = new Map();
+        this.ruleConditionsWrapper = new Map();
         this.conditionsArr = [];
         this.conditionExists = false;
         this.allConditions = [];
         this.listOfExistingConditions = [];
-        getConditions({
-                ruleName: this.ruleIdCreated
-            })
-            .then(result => {
-                if (result.length > 0) {
-                    this.conditionsArr = JSON.parse(JSON.stringify(result));
-                    this.lstofactualConditions = this.conditionsArr;
-
-                    this.conditionsArr.forEach(con => {
-                        this.mapOfRC.set(con.Name, con);
-                    });
-
-                    if (this.fieldWrapper !== undefined) {
-                        let conditionResult = createRuleConditionHierarcy(this.ruleExpression, this.mapOfRC, this.fieldWrapper);
-                        this.listOfExistingConditions = conditionResult.listOfConditions;
-                        this.selectedGlobalValue = conditionResult.selectedGlobalValue;
-                        this.conditionExists = true;
-                    }
+        getConditions({ ruleName: this.ruleIdCreated})
+        .then(result => {
+            if (result.length > 0) {
+                this.conditionsArr = JSON.parse(JSON.stringify(result));
+                this.listOfActualConditions = this.conditionsArr;
+                this.conditionsArr.forEach(con => {
+                    this.ruleConditionsWrapper.set(con.Name, con);
+                });
+                if (this.fieldWrapper !== undefined) {
+                    let conditionResult = createRuleConditionHierarcy(this.ruleExpression, this.ruleConditionsWrapper, this.fieldWrapper);
+                    this.listOfExistingConditions = conditionResult.listOfConditions;
+                    this.selectedGlobalValue = conditionResult.selectedGlobalValue;
+                    this.conditionExists = true;
                 }
-            })
-            .catch(error => {
-                let tempError = error.toString();
-                let errorMessage = error.message || 'Unknown error message';
-                createLog({recordId:'', className:'templateRelatedObjects LWC Component', exceptionMessage:errorMessage, logData:tempError, logType:'Exception'});    
-            })
+            }
+        })
+        .catch(error => {
+            createLog({recordId:null, className:'templateRelatedObjects LWC Component', exceptionMessage: (error.message || 'Unknown error message'), logData: error.toString(), logType:'Exception'});     
+        });
     }
 
     /*
@@ -1977,7 +1772,6 @@ export default class TemplateRelatedObjects extends LightningElement {
         let lst = [];
         for (let i = 0; i < lstOfConditions.length; i++) {
             let res = '' + lstOfConditions[i].DxCPQ__Condition_Field__c + ' ';
-
             if (lstOfConditions[i].DxCPQ__DataType__c == 'STRING' || lstOfConditions[i].DxCPQ__DataType__c == 'TEXT') {
                 if (lstOfConditions[i].DxCPQ__Operator__c != '!=') {
                     res = res + 'LIKE' + ' ' + '\'%' + lstOfConditions[i].DxCPQ__Value__c + '%\'';
@@ -1991,7 +1785,6 @@ export default class TemplateRelatedObjects extends LightningElement {
             }
             lst.push(res);
         }
-
         for (let i = 0; i < lst.length; i++) {
             let ind = i + 1;
             let con = 'Condition' + ind;

@@ -504,7 +504,7 @@ private class DisplayPDFController_Test {
             ROsectionAutomationController.getSectionDataAsHTML(testAccount.Id, testSection.Id);
             ROsectionAutomationController.dataFetchFromCurrentRecord(
                 new List<Object>{ 'Name' }, 
-                testAccount,        
+                (Map<String, Object>) JSON.deserializeUntyped(JSON.serialize(testAccount)),        
                 new Map<String, String>{ 'Name' => 'STRING' } 
             );            
             ROsectionAutomationController.handleDateTimeFormatAsSelectedbyUser(null, null, null);
@@ -536,7 +536,7 @@ private class DisplayPDFController_Test {
             ROsectionAutomationController.getSectionDataAsHTML(testAccount.Id, testSection.Id);
             ROsectionAutomationController.dataFetchFromCurrentRecord(
                 new List<Object>{ 'Name' }, 
-                testAccount,        
+                (Map<String, Object>) JSON.deserializeUntyped(JSON.serialize(testAccount)),     
                 new Map<String, String>{ 'Name' => 'STRING' } 
             );
             ROsectionAutomationController.handleDateTimeFormatAsSelectedbyUser(null, null, null);
@@ -567,7 +567,7 @@ private class DisplayPDFController_Test {
             ROsectionAutomationController.getSectionDataAsHTML(testAccount.Id, testSection.Id);
             ROsectionAutomationController.dataFetchFromCurrentRecord(
                 new List<Object>{ 'Name' }, 
-                testAccount,        
+                (Map<String, Object>) JSON.deserializeUntyped(JSON.serialize(testAccount)),      
                 new Map<String, String>{ 'Name' => 'STRING' } 
             );
             ROsectionAutomationController.handleDateTimeFormatAsSelectedbyUser(null, null, null);
