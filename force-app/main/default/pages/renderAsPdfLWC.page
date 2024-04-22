@@ -4,7 +4,10 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html;charset=UTF-8" />
     <style type="text/css" media="print">
-            
+      p{
+        margin:1em 0 0 0;
+      }
+
       div.header_left {
         position:running(header_left);
         top: 0;
@@ -12,7 +15,7 @@
         height: 70px;
         padding-bottom: 10px;
         width: 100%;
-        border-bottom:1px solid #e1e1e1;        
+        border-bottom:1px solid #e1e1e1;
       }
 
       div.header_center {
@@ -78,34 +81,92 @@
     
     table.newPagetableMainClass {page-break-before:always;}
     tr{ page-break-inside:avoid; page-break-after:auto; }
-    
-    @page {
-        size: A4 /*landscape*/;
-        margin-left: 0px;
-        margin-right: 0px;
-        margin-top: 90px;
-        margin-bottom: 80px;  
+    <apex:outputText rendered="{!if(defaultCSS== true,true,false)}">
+        @page {
+            size: A4;
+            margin-left: 0px;
+            margin-right: 0px;
+            margin-top: 90px;
+            margin-bottom: 80px;  
+            
+            @top-left { content:element(header_left); }
+            @top-center { content:element(header_center); }
+            @top-right { content:element(header_right); }
+            
+            @bottom-left { content:element(footer_left); }
+            @bottom-center { content:element(footer_center); }
+            @bottom-right { content:element(footer_right); }
+        }
+        </apex:outputText>
+     <apex:outputText rendered="{!if(defaultCSS== false,true,false)}">
+    		<apex:outputText rendered="{!if(showAllPages== true,true,false)}">
+        @page {
+            size: A4;
+            margin-left: 0px;
+            margin-right: 0px;
+            margin-top: 90px;
+            margin-bottom: 80px;  
+            background-image:url({!imageURL});
+            background-repeat: no-repeat;
+            background-origin: padding-box;
+            background-size: 100px 100px;
+            background-position: center;
         
-        @top-left { content:element(header_left); }
-        @top-center { content:element(header_center); }
-        @top-right { content:element(header_right); }
-        
-        @bottom-left { content:element(footer_left); }
-        @bottom-center { content:element(footer_center); }
-        @bottom-right { content:element(footer_right); }
-      }
-      @page {
-        
-        @top-left { content:element(header_left); }
-        @top-center { content:element(header_center); }
-        @top-right { content:element(header_right); }
-        
-        @bottom-left { content:element(footer_left); }
-        @bottom-center { content:element(footer_center); }
-        @bottom-right { content:element(footer_right); }
-      }
-      
-        
+            @top-left { content:element(header_left); }
+            @top-center { content:element(header_center); }
+            @top-right { content:element(header_right); }
+            
+            @bottom-left { content:element(footer_left); }
+            @bottom-center { content:element(footer_center); }
+            @bottom-right { content:element(footer_right); }
+
+
+        }
+        </apex:outputText>
+       		<apex:outputText rendered="{!if(showAllPages== false,true,false)}">
+            @page {
+              size: A4;
+              margin-left: 0px;
+              margin-right: 0px;
+              margin-top: 90px;
+              margin-bottom: 80px;  
+              background-image:url({!imageURL});
+              background-repeat: no-repeat;
+              background-origin: padding-box;
+              background-size: 100px 100px;
+              background-position: center;
+            
+              @top-left { content:element(header_left); }
+              @top-center { content:element(header_center); }
+              @top-right { content:element(header_right); }
+
+              @bottom-left { content:element(footer_left); }
+              @bottom-center { content:element(footer_center); }
+              @bottom-right { content:element(footer_right); }
+            }
+            
+            @page :first {
+              size: A4;
+              margin-left: 0px;
+              margin-right: 0px;
+              margin-top: 90px;
+              margin-bottom: 80px;  
+              background-image:none;
+              background-repeat: no-repeat;
+              background-origin: padding-box;
+              background-size: 100px 100px;
+              background-position: center;
+
+              @top-left { content:element(header_left); }
+              @top-center { content:element(header_center); }
+              @top-right { content:element(header_right); }
+
+              @bottom-left { content:element(footer_left); }
+              @bottom-center { content:element(footer_center); }
+              @bottom-right { content:element(footer_right); }
+            }
+        </apex:outputText>
+      </apex:outputText>
     </style>
 
   </head>
@@ -158,7 +219,7 @@
         </div> 
     </div>
 
-  <div class="content" style="padding-top:20px;padding-right:30px;padding-bottom:20px;padding-left:30px;">
+  <div class="content" style="padding-top:20px;padding-right:30px;padding-bottom:20px;padding-left:30px;font-family: Arial, Helvetica, sans-serif;">
     <div class="dxqt">
       <apex:outputText value="{!displayText}" escape="false" />
     </div>

@@ -52,12 +52,18 @@ global with sharing class PdfDisplay {
         return new ObjectDetails(objectName, objectLabel, recordName);
     }
     
-	/**
-     * @description Retrieves the organization's domain URL.
-     * @return String representing the organization's domain URL.
-     */
-    @AuraEnabled
+    /**
+    * @description    Retrieves the base URL of the Salesforce domain
+    * @return         String Base URL of the Salesforce domain
+    */
+    @AuraEnabled(cacheable=false)
     public static String getDomainUrl() {
-        return URL.getOrgDomainUrl().toExternalForm();
+        try {
+            String baseURL = URL.getOrgDomainURL().toExternalForm();
+            return baseURL;
+        } catch(Exception ex) {
+            LogHandler.createLog((Id) null,'PdfDisplay.getDomainUrl()','Template Id- '+' '+ex.getLineNumber()+ex.getStackTraceString()+ex.getCause(),ex.getMessage(),'Exception');
+            throw new AuraHandledException(ex.getMessage());
+        }
     }
 }

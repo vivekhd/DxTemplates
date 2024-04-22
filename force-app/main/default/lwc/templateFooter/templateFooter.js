@@ -1,240 +1,295 @@
-import { LightningElement, wire, api, track } from 'lwc';
+import { LightningElement, api, track } from 'lwc';
 import getContentVersions from '@salesforce/apex/FooterClass.getContentVersions';
 import saveDocumentTemplateSectionDetails from '@salesforce/apex/SaveDocumentTemplatesection.saveDocumentTemplateSectionDetails';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 import gettemplatesectiondata from '@salesforce/apex/SaveDocumentTemplatesection.gettemplatesectiondata';
 import createLog from '@salesforce/apex/LogHandler.createLog';
+import { NavigationMixin } from 'lightning/navigation';
 
-export default class TemplateFooter extends LightningElement {
-  imageUrls = [];
-  showimages = false;
-  isModalOpen = false;
-  selectedimageid;
-  imageselected = false;
-  imagebuttonlabel = 'Select Image';
-  @api showfooterdetails = false;
-  @api sectiontype;
-  @api documenttemplaterecord;
-  @api rowcount;
-  @api sectionrecordid;
-  @api isDisabled = false;
-  @api selectedObjectName;
+export default class TemplateFooter extends NavigationMixin(LightningElement) {
+	imageUrls = [];
+	showimages = false;
+	isModalOpen = false;
+	selectedimageid;
+	imageselected = false;
+	imagebuttonlabel = 'Select Image';
+	@api showfooterdetails = false;
+	@api sectiontype;
+	@api documenttemplaterecord;
+	@api rowcount;
+	@api sectionrecordid;
+	@api isDisabled = false;
+	@api selectedObjectName;
+	@api pdfLinks;
 
-  richtextVal = 'All Right Reserved.';
-  sectionItemsToselect = [{ label: 'Display Page Number Sequence', value: 'Display Page Number Sequence' }];
-  @track value = [];
-  displaypagesequence = false;
-  countoptions = [{ label: '1', value: '1' }, { label: '2', value: '2' }, { label: '3', value: '3' }];
-  columnvalue;
-  columnvalueList = [];
-  footerSectionsMap = [];
-  oldFooterColumnList = {};
+	richtextVal = 'All Right Reserved.';
+	sectionItemsToselect = [{
+		label: 'Display Page Number Sequence',
+		value: 'Display Page Number Sequence'
+	}];
+	@track value = [];
+	displaypagesequence = false;
+	countoptions = [{
+		label: '1',
+		value: '1'
+	}, {
+		label: '2',
+		value: '2'
+	}, {
+		label: '3',
+		value: '3'
+	}];
+	columnvalue;
+	columnvalueList = [];
+	footerSectionsMap = [];
+	oldFooterColumnList = {};
 
-  @track Recorddetailsnew = {
-    Name: '',
-    DxCPQ__Section_Content__c: '',
-    //DxCPQ__DisplaySectionName__c: false,
-    DxCPQ__New_Page__c: false,
-    DxCPQ__Document_Template__c: '',
-    DxCPQ__Sequence__c: 0,
-    DxCPQ__Type__c: '',
-    Id: '',
-    DxCPQ__Document_Clause__c: ''
-  };
+	@track Recorddetailsnew = {
+		Name: '',
+		DxCPQ__Section_Content__c: '',
+		//DxCPQ__DisplaySectionName__c: false,
+		DxCPQ__New_Page__c: false,
+		DxCPQ__Document_Template__c: '',
+		DxCPQ__Sequence__c: 0,
+		DxCPQ__Type__c: '',
+		Id: '',
+		DxCPQ__Document_Clause__c: ''
+	};
 
-  connectedCallback(){
-    getContentVersions() 
-    .then((data) => {
-      if (data != null) {
-        data.forEach((val) => {
-          this.imageUrls.push({ Id: val.Id, URL: '/sfc/servlet.shepherd/version/download/' + val.Id, title: val.Title });
-        });
-        this.showimages = true;
-      }
-    })
-    .catch(error => {
-      createLog({recordId:null, className:'templateFooter LWC Component', exceptionMessage: (error.message || 'Unknown error message'), logData: error.toString(), logType:'Exception'});     
-    })
-  }
- 
+	connectedCallback() {
+		getContentVersions()
+			.then((data) => {
+				if (data != null) {
+					data.forEach((val) => {
+						this.imageUrls.push({
+							Id: val.Id,
+							URL: '/sfc/servlet.shepherd/version/download/' + val.Id,
+							title: val.Title
+						});
+					});
+					this.showimages = true;
+				}
+			})
+			.catch(error => {
+				createLog({
+					recordId: null,
+					className: 'templateFooter LWC Component',
+					exceptionMessage: (error.message || 'Unknown error message'),
+					logData: error.toString(),
+					logType: 'Exception'
+				});
+			})
+	}
 
-  @api handleActivateTemplate(isActive) {
-    this.isDisabled = isActive;
-  }
 
-  handlecolumncomboChange(event) {
-    this.columnvalueList = [];
-    this.columnvalue = event.detail.value;
-    this.handlecolumnsClass(this.columnvalue);
-    if (this.footerSectionsMap.length > 0) {
-      if (this.footerSectionsMap.length < this.columnvalue) {
-        for (let i = this.footerSectionsMap.length; i < this.columnvalue; i++) {
-          if (this.oldFooterColumnList[i]) {
-            this.footerSectionsMap.push(this.oldFooterColumnList[i]);
-          } else {
-            this.columnvalueList.push(i);
-            this.footerSectionsMap.push({ "value": "", "indexvar": i, "key": (new Date()).getTime() + ":" + i })
-          }
-        }
-      } else if (this.footerSectionsMap.length > this.columnvalue) {
-        this.handleColumnRemoval();
-      }
-    } else {
-      for (let i = 0; i < this.columnvalue; i++) {
-        this.columnvalueList.push(i);
-        this.footerSectionsMap.push({ "value": "", "indexvar": i, "key": (new Date()).getTime() + ":" + i })
-      }
-    }
-  }
+	@api handleActivateTemplate(isActive) {
+		this.isDisabled = isActive;
+	}
 
-  /* Footer Changes Start by Rahul*/
-  handleColumnRemoval() {
-    let headerColumnsList = {};
-    let size = 0;
+	handlecolumncomboChange(event) {
+		this.columnvalueList = [];
+		this.columnvalue = event.detail.value;
+		this.handlecolumnsClass(this.columnvalue);
+		if (this.footerSectionsMap.length > 0) {
+			if (this.footerSectionsMap.length < this.columnvalue) {
+				for (let i = this.footerSectionsMap.length; i < this.columnvalue; i++) {
+					if (this.oldFooterColumnList[i]) {
+						this.footerSectionsMap.push(this.oldFooterColumnList[i]);
+					} else {
+						this.columnvalueList.push(i);
+						this.footerSectionsMap.push({
+							"value": "",
+							"indexvar": i,
+							"key": (new Date()).getTime() + ":" + i
+						})
+					}
+				}
+			} else if (this.footerSectionsMap.length > this.columnvalue) {
+				this.handleColumnRemoval();
+			}
+		} else {
+			for (let i = 0; i < this.columnvalue; i++) {
+				this.columnvalueList.push(i);
+				this.footerSectionsMap.push({
+					"value": "",
+					"indexvar": i,
+					"key": (new Date()).getTime() + ":" + i
+				})
+			}
+		}
+	}
 
-    for (let i = 0; i < this.footerSectionsMap.length; i++) {
-      let tempColumnDetail = this.footerSectionsMap[i];
-      if (tempColumnDetail.indexvar < this.columnvalue) {
-        headerColumnsList[tempColumnDetail.indexvar] = tempColumnDetail;
-        size += 1;
-      } else {
-        this.oldFooterColumnList[tempColumnDetail.indexvar] = tempColumnDetail;
-      }
-    }
+	/* Footer Changes Start by Rahul*/
+	handleColumnRemoval() {
+		let headerColumnsList = {};
+		let size = 0;
 
-    this.footerSectionsMap = [];
-    for (let i = 0; i < size; i++) {
-      if (headerColumnsList[i]) {
-        this.footerSectionsMap.push(headerColumnsList[i]);
-      }
-    }
-  }
-  /* Footer Changes End by Rahul */
+		for (let i = 0; i < this.footerSectionsMap.length; i++) {
+			let tempColumnDetail = this.footerSectionsMap[i];
+			if (tempColumnDetail.indexvar < this.columnvalue) {
+				headerColumnsList[tempColumnDetail.indexvar] = tempColumnDetail;
+				size += 1;
+			} else {
+				this.oldFooterColumnList[tempColumnDetail.indexvar] = tempColumnDetail;
+			}
+		}
 
-  handlecolumnsClass(columncount) {
-    this.classvar = 'slds-col slds-size_1-of-' + columncount;
-  }
+		this.footerSectionsMap = [];
+		for (let i = 0; i < size; i++) {
+			if (headerColumnsList[i]) {
+				this.footerSectionsMap.push(headerColumnsList[i]);
+			}
+		}
+	}
+	/* Footer Changes End by Rahul */
 
-  saverichtextfooter(event) {
-    var data = event.detail;
-    this.footerSectionsMap.forEach((loopvar, index) => {
-      if (loopvar.indexvar == data.indexvar) {
-        this.footerSectionsMap.splice(index, 1);
-        this.footerSectionsMap.push(data);
-      }
-    });
-  }
+	handlecolumnsClass(columncount) {
+		this.classvar = 'slds-col slds-size_1-of-' + columncount;
+	}
 
-  handlecheckboxChange(event) {
-    const mystring = JSON.stringify(event.detail.value);
-    if (mystring.includes('Display Page Number Sequence')) {
-      this.displaypagesequence = true;
-    }
-    else {
-      this.displaypagesequence = false;
-    }
-  }
+	saverichtextfooter(event) {
+		var data = event.detail;
+		this.footerSectionsMap.forEach((loopvar, index) => {
+			if (loopvar.indexvar == data.indexvar) {
+				this.footerSectionsMap.splice(index, 1);
+				this.footerSectionsMap.push(data);
+			}
+		});
+	}
 
-  @api loadsectionsvaluesforCreation() {
-    this.showfooterdetails = true;
-    this.columnvalue = null;
-    this.columnvalueList = [];
-    this.footerSectionsMap = [];
-    this.value = [];
-    this.Recorddetailsnew = {
-      Name: '', DxCPQ__Section_Content__c: '', //DxCPQ__DisplaySectionName__c: false,
-      DxCPQ__New_Page__c: false,
-      DxCPQ__Document_Template__c: '',
-      DxCPQ__Sequence__c: 0,
-      DxCPQ__Type__c: '',
-      Id: '',
-      DxCPQ__Document_Clause__c: ''
-    };
-  }
+	handlecheckboxChange(event) {
+		const mystring = JSON.stringify(event.detail.value);
+		if (mystring.includes('Display Page Number Sequence')) {
+			this.displaypagesequence = true;
+		} else {
+			this.displaypagesequence = false;
+		}
+	}
 
-  @api loadsectionvaluesforedit(recordID) {
-    this.showfooterdetails = true;
-    gettemplatesectiondata({ editrecordid: recordID })
-      .then(result => {
-        if (result != null) {
-          var sectioncontent = JSON.parse(result.DxCPQ__Section_Content__c);
-          
-          /* Fix for Header Onload Alignment by Rahul*/
-          let sectionsMapTemp = sectioncontent.sectionsContent;
-          sectionsMapTemp.sort((a, b) => {
-            return a.indexvar - b.indexvar;
-          });
-          this.footerSectionsMap = sectionsMapTemp;
-          /* Fix for Header Onload Alignment by Rahul*/
+	@api loadsectionsvaluesforCreation() {
+		this.showfooterdetails = true;
+		this.columnvalue = null;
+		this.columnvalueList = [];
+		this.footerSectionsMap = [];
+		this.value = [];
+		this.Recorddetailsnew = {
+			Name: '',
+			DxCPQ__Section_Content__c: '', //DxCPQ__DisplaySectionName__c: false,
+			DxCPQ__New_Page__c: false,
+			DxCPQ__Document_Template__c: '',
+			DxCPQ__Sequence__c: 0,
+			DxCPQ__Type__c: '',
+			Id: '',
+			DxCPQ__Document_Clause__c: ''
+		};
+	}
 
-          this.columnvalue = sectioncontent.sectionsCount;
-          this.handlecolumnsClass(this.columnvalue);
+	@api loadsectionvaluesforedit(recordID) {
+		this.showfooterdetails = true;
+		gettemplatesectiondata({
+				editrecordid: recordID
+			})
+			.then(result => {
+				if (result != null) {
+					var sectioncontent = JSON.parse(result.DxCPQ__Section_Content__c);
 
-          this.displaypagesequence = sectioncontent.displaypagesequence;
-          this.template.querySelectorAll('lightning-checkbox-group ').forEach(element => {
-            if (this.displaypagesequence == true) {
-              this.value.push('Display Page Number Sequence');
-            }
-          });
-        }
-      })
-      .catch(error => {
-        createLog({recordId:null, className:'templateFooter LWC Component', exceptionMessage: (error.message || 'Unknown error message'), logData: error.toString(), logType:'Exception'});     
-      })
-  }
+					/* Fix for Header Onload Alignment by Rahul*/
+					let sectionsMapTemp = sectioncontent.sectionsContent;
+					sectionsMapTemp.sort((a, b) => {
+						return a.indexvar - b.indexvar;
+					});
+					this.footerSectionsMap = sectionsMapTemp;
+					/* Fix for Header Onload Alignment by Rahul*/
 
-  handlesectionsave() {
-    this.Recorddetailsnew.Name = this.sectiontype;
-    var currecid = this.sectionrecordid;
-    if (this.footerSectionsMap.length > 0) {
-      this.footerSectionsMap.forEach((loopvar) => {
-        var sectionval = loopvar.value;
-        if (sectionval.includes('img') && !sectionval.includes('style')) {
-          const styletag = 'style=\"max-height:35px; max-width:100%; height:35px; margin:10px 20px;\"';
-          sectionval = sectionval.slice(0, sectionval.lastIndexOf('"') + 1) +
-            ' ' + styletag + sectionval.slice(sectionval.lastIndexOf('"') + 1, sectionval.length);
-          loopvar.value = sectionval;
-        }
-      });
-      var obj = {};
-      obj.sectionsCount = this.columnvalue;
-      obj.sectionsContent = this.footerSectionsMap;
-      obj.displaypagesequence = this.displaypagesequence;
-      this.Recorddetailsnew.DxCPQ__Section_Content__c = JSON.stringify(obj);
-    }
+					this.columnvalue = sectioncontent.sectionsCount;
+					this.handlecolumnsClass(this.columnvalue);
 
-    if (currecid != '' && this.sectionrecordid.indexOf('NotSaved') == -1) {
-      this.Recorddetailsnew.Id = this.sectionrecordid;
-    }
-    this.Recorddetailsnew.DxCPQ__Sequence__c = this.rowcount;
-    this.Recorddetailsnew.DxCPQ__Type__c = this.sectiontype;
-    this.Recorddetailsnew.DxCPQ__Document_Template__c = this.documenttemplaterecord.Id;
+					this.displaypagesequence = sectioncontent.displaypagesequence;
+					this.template.querySelectorAll('lightning-checkbox-group ').forEach(element => {
+						if (this.displaypagesequence == true) {
+							this.value.push('Display Page Number Sequence');
+						}
+					});
+				}
+			})
+			.catch(error => {
+				createLog({
+					recordId: null,
+					className: 'templateFooter LWC Component',
+					exceptionMessage: (error.message || 'Unknown error message'),
+					logData: error.toString(),
+					logType: 'Exception'
+				});
+			})
+	}
 
-    if (this.Recorddetailsnew.Name != '' && this.Recorddetailsnew.Name != null) {
-      saveDocumentTemplateSectionDetails({ recordDetails: this.Recorddetailsnew })
-        .then(result => {
-          if (result != null) {
-            this.savedRecordID = result;
-            this.sectionrecordid = this.savedRecordID.Id;
-            const event4 = new ShowToastEvent({
-              title: 'Success',
-              message: 'Section "' + this.Recorddetailsnew.Name + '"' + ' was Saved',
-              variant: 'success',
-            });
-            this.dispatchEvent(event4);
-            var firecustomevent = new CustomEvent('savesectiondata', { detail: this.savedRecordID });
-            this.dispatchEvent(firecustomevent);
-          }
-        })
-        .catch(error => { })
-    }
-    else {
-      const Errormsg = new ShowToastEvent({
-        title: 'Error',
-        message: 'Please Enter Name',
-        variant: 'Error',
-      });
-      this.dispatchEvent(Errormsg);
-    }
-  }
+	handlesectionsave() {
+		this.Recorddetailsnew.Name = this.sectiontype;
+		var currecid = this.sectionrecordid;
+		if (this.footerSectionsMap.length > 0) {
+			this.footerSectionsMap.forEach((loopvar) => {
+				var sectionval = loopvar.value;
+				if (sectionval.includes('img') && !sectionval.includes('style')) {
+					const styletag = 'style=\"max-height:35px; max-width:100%; height:35px; margin:10px 20px;\"';
+					sectionval = sectionval.slice(0, sectionval.lastIndexOf('"') + 1) +
+						' ' + styletag + sectionval.slice(sectionval.lastIndexOf('"') + 1, sectionval.length);
+					loopvar.value = sectionval;
+				}
+			});
+			var obj = {};
+			obj.sectionsCount = this.columnvalue;
+			obj.sectionsContent = this.footerSectionsMap;
+			obj.displaypagesequence = this.displaypagesequence;
+			this.Recorddetailsnew.DxCPQ__Section_Content__c = JSON.stringify(obj);
+		}
+
+		if (currecid != '' && this.sectionrecordid.indexOf('NotSaved') == -1) {
+			this.Recorddetailsnew.Id = this.sectionrecordid;
+		}
+		this.Recorddetailsnew.DxCPQ__Sequence__c = this.rowcount;
+		this.Recorddetailsnew.DxCPQ__Type__c = this.sectiontype;
+		this.Recorddetailsnew.DxCPQ__Document_Template__c = this.documenttemplaterecord.Id;
+
+		if (this.Recorddetailsnew.Name != '' && this.Recorddetailsnew.Name != null) {
+			saveDocumentTemplateSectionDetails({
+					recordDetails: this.Recorddetailsnew
+				})
+				.then(result => {
+					if (result != null) {
+						this.savedRecordID = result;
+						this.sectionrecordid = this.savedRecordID.Id;
+						const event4 = new ShowToastEvent({
+							title: 'Success',
+							message: 'Section "' + this.Recorddetailsnew.Name + '"' + ' was Saved',
+							variant: 'success',
+						});
+						this.dispatchEvent(event4);
+						var firecustomevent = new CustomEvent('savesectiondata', {
+							detail: this.savedRecordID
+						});
+						this.dispatchEvent(firecustomevent);
+					}
+				})
+				.catch(error => {})
+		} else {
+			const Errormsg = new ShowToastEvent({
+				title: 'Error',
+				message: 'Please Enter Name',
+				variant: 'Error',
+			});
+			this.dispatchEvent(Errormsg);
+		}
+	}
+
+	handlehelp() {
+		let relatedObjectsMap = this.pdfLinks.find(item => item.MasterLabel === 'Footer');
+		let pdfUrl = relatedObjectsMap ? relatedObjectsMap.DxCPQ__Section_PDF_URL__c : null;
+		const config = {
+			type: 'standard__webPage',
+			attributes: {
+				url: pdfUrl
+			}
+		};
+		this[NavigationMixin.Navigate](config);
+	}
 }

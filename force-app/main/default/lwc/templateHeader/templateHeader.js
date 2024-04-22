@@ -4,10 +4,12 @@ import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 import gettemplatesectiondata from '@salesforce/apex/SaveDocumentTemplatesection.gettemplatesectiondata';
 import getAllPopupMessages from '@salesforce/apex/PopUpMessageSelector.getAllConstants';
 import createLog from '@salesforce/apex/LogHandler.createLog';
+import { NavigationMixin } from 'lightning/navigation';
 
-export default class TemplateHeader extends LightningElement {
+export default class TemplateHeader extends NavigationMixin(LightningElement) {
 
   columnvalue;
+  @api pdfLinks;
   @api rowcount;
   @api sectiontype;
   columnvalueList = [];
@@ -201,5 +203,17 @@ export default class TemplateHeader extends LightningElement {
           createLog({recordId:null, className:'templateHeader LWC Component', exceptionMessage: (error.message || 'Unknown error message'), logData: error.toString(), logType:'Exception'});     
         })
     }
+  }
+
+  handlehelp(){
+    let relatedObjectsMap = this.pdfLinks.find(item => item.MasterLabel === 'Header');
+    let pdfUrl = relatedObjectsMap ? relatedObjectsMap.DxCPQ__Section_PDF_URL__c : null;
+    const config = {
+      type: 'standard__webPage',
+      attributes: {
+          url: pdfUrl
+        }
+    };
+    this[NavigationMixin.Navigate](config);
   }
 }

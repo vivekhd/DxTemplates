@@ -4,6 +4,7 @@
 		<members>CanTheUser</members>
 		<members>CanTheUser_Tests</members>
 		<members>DeleteTransactionLogRecords</members>
+		<members>DXHandlerInterface</members>
 		<members>DexUtilTestDataFactory</members>
 		<members>DisplayPDFController</members>
 		<members>DisplayPDFController_Test</members>
@@ -45,6 +46,7 @@
 	</types>
 	<types>
 		<members>ChartAutomationStyleResources__mdt.Style_Composition__c</members>
+		<members>DXTemplates_HandlerClass__mdt.HandlerClassName__c</members>
 		<members>Document_Clause__c.Body__c</members>
 		<members>Document_Clause__c.Category__c</members>
 		<members>Document_Clause__c.IsActive__c</members>
@@ -62,15 +64,19 @@
 		<members>Document_Template_Section__c.Sequence__c</members>
 		<members>Document_Template_Section__c.Type__c</members>
 		<members>Document_Template__c.Description__c</members>
+		<members>Document_Template__c.ClassId__c</members>
+		<members>Document_Template__c.FlowId_c</members>
 		<members>Document_Template__c.IsActive__c</members>
 		<members>Document_Template__c.Parent_Template__c</members>
 		<members>Document_Template__c.Previously_Active__c</members>
 		<members>Document_Template__c.Related_To_Type__c</members>
 		<members>Document_Template__c.Version_Number__c</members>
+		<members>Document_Template__c.Watermark_Data__c</members>
 		<members>Document__c.Document_Body__c</members>
 		<members>Document__c.Document_Content__c</members>
 		<members>Document__c.Document_Template__c</members>
 		<members>Document__c.Object_Id__c</members>
+		<members>Document__c.Token_Data__c</members>
 		<members>Rule_Condition__c.ConditionIndex__c</members>
 		<members>Rule_Condition__c.Condition_Field__c</members>
 		<members>Rule_Condition__c.DataType__c</members>
@@ -88,7 +94,8 @@
 		<name>CustomField</name>
 	</types>
 	<types>
-		<members>ChartAutomationStyleResources.itembar</members>
+		<members>DXTemplates_HandlerClass.HandlerClass</members>
+        <members>ChartAutomationStyleResources.itembar</members>
 		<members>ChartAutomationStyleResources.itembase</members>
 		<members>ChartAutomationStyleResources.itemtitle</members>
 		<members>ChartAutomationStyleResources.itemvaluein</members>
@@ -157,6 +164,7 @@
 		<members>templateHeader</members>
 		<members>templateHeaderType</members>
 		<members>templateRelatedObjects</members>
+		<members>templateTableDetails</members>
 		<name>LightningComponentBundle</name>
 	</types>
 	<types>

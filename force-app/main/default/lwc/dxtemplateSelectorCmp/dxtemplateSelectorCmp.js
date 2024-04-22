@@ -134,13 +134,13 @@ export default class DxtemplateSelectorCmp extends NavigationMixin(LightningElem
 
     renderedCallback() {
         Promise.all([
-                loadStyle(this, rte_tbl + '/rte_tbl1.css'),
-                loadStyle(this, dexcpqcartstylesCSS)
-            ]).then(() => {
-            })
-            .catch(error => {
-                createLog({recordId:null, className:'dxtemplateSelectorCmp LWC Component', exceptionMessage: (error.message || 'Unknown error message'), logData: error.toString(), logType:'Exception'});     
-            });
+            loadStyle(this, rte_tbl + '/rte_tbl1.css'),
+            loadStyle(this, dexcpqcartstylesCSS)
+        ])
+        .then(() => { })
+        .catch(error => {
+            createLog({recordId:null, className:'dxtemplateSelectorCmp LWC Component', exceptionMessage: (error.message || 'Unknown error message'), logData: error.toString(), logType:'Exception'});     
+        });
     }
 
     buttonClicked; //defaulted to false
@@ -149,7 +149,6 @@ export default class DxtemplateSelectorCmp extends NavigationMixin(LightningElem
     @track titleMaxorMinName = 'Maximize Window';
     productBundleRelationship;
 
-    //Handles click on the 'Show/hide content'button
     minorMaxWindow() {
         this.buttonClicked = !this.buttonClicked; //set to true if false, false if true.
         this.cssMaxorMinClass2 = this.buttonClicked ? 'dxcappcontainer2max' : 'dxcappcontainer2nor';
@@ -157,9 +156,7 @@ export default class DxtemplateSelectorCmp extends NavigationMixin(LightningElem
         this.titleMaxorMinName = this.buttonClicked ? 'Minimize Window' : 'Maximize Window';
     }
 
-    // Modified by Rahul
     handleBacktoQuote() {
-        //history.back();
         this[NavigationMixin.Navigate]({
             type: 'standard__recordPage',
             attributes: {
@@ -170,7 +167,7 @@ export default class DxtemplateSelectorCmp extends NavigationMixin(LightningElem
         });
     }
 
-    showSendEmailMethod() {
+    showSendEmailMethod(event) {
         this.showSendEmailModal = true;
     }
 
@@ -178,8 +175,11 @@ export default class DxtemplateSelectorCmp extends NavigationMixin(LightningElem
         this.showSendEmailModal = false;
     }
 
+    closeModal() {
+        this.showSendEmailModal = false;
+    }
+
     disconnectedCallback() {
         this.showTemplate = false;
     }
-
 }

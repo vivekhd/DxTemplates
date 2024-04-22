@@ -10,23 +10,21 @@ public with sharing class SaveDocumentTemplate {
     private static Savepoint sp1;
      
     /**
-         * @description 
-         * @param recordDetails Document_Template__c
-         * @param hasRecordId String
-         * @return String
-         */
+     * @description 
+     * @param recordDetails Document_Template__c
+     * @param hasRecordId String
+     * @return String
+     */
     @AuraEnabled
     public static String saveDocumentTemplatedetails(Document_Template__c recordDetails , String hasRecordId){
         String insertedID = '';
         String updatedRecord = '';
         try{
             Document_Template__c docTemp = new Document_Template__c();
-            if( hasRecordId ==''){
-                
+            if( hasRecordId =='') {
                 docTemp.Name = recordDetails.Name;
                 docTemp.Description__c = recordDetails.Description__c;
                 docTemp.Related_To_Type__c = recordDetails.Related_To_Type__c;
-                
                 List<Document_Template__c> listtobecreated=new List<Document_Template__c>();
                 listtobecreated.add(docTemp);
                 if (sp1 == null) {sp1 = Database.setSavepoint();}
@@ -37,8 +35,7 @@ public with sharing class SaveDocumentTemplate {
                     throw new SafeClassException(String.join( errorList1, ', ' ));
                 }
                 insertedID = docTemp.ID;
-            }
-            else if (hasRecordId != null && hasRecordId != ''){
+            } else if (hasRecordId != null && hasRecordId != '') {
                 docTemp.ID = hasRecordId;
                 docTemp.Description__c = recordDetails.Description__c;
                 List<Document_Template__c> listtobeupdated=new List<Document_Template__c>();
@@ -53,44 +50,44 @@ public with sharing class SaveDocumentTemplate {
                 updatedRecord = 'Record updated Succesfuly';
             }
             return (insertedID !=null && insertedID !='') ? insertedID : updatedRecord;
-        }
-        catch (Exception ex) {
+        } catch (Exception ex) {
             LogHandler.createLog((Id) null,'SaveDocumentTemplate.saveDocumentTemplatedetails()','Template Id- '+insertedID+' '+ex.getLineNumber()+ex.getStackTraceString()+ex.getCause(),ex.getMessage(),'Exception');
             return null;
         }
     }
+    
     /**
-         * @description 
-         * @param docTemp Document_Template__c
-         * @param docTempId Id
-         * @return Document_Template__c
-         */
+     * @description 
+     * @param docTemp Document_Template__c
+     * @param docTempId Id
+     * @return Document_Template__c
+     */
     @AuraEnabled
     public static Document_Template__c cloneDocumentTemplate(Document_Template__c docTemp, Id docTempId)	{
         try	{
             List<Document_Template_Section__c> docTempSec = [SELECT ID, Name, IsActive__c, New_Page__c, Section_Content__c, Sequence__c, Section_Details__c, Type__c, Document_Clause__c, ruleId__c, Header_Content__c FROM Document_Template_Section__c WHERE Document_Template__c=:docTempId WITH SECURITY_ENFORCED limit 50000];
-            List<Document_Template__c> docCloneTemplate = [SELECT ID, Name,Version_Number__c FROM Document_Template__c WHERE Parent_Template__c= :docTemp.Parent_Template__c WITH SECURITY_ENFORCED order by Version_Number__c desc limit 1];
+            List<Document_Template__c> docCloneTemplate = [SELECT ID, Name,Version_Number__c,Watermark_Data__c FROM Document_Template__c WHERE Parent_Template__c= :docTemp.Parent_Template__c WITH SECURITY_ENFORCED order by Version_Number__c desc limit 1];
             
             if(docTemp!=null){
-                docTemp.Version_Number__c = (docTemp.Parent_Template__c != docTempId) ? docCloneTemplate[0].Version_Number__c + 1 : 1;                
-                if (sp1 == null) {sp1 = Database.setSavepoint();}
+                docTemp.Version_Number__c = (docTemp.Parent_Template__c != docTempId) ? docCloneTemplate[0].Version_Number__c + 1 : 1;
+                if (sp1 == null) sp1 = Database.setSavepoint();
                 Database.SaveResult[] urListsave = safe.doInsert(new List<Document_Template__c> {docTemp});
-                
+
                 List<String> errorList1 = Safely.safeClassExceptionHandlerInsert(urListsave);
                 if(errorList1.size()>0){
-                    Database.rollback(sp1);
+                Database.rollback(sp1);
                     throw new SafeClassException(String.join( errorList1, ', ' ));
                 }
-                
+
                 for (Database.SaveResult sr : urListsave) {
                     if (sr.isSuccess()) {
                         docTemp.Id = sr.getId();
                     }
                 }
-            }
-            
+                            }
+
             List<Document_Template_Section__c> docTempSecCloneList = new List<Document_Template_Section__c>();
-            
+
             for(Document_Template_Section__c dts : docTempSec){
                 Document_Template_Section__c docSec = new Document_Template_Section__c();
                 docSec.Name = dts.Name;
@@ -109,54 +106,53 @@ public with sharing class SaveDocumentTemplate {
                 }
                 docTempSecCloneList.add(docSec);
             }
-
+            
             if(docTempSecCloneList!=null && docTempSecCloneList.size()>0)	{
                 if (sp1 == null) {sp1 = Database.setSavepoint();}
                 Database.SaveResult[] urListsave = safe.doInsert(docTempSecCloneList);
                 List<String> errorList2 = Safely.safeClassExceptionHandlerInsert(urListsave);
-                if(errorList2.size()>0){
-                    Database.rollback(sp1);
-                    throw new SafeClassException(String.join( errorList2, ', ' ));
-                }
+                                if(errorList2.size()>0){
+                                    Database.rollback(sp1);
+                                    throw new SafeClassException(String.join( errorList2, ', ' ));
+                                }
             }
             return docTemp;   
         }
         catch (Exception ex) {
-           	LogHandler.createLog((Id) null,'SaveDocumentTemplate.cloneDocumentTemplate()','Template Id- '+docTempId+' '+ex.getLineNumber()+ex.getStackTraceString()+ex.getCause(),ex.getMessage(),'Exception');
+            LogHandler.createLog((Id) null,'SaveDocumentTemplate.cloneDocumentTemplate()','Template Id- '+docTempId+' '+ex.getLineNumber()+ex.getStackTraceString()+ex.getCause(),ex.getMessage(),'Exception');
             return null;
         }
     }
+
     /**
-         * @description 
-         * @param filterValue String
-         * @return List<Document_Template__c>
-         */
+     * @description 
+     * @param filterValue String
+     * @return List<Document_Template__c>
+     */
     @AuraEnabled
     public static List<Document_Template__c> getDocumentTemplates(String filterValue){
         List<Document_Template__c> docTemp = [SELECT Id, Name,isactive__c, Related_To_Type__c, Version_Number__c, Previously_Active__c, Parent_Template__c FROM Document_Template__c WITH SECURITY_ENFORCED order by CreatedDate Desc limit 50000];
         if(filterValue != null){
-            docTemp = [SELECT Id, Name,isactive__c, Related_To_Type__c, Version_Number__c, Previously_Active__c, Parent_Template__c FROM Document_Template__c WHERE Related_To_Type__c=:filterValue WITH SECURITY_ENFORCED order by CreatedDate Desc limit 50000];
+        	docTemp = [SELECT Id, Name,isactive__c, Related_To_Type__c, Version_Number__c, Previously_Active__c, Parent_Template__c FROM Document_Template__c WHERE Related_To_Type__c=:filterValue WITH SECURITY_ENFORCED order by CreatedDate Desc limit 50000];
         }
         return docTemp;
     }
+
      /**
-         * @description 
-         * @param templateId Id
-         * @param parentId String
-         * @param isActive Boolean
-         * @return Document_Template__c
-         */
+     * @description 
+     * @param templateId Id
+     * @param parentId String
+     * @param isActive Boolean
+     * @return Document_Template__c
+     */
     @AuraEnabled
     public static Document_Template__c activateTemplate(Id templateId, String parentId, Boolean isActive){
         try{
-            
             List<Document_Template__c> docTempList = new List<Document_Template__c>();
             Map<Id,Document_Template__c> docTempMap = new Map<Id,Document_Template__c>([SELECT Id, Name, IsActive__c, Previously_Active__c, Version_Number__c, Parent_Template__c FROM Document_Template__c WHERE Id=:templateId OR Parent_Template__c=:parentId WITH SECURITY_ENFORCED limit 50000]);
             Document_Template__c docTemp = docTempMap.get(templateId);
-            
             if(isActive){
                 docTemp.Previously_Active__c = (!docTemp.Previously_Active__c) ? true: false ;
-                
                 for(Document_Template__c dct : docTempMap.values()) {
                     if(dct.Id != templateId) {
                         dct.IsActive__c = false;
@@ -166,50 +162,46 @@ public with sharing class SaveDocumentTemplate {
             }
             docTemp.IsActive__c = isActive;
             docTempList.add(docTemp);
-            
             if (sp1 == null) {sp1 = Database.setSavepoint();}
             Database.UpsertResult[] urList2 = safe.doupsert(docTempList);
             List<String> errorList = Safely.safeClassExceptionHandlerUpsert(urList2);
-            if(errorList.size()>0){
-                Database.rollback(sp1);
-                throw new SafeClassException(String.join( errorList, ', ' ));
-            }
-            return docTemp;
-        }
-        catch (Exception ex) {
-            LogHandler.createLog((Id) null,'SaveDocumentTemplate.activateTemplate()','Template Id- '+templateId+' '+ex.getLineNumber()+ex.getStackTraceString()+ex.getCause(),ex.getMessage(),'Exception');
-            return null;
-        }
-    }
-     /**
-         * @description 
-         * @param templateId Id
-         */
-    @AuraEnabled
-    public static void deleteTemplate(Id templateId){
-        try{
-
-            Map<ID,Document_Template__c> docTempMap = new Map<ID,Document_Template__c>([SELECT ID, Name,Version_Number__c,Parent_Template__c FROM Document_Template__c WHERE Parent_Template__c= :templateId OR ID=:templateId WITH SECURITY_ENFORCED ORDER BY Version_Number__c limit 50000]);
-            Document_Template__c delDocTemp = docTempMap.get(templateId);
-            list<Document_Template_section__c> rltdRO = [SELECT Id, Type__c, RuleId__c, Document_Template__c FROM Document_Template_Section__c where document_template__c=:templateId and Type__c='Related Objects' WITH SECURITY_ENFORCED limit 50000];
-            list<Id> arrRuleIdtoDelete = new list<Id> {};        
-                
-                for(integer i=0; i<rltdRO.size(); i++){
-                    arrRuleIdtoDelete.add(rltdRO[i].RuleId__c);            
-                }
-            list<Rule__c> arrRuletoDelete = [Select Id from Rule__c where Id in: arrRuleIdtoDelete WITH SECURITY_ENFORCED limit 50000];
-            
-            if(arrRuletoDelete.size() > 0)
-            {
-                if (sp1 == null) {sp1 = Database.setSavepoint();}
-                List<Database.DeleteResult> deleteResult = safe.doDelete(arrRuletoDelete);
-                List<String> errorList = Safely.safeClassExceptionHandlerDelete(deleteResult);
                 if(errorList.size()>0){
                     Database.rollback(sp1);
                     throw new SafeClassException(String.join( errorList, ', ' ));
                 }
+            return docTemp;
+        } catch (Exception ex) {
+            LogHandler.createLog((Id) null,'SaveDocumentTemplate.activateTemplate()','Template Id- '+templateId+' '+ex.getLineNumber()+ex.getStackTraceString()+ex.getCause(),ex.getMessage(),'Exception');
+            return null;
+        }
+    }
+
+     /**
+     * @description 
+     * @param templateId Id
+     */
+    @AuraEnabled
+    public static void deleteTemplate(Id templateId){
+        try{
+            Map<ID,Document_Template__c> docTempMap = new Map<ID,Document_Template__c>([SELECT ID, Name,Version_Number__c,Parent_Template__c FROM Document_Template__c WHERE Parent_Template__c= :templateId OR ID=:templateId WITH SECURITY_ENFORCED ORDER BY Version_Number__c limit 50000]);
+            Document_Template__c delDocTemp = docTempMap.get(templateId);
+            list<Document_Template_section__c> rltdRO = [SELECT Id, Type__c, RuleId__c, Document_Template__c FROM Document_Template_Section__c where document_template__c=:templateId and Type__c='Related Objects' WITH SECURITY_ENFORCED limit 50000];
+            list<Id> arrRuleIdtoDelete = new list<Id> {};          
+            for(integer i=0; i<rltdRO.size(); i++){
+                arrRuleIdtoDelete.add(rltdRO[i].RuleId__c);            
             }
-            
+            list<Rule__c> arrRuletoDelete = [Select Id from Rule__c where Id in: arrRuleIdtoDelete WITH SECURITY_ENFORCED limit 50000];
+                
+            if(arrRuletoDelete.size() > 0) {
+                if (sp1 == null) {sp1 = Database.setSavepoint();}
+                List<Database.DeleteResult> deleteResult = safe.doDelete(arrRuletoDelete);
+                List<String> errorList = Safely.safeClassExceptionHandlerDelete(deleteResult);
+                if(errorList.size()>0) {
+                    Database.rollback(sp1);
+                    throw new SafeClassException(String.join( errorList, ', ' ));
+                }
+            }
+                
             List<Document_Template__c> deletedts = new List<Document_Template__c>();
             deletedts.add(delDocTemp);
             if(deletedts.size()>0){
@@ -229,39 +221,36 @@ public with sharing class SaveDocumentTemplate {
 
             if (sp1 == null) {sp1 = Database.setSavepoint();}
             Database.UpsertResult[] urList2 = safe.doupsert(docTempMap.values());
-            List<String> errorList2 = Safely.safeClassExceptionHandlerUpsert(urList2);
-            if(errorList2.size()>0){
+                List<String> errorList2 = Safely.safeClassExceptionHandlerUpsert(urList2);
+                if(errorList2.size()>0){
                 Database.rollback(sp1);
                 throw new SafeClassException(String.join(errorList2, ', ' ));
             }
-        }
-        catch (Exception ex) {
+        } catch (Exception ex) {
             LogHandler.createLog((Id) null,'SaveDocumentTemplate.deleteTemplate()','Template Id- '+templateId+' '+ex.getLineNumber()+ex.getStackTraceString()+ex.getCause(),ex.getMessage(),'Exception');
         }
     }
+
      /**
-         * @description 
-         * @param docTemp Document_Template__c
-         * @return Document_Template__c
-         */
+     * @description 
+     * @param docTemp Document_Template__c
+     * @return Document_Template__c
+     */
     @AuraEnabled
     public static Document_Template__c createDocumentTemplate(Document_Template__c docTemp){
         String docTempId='';
-        
         try{
             if (sp1 == null) {sp1 = Database.setSavepoint();}
             Database.SaveResult[] urListsave = safe.doInsert(docTemp);
             List<String> errorList1 = Safely.safeClassExceptionHandlerInsert(urListsave);
-            
             if(errorList1.size()>0){
                 Database.rollback(sp1);
                 throw new SafeClassException(String.join( errorList1, ', ' ));
             }
-
             docTemp.Parent_Template__c = docTemp.Id;
             docTemp.Version_Number__c = 1;
             docTempId = docTemp.Id;
-
+            
             if (sp1 == null) {sp1 = Database.setSavepoint();}
             Database.UpsertResult[] urList2 = safe.doupsert(docTemp);
             List<String> errorList = Safely.safeClassExceptionHandlerUpsert(urList2);
@@ -278,9 +267,9 @@ public with sharing class SaveDocumentTemplate {
     }
     
      /**
-         * @description 
-         * @return List<AggregateResult>
-         */
+     * @description 
+     * @return List<AggregateResult>
+     */
     @AuraEnabled
     public static List<AggregateResult> getRelatedToTypeOptions(){
         String queryString = 'SELECT Related_To_Type__c FROM Document_Template__c WITH SECURITY_ENFORCED group by Related_To_Type__c limit 5000';
@@ -288,8 +277,70 @@ public with sharing class SaveDocumentTemplate {
         return relatedTypeOptions;
     }
     
-	/**
-     * @description Internal custom exception class
-     */
+    /**
+    * @description this getClassNames method is used to get
+    * the all the interface implemented classes
+    * Author : Reethika
+    */
+    @AuraEnabled
+    public static Map<string,string> getClassNames() {      
+        List <ApexTypeImplementor> classnames= [SELECT ClassName, ApexClassId FROM ApexTypeImplementor WHERE InterfaceName ='DXHandlerInterface' WITH SECURITY_ENFORCED];
+        Map<String,String> classId=new Map<string,string>();
+        for(ApexTypeImplementor a:classnames)
+        {
+            classId.put(a.ApexClassId,a.ClassName);
+        }     
+        return classId;
+    }
+    
+    /**
+    * @description this getFlowNames method is used to get
+    * the all the autolaunched flows
+    * Author : Reethika
+    */
+    @AuraEnabled
+    public static Map<string,string> getFlowNames() {        
+       List <FlowDefinitionView> classnames= [SELECT  Label, ApiName, DurableId, NamespacePrefix, Id FROM FlowDefinitionView WHERE ProcessType='AutoLaunchedFlow' AND NamespacePrefix = '' AND IsActive=True WITH SECURITY_ENFORCED];
+       Map<String,String> FlowId=new Map<string,string>();
+        for(FlowDefinitionView a:classnames) {
+            FlowId.put(a.DurableId,a.Label);
+        }             
+        return FlowId;
+    }  
+    
+    /**
+    * @description this gettemplatedata method is used to get
+    * the template data
+    * Author : Reethika
+    */
+    @AuraEnabled
+    public static List<Document_Template__c> gettemplatedata(string editrecordid) {
+        List<Document_Template__c> d=[SELECT ClassId__c,FlowId__c FROM Document_Template__c WHERE id=:editrecordid WITH SECURITY_ENFORCED];        
+        return d;
+    }
+
+    /**
+    * @description this updateTemplateDetails method is used to update
+    * the template data
+    * Author : Reethika
+    */
+    @AuraEnabled
+    public static  void updateTemplateDetails(Map<String,String> templateData,string idval) {
+        List<Document_Template__c> docTempList=[SELECT ClassId__c,FlowId__c FROM Document_Template__c WHERE id=:idval WITH SECURITY_ENFORCED];
+        if(templateData.containsKey('classId')){
+            docTempList[0].ClassId__c=templateData.get('classId');
+        }
+        if(templateData.containsKey('flowId')){
+            docTempList[0].FlowId__c=templateData.get('flowId');
+        }
+        if (sp1 == null) sp1 = Database.setSavepoint();
+        Database.SaveResult[] urList2 = safe.doUpdate(docTempList);
+        List<String> errorList = Safely.safeClassExceptionHandlerUpdate(urList2);
+        if(errorList.size()>0){
+            Database.rollback(sp1);
+            throw new SafeClassException(String.join( errorList, ', ' ));
+        }
+    }
+
     public class SafeClassException extends Exception   { }
 }

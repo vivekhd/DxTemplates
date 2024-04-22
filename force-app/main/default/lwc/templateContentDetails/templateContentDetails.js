@@ -3,12 +3,14 @@ import saveDocumentTemplateSectionDetails from '@salesforce/apex/SaveDocumentTem
 import ClauseBody from '@salesforce/apex/SaveDocumentTemplatesection.clauseBody';
 import deletetemplate from '@salesforce/apex/SaveDocumentTemplatesection.deletetemplate';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
+import { NavigationMixin } from 'lightning/navigation';
 import gettemplatesectiondata from '@salesforce/apex/SaveDocumentTemplatesection.gettemplatesectiondata';
-import createLog from '@salesforce/apex/LogHandler.createLog';
-export default class TemplateContentDetails extends LightningElement {
+
+export default class TemplateContentDetails extends NavigationMixin(LightningElement) {
   isLoaded = false;
   showMergeFields = false;
   newpage = false;
+  @api pdfLinks;
   @api documenttemplaterecord;
   @api selectedObjectName;
   @track relatedtoTypeObjChild;
@@ -44,22 +46,23 @@ export default class TemplateContentDetails extends LightningElement {
     DxCPQ__RuleId__c: '',
     DxCPQ__Document_Clause__c: ''
   };
-  formats = [
-    'font',
-    'size',
-    'bold',
-    'italic',
-    'underline',
-    'strike',
-    'list',
-    'indent',
-    'align',
-    'link',
-    'image',
-    'table',
-    'header',
-    'color',
-  ];
+    formats = [
+        'font',
+        'size',
+        'bold',
+        'italic',
+        'underline',
+        'strike',
+        'list',
+        'indent',
+        'align',
+        'link',
+        'image',
+        'table',
+        'header',
+        'color',
+        'script',
+    ];
 
   renderedCallback() {
     if (this.documenttemplaterecord && this.documenttemplaterecord.DxCPQ__Previously_Active__c == true) {
@@ -192,18 +195,11 @@ export default class TemplateContentDetails extends LightningElement {
 
   handlecheckboxChange(event) {
     const mystring = JSON.stringify(event.detail.value);
-
     if (mystring.includes('New Page')) {
       this.Recorddetailsnew.DxCPQ__New_Page__c = true;
     } else {
       this.Recorddetailsnew.DxCPQ__New_Page__c = false;
     }
-    /*
-    if (mystring.includes('Display Section Name')) {
-      this.Recorddetailsnew.DxCPQ__DisplaySectionName__c = true;
-    } else {
-      this.Recorddetailsnew.DxCPQ__DisplaySectionName__c = false;
-    }*/
   }
 
   handlemergefieldselection(event) {
@@ -286,7 +282,14 @@ export default class TemplateContentDetails extends LightningElement {
         element.value = '';
       }
     });
-    setTimeout(() => { this.template.querySelector('[data-id="newpage"]').checked = this.newpage; });
+
+    setTimeout(() => { 
+      try {
+        this.template.querySelector('[data-id="newpage"]').checked = this.newpage; 
+      } catch(error) {
+        console.log('error in setTimeout for checked error >> ', error.message);
+      }
+    });
   }
 
   @api loadsectionsectionvaluesforedit(recordID) {
@@ -313,7 +316,15 @@ export default class TemplateContentDetails extends LightningElement {
             this.ukey = (new Date()).getTime();
           }
           this.newpage = result.DxCPQ__New_Page__c;
-          setTimeout(() => { this.template.querySelector('[data-id="newpage"]').checked = this.newpage; });
+          setTimeout(() => { 
+            try{
+              this.template.querySelector('[data-id="newpage"]').checked = this.newpage; 
+            }
+            catch(error){
+              console.log('error in setTimeout for checked error >> ', error.message);
+            }
+              
+            });
 
           if (result.DxCPQ__Section_Content__c != null) {
             this.richtextVal = result.DxCPQ__Section_Content__c;
@@ -333,5 +344,42 @@ export default class TemplateContentDetails extends LightningElement {
       .catch(error => {
         createLog({recordId:null, className:'templateContentDetails LWC Component', exceptionMessage: (error.message || 'Unknown error message'), logData: error.toString(), logType:'Exception'});     
       })
+  }
+
+  handlehelp(){
+    let urlLink;
+    if(this.showclausescreen){ //for clause screen
+      let relatedObjectsMap = this.pdfLinks.find(item => item.MasterLabel === 'Clause');
+      urlLink = relatedObjectsMap ? relatedObjectsMap.DxCPQ__Section_PDF_URL__c : null;
+    } else {//for context screen
+      let relatedObjectsMap = this.pdfLinks.find(item => item.MasterLabel === 'Context');
+      urlLink = relatedObjectsMap ? relatedObjectsMap.DxCPQ__Section_PDF_URL__c : null;
+    }
+    const config = {
+      type: 'standard__webPage',
+      attributes: {
+        url: urlLink
+      }
+    };
+    this[NavigationMixin.Navigate](config);
+  }
+
+  //code added by Bhavya for adding Custom Font-family list - compatible with VF PDF generation
+  get fontFamilies() {
+    return [
+        { label: 'Times New Roman', value: 'serif' },
+        { label: 'Arial', value: 'sans-serif' },
+        { label: 'serif', value: 'serif' },
+        { label: 'Courier', value: 'courier' },
+    ];
+  }
+
+  handleFontFamilySelection(event){
+    let applySelectedFormats = {
+        font: event.target.value,
+    };
+    let selection = window.getSelection().toString();
+    let editor = this.template.querySelector('lightning-input-rich-text');
+    editor.setFormat(applySelectedFormats);
   }
 }

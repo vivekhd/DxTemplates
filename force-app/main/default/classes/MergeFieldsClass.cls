@@ -1,21 +1,26 @@
-/**
-* Class			    : MergeFieldsClass
-* Developer			: 
-* Created Date		: 
-* @description  	: Apex class for handling merge fields in document templates.
- *              Provides methods for merging fields based on a specified record and object,
- *              transforming text to title case, and retrieving available fields for a given object.
-* Last Modified Date: 
+/* The MergeFieldsClass assists in merging record fields into templates, handles title case conversions, 
+ * and retrieves object fields for dynamic form generation.
+ * Error handling ensures robustness. 
+ * It integrates with Salesforce Aura components, offering versatile 
+ * functionality for template customization and data presentation. 
+ * With features like field merging and dynamic form 
+ * generation, it enhances user experience and 
+ * streamlines data management within Salesforce applications.
 */
+
+/**
+ * @description Represents the MergeFieldsClass, which is a class with sharing.
+ *              This class provides functionality related to merging fields.
+ */
 public with sharing class MergeFieldsClass {
 
-	/**
-     * @description Merges fields in the document template content based on the specified record and object.
-     * @param selectedTemplateContents List of Document_Template_Section__c objects representing template sections.
-     * @param recordId Id of the target record for merging fields.
-     * @return List<Document_Template_Section__c> List of template sections with merged fields.
+    /**
+     * @description    Merges fields from the specified record into the selected template contents
+     * @param          selectedTemplateContents  List of Document_Template_Section__c representing selected template contents
+     * @param          recordId                  Id of the record from which fields will be merged
+     * @return         List<Document_Template_Section__c> The modified template contents with merged fields
      */
-    public static List<Document_Template_Section__c> mergefieldsMethod(List<Document_Template_Section__c> selectedTemplateContents, Id recordId) {   
+     public static List<Document_Template_Section__c> mergefieldsMethod(List<Document_Template_Section__c> selectedTemplateContents, Id recordId,Map<String,Object> replaceData) {   
         try{
             String objectName = recordId.getSObjectType().getDescribe().getName();
             String mainstr;
@@ -27,7 +32,15 @@ public with sharing class MergeFieldsClass {
                 }
             }
             String mainObject=objectName;
-            
+            /* <Checks if strig contains %% if yes then customLogic method is called> */
+            if(mainstr.contains('%%') && replaceData.size()>0)
+            {           
+                for(Document_Template_Section__c sec: selectedTemplateContents)
+                {
+                    String str=customLogic( replaceData,sec.Section_Content__c);
+                    sec.Section_Content__c=sec.Section_Content__c.replace(sec.Section_Content__c, str);   
+                }
+            }
             Pattern p = Pattern.compile('\\{!.+?\\}');
             Matcher m = p.matcher(mainstr);
             String mainfields;
@@ -117,10 +130,10 @@ public with sharing class MergeFieldsClass {
         return titlePhrase.trim();
     }
     
-	/**
-     * @description Retrieves a list of available fields for a given object.
-     * @param selectedObject String representing the API name of the target Salesforce object.
-     * @return List<FieldWrap> List of FieldWrap objects containing details of available fields.
+    /**
+     * @description    Retrieves the fields of a selected object
+     * @param          selectedObject String name of the selected object
+     * @return         List<FieldWrap> List of FieldWrap objects representing the fields of the selected object
      */
     @AuraEnabled
     public static List<FieldWrap> getFields(String selectedObject){
@@ -146,7 +159,6 @@ public with sharing class MergeFieldsClass {
                 }
                 
                 if(wmp.dataType=='PICKLIST'){
-                    
                     List<String> plistValues = new List<String> ();
                     List<Schema.PicklistEntry> plist = fmap.get(fieldName).getDescribe().getPickListValues();
                     for(Schema.PicklistEntry pl : plist){
@@ -162,53 +174,174 @@ public with sharing class MergeFieldsClass {
         return strList;    
     }
     
-	/**
-     * @description Inner class representing the structure of a field.
-     *              Contains fields for the field name, API name, data type, values (for picklists),
-     *              related object name (for reference fields), and relationship name.
+    /**
+     * @description Represents a wrapper class used to encapsulate field information.
+     *              This class provides properties to store metadata about a field, such as its name, API name,
+     *              data type, values, sObject name, and relationship name.
      */
     public class FieldWrap{
-       /**
-         * @description Represents the name or label associated with a field.
-         *              Used for displaying a human-readable identifier for the field.
+        /**
+         * @description Represents the name of the field.
          */
         @AuraEnabled
-        public String name { get; set; }
+        public String name{get;set;}
         
         /**
-         * @description Represents the API name of a field.
-         *              Used for programmatic identification and reference to the field in Apex and API calls.
+         * @description Represents the API name of the field.
          */
         @AuraEnabled
-        public String apiName { get; set; }
+        public String apiName{get;set;}
         
         /**
-         * @description Represents the data type of a field.
-         *              Used for specifying the type of data that can be stored in the field.
+         * @description Represents the data type of the field.
          */
         @AuraEnabled
-        public String dataType { get; set; }
+        public String dataType{get;set;}
         
         /**
-         * @description Represents a list of values associated with a field, particularly applicable for picklist fields.
-         *              Used for displaying and managing the available values for selection in the user interface.
+         * @description Represents the list of values associated with the field.
          */
         @AuraEnabled
-        public List<String> values { get; set; }
+        public List<String> values{get;set;}
         
         /**
-         * @description Represents the API name of the Salesforce object to which the field belongs.
-         *              Used for identifying the parent object of the field.
+         * @description Represents the API name of the sObject to which the field belongs.
          */
         @AuraEnabled
-        public String sObjectName { get; set; }
+        public String sObjectName{get;set;}
         
         /**
-         * @description Represents the relationship name of the field if it is a reference (lookup) field.
-         *              Used for identifying the relationship between objects.
+         * @description Represents the relationship name of the field (if it's a related field).
          */
         @AuraEnabled
         public String relationshipName { get; set; }
-
     }    
+
+     /**
+     * @description    Merges fields from the specified record into the selected template contents
+     * @param          selectedTemplateContents  List of Document_Template_Section__c representing selected template contents
+     * @param          recordIds                  List of Ids of the records from which fields will be merged
+     * @return         List<Document_Template_Section__c> The modified template contents with merged fields
+     */
+    public static List<Document_Template_Section__c> mergefieldsMethodMultiple(List<Document_Template_Section__c> selectedTemplateContents, List<String> recordIds) {   
+        try{
+            List<Document_Template_Section__c> docsTempLst = new List<Document_Template_Section__c>();
+            String objectName = ((Id)recordIds[0]).getSObjectType().getDescribe().getName();
+            String mainstr;
+            for(Document_Template_Section__c sec: selectedTemplateContents) {
+                if(mainstr==null){
+                    mainstr=sec.Section_Content__c;
+                }else{
+                    mainstr=mainstr+sec.Section_Content__c;
+                }
+            }
+            String mainObject=objectName;
+            Pattern p = Pattern.compile('\\{!.+?\\}');
+            Matcher m = p.matcher(mainstr);
+            String mainfields;
+            Set<String> mainfieldsList = new Set<String>();
+            while(m.find()) {
+                String strReplace = '{!'+mainObject+'.';
+                String str = m.group(0).replace(strReplace,'').replace('}',', ');
+                String str1 = str.replace(',','');
+                mainfieldsList.add(str1);
+            }
+            for(String str : mainfieldsList){
+                if(mainfields==null){
+                    mainfields=str;
+                }else{
+                    mainfields = mainfields+', '+str;  
+                }
+            }
+            Integer executeHeadFoot = 0;
+            string mainSOQL='Select '+String.escapeSingleQuotes(mainfields)+' from '+String.escapeSingleQuotes(mainObject)+' where Id IN :recordIds WITH SECURITY_ENFORCED';
+            for(Sobject qrec : Database.query(mainSOQL)){
+                Boolean executeVar = false;
+                if(mainfields!=null) {
+                    mainfields = mainfields.removeEnd(', ');
+                    Map<String, Object> mainMap = (Map<String, Object>) JSON.deserializeUntyped(JSON.serialize(qrec));
+                    for(Document_Template_Section__c sec: selectedTemplateContents) {
+                        Document_Template_Section__c tempSec = (Document_Template_Section__c) JSON.deserialize(JSON.serialize(sec), Document_Template_Section__c.class);
+                        if(executeHeadFoot == 0){
+                            executeVar = true;
+                        } else {
+                            if(!tempSec.Type__c.equals('Header') && !tempSec.Type__c.equals('Footer')){
+                                executeVar = true;
+                            } else {
+                                executeVar = false;
+                            }
+                        }
+                        if(executeVar){
+                            for(String str:mainfieldsList)  {
+                                str = str.replaceAll('(\\s+)', '');
+                                if(mainMap.containskey(str)) {
+                                    string mergefieldsyntax='{!'+mainObject+'.'+str+'}';
+                                    tempSec.Section_Content__c=tempSec.Section_Content__c.replace(mergefieldsyntax, String.valueOf(mainMap.get(str)));
+                                } else {
+                                    String finalvalue;
+                                    if(str.contains('.')){
+                                        List<String> strList = new List<string>();
+                                        strList=str.split('\\.');
+                                        Map<String, Object> tempObj=new Map<String, Object>();
+                                        tempObj=mainMap;
+                                        String resVal; 
+                                        for(Integer j=0; j<strList.size(); j++) {
+                                            if(tempObj.containskey(strList[j]))  {
+                                                if(j==strList.size()-1)   {
+                                                    finalvalue=String.valueOf(tempObj.get(strList[j]));
+                                                } else {
+                                                    tempObj=(Map<String, Object>)tempObj.get(strList[j]);                                            
+                                                }
+                                            }
+                                        }
+                                    }
+                                    if(finalvalue!=null)  {
+                                        string mergefieldsyntax='{!'+mainObject+'.'+str+'}';
+                                        tempSec.Section_Content__c=tempSec.Section_Content__c.replace(mergefieldsyntax, finalvalue); 
+                                    } else {
+                                        string mergefieldsyntax='{!'+mainObject+'.'+str+'}';
+                                        tempSec.Section_Content__c=tempSec.Section_Content__c.replace(mergefieldsyntax, ''); 
+                                    }
+                                }
+                            }
+                            docsTempLst.add(tempSec);
+                        }
+                        executeVar = false;
+                    }   
+                } 
+                executeHeadFoot = executeHeadFoot + 1; 
+            } 
+            mainstr = '';
+            selectedTemplateContents = docsTempLst;
+        } catch(Exception ex) {
+            LogHandler.createLog((Id) null,'MergeFieldsClass Error',ex.getLineNumber()+ex.getStackTraceString()+ex.getCause(),ex.getMessage(),'Exception');
+        }        
+        return selectedTemplateContents;
+    }
+
+    /* <customLogic method is used to replace %%data%% with the respective value from the
+    map mp which is constructed in the GenericController class as well as from the flow> */
+    public static string customLogic(map<string,object> mp,string mainstr) {      
+        Integer count=1;
+        boolean flag=false;
+        List<string> arr=mainstr.split('%');
+        for(Integer i=0;i<arr.size();i++) {
+            if(arr[i]=='') {
+                if( Math.mod(count,2) !=0){
+                    for(string s:mp.keySet()) {
+                        if(arr[i+1]==s) {
+                            arr[i+1]=(string)mp.get(s);
+                            flag=true;
+                        }                       
+                    }
+                    if(flag !=true) {
+                        arr[i+1]='%%'+arr[i+1]+'%%';
+                    }
+                flag=false;           
+                }
+                count=count+1;
+            }
+        }
+        return String.join( arr, ' ' );
+    } 
 }

@@ -1,5 +1,6 @@
-import { LightningElement, track, api} from 'lwc';
-import {loadStyle } from 'lightning/platformResourceLoader';
+import { LightningElement, track, api, wire } from 'lwc';
+import { NavigationMixin } from 'lightning/navigation';
+import { loadScript,loadStyle } from 'lightning/platformResourceLoader';
 import { createRuleConditionHierarcy } from 'c/conditionUtil';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 import rte_tbl from '@salesforce/resourceUrl/rte_tbl';
@@ -16,7 +17,7 @@ import resetRulesForTemplate from '@salesforce/apex/RelatedObjectsClass.handleTe
 import saveDocumentTemplateSectionDetails from '@salesforce/apex/SaveDocumentTemplatesection.saveDocumentTemplateSectionDetails';
 import createLog from '@salesforce/apex/LogHandler.createLog';
 
-export default class TemplateRelatedObjects extends LightningElement {
+export default class TemplateRelatedObjects extends NavigationMixin(LightningElement) {
 
     @api selectedObjectName;
     @api showrelatedobjectdetails;
@@ -2000,6 +2001,18 @@ export default class TemplateRelatedObjects extends LightningElement {
         }
         ruleExpression = actualResult.replaceAll('==', '=').replaceAll('&&', 'and').replaceAll('||', 'or').replaceAll('"', '');
         return ruleExpression;
+    }
+
+    handlehelp(){
+        let relatedObjectsMap = this.pdfLinks.find(item => item.MasterLabel === 'Related Objects');
+        let pdfUrl = relatedObjectsMap ? relatedObjectsMap.DxCPQ__Section_PDF_URL__c : null;
+        const config = {
+            type: 'standard__webPage',
+            attributes: {
+                url: pdfUrl
+                }
+        };
+        this[NavigationMixin.Navigate](config);
     }
 
 }

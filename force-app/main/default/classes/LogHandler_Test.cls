@@ -1,6 +1,6 @@
 @IsTest
 private class LogHandler_Test {
-
+    
     @IsTest
     static void createExceptionTest(){
         User us = DexUtilTestDataFactory.CreateTestUser();
@@ -16,7 +16,7 @@ private class LogHandler_Test {
             LogHandler.createMultipleLogs(null);
             try{
                 LogHandler.createMultipleLogs(logRecordList);
-            }catch(Exception e){
+            } catch(Exception e) {
                 System.assert(e.getMessage()!=null, 'Error: Assertion failed');
             }
             System.assert(true,'Error: Assertion failed');

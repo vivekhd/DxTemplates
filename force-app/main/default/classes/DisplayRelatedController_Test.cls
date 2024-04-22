@@ -70,7 +70,7 @@ private class DisplayRelatedController_Test {
     
     
     @IsTest
-    static void testGetLkpObjectApiExceptionHandling() {
+    static void testGetLkpObjectApi_ExceptionHandling() {
         Test.startTest();
         User us = DexUtilTestDataFactory.CreateTestUser();
         System.runAs(us){
@@ -241,6 +241,31 @@ private class DisplayRelatedController_Test {
             System.assertEquals(testAccount.Name, result[0].recordName,'Record name as expected');
             System.assertEquals(testAccount.Id, result[0].recordObject.get('Id'),'Record object ID as expected');
             System.assertEquals(testAccount.Name, result[0].recordObject.get('Name'),'Record object name as expected');
+        }
+        Test.stopTest();
+    }
+    
+    @IsTest
+    static void testRetrieveRecords1() {
+        Test.startTest();
+        User us = DexUtilTestDataFactory.CreateTestUser();
+        System.runAs(us){
+            try{
+                Account testAccount = new Account(Name = 'Test Account');
+                insert testAccount;
+                List<MultiSelectLookupController.SObjectQueryResult> result = MultiSelectLookupController.retrieveRecords(
+                    'Account', 'Id,Name', 'Name', 'Test', '', '');
+                System.assertEquals(1, result.size());
+                System.assertEquals(testAccount.Id, result[0].recordId);
+                System.assertEquals(testAccount.Name, result[0].recordName);
+                System.assertEquals(testAccount.Id, result[0].recordObject.get('Id'));
+                System.assertEquals(testAccount.Name, result[0].recordObject.get('Name'));
+            }
+            catch(exception ex)
+            {
+                System.assert(ex.getMessage().contains('Script-thrown exception'));
+            }
+            
         }
         Test.stopTest();
     }

@@ -37,6 +37,7 @@ export default class DxShowSelectedTemplate extends LightningElement {
     showpreviewbutton=false;
     showpreview=false;
     popUpMessage;
+    documentIdVal='';
   
 
     @wire(getAllPopupMessages) 
@@ -50,12 +51,15 @@ export default class DxShowSelectedTemplate extends LightningElement {
 
     connectedCallback() {
         this.isLoaded=true;
-        getTemplateSections({templateId : this.templateId, recordId:this.objectRecordId, objectApiName: this.objectName}).then((result) => {
+        /*  returning map of resultdata from apex call
+            which contains documentId and document template section data */
+        getTemplateSections({templateId : this.templateId, recordId:this.objectRecordId, objectApiName: this.objectName}).then((resultdata) => {
             this.isLoaded=false;
-
+            var result=resultdata.selectedTemplateContents;     
+            this.documentIdVal=resultdata.documentId;
             if(result && result.length>0){
                 result.forEach(tempSec=>{
-                    
+                     
                     if(tempSec.DxCPQ__Type__c=='Context' || tempSec.DxCPQ__Type__c=='Table' || tempSec.DxCPQ__Type__c=='Clause' ){
                         
                         let tempObj={};
@@ -167,24 +171,22 @@ export default class DxShowSelectedTemplate extends LightningElement {
 
     renderedCallback(){
         this.isSectionContentLoaded=true;
-            let index = 0;
-            this.sectionContentArr.forEach(obj=>{
-                let elementDiv = this.template.querySelector(`[data-id="${index}"]`);
-                if(obj.isContext==true){
-                    elementDiv.innerHTML=obj.content;
-                }
-                index++;
-            })
-
-   
-    Promise.all([
-      loadStyle(this, rte_tbl + '/rte_tbl1.css'),
-    ])
-      .then(() => {
-      })
-      .catch(error => {
-        createLog({recordId:null, className:'dxShowSelectedTemplate LWC Component', exceptionMessage: (error.message || 'Unknown error message'), logData: error.toString(), logType:'Exception'});     
-      });
+        let index = 0;
+        this.sectionContentArr.forEach(obj=>{
+            let elementDiv = this.template.querySelector(`[data-id="${index}"]`);
+            if(obj.isContext==true){
+                elementDiv.innerHTML=obj.content;
+            }
+            index++;
+        })
+        
+        Promise.all([
+            loadStyle(this, rte_tbl + '/rte_tbl1.css'),
+        ])
+        .then(() => { })
+        .catch(error => {
+            createLog({recordId:null, className:'dxShowSelectedTemplate LWC Component', exceptionMessage: (error.message || 'Unknown error message'), logData: error.toString(), logType:'Exception'});     
+        });
     }
 
     @api
@@ -193,11 +195,11 @@ export default class DxShowSelectedTemplate extends LightningElement {
         const container = this.template.querySelector('.wholecontent');
         var headfooterstr=JSON.stringify(this.headerfooter);
 
-        generateDocument({templateId : this.templateId, quoteId:this.objectRecordId, pdfbody:container.innerHTML,pdfheaderfooter:headfooterstr}).then((result) => {
+        generateDocument({templateId : this.templateId, quoteId:this.objectRecordId, pdfbody:container.innerHTML,pdfheaderfooter:headfooterstr})
+        .then((result) => {
             if(result && result.length>0){
                 this.handleAttachment(result);
             }
-            
         }).catch(() => {
             this.isLoaded2=false;
         });
@@ -211,20 +213,15 @@ export default class DxShowSelectedTemplate extends LightningElement {
                 this.downloadURL = '/servlet/servlet.FileDownload?file='+result;
                 this.showpreviewbutton=true;
                 var docdetailsobj={documentid:documentid,downloadURL:this.downloadURL,attachmentid:result};
-
                 var firecustomevent = new CustomEvent('pdfgeneration', { detail:docdetailsobj});
                 this.dispatchEvent(firecustomevent);
-
-                const event4 = new ShowToastEvent({
+                this.dispatchEvent(new ShowToastEvent({
                     title: 'Success',
                     message: this.popUpMessage.DXSHOWSELECTEDTEMPLATE_PDF,
                     variant: 'success',
-                    });
-    
-                    this.dispatchEvent(event4);
-                    this.isLoaded2=false;
+                }));
+                this.isLoaded2=false;
             }
-            
         }).catch(error => {
             createLog({recordId:null, className:'dxShowSelectedTemplate LWC Component', exceptionMessage: (error.message || 'Unknown error message'), logData: error.toString(), logType:'Exception'});     
         });
@@ -235,8 +232,8 @@ export default class DxShowSelectedTemplate extends LightningElement {
         let content = event.detail.content;
         let elementDiv = this.template.querySelector(`[data-id="${index}"]`);
         elementDiv.innerHTML=content.innerHTML;
-    }  
-
+    } 
+    
     /* Commented by Rahul - not intended in this release */
     handleClauseContent(){ } 
 

@@ -558,5 +558,29 @@ c-template-header-type .ql-image, c-template-footer-type .ql-image, c-template-c
     .dxcappcontainernor .pagetitle {display:none; }
     .dxcappcontainernor .dx-tabs_01 .slds-tabs_default__content { height:calc(100vh - 95px); padding-top:3px; background:#f9f9f9; }
     .dxcappcontainernor {height: calc(100vh - 0px);padding-top:7px;}
+<<<<<<< HEAD
     .dx-box .slds-table thead tr th, .dx-box .slds-table_tree tr th { min-width:60px !important; }
+=======
+    .dx-box .slds-table thead tr th, .dx-box .slds-table_tree tr th { min-width:60px; }
+
+    .sidenavleft_close, .sidenavleft_min, .sidenavleft_open, .sidenavleft_over, .sidenavright_close, .sidenavright_min, .sidenavright_open, .sidenavright_over {
+        height: 100%; position: absolute; transition: all .5s; display: block; z-index:9;
+    }
+    .sidenavleft_open { left:-200px; }
+    .sidenavleft_close .sidenavleft { margin-left:0px; width: 200px; }
+    .sidenavleft{background: linear-gradient(to right, var(--lwc-brandPrimaryTransparent10) 0%,var(--lwc-brandPrimaryTransparent10) 92.5%,var(--lwc-brandPrimaryTransparent10) 92.5%, #d6dee0 93%, #f9f9f900 93%);
+        filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='var(--lwc-brandPrimaryTransparent10)', endColorstr='#f9f9f900',GradientType=1 );
+    }
+    .sidenavright_open { width:0; /*right:-300px;*/ }
+    .sidenavright_open .sidenavright { width: 0; display: none !important; }
+    .sidenavleft_close { width:200px; z-index:9; background:linear-gradient(to right, #ffffff 0%,#ffffff 92.5%,#ffffff 92.5%, #d6dee000 93%, #f9f9f900 93%);
+        filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#ffffff', endColorstr='#f9f9f900',GradientType=1 ); left:0; }
+    .sidenavright_close { width:300px; z-index:9; background: #ffffff; right:0; }
+    .sidenavright_close .sidenavright { margin-right: 0; width: 300px; right: 0; border-left: 1px solid var(--lwc-brandPrimaryTransparent40); }
+    .dxrecommendcartmax {margin: 0px 6px 0px 6px;}
+    /*.sidenavright_open .sidenavright { margin-right: -300px; right: -300px; }*/
+    /* .dx-leftmenuocbut_res { right:-30px; display:inline-block; }
+    .dx-rightmenuocbut_res { left:-30px; display:inline-block; } */
+
+>>>>>>> dev
 }

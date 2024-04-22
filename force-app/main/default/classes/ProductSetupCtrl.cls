@@ -28,10 +28,26 @@ public with sharing class ProductSetupCtrl {
             return lookupValues;
         }  
     }
-    
-	/**
-     * @description Nested exception class named SafeClassException, extending the built-in Exception class.
-     *              This class can be used to represent specific exceptions in a more organized manner within the application.
+
+    /**
+     * @description AuraEnabled method to retrieve web links for user documentation.
+     * @return list of metadata records for helplinks
      */
+    @AuraEnabled
+    public static List<DxTemplates_PDFLink__mdt> getPDFLinks(){
+        List<DxTemplates_PDFLink__mdt> linkLst = [select Id,MasterLabel,DeveloperName, Section_PDF_URL__c from DxTemplates_PDFLink__mdt with USER_MODE ];
+        return linkLst;
+    }
+    
+    /**
+     * @description method to retrieve the content data for a given contentversion id.
+     * @return String - base64 data of the requested image
+     */
+    @AuraEnabled
+    public static String getOriginalImageCVID(String contentVersionId) {
+        ContentVersion cvData = [SELECT Id, Title, VersionData FROM ContentVersion WHERE Id = :contentVersionId LIMIT 1]  ;
+        return EncodingUtil.base64Encode(cvData.VersionData);
+    }
+    
     public class SafeClassException extends Exception{}    
 }

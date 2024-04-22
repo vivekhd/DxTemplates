@@ -9,7 +9,10 @@
 		  <lightning-button disabled={disableButton} variant="brand" label="Update" title="titleName" onclick={handleSectionSave}></lightning-button>
 		</div>
 		<div class="slds-col slds-size_1-of-1 slds-medium-size_5-of-12 slds-large-size_3-of-12 slds-p-top_x-large slds-p-left_xx-large slds-float_right">
-		  <lightning-input data-id="newPageRO" type="checkbox" label="New Page" name="New Page" class="slds-list_horizontal" onchange={handleNewPage} disabled={isDisabled}></lightning-input>
+		  <lightning-input data-id="newPageRO" type="checkbox" label="New Page" name="New Page" class="slds-list_horizontal" onchange={handleNewPage} disabled={isDisabled} title="Displays this section in the next page of the PDF"></lightning-input>
+		</div>
+		<div class="slds-is-relative slds-col_bump-left">
+			<lightning-button-icon icon-name="utility:help_doc_ext" onclick={handlehelp} alternative-text="Need Help?" title="Need Help?" size="medium" variant="bare" class="slds-is-absolute slds-button_icon-help" style="right:0px"></lightning-button-icon>
 		</div>
 	  </div>
 	  <div class="slds-m-horizontal_large">

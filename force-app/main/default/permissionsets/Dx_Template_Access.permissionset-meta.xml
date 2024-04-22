@@ -9,6 +9,13 @@
         <enabled>true</enabled>
     </classAccesses>
     <classAccesses>
+<<<<<<< HEAD
+=======
+        <apexClass>DXHandlerInterface</apexClass>
+        <enabled>true</enabled>
+    </classAccesses>
+    <classAccesses>
+>>>>>>> dev
         <apexClass>DexUtilTestDataFactory</apexClass>
         <enabled>true</enabled>
     </classAccesses>
@@ -126,11 +133,19 @@
     </classAccesses>
     <customMetadataTypeAccesses>
         <enabled>true</enabled>
+<<<<<<< HEAD
         <name>Transaction_Logs_Tenure__mdt</name>
     </customMetadataTypeAccesses>
     <customMetadataTypeAccesses>
         <enabled>true</enabled>
         <name>ChartAutomationStyleResources__mdt</name>
+=======
+        <name>DXTemplates_HandlerClass__mdt</name>
+    </customMetadataTypeAccesses>
+    <customMetadataTypeAccesses>
+        <enabled>true</enabled>
+        <name>DxTemplates_PDFLink__mdt</name>
+>>>>>>> dev
     </customMetadataTypeAccesses>
     <fieldPermissions>
         <editable>true</editable>
@@ -209,6 +224,11 @@
     </fieldPermissions>
     <fieldPermissions>
         <editable>true</editable>
+        <field>Document_Template__c.FlowId__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>true</editable>
         <field>Document_Template__c.IsActive__c</field>
         <readable>true</readable>
     </fieldPermissions>
@@ -234,6 +254,16 @@
     </fieldPermissions>
     <fieldPermissions>
         <editable>true</editable>
+        <field>Document_Template__c.Watermark_Data__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+<fieldPermissions>
+        <editable>true</editable>
+        <field>Document_Template__c.ClassId__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>true</editable>
         <field>Document__c.Document_Body__c</field>
         <readable>true</readable>
     </fieldPermissions>
@@ -250,6 +280,11 @@
     <fieldPermissions>
         <editable>true</editable>
         <field>Document__c.Object_Id__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+<fieldPermissions>
+        <editable>true</editable>
+        <field>Document__c.Token_Data__c</field>
         <readable>true</readable>
     </fieldPermissions>
     <fieldPermissions>

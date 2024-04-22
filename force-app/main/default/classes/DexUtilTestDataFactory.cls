@@ -1,8 +1,7 @@
-/**
-* Class:              DexUtilTestDataFactory
-* Developer		:     Abhishek Goel
-* Created Date	:     30/1/2020
-* @description	:     This generic test is used to create the records for test classes
+/* Class:              DexUtilTestDataFactory
+* Developer:          Abhishek Goel
+* Created Date:       30/1/2020
+* Description:        This generic test is used to create the records for test classes
 * Last Modified Date: 30/1/2020
 * Change Log: 
 */

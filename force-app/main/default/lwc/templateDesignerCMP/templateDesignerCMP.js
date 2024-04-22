@@ -9,51 +9,139 @@ import { loadStyle } from 'lightning/platformResourceLoader';
 import dxQuoteTemplate from '@salesforce/resourceUrl/dxQuoteTemplate';
 import dexcpqcartstylesCSS from '@salesforce/resourceUrl/dexcpqcartstyles';
 import getAllPopupMessages from '@salesforce/apex/PopUpMessageSelector.getAllConstants';
+import saveContentVersion from '@salesforce/apex/DisplayPDFController.saveContentVersion';
+import { updateRecord } from 'lightning/uiRecordApi';
+import DOCUMENTTEMPLATEID_FIELD from '@salesforce/schema/Document_Template__c.Id';
+import WATERMARKDATA_FIELD from '@salesforce/schema/Document_Template__c.Watermark_Data__c';
+import getSFDomainBaseURL from '@salesforce/apex/PdfDisplay.getDomainUrl';
+import getDocumentTemplateData from '@salesforce/apex/DisplayPDFController.getDocumentTemplateData';
 import createLog from '@salesforce/apex/LogHandler.createLog';
+import getClassNames from '@salesforce/apex/SaveDocumentTemplate.getClassNames';
+import getFlowNames from '@salesforce/apex/SaveDocumentTemplate.getFlowNames';
+import updateTemplateDetails from '@salesforce/apex/SaveDocumentTemplate.updateTemplateDetails';
+import gettemplatedata from '@salesforce/apex/SaveDocumentTemplate.gettemplatedata';
+import getPDFLinks from '@salesforce/apex/ProductSetupCtrl.getPDFLinks';
+import getOriginalImageCVID from '@salesforce/apex/ProductSetupCtrl.getOriginalImageCVID';
 
 export default class TemplateDesignerCMP extends NavigationMixin(LightningElement) {
-  @api recordId;
-  value = '';
-  rowCount = -1;
-  selectedOption;
-  isLoaded = false;
-  SectionTypename;
-  recordidtoedit = '';
-  firstsectionrecord;
-  editTemplate = false;
-  opensection = false;
-  disableEditing = false;
-  showtabledetails = false;
-  showclausescreen = false;
-  showheaderdetails = false;
-  showfooterdetails = false;
-  showCloneTemplate = false;
-  showAddNewTemplate = false;
-  showDeleteTemplate = false;
-  documenttemplaterecordid;
-  showcontextdetails = false;
-  selectedSectionRecordID = '';
-  isconnectedcalledonLoad = false;
-  showrelatedobjectdetails = false;
-  activateTemplateLabel = 'Activate Template';
-  @track showPreview = false;
-  @track previewModal = false;
-  previewLabel = '';
-  @track showTemplate = false;
-  isconnectedcalledondeletion = false;
-  previewRecordId;
-  templateId;
-  templatename;
-  @api relatedtoTypeObjName;
-  @track relatedtoTypeObjChild;
-  quoteName;
-  popUpMessage;
+  @api recordId; // Selected Template ID
+  @track pdfLinksData;
+  @track isActivateTemplateDisabled = true;// to disable the Activate
+  //variables added by Bhavya for watermark starts here
 
+  step = 1; // progress bar increases with a step value 1
+  currentStep = "1"; // It reflects the current (or) active step in the progress bar
+  baseURL; // domain base url of the ORG
+  imageUrl = ''; // it stores the data of the uploaded image
+  originalImageCvId; //stores the contenversion Id of the original image uploaded
+  contentVersion; //stores the Image watermark - Original Image ContentVersion Information
+  @track activeTab = ''; // It stores the active tab value
+  @track outerContainer = ''; //The styling of the container which holds the canvas
+  @track watermarkText = ''; // The input text value with which text watermark is being created
+  @track showwatermarkbtn = false; // This variable controls the display of the Watermark Popup in HTML
+  @track fontSizeValue = '22'; // Default Font Size = 22
+  @track rotationValue = '0'; // Default Text Rotation Value = 0
+  @track rotationImagevalue = '0'; // Default Image Rotation Value = 0
+  previousRotationValue = '0'; // This variable stores the previous text rotation value, used for comparing with the current userinput text rotation value
+  previousImgRotationValue = '0'; // This variable stores the previous image rotation value, used for comparing with the current userinput image rotation value
+  @track colorValue = '#000000'; // Default watermark text color #000000
+  @track opacityImageValue = '1.0'; // Default Image Opacity = 1
+  @track checkedValText = true; // Default text watermark checkbox (isPrimary) is checked, true
+  @track checkedValImage = false; // Default Image watermark checkbox (isPrimary) is unchecked, false
+  @track imageScalingValue = 100; // Default Image scaling = 100
+  @track opacityValue = '1.0'; // Default text Opacity = 1
+  @track pageTextOption = 'All Pages - Text'; // Default text page Option for watermark is selected as "ALL PAGES"
+  @track pageImageOption = 'All Pages - Image'; // Default Image page Option for watermark is selected as "ALL PAGES"
+  @track readonlyVal = false; // Boolean to make the Image fields readonly
+  baseDataLst = []; //list that stores the dataURl of Watermark Images
+  hasOriginalImage = false; // Boolean to show if the watermark is new one or edit on previous one
+  prevoriginalImageCvId;//stores the previously saved original watermark Content Version ID
+  callImage = 0;
+  //watermarkPageOptionsText combobox options for Text Watermark
+  watermarkPageOptionsText = [
+    { label: 'All Pages', value: 'All Pages - Text', checked: true },
+    { label: 'All Pages Except First Page', value: 'All Pages Except First Page - Text', checked: false },
+    { label: 'Only First Page', value: 'Only First Page - Text', checked: false },
+  ];
+  //watermarkPageOptionsImage combobox options for Image Watermark
+  watermarkPageOptionsImage = [
+    { label: 'All Pages', value: 'All Pages - Image', checked: true },
+    { label: 'All Pages Except First Page', value: 'All Pages Except First Page - Image', checked: false },
+    { label: 'Only First Page', value: 'Only First Page - Text', checked: false },
+  ];
+  //fontSizeOptions combobox options for Text Watermark
+  get fontSizeOptions() {
+    const options = [];
+    for (let i = 8; i <= 28; i += 2) {
+      options.push({
+        label: i.toString(),
+        value: i.toString()
+      });
+    }
+    return options;
+  }
+  //opacityOptions combobox options for both Text & Image Watermark
+  get opacityOptions() {
+    const options = [];
+    for (let i = 1; i >= 0; i -= 0.1) {
+      options.push({
+        label: i.toFixed(1),
+        value: i.toFixed(1)
+      });
+    }
+    return options;
+  }
+
+  //Variables added for watermark by Bhavya ends here 
+
+  value = ''; // Variable used to store the event value.
+  rowCount = -1; // Section count/index of the section in the sections stack.
+  selectedOption; // Variable for storing selected options.
+  isLoaded = false; // Flag to indicate whether the component is loaded.
+  SectionTypename; // Variable to store the section type name.
+  recordidtoedit = ''; // ID of the record to edit.
+  firstsectionrecord; // First section record.
+  editTemplate = false; // Flag to indicate whether to show the edit the template screen or not.
+  opensection = false; // Flag to indicate whether to open a section.
+  disableEditing = false; // Flag to indicate whether editing is disabled.
+  showtabledetails = false; // Flag to indicate whether to show/hide table details.
+  showclausescreen = false; // Flag to indicate whether to show/hide the clause screen.
+  showheaderdetails = false; // Flag to indicate whether to show/hide header details.
+  showfooterdetails = false; // Flag to indicate whether to show/hide footer details.
+  showCloneTemplate = false; // Flag to indicate whether to show the clone template popup.
+  showAddNewTemplate = false; // Flag to indicate whether to show the add new template popup.
+  showDeleteTemplate = false; // Flag to indicate whether to show the delete template popup.
+  documenttemplaterecordid; // ID of the document template record.
+  showcontextdetails = false; // Flag to indicate whether to show the context details section.
+  selectedSectionRecordID = ''; // ID of the selected section record.
+  isconnectedcalledonLoad = false; // Flag to indicate whether connected is called on load.
+  showrelatedobjectdetails = false; // Flag to indicate whether to show related object details section.
+  activateTemplateLabel = 'Activate Template'; // Label for activating the template.
+  @track showPreview = false; // Flag to indicate whether to show/hide the preview.
+  @track previewModal = false; // Flag to indicate whether to show/hide the preview modal.
+  previewLabel = ''; // Label for the preview.
+  @track showTemplate = false; // Flag to indicate whether to show/hide the template.
+  isconnectedcalledondeletion = false; // Flag to indicate whether connected is called on deletion.
+  previewRecordId; // ID of the preview record.
+  templateId; // ID of the template.
+  templatename; // Name of the template.
+  @api relatedtoTypeObjName; // Related to type object name.
+  @track relatedtoTypeObjChild; // Child of the related to type object.
+  quoteName; // Name of the quote.
+  popUpMessage; // Popup message.
+// variables added by reethika regarding dynamic flow or class selection
+  @track classTypeOptions = [];
+  @track flowTypeOptions = [];
+  @track classIdData = [];
+  @track flowIdData = [];
+  @track editTemp = {};
+  @track isBundled = false;
+  //variables added by reethika regarding dynamic flow or class selection ends here
   @wire(getAllPopupMessages)
   allConstants({ error, data }) {
     if (data) {
       this.popUpMessage = data;
-    } else {
+          } else {
       this.error = error;
     }
   }
@@ -61,6 +149,8 @@ export default class TemplateDesignerCMP extends NavigationMixin(LightningElemen
   @track doctemplatedetails = {
     Id: '',
     Name: '',
+DxCPQ__ClassId__c: '',
+    DxCPQ__FlowId__c: '',
     DxCPQ__Related_To_Type__c: '',
     DxCPQ__IsActive__c: false,
     DxCPQ__Version_Number__c: '', DxCPQ__Previously_Active__c: false, DxCPQ__Parent_Template__c: ''
@@ -70,6 +160,11 @@ export default class TemplateDesignerCMP extends NavigationMixin(LightningElemen
     super();
   }
 
+  /**
+  * Sets the record ID and related field values based on the provided document information.
+  * Calls the connectedCallback method.
+  * @param {Object} doc The document information.
+  */
   @api handleConnectedCallback(doc) {
     this.recordId = doc.Id;
     this.doctemplatedetails.Id = doc.Id;
@@ -80,16 +175,31 @@ export default class TemplateDesignerCMP extends NavigationMixin(LightningElemen
     this.connectedCallback();
   }
 
+  /**
+  * Method to receive an object name and perform related actions based on the object name.
+  * Sets the object name received as the value for the relatedtoTypeObjChild property in the component.
+  * Calls the handleObjectNameSelection method of the c-template-content-details and c-template-related-objects components with the object name as a parameter.
+  * (Commented out) Calls the handleObjectNameSelection method of the c-template-footer-type and c-template-header-type components with the object name as a parameter.
+  * @param {String} objName The name of the object being passed.
+  * @returns The object name passed as a parameter.
+  */
   @api passingObject(objName) {
     this.relatedtoTypeObjChild = objName;
     this.template.querySelector("c-template-content-details").handleObjectNameSelection(this.relatedtoTypeObjName);
     this.template.querySelector("c-template-related-objects").handleObjectNameSelection(this.relatedtoTypeObjName);
+    /* Commented by Rahul -> Merge Fields in Header and Footer */
     // this.template.querySelector("c-template-footer-type").handleObjectNameSelection(this.relatedtoTypeObjName);
     // this.template.querySelector("c-template-header-type").handleObjectNameSelection(this.relatedtoTypeObjName);
   }
 
+  /**
+    * Method to handle child components based on the selected option, new section status, and section ID.
+    * @param {String} selectedOption The selected option for the section ('Clause', 'Context', 'Related Objects', 'Table', 'Header', or 'Footer').
+    * @param {Boolean} isNewSection Indicates whether the section is new or not.
+    * @param {String} sectionid The ID of the section.
+    */
   handlechildcomponents(selectedOption, isNewSection, sectionid) {
-    if (selectedOption == 'Clause') {
+        if (selectedOption == 'Clause') {
       this.showclausescreen = true;
       this.showtabledetails = false;
       this.showrelatedobjectdetails = false;
@@ -106,6 +216,7 @@ export default class TemplateDesignerCMP extends NavigationMixin(LightningElemen
       } else {
         this.template.querySelector("c-template-content-details").loadsectionsectionvaluesforedit(sectionid);
         this.showPreview = true;
+        this.isActivateTemplateDisabled = false;
       }
     }
     else if (selectedOption == 'Context') {
@@ -114,7 +225,6 @@ export default class TemplateDesignerCMP extends NavigationMixin(LightningElemen
       this.showrelatedobjectdetails = false;
       this.SectionTypename = 'Context';
       this.opensection = true;
-      //this.isModalOpen = false;
       this.showcontextdetails = true;
       this.showheaderdetails = false;
       this.showfooterdetails = false;
@@ -126,6 +236,7 @@ export default class TemplateDesignerCMP extends NavigationMixin(LightningElemen
       } else {
         this.template.querySelector("c-template-content-details").loadsectionsectionvaluesforedit(sectionid);
         this.showPreview = true;
+        this.isActivateTemplateDisabled = false;
       }
     }
     else if (selectedOption == 'Related Objects') {
@@ -135,7 +246,6 @@ export default class TemplateDesignerCMP extends NavigationMixin(LightningElemen
       this.showrelatedobjectdetails = true;
       this.SectionTypename = 'Related Objects';
       this.opensection = true;
-      //this.isModalOpen = false;
       this.showcontextdetails = false;
       this.showheaderdetails = false;
       this.showfooterdetails = false;
@@ -147,6 +257,28 @@ export default class TemplateDesignerCMP extends NavigationMixin(LightningElemen
       } else {
         this.template.querySelector("c-template-related-objects").loadsectionsectionvaluesforedit(sectionid);
         this.showPreview = true;
+        this.isActivateTemplateDisabled = false;
+      }
+    }
+    else if (selectedOption == 'Table') {
+      this.showclausescreen = false;
+      this.showtabledetails = true;
+      this.showrelatedobjectdetails = false;
+      this.SectionTypename = 'Table';
+      this.opensection = true;
+      //this.isModalOpen = false;
+      this.showcontextdetails = false;
+      this.showheaderdetails = false;
+      this.showfooterdetails = false;
+            if (isNewSection == true) {
+        this.rowCount += 1;
+        this.optionsList.push({ Id: selectedOption + 'NotSaved', Type: selectedOption, rowCount: this.rowCount });
+        this.selectedSectionRecordID = selectedOption + 'NotSaved';
+        this.connectedCallback();
+      } else {
+        this.template.querySelector("c-template-table-details").loadsectionsectionvaluesforedit(sectionid);
+        this.showPreview = true;
+        this.isActivateTemplateDisabled = false;
       }
     }
     else if (selectedOption == 'Header') {
@@ -164,6 +296,7 @@ export default class TemplateDesignerCMP extends NavigationMixin(LightningElemen
       } else {
         this.template.querySelector("c-template-header").loadsectionvaluesforedit(this.header.Id);
         this.showPreview = true;
+        this.isActivateTemplateDisabled = false;
       }
     } else if (selectedOption == 'Footer') {
       this.showclausescreen = false;
@@ -178,18 +311,13 @@ export default class TemplateDesignerCMP extends NavigationMixin(LightningElemen
       } else {
         this.template.querySelector("c-template-footer").loadsectionvaluesforedit(this.footer.Id);
         this.showPreview = true;
+        this.isActivateTemplateDisabled = false;
       }
     }
   }
-
-  /*handleSelectedValue(event) {
-    this.selectedSectionRecordID = '';
-    this.template.querySelector("c-template-content-details").resetvaluesonchildcmp();
-    const selectedOption = event.detail.value;
-    this.isconnectedcalledondeletion = false;
-    this.handlechildcomponents(selectedOption, true, null);
-  }*/
-
+  /**
+   * Method to add a new Context section to the sections stack
+  */
   handleNewContext() {
     this.selectedSectionRecordID = '';
     this.template.querySelector("c-template-content-details").resetvaluesonchildcmp();
@@ -197,7 +325,9 @@ export default class TemplateDesignerCMP extends NavigationMixin(LightningElemen
     this.isconnectedcalledondeletion = false;
     this.handlechildcomponents(selectedOption, true, null);
   }
-
+  /**
+   * Method to add a new Related Objects section to the sections stack
+  */
   handleNewRelatedObjects() {
     this.relatedtoTypeObjChild = this.relatedtoTypeObjName;
     this.selectedSectionRecordID = '';
@@ -207,7 +337,9 @@ export default class TemplateDesignerCMP extends NavigationMixin(LightningElemen
     this.isconnectedcalledondeletion = false;
     this.handlechildcomponents(selectedOption, true, null);
   }
-
+  /**
+   * Method to add a new Clause section to the sections stack
+  */
   handleNewClause() {
     this.selectedSectionRecordID = '';
     this.template.querySelector("c-template-content-details").resetvaluesonchildcmp();
@@ -216,14 +348,27 @@ export default class TemplateDesignerCMP extends NavigationMixin(LightningElemen
     this.handlechildcomponents(selectedOption, true, null);
   }
 
-  /*handleNewTable() {
+  /**
+   * Method to add a new Table section to the sections stack
+  */
+  handleNewTable() {
     this.selectedSectionRecordID = '';
     this.template.querySelector("c-template-table-details").resetvaluesonchildcmp();
+    this.template.querySelector("c-template-table-details").assignDocTempId(this.doctemplatedetails.Id);
     const selectedOption = 'Table';
     this.isconnectedcalledondeletion = false;
     this.handlechildcomponents(selectedOption, true, null);
-  }*/
+  }
 
+  /**
+    * Method to handle the data saved for a section.
+    * Retrieves the saved section record ID from the event detail.
+    * Iterates through the optionsList array to update the section name if the ID contains 'NotSaved' or matches the saved section record ID.
+    * Sets the selected section record ID to the saved section record ID.
+    * Calls the connectedCallback method to refresh the component.
+    * If the showPreview property is false, sets it to true.
+    * @param {CustomEvent} event The event containing the saved section record ID and name.
+    */
   handlesavedsectiondata(event) {
     var secrecordId = event.detail.Id;
     this.optionsList.forEach(function (val) {
@@ -239,23 +384,42 @@ export default class TemplateDesignerCMP extends NavigationMixin(LightningElemen
     this.selectedSectionRecordID = secrecordId;
     this.connectedCallback();
     if (this.showPreview == false) { this.showPreview = true; }
+    if (this.isActivateTemplateDisabled == true) { this.isActivateTemplateDisabled = false; }
   }
 
+  /**
+   * Method to save the Header data when clicked Save/update
+   */
   handlesavedheaderdata(event) {
     this.header.Id = event.detail.Id;
     if (this.showPreview == false) { this.showPreview = true; }
-  }
-
+    if (this.isActivateTemplateDisabled == true) { this.isActivateTemplateDisabled = false; }
+      }
+    
+  /**
+   * Method to save the footer data when clicked Save/update
+   */
   handlesavedfooterdata(event) {
     this.footer.Id = event.detail.Id;
     if (this.showPreview == false) { this.showPreview = true; }
+    if (this.isActivateTemplateDisabled == true) { this.isActivateTemplateDisabled = false; }
   }
-
+   
+  /**
+   * Method to delete the section of the current template
+   */
   handledeletesectiondata() {
     this.isconnectedcalledondeletion = true;
     this.connectedCallback();
   }
 
+  /**
+   * Method to handle a header click event. 
+   * Adds the "active" class to the element with the data-id attribute equal to this.header.Id.
+   * Removes the "active" class from all elements with data-id attributes equal to index in this.sections.
+   * Removes the "active" class from the element with the data-id attribute equal to this.footer.Id.
+   * Calls the displaysectionbasedontype method with this.header.Id and this.header.Type as parameters.
+   */
   handleHeaderClick() {
     const elm = this.template.querySelector(`[data-id="${this.header.Id}"]`);
     elm.classList.add("active");
@@ -268,6 +432,13 @@ export default class TemplateDesignerCMP extends NavigationMixin(LightningElemen
     this.displaysectionbasedontype(this.header.Id, this.header.Type);
   }
 
+  /**
+  * Method to handle the click event on the footer section.
+  * Retrieves the footer element using the footer ID and adds the 'active' class to it.
+  * Removes the 'active' class from all other sections.
+  * Retrieves the header element using the header ID and removes the 'active' class from it.
+  * Calls the displaysectionbasedontype method to display the footer section.
+  */
   handleFooterClick() {
     const elm = this.template.querySelector(`[data-id="${this.footer.Id}"]`);
     elm.classList.add("active");
@@ -280,6 +451,16 @@ export default class TemplateDesignerCMP extends NavigationMixin(LightningElemen
     this.displaysectionbasedontype(this.footer.Id, this.footer.Type);
   }
 
+  /**
+  * Method triggered when a section is clicked.
+  * Adds the 'active' class to the clicked section.
+  * Removes the 'active' class from all other sections.
+  * Removes the 'active' class from the header and footer sections.
+  * Sets the 'selectedSectionRecordID' and 'recordidtoedit' variables based on the clicked section.
+  * Calls the displaysectionbasedontype method to display the section based on its type and ID.
+  * @param {Event} event The event object containing information about the click event.
+  * @returns undefined.
+  */
   handleSectionClick(event) {
     const itemIndex = event.currentTarget.dataset.id;
     const elm = this.template.querySelector(`[data-id="${itemIndex}"]`);
@@ -303,6 +484,15 @@ export default class TemplateDesignerCMP extends NavigationMixin(LightningElemen
     this.displaysectionbasedontype(this.recordidtoedit, rowData.Type);
   }
 
+  /**
+  * Method to display a section based on its type and ID.
+  * If the section type is 'Header' or 'Footer', checks if the section ID contains the string 'NotSaved' to determine if the section is new.
+  * Calls the handlechildcomponents method with the section type, new status, and section ID as parameters.
+  * If the section type is not 'Header' or 'Footer', calls the handlechildcomponents method with the section type as the first parameter and false as the second parameter.
+  * @param {String} sectionid The ID of the section.
+  * @param {String} sectiontype The type of the section ('Header', 'Footer', or other).
+  * @returns value of the field based on their respective format.
+  */
   displaysectionbasedontype(sectionid, sectiontype) {
     if (sectiontype == 'Header' || sectiontype == 'Footer') {
       var isnew = true;
@@ -317,21 +507,30 @@ export default class TemplateDesignerCMP extends NavigationMixin(LightningElemen
     }
   }
 
+  /**
+  * Method to give dynamic styling to element
+  */
   get itemStyle() {
     return `background-color:${this.backgroundColor}; color: ${this.color}; padding:10px 10px 20px 10px; width:100%; box-shadow:0px 0px 2px rgb(229, 229, 229)`
   }
 
+  /**
+  * Method to prevent the default behavior of the action
+  */
   preventDefault(event) {
     return event.preventDefault()
   }
 
+  /**
+  * Method to reset all the values on all the section components
+  */
   @api resetallvaluesonAllcmp() {
     this.documenttemplaterecordid = '';
     this.doctemplatedetails.Id = '';
     this.doctemplatedetails.Name = '';
     this.doctemplatedetails.DxCPQ__Related_To_Type__c = '';
     this.relatedtoTypeObjChild = '',
-      this.doctemplatedetails.DxCPQ__IsActive__c = false;
+    this.doctemplatedetails.DxCPQ__IsActive__c = false;
     this.doctemplatedetails.DxCPQ__Version_Number__c = '';
     this.doctemplatedetails.DxCPQ__Previously_Active__c = false;
     this.doctemplatedetails.DxCPQ__Parent_Template__c = '';
@@ -341,37 +540,69 @@ export default class TemplateDesignerCMP extends NavigationMixin(LightningElemen
     this.showheaderdetails = false;
     this.showfooterdetails = false;
     this.disableEditing = false;
+    this.readonlyVal = false;
+    this.imageUrl = '';
+    this.originalImageCvId = '';
+    this.contentVersion = '';
     this.disableEditingHandler(this.disableEditing);
+    this.readonlyVal = false;
     this.activateTemplateLabel = 'Activate Template';
     this.rowCount = -1;
     this.template.querySelector("c-template-content-details").resetvaluesonchildcmp();
     this.header = { Id: 'headerNotSaved', Type: 'Header', rowCount: this.rowCount, sectionNameEntered: 'Header' };
     this.footer = { Id: 'footerNotSaved', Type: 'Footer', rowCount: this.rowCount, sectionNameEntered: 'Footer' };
     this.showPreview = false;
+    if (this.isActivateTemplateDisabled == false) { this.isActivateTemplateDisabled = true; }
   }
 
-  handlePreviewBackButton(){
+  resetImageWatermarkFields() {
+    this.rotationImagevalue = '0';
+    this.imageScalingValue = '100';
+    this.opacityImageValue = '1.0';
+    this.callImage = 0;
+  }
+
+  /**
+  * Method to disable the preview option when made active
+  */
+  handlePreviewBackButton() {
     this.showTemplate = false;
     this.previewModal = true;
     this.previewRecordId = undefined;
   }
 
-  get navigateToPreview(){
-    return this.previewRecordId==undefined;
+  /**
+  * Method to disable the preview option when made active
+  */
+  get navigateToPreview() {
+    return this.previewRecordId == undefined;
   }
 
-
-
   //--------------------------------DRAG FUNCTIONALITY START - VIVEK---------------------------------------------------------------
-  sections = [];
-
-  @api sectionMap;
-  @api dragMap;
-  optionsList = [];
-  @track header = { Id: 'headerNotSaved', Type: 'Header', rowCount: this.rowCount, sectionNameEntered: 'Header' };
-  @track footer = { Id: 'footerNotSaved', Type: 'Footer', rowCount: this.rowCount, sectionNameEntered: 'Footer' };
+  sections = []; // Variable used to store the event value
+  @api sectionMap; // Variable used to store the event value
+  @api dragMap; // Variable used to store the event value
+  optionsList = []; // Variable used to store the event value
+  @track header = { Id: 'headerNotSaved', Type: 'Header', rowCount: this.rowCount, sectionNameEntered: 'Header' }; // Variable used to store the event value
+  @track footer = { Id: 'footerNotSaved', Type: 'Footer', rowCount: this.rowCount, sectionNameEntered: 'Footer' }; // Variable used to store the event value
 
   connectedCallback() {
+    this.isActivateTemplateDisabled = true;
+    getSFDomainBaseURL()
+      .then(result => {
+          this.baseURL = result;
+      })
+      .catch(error => {
+        console.log('error while retrieving the org base URL --- > ', error);
+      })
+    //get PDFlinks from custom metdata
+    getPDFLinks()
+      .then(result => {
+          this.pdfLinksData = result;
+      })
+      .catch(error => {
+        console.log('error while retrieving the PDF Links --- > ', error);
+      })
     this.relatedtoTypeObjChild = this.relatedtoTypeObjName;
     this.documenttemplaterecordid = this.recordId;
     this.doctemplatedetails.Id = this.recordId;
@@ -416,7 +647,7 @@ export default class TemplateDesignerCMP extends NavigationMixin(LightningElemen
                   if (this.doctemplatedetails.DxCPQ__IsActive__c == true) {
                     this.activateTemplateLabel = 'Deactivate Template';
                     this.showPreview = true;
-                    ;
+                    if (this.isActivateTemplateDisabled == true) { this.isActivateTemplateDisabled = false; }
                   }
                 }
                 this.rowCount = val.DxCPQ__Sequence__c;
@@ -427,14 +658,14 @@ export default class TemplateDesignerCMP extends NavigationMixin(LightningElemen
             });
             this.sections = this.optionsList;
             this.isLoaded2 = false;
-            this.opensection = true; 
+            this.opensection = true;
             this.connectedCallbackHandler();
             if (this.firstsectionrecord) {
               this.displaysectionbasedontype(this.firstsectionrecord.Id, this.firstsectionrecord.DxCPQ__Type__c);
             }
           }
 
-          //// On load header section loading - by Rahul
+          // On load header section loading - by Rahul
           if (result.length < 1) {
             this.handlechildcomponents('Header', true, null);
             var _this = this;
@@ -465,61 +696,91 @@ export default class TemplateDesignerCMP extends NavigationMixin(LightningElemen
                 const elm = this.template.querySelector(`[data-onload="templateHeader"]`);
                 elm.classList.add("active");
               }, 1000);
-            }
-            else {
+            } else {
               this.handlechildcomponents(result[0].DxCPQ__Type__c, false, result[0].Id);
-
-              if(this.template.querySelector(`[data-onload="templateHeader"]`) != null) {
+              if (this.template.querySelector(`[data-onload="templateHeader"]`) != null) {
                 const elm = this.template.querySelector(`[data-onload="templateHeader"]`);
                 elm.classList.remove("active");
               }
-
-              
-              if(this.template.querySelector(`[data-onload="templateFooter"]`) != null) {
+              if (this.template.querySelector(`[data-onload="templateFooter"]`) != null) {
                 const elm = this.template.querySelector(`[data-onload="templateFooter"]`);
                 elm.classList.remove("active");
               }
-
               setTimeout(() => {
                 const elm = this.template.querySelector(`[data-id="0"]`);
                 elm.classList.add("active");
               }, 1000);
             }
           }
-          // On load header section loading - by Rahul
-
         })
         .catch(error => {
           createLog({recordId:null, className:'templateDesignerCMP LWC Component', exceptionMessage: (error.message || 'Unknown error message'), logData: error.toString(), logType:'Exception'});     
           this.isLoaded2 = false;
+          let tempError = error.toString();
+          let errorMessage = error.message || 'Unknown error message';
+          createLog({ recordId: '', className: 'templateDesignerCMP LWC Component - connectedCallback()', exceptionMessage: errorMessage, logData: tempError, logType: 'Exception' });
         })
     } else if (this.isconnectedcalledonLoad == true) {
       this.sections = this.optionsList;
       this.connectedCallbackHandler();
       var _this = this;
-
       setTimeout(() => {
-
         const elm_ = this.template.querySelector(`[data-onload="templateHeader"]`);
         elm_.classList.remove("active");
-
         const elm = this.template.querySelector(`[data-onload="templateFooter"]`);
         elm.classList.remove("active");
-
         this.sections.forEach((loopvar, index) => {
           const elm0 = this.template.querySelector(`[data-id="${index}"]`);
           elm0.classList.remove("active");
         });
-
         const newSectionAdded = (element) => element.Id == _this.selectedSectionRecordID;
         let newSectionIndex = this.optionsList.findLastIndex(newSectionAdded);
         const elm1 = this.template.querySelector(`[data-id="${newSectionIndex}"]`);
         elm1.classList.add("active");
       }, 2000)
-
     }
+
+    /**
+    * @description this getClassNames function is used to fetch
+    * all interface implemented classess
+    * Author : Reethika
+    */
+    getClassNames()
+    .then(result => {
+      if (result != null) {
+        let options = [];
+        for (var key in result) {
+          options.push({ label: result[key], value: key });
+        }
+        this.classTypeOptions = options;
+      }
+    })
+    .catch(error => {
+      console.log('error', error);
+    })
+
+    /* @description this getFlowNames function is used to fetch
+    * all autolaunched flows.
+    * Author : Reethika
+    */
+    getFlowNames()
+    .then(result => {
+      if (result != null) {
+        let options = [];
+        for (var key in result) {
+          options.push({ label: result[key], value: key });
+        }
+        this.flowTypeOptions = options;
+      }
+    })
+    .catch(error => {
+      console.log('error', error);
+    })
   }
 
+  /**
+  * Method to update the section variable 
+  */
   connectedCallbackHandler() {
     if (!!this.sections) {
       this.sectionMap = new Map();
@@ -533,51 +794,56 @@ export default class TemplateDesignerCMP extends NavigationMixin(LightningElemen
     }
   }
 
+  /**
+  * Method to active the template selected 
+  */
   handleActiveTemplate() {
     let isActive;
-
     if (this.activateTemplateLabel == 'Activate Template') {
       this.activateTemplateLabel = 'Deactivate Template';
       isActive = true;
     } else {
       this.activateTemplateLabel = 'Activate Template';
       isActive = false;
-      //this.template.querySelector("c-template-header").loadsectionsvaluesforCreation();
     }
-
     if (this.disableEditing == false) {
       this.template.querySelector("c-template-content-details").handleObjectNameSelection(this.relatedtoTypeObjName);
       this.template.querySelector("c-template-related-objects").handleObjectNameSelection(this.relatedtoTypeObjName);
-
-      // this.template.querySelector("c-template-footer-type").handleObjectNameSelection(this.relatedtoTypeObjName);
-      // this.template.querySelector("c-template-header-type").handleObjectNameSelection(this.relatedtoTypeObjName);
-
       this.template.querySelector('c-template-content-details').handleActivateTemplate(isActive, this.relatedtoTypeObjName);
-      //this.template.querySelector('c-template-table-details').handleActivateTemplate(isActive, this.relatedtoTypeObjName);
+      this.template.querySelector('c-template-table-details').handleActivateTemplate(isActive, this.relatedtoTypeObjName);
       this.template.querySelector('c-template-related-objects').handleActivateTemplate(isActive, this.relatedtoTypeObjName);
       this.template.querySelector('c-template-header').handleActivateTemplate(isActive, this.relatedtoTypeObjName);
       this.template.querySelector('c-template-footer').handleActivateTemplate(isActive, this.relatedtoTypeObjName);
     }
-
     activateTemplate({ templateId: this.documenttemplaterecordid, parentId: this.doctemplatedetails.DxCPQ__Parent_Template__c, isActive: isActive }).then(result => {
       if (result != null) {
         this.disableEditing = result.DxCPQ__Previously_Active__c;
+        this.readonlyVal = this.disableEditing ? true : false;
       }
     }).catch(error => {
       createLog({recordId:null, className:'templateDesignerCMP LWC Component', exceptionMessage: (error.message || 'Unknown error message'), logData: error.toString(), logType:'Exception'});     
     })
   }
 
+  /**
+  * Method to disable editing for the all sections under the selected template when the template is made active
+  */
   disableEditingHandler(isActive) {
     this.template.querySelector('c-template-content-details').handleActivateTemplate(isActive, this.relatedtoTypeObjName);
+    this.template.querySelector('c-template-table-details').handleActivateTemplate(isActive, this.relatedtoTypeObjName);
     this.template.querySelector('c-template-related-objects').handleActivateTemplate(isActive, this.relatedtoTypeObjName);
     this.template.querySelector('c-template-header').handleActivateTemplate(isActive, this.relatedtoTypeObjName);
     this.template.querySelector('c-template-footer').handleActivateTemplate(isActive, this.relatedtoTypeObjName);
+    this.readonlyVal = isActive ? true : false;
   }
 
+  /**
+  * Method to open the clone popup and show the cloned template
+  */
   handleCloneTemplate() {
     this.showAddNewTemplate = false;
     this.editTemplate = false;
+    this.showwatermarkbtn = false;
     this.showDeleteTemplate = false;
     this.showCloneTemplate = true;
     this.previewModal = false;
@@ -585,16 +851,23 @@ export default class TemplateDesignerCMP extends NavigationMixin(LightningElemen
     this.template.querySelector('c-modal').show();
   }
 
+  /**
+  * Method to show the preview of the template for the selected record ID
+  */
   showpreviewtemplate() {
     this.previewModal = false;
     this.showAddNewTemplate = false;
     this.editTemplate = false;
+    this.showwatermarkbtn = false;
     this.showDeleteTemplate = false;
     this.showCloneTemplate = false;
     this.showTemplate = true;
     this.template.querySelector('c-modal').show();
   }
 
+  /**
+   * Method to open the preview modal to select the record ID for previewing the selected template
+   */
   handlePreview() {
     this.previewLabel = `Search a ${this.relatedtoTypeObjName} for this template to preview`;
     if (this.relatedtoTypeObjName.toLowerCase().startsWith("a") || this.relatedtoTypeObjName.toLowerCase().startsWith("e") ||
@@ -604,27 +877,78 @@ export default class TemplateDesignerCMP extends NavigationMixin(LightningElemen
     this.previewModal = true;
     this.showAddNewTemplate = false;
     this.editTemplate = false;
+    this.showwatermarkbtn = false;
     this.showDeleteTemplate = false;
     this.showCloneTemplate = false;
     this.showTemplate = false;
     this.template.querySelector('c-modal').show();
   }
 
-  //edits the template
+  /**
+   * Method to open the edit template screen. It also triggers the getSavedDocTempWatermarkData() to get the information of the watermark if saved any on this selected template
+   */
   handleEditTemplate() {
+var attribute = [];
+    var attribute1 = [];
     this.showAddNewTemplate = false;
     this.showCloneTemplate = false;
     this.showDeleteTemplate = false;
     this.editTemplate = true;
+    this.showwatermarkbtn = false;
     this.previewModal = false;
     this.showTemplate = false;
+/**
+     * @description this is used to get the selected class name and 
+     * flow name when you click on edit icon on onload.
+     * Author : Reethika
+     */
+    gettemplatedata({ editrecordid: this.recordId })
+      .then(result => {
+        console.log('result', result);
+        if (typeof result[0].DxCPQ__ClassId__c !== 'undefined') {
+         
+          this.classTypeOptions.forEach(className => {
+            if (className.value == result[0].DxCPQ__ClassId__c) {
+              console.log('result1', className.value);
+              this.isBundled = true;
+              attribute.push({ label: className.label, value: className.value, selected: true });
+              setTimeout(()=>{
+                this.template.querySelector('[data-id="search"]').setupOptions(attribute);
+              },500             
+              )
+               
+            }
+          })
+        }
+        if (typeof result[0].DxCPQ__FlowId__c !== 'undefined') {
+         
+          this.flowTypeOptions.forEach(flowName => {
+            if (flowName.value == result[0].DxCPQ__FlowId__c) {
+               this.isBundled = false;
+              attribute1.push({ label: flowName.label, value: flowName.value, selected: true });
+               this.template.querySelector('[data-id="object"]').setupOptions(attribute1);
+            }
+          })
+        }
+       
+       
+      })
+      .catch(error => {
+      });
+
     this.template.querySelector('c-modal').show();
     this.template.querySelector('c-template-related-objects').clearChildObjSelection();
+    this.resetWatermarkValues();
+    //  this.getSavedDocTempWatermarkData();
   }
 
+  /**
+  * Method to close the preview modal screen
+  */
   closePreviewModal() {
     this.showCloneTemplate = false;
     this.editTemplate = false;
+    this.showwatermarkbtn = false;
     this.showAddNewTemplate = false;
     this.showDeleteTemplate = false;
     this.previewModal = false;
@@ -633,9 +957,13 @@ export default class TemplateDesignerCMP extends NavigationMixin(LightningElemen
     this.template.querySelector('c-modal').hide();
   }
 
+  /**
+  * Method to show the delete template popup
+  */
   handleDeleteTemplateHandler() {
     this.showCloneTemplate = false;
     this.editTemplate = false;
+    this.showwatermarkbtn = false;
     this.showAddNewTemplate = false;
     this.showDeleteTemplate = true;
     this.previewModal = false;
@@ -643,23 +971,49 @@ export default class TemplateDesignerCMP extends NavigationMixin(LightningElemen
     this.template.querySelector('c-modal').show();
   }
 
+  /**
+  * Method to refresh the selected template
+  */
   handleRefreshTemplateHandler() {
     setTimeout(() => {
       eval("$A.get('e.force:refreshView').fire();");
     }, 100);
   }
 
+  /**
+  * Method to select the record ID to preview the template for that record ID
+  * @param {Object} event
+  */
   selectItemEventHandler(event) {
     this.previewRecordId = event.detail.selectedRecord.recordId;
     this.templateId = this.doctemplatedetails.Id;
     this.templatename = this.doctemplatedetails.Name;
   }
 
+  /**
+  * Method to update the value of previewRecordId when the selected Record ID is removed
+  * @param {Object} event
+  */
   updateItemEventHandler() {
     this.previewRecordId = undefined;
   }
 
+  /**
+  * Method to edit the saved document template information 
+  * @param {Object} event
+  */
   handleEditSuccess(event) {
+/**
+    * @description this updateTemplateDetails function is used to update
+    * the class and flow selected for the template
+    * Author : Reethika
+    */
+    updateTemplateDetails({ templateData: this.editTemp, idval: this.recordId })
+    .then(result1 => { })
+    .catch(error => {
+        console.log('error', error);
+    })
+      
     const toastEvt = new ShowToastEvent({
       title: 'Success',
       message: 'Template "' + event.detail.fields.Name.value + '"' + this.popUpMessage.TEMPLATE_DESIGN_UPDATED,//'Edited Successfully',
@@ -676,6 +1030,10 @@ export default class TemplateDesignerCMP extends NavigationMixin(LightningElemen
     this.template.querySelector('c-modal').hide();
   }
 
+  /**
+  * Method to clone the existing template in to a new template with the same data as that of the exiting one
+  * @param {Object} event
+  */
   cloneTemplateHandler(event) {
     const newDocTempEvt = new CustomEvent('doccreated', {
       detail: { id: event.detail.id, name: event.detail.name, templateObj: event.detail.templateObj }, bubbles: true
@@ -690,10 +1048,16 @@ export default class TemplateDesignerCMP extends NavigationMixin(LightningElemen
     this.template.querySelector('c-modal').hide();
   }
 
+  /**
+  * Method called to cancel the delete the document template action when delete template pop up opens
+  */
   cancelDeleteHandler() {
     this.template.querySelector('c-modal').hide();
   }
 
+  /**
+  * Method called to delete the document template
+  */
   permanantDeleteHandler() {
     deleteTemplate({ templateId: this.documenttemplaterecordid }).then(result => {
       const toastEvt = new ShowToastEvent({
@@ -724,6 +1088,9 @@ export default class TemplateDesignerCMP extends NavigationMixin(LightningElemen
       });
   }
 
+  /**
+  * Method called to save the document template sections in the same sequence they are arranged on the UI
+  */
   handleSubmit() {
     var allRecords = [];
     this.sections.forEach(function (val) {
@@ -744,6 +1111,9 @@ export default class TemplateDesignerCMP extends NavigationMixin(LightningElemen
       })
   }
 
+  /**
+  * Method assigns the Sections sequence after the drag and drop action is completed
+  */
   processRowNumbers() {
     const trs = this.template.querySelectorAll(".myIndex");
     const ids = this.template.querySelectorAll(".myId");
@@ -758,7 +1128,10 @@ export default class TemplateDesignerCMP extends NavigationMixin(LightningElemen
     this.sections = Array.from(this.sectionMap.values());
     this.handleSubmit();
   }
-
+  /**
+ * Method called when the onDragStart action is performed, this method assigns the necessary attributes to the event evt
+ * @param {Object} evt
+ */
   onDragStart(evt) {
     this.dragMap = new Map();
     let eventRowDataId = evt.currentTarget.dataset.dragId;
@@ -770,12 +1143,19 @@ export default class TemplateDesignerCMP extends NavigationMixin(LightningElemen
       this.dragMap.forEach((value) => value.classList.add("grabbed"));
     }
   }
-
+  /**
+  * Method called when the dragOver action is performed, this method assigns the dropEffect
+  * @param {Object} evt
+  */
   onDragOver(evt) {
     evt.preventDefault();
     evt.dataTransfer.dropEffect = "move";
   }
 
+  /**
+  * Method to restack the created sections in a document template
+  * @param {Object} evt
+  */
   onDrop(evt) {
     evt.preventDefault();
     let sourceId = evt.dataTransfer.getData("dragId");
@@ -801,7 +1181,7 @@ export default class TemplateDesignerCMP extends NavigationMixin(LightningElemen
       }
     } else {
       if (this.dragMap.has(sourceId)) {
-        this.dragMap.forEach((value, key, map) => {
+        this.dragMap.forEach((key) => {
           const elm = this.template.querySelector(`[data-drag-id="${key}"]`);
           if (!!elm) {
             elm.classList.remove("grabbed");
@@ -823,5 +1203,526 @@ export default class TemplateDesignerCMP extends NavigationMixin(LightningElemen
       }
     }
     this.processRowNumbers();
+  }
+
+
+
+  //code added by Bhavya for Watermark
+  /**
+  * Method to display the Watermark Screen when "Watermark Settings" button is clicked on Edit Screen
+  */
+  handleWatermarkSettings() {
+    this.editTemplate = false;
+    this.showwatermarkbtn = true;
+    this.getSavedDocTempWatermarkData();
+    //this.generateCanvas();
+
+  }
+
+  /**
+      * Method to store the user inputs for different inputs used for creating a watermark on Canvas
+      * This method is used storing the variable related to both Text and Image Watermarks
+      * Based on the user inputs and the activeTab value the respective draw on canvas methods are called to create a image watermark for the user given inputs
+      * @param {Object} event
+      */
+  handleWatermarkChange(event) {
+    const fieldName = event.target.dataset.label;
+    const value = event.target.value;
+    const fieldMap = {
+      watermarkText: 'watermarkText',
+      color: 'colorValue',
+      fontSize: 'fontSizeValue',
+      alignment: 'alignmentValue',
+      direction: 'directionValue',
+      rotation: 'rotationValue',
+      opacity: 'opacityValue',
+      autofit: 'autofit',
+      imagescaling: 'imageScalingValue',
+      textPrimary: "checkedValText",
+      imagePrimary: "checkedValImage",
+      opacityImage: "opacityImageValue"
+    };
+
+    if (fieldMap[fieldName]) {
+      this[fieldMap[fieldName]] = value;
+    }
+    if (this.activeTab == 'Text') {
+      this.generateCanvas();
+    }
+    else {
+      this.drawOnCanvas(this.imageUrl);
+    }
+  }
+
+  /**
+    * Method to store the clicked tab name in the variable called "activeTab"
+    * @param {Object} event
+    */
+  handleTabChange(event) {
+    this.activeTab = event.currentTarget.dataset.name;
+    if (this.activeTab == 'Image' && this.imageOriginalImage != '' && this.callImage == 0) {
+      this.getSavedDocTempWatermarkData();
+      this.callImage++;
+    }
+  }
+
+  /**
+    * Method to create the image of the text watermark for the given user inputs
+    * @param {Object} event
+    */
+  generateCanvas() {
+try{
+    const canvas = this.template.querySelector('canvas');
+    const context = canvas.getContext('2d');
+    context.clearRect(0, 0, canvas.width, canvas.height);
+    if (this.rotationValue !== this.previousRotationValue) {
+      context.translate(canvas.width / 2, canvas.height / 2);
+      context.rotate((this.rotationValue - this.previousRotationValue) * Math.PI / 180);
+      context.translate(-canvas.width / 2, -canvas.height / 2);
+      this.previousRotationValue = this.rotationValue;
+    }
+    context.globalAlpha = this.opacityValue;
+    context.font = this.fontSizeValue + 'px Arial';
+    let textWidth = context.measureText(this.watermarkText).width;
+    context.fillStyle = this.colorValue;
+    context.fillText(this.watermarkText, (canvas.width/2 - textWidth/2), canvas.height / 2);
+} catch(error){
+      console.log('error while getting canvas line 1193 templatedesignerCMP --> ', error);
+    } 
+  }
+
+  /**
+  * Method to handle rotation values for Text and Image Watermarks seperately
+  * Once the rotation values are captured then the respective canvas drawing methods are called to update the final output for the captured rotation values
+  * @param {Object} event
+  */
+  handleRotationChange(event) {
+    let slectedRotation = event.currentTarget.dataset.type;
+    if (slectedRotation == 'Text') {
+      this.rotationValue = event.target.value;
+      this.outerDabba = `transform: rotate(${this.rotationValue}deg);`;
+      this.generateCanvas();
+    }
+    else if (slectedRotation == 'Image') {
+      this.rotationImagevalue = event.target.value;
+      this.outerDabba = `transform: rotate(${this.rotationImagevalue}deg);`;
+      this.drawOnCanvas(this.imageUrl);
+    }
+  }
+
+  /**
+   * Method to save the created Text & Image watermarks for the user given inputs
+   * Once the images drawn in both cases - text & image are saved then their contentversion IDs are captured and using the updateRecord the Watermark_Data__c field on Document_Template__c object is updated based on the selected ID
+   */
+  handleWaterMarkSave() {
+    try{
+    let canvasText = this.template.querySelector('.canvasText');
+    if (canvasText && this.watermarkText !== '') {
+      let dataURLText = canvasText.toDataURL();
+      this.baseDataLst.push({ 'text': dataURLText.split(',')[1], title:'Text' });
+    }
+
+    let canvasImage = this.template.querySelector('.canvasImage');
+    if (canvasImage && this.imageUrl) {
+      let dataURLImage = canvasImage.toDataURL();
+      this.baseDataLst.push({ 'Image': dataURLImage.split(',')[1], title:'Image' });
+}
+    } catch(error) {
+      console.log('error while getting canvas line 1230 templatedesignerCMP --> ', error);
+    }
+
+        const originalImageMap = this.baseDataLst.find(entry => entry.title === 'OriginalImg');
+    this.hasOriginalImage = originalImageMap != undefined ? true : false;
+    saveContentVersion({ title: "WatermarkImage", base64DataList: this.baseDataLst, templateId: this.documenttemplaterecordid, wtImage : this.hasOriginalImage })
+      .then(result => {
+                this.imageSavedId = result;
+        const fields = {};
+        this.baseDataLst =[];
+        let watermarkText = (result.filter(obj => Object.keys(obj).some(key => key.includes('Text'))) || [])[0];
+        let watermarkImage = (result.filter(obj => Object.keys(obj).some(key => key.includes('Image'))) || [])[0];
+        watermarkText = watermarkText ? watermarkText[Object.keys(watermarkText)[0]] : null;
+        watermarkImage = watermarkImage? watermarkImage[Object.keys(watermarkImage)[0]] : null;
+        let wtOriginalImage = (result.filter(obj => Object.keys(obj).some(key => key.includes('OriginalImg'))) || [])[0];
+        wtOriginalImage = wtOriginalImage ? wtOriginalImage[Object.keys(wtOriginalImage)[0]] : null;
+        this.originalImageCvId = wtOriginalImage? wtOriginalImage : this.prevoriginalImageCvId;
+
+        const watermarkImageIdText = {
+          name: 'Text',
+          isPrimary: this.checkedValText,
+          contentVersionID: watermarkText,
+          pageOption: this.pageTextOption,
+          fontsize: this.fontSizeValue,
+          opacity: this.opacityValue,
+          color: this.colorValue,
+          rotation: this.rotationValue,
+          textVal: this.watermarkText,
+          pageTextOption: this.pageTextOption
+
+        };
+
+        const watermarkImageIdImage = {
+          name: 'Image',
+          isPrimary: this.checkedValImage,
+          contentVersionID: watermarkImage,
+          pageOption: this.pageImageOption,
+          opacity: this.opacityImageValue,
+          rotation: this.rotationImagevalue,
+          pageImageOption: this.pageImageOption,
+          imageScale: this.imageScalingValue,
+          originalImageCVId: this.originalImageCvId
+        };
+        fields[DOCUMENTTEMPLATEID_FIELD.fieldApiName] = this.documenttemplaterecordid;
+        let jsonDataLst = [watermarkImageIdText, watermarkImageIdImage];
+        fields[WATERMARKDATA_FIELD.fieldApiName] = JSON.stringify(jsonDataLst);
+        const recordInput = { fields };
+        
+        updateRecord(recordInput)
+          .then(() => {
+            const toastEvt = new ShowToastEvent({
+              title: 'Success!',
+              message: 'Watermark saved successfully',
+              variant: 'Success',
+            });
+            this.dispatchEvent(toastEvt);
+            this.previousImgRotationValue = '0';
+            //resetting previous Text Totation & Image Rotation values
+            this.previousRotationValue = '0';
+            this.showwatermarkbtn = false;
+            this.fontSizeValue = '22';
+            this.opacityValue = '1.0';
+            this.watermarkText = '';
+            this.colorValue = '';
+            this.rotationValue = '0';
+            this.checkedValText = true;
+            this.checkedValImage = false;
+            this.pageTextOption = 'All Pages - Text';
+            this.pageImageOption = 'All Pages -  Image';
+            this.imageScalingValue = '100';
+            this.rotationImagevalue = '0';
+            this.opacityImageValue = '1.0';
+            this.callImage = 0;
+            this.updateCheckedValue(this.pageTextOption, this.watermarkPageOptionsText);
+            this.updateCheckedValue(this.pageImageOption, this.watermarkPageOptionsImage);
+            this.imageUrl =  '';
+            this.template.querySelector('c-modal').hide();
+          })
+          .catch(error => {
+            const toastEvt = new ShowToastEvent({
+              title: 'Error!',
+              message: 'Cannot save watermark Image',
+              variant: 'error',
+            });
+            this.dispatchEvent(toastEvt);
+            this.showwatermarkbtn = false;
+            this.template.querySelector('c-modal').hide();
+          });
+      })
+      .catch(error => {
+        console.error('Error saving file:', error);
+      });
+  }
+
+  /**
+  * Method to hide the Watermark Screen from UI
+  */
+  handleWaterMarkCancel() {
+    this.showwatermarkbtn = false;
+    this.previousImgRotationValue = '0';
+    this.editTemplate = true;
+    this.fontSizeValue = '22';
+    this.colorValue = '#000000';
+    this.watermarkText = '';
+    this.opacityValue = '1.0';
+    this.rotationValue = '0';
+    this.checkedValText = true;
+    this.checkedValImage = false;
+    this.rotationImagevalue = '0';
+    this.opacityImageValue = '1.0';
+    this.imageScalingValue = '100';
+    this.activeTab = '';
+    this.previousRotationValue = '0';
+    this.previousImgRotationValue = '0';
+    this.callImage = 0;
+  }
+
+  /**
+  * Method to catch the data of the uploaded image files 
+  * @param {Object} event
+  */
+  handleUploadFinished(event) {
+    this.previousRotationValue = '0';
+    this.previousImgRotationValue = '0';
+    this.imageScalingValue = '0';
+    const file = event.target.files[0];
+    this.resetImageWatermarkFields();
+    const reader = new FileReader();
+    reader.onload = () => {
+      this.imageUrl = reader.result;
+      try {
+        this.drawOnCanvas(this.imageUrl).then(() => {
+          this.baseDataLst = [];
+          let canvasImage = this.template.querySelector('.canvasImage');
+          if (canvasImage && this.imageUrl) {
+            let dataURLImage = canvasImage.toDataURL();
+            this.baseDataLst.push({ 'OriginalImg': dataURLImage.split(',')[1], title: 'OriginalImg' });
+          }
+        });
+      }
+      catch (error) {
+        console.log(error);
+      }
+    };
+    reader.readAsDataURL(file);
+  }
+
+  /**
+  * Method to create the image of the Image watermark for the given user inputs
+  * @param {Object} imageUrl
+  */
+  drawOnCanvas(imageUrl) {
+    return new Promise((resolve, reject) => {
+      try {
+        const canvas = this.template.querySelector('.canvasImage');
+        const ctx = canvas.getContext('2d');
+        const image = new Image();
+        image.src = imageUrl;
+        image.onload = () => {
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
+          if (this.rotationImagevalue !== this.previousImgRotationValue) {
+            ctx.translate(canvas.width / 2, canvas.height / 2);
+            ctx.rotate((this.rotationImagevalue - this.previousImgRotationValue) * Math.PI / 180);
+            ctx.translate(-canvas.width / 2, -canvas.height / 2);
+            this.previousImgRotationValue = this.rotationImagevalue;
+          }
+          ctx.globalAlpha = this.opacityImageValue;
+          let imgwidth = this.imageScalingValue == 0 ? image.width : image.width * (this.imageScalingValue / 100);
+          let imgheight = this.imageScalingValue == 0 ? image.height : image.height * (this.imageScalingValue / 100);
+          ctx.drawImage(image, (canvas.width - imgwidth) / 2, (canvas.height - imgheight) / 2, this.imageScalingValue == 0 ? image.width : image.width * (this.imageScalingValue / 100), this.imageScalingValue == 0 ? image.height : image.height * (this.imageScalingValue / 100));
+          resolve();
+        };
+      }
+      catch (error) {
+        console.log('error while getting canvas line 1387 templatedesignerCMP --> ', error);
+      }
+
+    });
+  }
+
+
+  /**
+  * Method to store the Watermark Page Option i.e., on what pages the watermark should be visible is handled with the following method
+  * @param {Object} event
+  */
+  handleWatermarkPageChange(event) {
+    if (this.activeTab === "Text") {
+      this.pageTextOption = event.target.value;
+      this.updateCheckedValue(this.pageTextOption, this.watermarkPageOptionsText);
+    } else if (this.activeTab === "Image") {
+      this.pageImageOption = event.target.value;
+      this.updateCheckedValue(this.pageImageOption, this.watermarkPageOptionsImage);
+    }
+  }
+
+  /**
+   * Method to update the checked value in the respective lists based on selected values
+   * @param optionValue Either pageTextOption/ pageImageOption
+   * @param optionsList Either watermarkPageOptionsText/ watermarkPageOptionsImage
+   */
+  updateCheckedValue(optionValue, optionsList) {
+    optionsList = optionsList.map(option => {
+      if (option.value === optionValue) {
+        return { ...option, checked: true };
+      } else {
+        return { ...option, checked: false };
+      }
+    });
+    if (optionValue.includes('Text')) {
+      this.watermarkPageOptionsText = optionsList;
+    } else if (optionValue.includes('Image')) {
+      this.watermarkPageOptionsImage = optionsList;
+    }
+  }
+
+  /**
+  * Method to store the information about which type of watermark should be used for displaying on the final PDF
+  * By Default, the text watermark is made primary with option show on "All Pages"
+  * @param {Object} event
+  */
+  handleWatermarkPrimary(event) {
+    const isChecked = event.target.checked;
+    if (this.activeTab === "Text") {
+      this.checkedValText = isChecked;
+      this.checkedValImage = !this.checkedValText;
+    } else if (this.activeTab === "Image") {
+      this.checkedValImage = isChecked;
+      this.checkedValText = !this.checkedValImage;
+    }
+  }
+
+  /**
+  * Method to get the already saved watermark data from apex and assign them to the respective variables
+  */
+  getSavedDocTempWatermarkData() {
+    try{
+      getDocumentTemplateData({ templateId: this.recordId }).then(result => {
+        if (result != null) {
+
+          let savedWaterMarkData = JSON.parse(result.DxCPQ__Watermark_Data__c);
+          if(this.activeTab == ''){
+            this.fontSizeValue = savedWaterMarkData[0].fontsize;
+            this.opacityValue = savedWaterMarkData[0].opacity;
+            this.checkedValText = savedWaterMarkData[0].isPrimary;
+            this.pageTextOption = savedWaterMarkData[0].pageTextOption;
+            this.watermarkText = savedWaterMarkData[0].textVal;
+            this.colorValue = savedWaterMarkData[0].color;
+            this.rotationValue = savedWaterMarkData[0].rotation;
+            this.updateCheckedValue(this.pageTextOption, this.watermarkPageOptionsText);
+            this.rotationImagevalue = savedWaterMarkData[1].rotation;
+            this.imageScalingValue = savedWaterMarkData[1].imageScale;
+            this.pageImageOption = savedWaterMarkData[1].pageImageOption;
+            this.checkedValImage = savedWaterMarkData[1].isPrimary;
+            this.opacityImageValue = savedWaterMarkData[1].opacity;
+            let imageOriginalImage = savedWaterMarkData[1].originalImageCVId;
+            this.prevoriginalImageCvId = savedWaterMarkData[1].originalImageCVId;
+            this.updateCheckedValue(this.pageImageOption, this.watermarkPageOptionsImage);
+          }
+          if(this.activeTab == 'Text'){
+            this.fontSizeValue = savedWaterMarkData[0].fontsize;
+            this.opacityValue = savedWaterMarkData[0].opacity;
+            this.checkedValText = savedWaterMarkData[0].isPrimary;
+            this.checkedValImage = !this.checkedValText;
+            this.pageTextOption = savedWaterMarkData[0].pageTextOption;
+            this.watermarkText = savedWaterMarkData[0].textVal;
+            this.colorValue = savedWaterMarkData[0].color;
+            this.rotationValue = savedWaterMarkData[0].rotation;
+            this.updateCheckedValue(this.pageTextOption, this.watermarkPageOptionsText);
+            this.generateCanvas();
+          }
+          else if(this.activeTab == 'Image'){
+            this.rotationImagevalue = savedWaterMarkData[1].rotation;
+            this.imageScalingValue = savedWaterMarkData[1].imageScale;
+            this.pageImageOption = savedWaterMarkData[1].pageImageOption;
+            this.checkedValImage = savedWaterMarkData[1].isPrimary;
+            this.checkedValText = !this.checkedValImage;
+            this.opacityImageValue = savedWaterMarkData[1].opacity;
+            let imageOriginalImage = savedWaterMarkData[1].originalImageCVId;
+            this.prevoriginalImageCvId = savedWaterMarkData[1].originalImageCVId;
+            this.updateCheckedValue(this.pageImageOption, this.watermarkPageOptionsImage);
+            //displaying the image watermark - original image on canvas
+            if(imageOriginalImage != ''){
+              getOriginalImageCVID({ contentVersionId : imageOriginalImage }).then(result => {
+                if (result != null) {
+                  this.contentVersion = result;
+                  this.imageUrl = 'data:image/png;base64,' + this.contentVersion;
+                  this.drawOnCanvas(this.imageUrl).then(() => {});
+                }
+              }).catch(error => {
+                console.log('error activation', error);
+              })
+            }
+          }
+        }
+      }).catch(error => {
+        console.log('error activation', error);
+      })
+    } catch(error) {
+      console.log('error' + error);
+    }
+  }
+
+  /**
+  * Method to show up the Template/Watermark help document
+  * @param {Object} event
+  */
+  handlehelp(event){
+    let relatedObjectsMap = this.pdfLinksData.find(item => item.MasterLabel === event.currentTarget.dataset.val);
+    let pdfUrl = relatedObjectsMap ? relatedObjectsMap.DxCPQ__Section_PDF_URL__c : null;
+     const config = {
+      type: 'standard__webPage',
+      attributes: {
+        url: pdfUrl
+      }
+    };
+    this[NavigationMixin.Navigate](config);
+  }
+
+  /**
+  * Method to clear the watermark fields when the modal is closed
+  * @param {Object} event
+  */
+  handleDialogBoxClosed(event){
+    this.previousImgRotationValue = '0';
+    this.previousRotationValue = '0';
+    this.fontSizeValue = '22';
+    this.opacityImageValue = '1.0';
+    this.opacityValue = '1.0';
+    this.color = '#000000';
+    this.rotationValue = '0';
+    this.rotationImagevalue = '0';
+    this.imageScalingValue = '100';
+    this.checkedValText = true;
+    this.watermarkText = '';
+    this.callImage = 0;
+    this.checkedValImage = false;
+    this.imageUrl =  '';
+  }
+
+  /**
+  * Method to reset the all Watermark fields both Text and Image Watermark
+  */
+  resetWatermarkValues(){
+    this.fontSizeValue = '22';
+    this.opacityValue = '1.0';
+    this.colorValue = '#000000';
+    this.rotationValue = '0';
+    this.watermarkText = '';
+    this.checkedValText = true;
+    this.checkedValImage = false;
+    this.pageTextOption = 'All Pages - Text';
+    this.imageScalingValue = '100';
+    this.opacityImageValue = '1.0';
+    this.rotationImagevalue = '0';
+    this.pageImageOption = 'All Pages - Image';
+    this.callImage = 0;
+    this.imageUrl =  '';
+    this.updateCheckedValue(this.pageTextOption, this.watermarkPageOptionsText);
+    this.updateCheckedValue(this.pageImageOption, this.watermarkPageOptionsImage);
+  }
+
+  /**
+   * @description this handleClassselection event is used to get
+   * the id of the class selected
+   * Author : Reethika
+   */
+  handleClassselection(event) {
+    this.classIdData = event.detail.values;
+    this.editTemp.classId = this.classIdData[0];
+    if (this.classIdData.length === 0) {
+      this.editTemp.classId = ' ';
+    }
+  }
+
+  /**
+   * @description this handleClassselection event is used to get
+   * the durableid of the flow selected
+   * Author : Reethika
+   */
+  handleFlowselection(event) {
+    this.flowIdData = event.detail.values;
+    this.editTemp.flowId = this.flowIdData[0];
+    if (this.flowIdData.length === 0) {
+      this.editTemp.flowId = ' ';
+    }
+  }
+     
+  /**
+  * @description this handleRelationshipType event is used to get
+  * whether the flow is selected or class is selected
+  * Author : Reethika
+  */
+  handleRelationshipType(event){
+    this.isBundled= event.target.checked;
+    this.editTemp.flowId = ' ';
+    this.editTemp.classId = ' ';
   }
 }

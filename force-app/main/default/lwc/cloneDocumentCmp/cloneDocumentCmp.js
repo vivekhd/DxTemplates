@@ -38,17 +38,17 @@ export default class CloneDocumentCmp extends LightningElement {
     handleSubmit(event) {
         event.preventDefault();
         let docTempObj ={'sobjectType':'DxCPQ__Document_Template__c'};
-        
+
         const fields = event.detail.fields;
-            docTempObj.Name = fields.Name;
-            docTempObj.DxCPQ__Related_To_Type__c = this.parentTemplateRelatedToType;
-            docTempObj.DxCPQ__Description__c = fields.DxCPQ__Description__c;
-            docTempObj.DxCPQ__Parent_Template__c = fields.DxCPQ__Parent_Template__c;
-            
-            if(this.cloneTypeOptionSelectedByUser == 'New_Template') {
-                docTempObj.DxCPQ__Parent_Template__c = this.recordId;
-                docTempObj.DxCPQ__Version_Number__c = 1;
-            }
+        docTempObj.Name = fields.Name;
+        docTempObj.DxCPQ__Related_To_Type__c = this.parentTemplateRelatedToType;
+        docTempObj.DxCPQ__Description__c = fields.DxCPQ__Description__c;
+        docTempObj.DxCPQ__Parent_Template__c = fields.DxCPQ__Parent_Template__c;
+        docTempObj.DxCPQ__Watermark_Data__c=fields.DxCPQ__Watermark_Data__c;
+        if(this.cloneTypeOptionSelectedByUser == 'New_Template') {
+            docTempObj.DxCPQ__Parent_Template__c = this.recordId;
+            docTempObj.DxCPQ__Version_Number__c = 1;
+        }
         
         cloneDocumentTemplate({docTemp:docTempObj, docTempId:this.recordId}).then(result=>{
             if(result){
