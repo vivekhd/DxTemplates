@@ -16,9 +16,12 @@ import WATERMARKDATA_FIELD from '@salesforce/schema/Document_Template__c.Waterma
 import getSFDomainBaseURL from '@salesforce/apex/PdfDisplay.getDomainUrl';
 import getDocumentTemplateData from '@salesforce/apex/DisplayPDFController.getDocumentTemplateData';
 import createLog from '@salesforce/apex/LogHandler.createLog';
+import getClassNames from '@salesforce/apex/SaveDocumentTemplate.getClassNames';
+import getFlowNames from '@salesforce/apex/SaveDocumentTemplate.getFlowNames';
+import updateTemplateDetails from '@salesforce/apex/SaveDocumentTemplate.updateTemplateDetails';
+import gettemplatedata from '@salesforce/apex/SaveDocumentTemplate.gettemplatedata';
 import getPDFLinks from '@salesforce/apex/ProductSetupCtrl.getPDFLinks';
 import getOriginalImageCVID from '@salesforce/apex/ProductSetupCtrl.getOriginalImageCVID';
-
 
 export default class TemplateDesignerCMP extends NavigationMixin(LightningElement) {
   @api recordId; // Selected Template ID
@@ -50,7 +53,7 @@ export default class TemplateDesignerCMP extends NavigationMixin(LightningElemen
   @track pageTextOption = 'All Pages - Text'; // Default text page Option for watermark is selected as "ALL PAGES"
   @track pageImageOption = 'All Pages - Image'; // Default Image page Option for watermark is selected as "ALL PAGES"
   @track readonlyVal = false; // Boolean to make the Image fields readonly
-  baseDataLst = []; //list that stores the dataURl of Watermark Images
+    baseDataLst = []; //list that stores the dataURl of Watermark Images
   hasOriginalImage = false; // Boolean to show if the watermark is new one or edit on previous one
   prevoriginalImageCvId;//stores the previously saved original watermark Content Version ID
   callImage = 0;
@@ -126,8 +129,14 @@ export default class TemplateDesignerCMP extends NavigationMixin(LightningElemen
   @track relatedtoTypeObjChild; // Child of the related to type object.
   quoteName; // Name of the quote.
   popUpMessage; // Popup message.
-
-
+  // variables added by reethika regarding dynamic flow or class selection
+  @track classTypeOptions = [];
+  @track flowTypeOptions = [];
+  @track classIdData = [];
+  @track flowIdData = [];
+  @track editTemp = {};
+  @track isBundled = false;
+  //variables added by reethika regarding dynamic flow or class selection ends here
   @wire(getAllPopupMessages)
   allConstants({ error, data }) {
     if (data) {
@@ -140,6 +149,8 @@ export default class TemplateDesignerCMP extends NavigationMixin(LightningElemen
   @track doctemplatedetails = {
     Id: '',
     Name: '',
+    DxCPQ__ClassId__c: '',
+    DxCPQ__FlowId__c: '',
     DxCPQ__Related_To_Type__c: '',
     DxCPQ__IsActive__c: false,
     DxCPQ__Version_Number__c: '', DxCPQ__Previously_Active__c: false, DxCPQ__Parent_Template__c: ''
@@ -528,6 +539,7 @@ export default class TemplateDesignerCMP extends NavigationMixin(LightningElemen
     this.originalImageCvId = '';
     this.contentVersion = '';
     this.disableEditingHandler(this.disableEditing);
+    this.readonlyVal = false;
     this.activateTemplateLabel = 'Activate Template';
     this.rowCount = -1;
     this.template.querySelector("c-template-content-details").resetvaluesonchildcmp();
@@ -579,6 +591,7 @@ export default class TemplateDesignerCMP extends NavigationMixin(LightningElemen
       .catch(error => {
         console.log('error while retrieving the org base URL --- > ', error);
       })
+      
     //get PDFlinks from custom metdata
     getPDFLinks()
       .then(result => {
@@ -742,6 +755,43 @@ export default class TemplateDesignerCMP extends NavigationMixin(LightningElemen
       }, 2000)
 
     }
+
+    /**
+      * @description this getClassNames function is used to fetch
+      * all interface implemented classess
+      * Author : Reethika
+      */
+    getClassNames()
+      .then(result => {
+        if (result != null) {
+          let options = [];
+          for (var key in result) {
+            options.push({ label: result[key], value: key });
+          }
+          this.classTypeOptions = options;
+        }
+      })
+      .catch(error => {
+        console.log('error', error);
+      })
+
+    /* @description this getFlowNames function is used to fetch
+    * all autolaunched flows.
+    * Author : Reethika
+    */
+    getFlowNames()
+      .then(result => {
+        if (result != null) {
+          let options = [];
+          for (var key in result) {
+            options.push({ label: result[key], value: key });
+          }
+          this.flowTypeOptions = options;
+        }
+      })
+      .catch(error => {
+        console.log('error', error);
+      })
   }
 
   /**
@@ -854,6 +904,8 @@ export default class TemplateDesignerCMP extends NavigationMixin(LightningElemen
    * Method to open the edit template screen. It also triggers the getSavedDocTempWatermarkData() to get the information of the watermark if saved any on this selected template
    */
   handleEditTemplate() {
+    var attribute = [];
+    var attribute1 = [];
     this.showAddNewTemplate = false;
     this.showCloneTemplate = false;
     this.showDeleteTemplate = false;
@@ -861,6 +913,45 @@ export default class TemplateDesignerCMP extends NavigationMixin(LightningElemen
     this.showwatermarkbtn = false;
     this.previewModal = false;
     this.showTemplate = false;
+    /**
+     * @description this is used to get the selected class name and 
+     * flow name when you click on edit icon on onload.
+     * Author : Reethika
+     */
+    gettemplatedata({ editrecordid: this.recordId })
+      .then(result => {
+        console.log('result', result);
+        if (typeof result[0].DxCPQ__ClassId__c !== 'undefined') {
+         
+          this.classTypeOptions.forEach(className => {
+            if (className.value == result[0].DxCPQ__ClassId__c) {
+              console.log('result1', className.value);
+              this.isBundled = true;
+              attribute.push({ label: className.label, value: className.value, selected: true });
+              setTimeout(()=>{
+                this.template.querySelector('[data-id="search"]').setupOptions(attribute);
+              },500             
+              )
+               
+            }
+          })
+        }
+        if (typeof result[0].DxCPQ__FlowId__c !== 'undefined') {
+         
+          this.flowTypeOptions.forEach(flowName => {
+            if (flowName.value == result[0].DxCPQ__FlowId__c) {
+               this.isBundled = false;
+              attribute1.push({ label: flowName.label, value: flowName.value, selected: true });
+               this.template.querySelector('[data-id="object"]').setupOptions(attribute1);
+            }
+          })
+        }
+       
+       
+      })
+      .catch(error => {
+      });
+
     this.template.querySelector('c-modal').show();
     this.template.querySelector('c-template-related-objects').clearChildObjSelection();
     this.resetWatermarkValues();
@@ -928,11 +1019,23 @@ export default class TemplateDesignerCMP extends NavigationMixin(LightningElemen
   * @param {Object} event
   */
   handleEditSuccess(event) {
+    /**
+    * @description this updateTemplateDetails function is used to update
+    * the class and flow selected for the template
+    * Author : Reethika
+    */
+    updateTemplateDetails({ templateData: this.editTemp, idval: this.recordId })
+    .then(result1 => { })
+    .catch(error => {
+        console.log('error', error);
+    })
+      
     const toastEvt = new ShowToastEvent({
       title: 'Success',
       message: 'Template "' + event.detail.fields.Name.value + '"' + this.popUpMessage.TEMPLATE_DESIGN_UPDATED,//'Edited Successfully',
       variant: 'Success',
     });
+
     this.dispatchEvent(toastEvt);
     let createdDocumentTemplateId = event.detail.id;
     let name = event.detail.fields.Name.value;
@@ -974,7 +1077,7 @@ export default class TemplateDesignerCMP extends NavigationMixin(LightningElemen
   */
   permanantDeleteHandler() {
     deleteTemplate({ templateId: this.documenttemplaterecordid }).then(result => {
-      const toastEvt = new ShowToastEvent({
+            const toastEvt = new ShowToastEvent({
         title: 'Success',
         message: 'Template ' + this.popUpMessage.TEMPLATE_DESIGN_DELETED,//'Deleted Successfully',
         variant: 'Success',
@@ -1164,7 +1267,7 @@ export default class TemplateDesignerCMP extends NavigationMixin(LightningElemen
     if (fieldMap[fieldName]) {
       this[fieldMap[fieldName]] = value;
     }
-    if (this.activeTab == 'Text') {
+        if (this.activeTab == 'Text') {
       this.generateCanvas();
     }
     else {
@@ -1189,23 +1292,22 @@ export default class TemplateDesignerCMP extends NavigationMixin(LightningElemen
     * @param {Object} event
     */
   generateCanvas() {
-try{
-    const canvas = this.template.querySelector('canvas');
-    const context = canvas.getContext('2d');
-    context.clearRect(0, 0, canvas.width, canvas.height);
-    if (this.rotationValue !== this.previousRotationValue) {
-      context.translate(canvas.width / 2, canvas.height / 2);
-      context.rotate((this.rotationValue - this.previousRotationValue) * Math.PI / 180);
-      context.translate(-canvas.width / 2, -canvas.height / 2);
-      this.previousRotationValue = this.rotationValue;
-    }
-    context.globalAlpha = this.opacityValue;
-    context.font = this.fontSizeValue + 'px Arial';
-    let textWidth = context.measureText(this.watermarkText).width;
-    context.fillStyle = this.colorValue;
-    context.fillText(this.watermarkText, (canvas.width/2 - textWidth/2), canvas.height / 2);
-}
-    catch(error){
+    try{
+        const canvas = this.template.querySelector('canvas');
+        const context = canvas.getContext('2d');
+        context.clearRect(0, 0, canvas.width, canvas.height);
+        if (this.rotationValue !== this.previousRotationValue) {
+          context.translate(canvas.width / 2, canvas.height / 2);
+          context.rotate((this.rotationValue - this.previousRotationValue) * Math.PI / 180);
+          context.translate(-canvas.width / 2, -canvas.height / 2);
+          this.previousRotationValue = this.rotationValue;
+        }
+        context.globalAlpha = this.opacityValue;
+        context.font = this.fontSizeValue + 'px Arial';
+        let textWidth = context.measureText(this.watermarkText).width;
+        context.fillStyle = this.colorValue;
+        context.fillText(this.watermarkText, (canvas.width/2 - textWidth/2), canvas.height / 2);
+    } catch(error){
       console.log('error while getting canvas line 1193 templatedesignerCMP --> ', error);
     } 
   }
@@ -1216,7 +1318,7 @@ try{
   * @param {Object} event
   */
   handleRotationChange(event) {
-    let slectedRotation = event.currentTarget.dataset.type;
+        let slectedRotation = event.currentTarget.dataset.type;
     if (slectedRotation == 'Text') {
       this.rotationValue = event.target.value;
       this.outerDabba = `transform: rotate(${this.rotationValue}deg);`;
@@ -1370,11 +1472,11 @@ try{
   * @param {Object} event
   */
   handleUploadFinished(event) {
-    this.previousRotationValue = '0';
+this.previousRotationValue = '0';
     this.previousImgRotationValue = '0';
     this.imageScalingValue = '0';
     const file = event.target.files[0];
-    this.resetImageWatermarkFields();
+this.resetImageWatermarkFields();
     const reader = new FileReader();
     reader.onload = () => {
       this.imageUrl = reader.result;
@@ -1418,8 +1520,6 @@ try{
           let imgwidth = this.imageScalingValue == 0 ? image.width : image.width * (this.imageScalingValue / 100);
           let imgheight = this.imageScalingValue == 0 ? image.height : image.height * (this.imageScalingValue / 100);
           ctx.drawImage(image, (canvas.width - imgwidth) / 2, (canvas.height - imgheight) / 2, this.imageScalingValue == 0 ? image.width : image.width * (this.imageScalingValue / 100), this.imageScalingValue == 0 ? image.height : image.height * (this.imageScalingValue / 100));
-
-
           resolve();
         };
       }
@@ -1488,25 +1588,25 @@ try{
     try{
       getDocumentTemplateData({ templateId: this.recordId }).then(result => {
         if (result != null) {
-
+          
           let savedWaterMarkData = JSON.parse(result.DxCPQ__Watermark_Data__c);
-          if(this.activeTab == ''){
-            this.fontSizeValue = savedWaterMarkData[0].fontsize;
-            this.opacityValue = savedWaterMarkData[0].opacity;
-            this.checkedValText = savedWaterMarkData[0].isPrimary;
-            this.pageTextOption = savedWaterMarkData[0].pageTextOption;
-            this.watermarkText = savedWaterMarkData[0].textVal;
-            this.colorValue = savedWaterMarkData[0].color;
-            this.rotationValue = savedWaterMarkData[0].rotation;
-            this.updateCheckedValue(this.pageTextOption, this.watermarkPageOptionsText);
-            this.rotationImagevalue = savedWaterMarkData[1].rotation;
-            this.imageScalingValue = savedWaterMarkData[1].imageScale;
-            this.pageImageOption = savedWaterMarkData[1].pageImageOption;
-            this.checkedValImage = savedWaterMarkData[1].isPrimary;
-            this.opacityImageValue = savedWaterMarkData[1].opacity;
-            let imageOriginalImage = savedWaterMarkData[1].originalImageCVId;
-            this.prevoriginalImageCvId = savedWaterMarkData[1].originalImageCVId;
-            this.updateCheckedValue(this.pageImageOption, this.watermarkPageOptionsImage);
+        if(this.activeTab == ''){
+          this.fontSizeValue = savedWaterMarkData[0].fontsize;
+          this.opacityValue = savedWaterMarkData[0].opacity;
+          this.checkedValText = savedWaterMarkData[0].isPrimary;
+          this.pageTextOption = savedWaterMarkData[0].pageTextOption;
+          this.watermarkText = savedWaterMarkData[0].textVal;
+          this.colorValue = savedWaterMarkData[0].color;
+          this.rotationValue = savedWaterMarkData[0].rotation;
+          this.updateCheckedValue(this.pageTextOption, this.watermarkPageOptionsText);
+          this.rotationImagevalue = savedWaterMarkData[1].rotation;
+          this.imageScalingValue = savedWaterMarkData[1].imageScale;
+          this.pageImageOption = savedWaterMarkData[1].pageImageOption;
+          this.checkedValImage = savedWaterMarkData[1].isPrimary;
+          this.opacityImageValue = savedWaterMarkData[1].opacity;
+          let imageOriginalImage = savedWaterMarkData[1].originalImageCVId;
+          this.prevoriginalImageCvId = savedWaterMarkData[1].originalImageCVId;
+          this.updateCheckedValue(this.pageImageOption, this.watermarkPageOptionsImage);
           }
           if(this.activeTab == 'Text'){
             this.fontSizeValue = savedWaterMarkData[0].fontsize;
@@ -1518,8 +1618,8 @@ try{
             this.colorValue = savedWaterMarkData[0].color;
             this.rotationValue = savedWaterMarkData[0].rotation;
             this.updateCheckedValue(this.pageTextOption, this.watermarkPageOptionsText);
-            this.generateCanvas();
-          }
+          this.generateCanvas();
+}
           else if(this.activeTab == 'Image'){
             this.rotationImagevalue = savedWaterMarkData[1].rotation;
             this.imageScalingValue = savedWaterMarkData[1].imageScale;
@@ -1552,7 +1652,7 @@ try{
     }
   }
 
-  /**
+/**
   * Method to show up the Template/Watermark help document
   * @param {Object} event
   */
@@ -1609,5 +1709,42 @@ try{
     this.imageUrl =  '';
     this.updateCheckedValue(this.pageTextOption, this.watermarkPageOptionsText);
     this.updateCheckedValue(this.pageImageOption, this.watermarkPageOptionsImage);
+  }
+
+  /**
+   * @description this handleClassselection event is used to get
+   * the id of the class selected
+   * Author : Reethika
+   */
+  handleClassselection(event) {
+    this.classIdData = event.detail.values;
+    this.editTemp.classId = this.classIdData[0];
+    if (this.classIdData.length === 0) {
+      this.editTemp.classId = ' ';
+    }
+  }
+
+  /**
+   * @description this handleClassselection event is used to get
+   * the durableid of the flow selected
+   * Author : Reethika
+   */
+  handleFlowselection(event) {
+    this.flowIdData = event.detail.values;
+    this.editTemp.flowId = this.flowIdData[0];
+    if (this.flowIdData.length === 0) {
+      this.editTemp.flowId = ' ';
+    }
+  }
+     
+  /**
+  * @description this handleRelationshipType event is used to get
+  * whether the flow is selected or class is selected
+  * Author : Reethika
+  */
+  handleRelationshipType(event){
+    this.isBundled= event.target.checked;
+      this.editTemp.flowId = ' ';
+        this.editTemp.classId = ' ';
   }
 }

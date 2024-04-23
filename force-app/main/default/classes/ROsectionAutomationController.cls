@@ -261,8 +261,8 @@ public with sharing class ROsectionAutomationController {
                 };
                 */
                 Map<String,String> chartStaticResourceStyle = new Map<String,String> {};
-                for(DxCPQ__ChartAutomationStyleResources__mdt chartStyleAttribute :  [SELECT Id,Label,DxCPQ__Style_Composition__c FROM DxCPQ__ChartAutomationStyleResources__mdt]){
-                    chartStaticResourceStyle.put(chartStyleAttribute.label,chartStyleAttribute.DxCPQ__Style_Composition__c );
+                for(ChartAutomationStyleResources__mdt chartStyleAttribute :  [SELECT Id,Label,Style_Composition__c FROM ChartAutomationStyleResources__mdt]){
+                    chartStaticResourceStyle.put(chartStyleAttribute.label,chartStyleAttribute.Style_Composition__c );
                 }
 
                 /*Bar height Calculation*/

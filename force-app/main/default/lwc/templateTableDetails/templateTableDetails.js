@@ -27,11 +27,13 @@ export default class TemplateTableDetails extends LightningElement {
     showmergefield = false;
     showImageModal = false;
     isHeaderMergeField = false;
+    isTableColumnSizeChange = false;
 
     imageUrls = [];
     mainimageUrls = [];
     @track divContentArray = [];
     selectedimageid;
+    @track tableHeadersData = [];
     @track selectedImageHeight = "75px";
     @track selectedImageWidth = "75px";
     showText = true;
@@ -45,12 +47,21 @@ export default class TemplateTableDetails extends LightningElement {
     @api selectedObjectName;
     showStatement = false;
     showLstOfObj = false;
+    originalTableWidth = 0;
 
+    @track columnWidths = [];
     @track noBordersIcon = '';
     @track allBordersIcon = '';
     @track outsideBordersIcon = '';
     @track thickOutsideBordersIcon = '';
     @track thickOutsideAllBordersIcon = '';
+
+    draggedColumnIndex;
+    resizing;
+    resizingColumnIndex;
+    initialResizeX;
+    resizingColumn = null;
+
 
 
     fontsize = "10px";
@@ -69,6 +80,15 @@ export default class TemplateTableDetails extends LightningElement {
         { value: 'Georgia', label: 'Georgia' },
         { value: 'Courier New', label: 'Courier New' },
         { value: 'Brush Script MT', label: 'Brush Script MT' },];
+
+    @track columnWidthValue;
+    @track columnWidthOptions = [
+        { label: '25%', value: '25' },
+        { label: '50%', value: '50' },
+        { label: '100%', value: '100' },
+        { label: '125%', value: '125' },
+        { label: '150%', value: '150' }
+    ];
 
     selectedHeader;
     selectedHFontColor;
@@ -113,6 +133,7 @@ export default class TemplateTableDetails extends LightningElement {
     @track colnumber = 2;
     @track showBool = false;
     @track isSerialNumberCheck = false;
+    @track isColWidthChangedCheck = false;
     @api recordidtoedit = '';
     @track clauseId = '';
     @api disableButton = false;
@@ -148,6 +169,7 @@ export default class TemplateTableDetails extends LightningElement {
 
     connectedCallback() {
         this.getContentVersionData();
+
     }
 
     /**
@@ -237,6 +259,7 @@ export default class TemplateTableDetails extends LightningElement {
         let elm = this.template.querySelector(`[data-id="${key}"]`);
         elm.innerHTML = event.detail.value;
 
+
         let divElement = event.target.nextElementSibling;
         let divContent = divElement.innerHTML;
         let existingIndex = this.divContentArray.findIndex(item => item['data-id'] === divElement.dataset.id);
@@ -246,7 +269,7 @@ export default class TemplateTableDetails extends LightningElement {
         } else {
             this.divContentArray.push({ 'data-id': divElement.dataset.id, 'Content': divContent });
         }
-        console.log('div content array in head ' + JSON.stringify(this.divContentArray));
+        //  console.log('div content array in head ' + JSON.stringify(this.divContentArray));
     }
 
     /**
@@ -268,7 +291,7 @@ export default class TemplateTableDetails extends LightningElement {
         } else {
             this.divContentArray.push({ 'data-id': divElement.dataset.id, 'Content': divContent });
         }
-        console.log('div content array ' + JSON.stringify(this.divContentArray));
+        // console.log('div content array ' + JSON.stringify(this.divContentArray));
     }
 
     /**
@@ -310,6 +333,7 @@ export default class TemplateTableDetails extends LightningElement {
         this.isModalOpen = false;
         this.isHeaderMergeField = false;
         this.isClearTable = false;
+        this.isTableColumnSizeChange = false;
     }
 
     /**
@@ -323,6 +347,7 @@ export default class TemplateTableDetails extends LightningElement {
         this.isModalOpen = false;
         this.isHeaderMergeField = true;
         this.isClearTable = false;
+        this.isTableColumnSizeChange = false;
     }
 
     /**
@@ -335,6 +360,7 @@ export default class TemplateTableDetails extends LightningElement {
         this.isModalOpen = false;
         this.showImageModal = true;
         this.isClearTable = false;
+        this.isTableColumnSizeChange = false;
     }
 
     /**
@@ -470,6 +496,7 @@ export default class TemplateTableDetails extends LightningElement {
         }
     }
 
+
     /**
     * Method to delete the last row of the table 
     */
@@ -541,6 +568,7 @@ export default class TemplateTableDetails extends LightningElement {
             this.template.querySelectorAll('th')[i].style.color = this.selectedHFontColor;
             this.template.querySelectorAll('th')[i].style.backgroundColor = this.selectedHbgColor;
         }
+
         let lentd = this.template.querySelectorAll('td').length;
         for (let i = 0; i < lentd; i++) {
             this.template.querySelectorAll('td')[i].style.fontSize = this.fontsize;
@@ -586,6 +614,10 @@ export default class TemplateTableDetails extends LightningElement {
         this.Recorddetailsnew.Name = event.detail.value;
     }
 
+    /**
+    * Method to handle the selected Border style
+    */
+
     handleMenuItemSelect(event) {
         this.selectedBorderStyle = event.detail.value;
         console.log('Selected value:', this.selectedBorderStyle);
@@ -596,11 +628,23 @@ export default class TemplateTableDetails extends LightningElement {
     */
 
     handlesectionsave(event) {
+        if(this.tableOnLoad === true &&  this.tableDisplayed === false && this.showtablecontent === false)
+        {
+                let showTableClickCheck = new ShowToastEvent({
+                title : 'Error',
+                message: 'Please Click on Show Table button before Saving/Updating Table Section',
+                variant: 'error',
+            });
+            this.dispatchEvent(showTableClickCheck);
+        }
+        else
+        {
         let jsonString = '';
         let obj = {};
         obj.rownumber = this.rownumber;
         obj.colnumber = this.colnumber;
         obj.serialNumberColumn = this.isSerialNumberCheck;
+        obj.colWidthChanged = this.isColWidthChangedCheck;
         obj.headerFont = this.selectedHFontColor;
         obj.bodyFont = this.selectedBFontColor;
         obj.headbackground = this.selectedHbgColor;
@@ -609,7 +653,7 @@ export default class TemplateTableDetails extends LightningElement {
         obj.fontfamily = this.fontfamily;
         obj.borderstyle = this.selectedBorderStyle;
         obj.bordercolor = this.selectedBDRbgcolor;
-        console.log('div content array ' + JSON.stringify(this.divContentArray));
+        //console.log('div content array ' + JSON.stringify(this.divContentArray));
         obj.sectionInfo = this.divContentArray;
 
         jsonString = JSON.stringify(obj);
@@ -643,6 +687,14 @@ export default class TemplateTableDetails extends LightningElement {
                         });
                         this.dispatchEvent(firecustomevent);
                     }
+                    else {
+                        let resultNullCheck = new ShowToastEvent({
+                            title: 'Error',
+                            message: 'Error Occured. Please Check the Latest Log',
+                            variant: 'Error',
+                        });
+                        this.dispatchEvent(resultNullCheck);
+                    }
                 })
                 .catch(error => {
                     console.log('error', error);
@@ -655,6 +707,7 @@ export default class TemplateTableDetails extends LightningElement {
                 variant: 'Error',
             });
             this.dispatchEvent(Errormsg);
+        }
         }
     }
 
@@ -736,6 +789,7 @@ export default class TemplateTableDetails extends LightningElement {
         this.selectedHbgColor = '';
         this.selectedHFontColor = '';
         this.isSerialNumberCheck = false;
+        this.isColWidthChangedCheck = false;
         this.isNoBorders = false;
         this.isAllBorders = false;
         this.isOutsideBorders = false;
@@ -786,6 +840,7 @@ export default class TemplateTableDetails extends LightningElement {
         this.outsideBordersIcon = '';
         this.thickOutsideBordersIcon = '';
         this.thickOutsideAllBordersIcon = '';
+        this.divContentArray = [];
 
         this.Recorddetailsnew.Id = recordID;
 
@@ -796,6 +851,7 @@ export default class TemplateTableDetails extends LightningElement {
                 if (result != null) {
                     this.Recorddetailsnew = { ...this.Recorddetailsnew, ...result };
                     let parsedJson = JSON.parse(this.Recorddetailsnew.DxCPQ__Section_Details__c);
+
                     parsedContent = parsedJson.sectionInfo;
                     this.divContentArray = parsedContent;
                     this.rownumber = parsedJson.rownumber;
@@ -808,6 +864,7 @@ export default class TemplateTableDetails extends LightningElement {
                     this.fontfamily = parsedJson.fontfamily;
                     this.fontsize = parsedJson.fontsize;
                     this.isSerialNumberCheck = parsedJson.serialNumberColumn;
+                    this.isColWidthChangedCheck = parsedJson.colWidthChanged;
                     this.selectedBorderStyle = parsedJson.borderstyle;
 
                     this.handletablecreate();
@@ -1076,10 +1133,36 @@ export default class TemplateTableDetails extends LightningElement {
     /**
     * Method to include Serial Numbers Column to the table
     */
+
     handleSnoClick(event) {
         this.isSerialNumberCheck = event.target.checked;
         let parentData = this;
         setTimeout(function () { parentData.handleBorderStyling(); }, 100);
+    }
+
+    /**
+    * Method to change column width for resizing 
+    */
+
+    handleColWidthChangeClick(event) {
+        this.isColWidthChangedCheck = event.target.checked;
+        let parentData = this;
+        setTimeout(function () { parentData.handleBorderStyling(); }, 100);
+        this.computeColumnWidths();
+    }
+
+    /**
+    * Method to map the header th values with the new offset width values  
+    */
+
+    computeColumnWidths() {
+        let thElements = this.template.querySelectorAll('th');
+        this.columnWidths = Array.from(thElements).map(th => th.offsetWidth);
+
+        this.tableHeadersData = this.tableheaders.map((header, index) => ({
+            header,
+            width: this.columnWidths[index] || 0,
+        }));
     }
 
     /**
@@ -1093,6 +1176,7 @@ export default class TemplateTableDetails extends LightningElement {
         this.showImageModal = false;
         this.isModalOpen = false;
         this.isHeaderMergeField = false;
+        this.isTableColumnSizeChange = false;
     }
 
     /**
@@ -1102,6 +1186,14 @@ export default class TemplateTableDetails extends LightningElement {
     cancelTableClear() {
         this.template.querySelector('c-modal').hide();
         this.isClearTable = false;
+    }
+    /**
+    * Method to cancel col width change model. 
+    */
+
+    cancelTableColSizeChanges() {
+        this.template.querySelector('c-modal').hide();
+        this.isTableColumnSizeChange = false;
     }
 
     /**
@@ -1120,11 +1212,296 @@ export default class TemplateTableDetails extends LightningElement {
         this.tableOnLoad = true;
         this.showtablecontent = false;
         this.isSerialNumberCheck = false;
+        this.isColWidthChangedCheck = false;
         this.isNoBorders = false;
         this.isAllBorders = false;
         this.isOutsideBorders = false;
         this.isOutsideThickBorders = false;
         this.isOutsideThickAllBorders = false;
+    }
+
+    /**
+    * Method to handle merging of table body cells 
+    */
+
+    handleMergeRightCell(event) {
+        let selectedDiv = this.template.querySelector(`[data-id="${this.selectedTableRow}"]`);
+        let rowIndex = parseInt(this.selectedTableRow.match(/row(\d+)/)[1]) - 1;
+        let selectedTd = selectedDiv.closest('td');
+
+        if (selectedTd) {
+            let columnIndex = Array.from(selectedTd.parentElement.children).indexOf(selectedTd);
+            let lastColumnIndex = this.tablecolumns.length - 1;
+
+            if (columnIndex < lastColumnIndex) {
+                let currentTd = selectedTd;
+                let nextTd = currentTd.nextElementSibling;
+
+                if (nextTd && Array.from(nextTd.parentElement.children).indexOf(nextTd) <= lastColumnIndex) {
+                    let currentColspan = parseInt(currentTd.getAttribute('colspan')) || 1;
+                    let nextColspan = parseInt(nextTd.getAttribute('colspan')) || 1;
+
+                    let newColspan = currentColspan + nextColspan;
+
+                    if (columnIndex + newColspan - 1 <= lastColumnIndex) {
+                        currentTd.setAttribute('colspan', newColspan);
+                        let countToRemove = Math.min(nextColspan, lastColumnIndex - columnIndex);
+                        let nextSibling = nextTd;
+                        while (countToRemove > 0 && nextSibling) {
+                            let nextNextSibling = nextSibling.nextElementSibling;
+                            let removedCell = this.tablerows[rowIndex].columns[columnIndex + currentColspan];
+                            if (removedCell) {
+                                //removedCell.isMerged = false;
+                                removedCell.isRemoved = true;
+                            }
+                            nextSibling.remove();
+                            countToRemove--;
+                        }
+                        for (let i = columnIndex; i <= columnIndex + currentColspan - 1; i++) {
+                            this.tablerows[rowIndex].columns[i].isMerged = true;
+                        }
+                    } else {
+                        let errorDisplay = new ShowToastEvent({
+                            title: 'Error',
+                            message: 'Cannot merge cells beyond column boundary',
+                            variant: 'error',
+                        });
+                        this.dispatchEvent(errorDisplay);
+
+                        console.error("Cannot merge cells beyond column boundary");
+                    }
+                } else {
+                    let errorDisplay1 = new ShowToastEvent({
+                        title: 'Error',
+                        message: 'Cannot merge cells beyond column boundary',
+                        variant: 'error',
+                    });
+                    this.dispatchEvent(errorDisplay1);
+
+                    console.error("Cannot merge cell in the last column");
+                }
+            } else {
+                let errorDisplay2 = new ShowToastEvent({
+                    title: 'Error',
+                    message: 'Cannot merge cells beyond column boundary',
+                    variant: 'error',
+                });
+                this.dispatchEvent(errorDisplay2);
+                console.error("Cannot merge cell in the last column");
+            }
+        } else {
+            let errorDisplay3 = new ShowToastEvent({
+                title: 'Error',
+                message: 'Div not found within a td',
+                variant: 'error',
+            });
+            this.dispatchEvent(errorDisplay3);
+            console.error("Div not found within a td");
+        }
+
+       // console.log('table rows after ' + JSON.stringify(this.tablerows));
+    }
+
+    /**
+    * Method to handle merging of table header cells
+    */
+
+    handleHeaderMergeRightCell(event) {
+        let selectedTh = event.target.closest('th');
+        let columnIndex = Array.from(selectedTh.parentElement.children).indexOf(selectedTh);
+        let lastColumnIndex = this.tableheaders.length - 1;
+
+        if (columnIndex < lastColumnIndex) {
+            let currentTh = selectedTh;
+            let nextTh = currentTh.nextElementSibling;
+
+            if (nextTh && Array.from(nextTh.parentElement.children).indexOf(nextTh) <= lastColumnIndex) {
+                let currentColspan = parseInt(currentTh.getAttribute('colspan')) || 1;
+                let nextColspan = parseInt(nextTh.getAttribute('colspan')) || 1;
+                let newColspan = currentColspan + nextColspan;
+
+                if (columnIndex + newColspan - 1 <= lastColumnIndex) {
+                    currentTh.setAttribute('colspan', newColspan);
+                    let countToRemove = Math.min(nextColspan, lastColumnIndex - columnIndex);
+                    let nextSibling = nextTh;
+                    while (countToRemove > 0 && nextSibling) {
+                        let nextNextSibling = nextSibling.nextElementSibling;
+                        // nextSibling = nextNextSibling;
+                        nextSibling.remove();
+                        countToRemove--;
+                    }
+                } else {
+                    let errorDisplay = new ShowToastEvent({
+                        title: 'Error',
+                        message: 'Cannot merge cells beyond column boundary',
+                        variant: 'error',
+                    });
+                    this.dispatchEvent(errorDisplay);
+
+                    console.error("Cannot merge cells beyond column boundary");
+                }
+            } else {
+                let errorDisplay1 = new ShowToastEvent({
+                    title: 'Error',
+                    message: 'Cannot merge cells beyond column boundary',
+                    variant: 'error',
+                });
+                this.dispatchEvent(errorDisplay1);
+
+                console.error("Cannot merge cell in the last column");
+            }
+        } else {
+            let errorDisplay2 = new ShowToastEvent({
+                title: 'Error',
+                message: 'Cannot merge cells beyond column boundary',
+                variant: 'error',
+            });
+            this.dispatchEvent(errorDisplay2);
+            console.error("Cannot merge cell in the last column");
+        }
+    }
+
+    /**
+    * Method to handle column swapping on drag start
+    */
+
+    handleDragStart(event) {
+        this.draggedColumnIndex = Array.from(event.target.parentNode.children).indexOf(event.target);
+        event.dataTransfer.setData('text/plain', '');
+    }
+
+    /**
+    * Method to handle column swapping on drag over
+    */
+
+    handleDragOver(event) {
+        event.preventDefault();
+        let draggedColumn = event.target.closest('th');
+        draggedColumn.style.borderColor = 'silver';
+        draggedColumn.style.borderRadius = '5px';
+        draggedColumn.style.boxShadow = '0 0 5px 5px silver';
+
+        let columnIndex = Array.from(draggedColumn.parentNode.children).indexOf(draggedColumn);
+        let allRows = this.template.querySelectorAll('tbody tr');
+        allRows.forEach(row => {
+            let cell = row.querySelectorAll('td')[columnIndex];
+            cell.style.borderLeft = '2px groove silver';
+            cell.style.borderRight = '2px groove silver';
+            cell.style.boxShadow = '0 5px silver';
+        });
+    }
+
+    /**
+    * Method to handle column swapping on drag leave
+    */
+
+    handleDragLeave(event) {
+        event.preventDefault();
+        let draggedColumn = event.target.closest('th');
+        draggedColumn.style.borderLeft = '';
+        draggedColumn.style.borderRight = '';
+        draggedColumn.style.boxShadow = '';
+
+        let columnIndex = Array.from(draggedColumn.parentNode.children).indexOf(draggedColumn);
+        let allRows = this.template.querySelectorAll('tbody tr');
+        allRows.forEach(row => {
+            let cell = row.querySelectorAll('td')[columnIndex];
+            cell.style.borderLeft = '';
+            cell.style.borderRight = '';
+            cell.style.boxShadow = '';
+        });
+    }
+
+    /**
+    * Method to handle column swapping on drag drop
+    */
+
+    handleDrop(event) {
+        event.preventDefault();
+        let oldIndex = this.draggedColumnIndex;
+        let newTh = event.target.closest('th');
+        let newIndex = Array.from(newTh.parentNode.children).indexOf(newTh);
+        this.handleColumnSwap(oldIndex, newIndex);
+
+        let allColumns = this.template.querySelectorAll('th,td');
+        allColumns.forEach(column => {
+            column.style.borderColor = '';
+            column.style.borderRadius = '';
+            column.style.borderLeft = '';
+            column.style.borderRight = '';
+            column.style.boxShadow = '';
+        });
+
+        let parentData = this;
+        setTimeout(function () { parentData.handleBorderStyling(); }, 100);
+    }
+
+
+    /**
+    * Method to handle column swapping by swapping old Index with new Index
+    */
+
+    handleColumnSwap(oldIndex, newIndex) {
+        let headersCopy = [...this.tableheaders];
+        let rowsCopy = [...this.tablerows];
+        let [removed] = headersCopy.splice(oldIndex, 1);
+        headersCopy.splice(newIndex, 0, removed);
+
+        for (let i = 0; i < rowsCopy.length; i++) {
+            let row = rowsCopy[i];
+            let [removedCol] = row.columns.splice(oldIndex, 1);
+            row.columns.splice(newIndex, 0, removedCol);
+        }
+
+        this.tableheaders = headersCopy;
+        this.tablerows = rowsCopy;
+    }
+
+    /**
+    * Method to handle column resizing on mouse down
+    */
+    
+    handleMouseDown(event) {
+        let resizeHandle = event.target;
+        let index = parseInt(resizeHandle.dataset.index, 10);
+        let th = this.template.querySelector(`th:nth-child(${index + 1})`);
+        let startingWidth = th.offsetWidth;
+        let startX = event.clientX;
+
+        let handleMouseMove = (moveEvent) => {
+            let deltaX = moveEvent.clientX - startX;
+            let newWidth = startingWidth + deltaX;
+            th.style.width = `${newWidth}px`;
+        };
+
+        let handleMouseUp = () => {
+            document.removeEventListener('mousemove', handleMouseMove);
+            document.removeEventListener('mouseup', handleMouseUp);
+            this.resizingColumn = null;
+        };
+
+        document.addEventListener('mousemove', handleMouseMove);
+        document.addEventListener('mouseup', handleMouseUp);
+        this.resizingColumn = th;
+    }
+
+    /**
+    * Method to handle column resizing on mouse enter
+    */
+
+    handleResizeHandleMouseEnter(event) {
+        let resizeHandle = event.target;
+        let index = parseInt(resizeHandle.dataset.index, 10);
+        let th = this.template.querySelector(`th:nth-child(${index + 1})`);
+        this.resizingColumn = th;
+    }
+
+    /**
+    * Method to handle column resizing on mouse leave 
+    */
+
+    handleResizeHandleMouseLeave() {
+        this.resizingColumn = null;
     }
 
 }

@@ -64,6 +64,8 @@
 		<members>Document_Template_Section__c.Sequence__c</members>
 		<members>Document_Template_Section__c.Type__c</members>
 		<members>Document_Template__c.Description__c</members>
+		<members>Document_Template__c.ClassId__c</members>
+		<members>Document_Template__c.FlowId_c</members>
 		<members>Document_Template__c.IsActive__c</members>
 		<members>Document_Template__c.Parent_Template__c</members>
 		<members>Document_Template__c.Previously_Active__c</members>
@@ -74,6 +76,7 @@
 		<members>Document__c.Document_Content__c</members>
 		<members>Document__c.Document_Template__c</members>
 		<members>Document__c.Object_Id__c</members>
+		<members>Document__c.Token_Data__c</members>
 		<members>Rule_Condition__c.ConditionIndex__c</members>
 		<members>Rule_Condition__c.Condition_Field__c</members>
 		<members>Rule_Condition__c.DataType__c</members>

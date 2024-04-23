@@ -37,6 +37,7 @@ export default class DxShowSelectedTemplate extends LightningElement {
     showpreviewbutton=false;
     showpreview=false;
     popUpMessage;
+    documentIdVal='';
   
 
     @wire(getAllPopupMessages) 
@@ -51,13 +52,15 @@ export default class DxShowSelectedTemplate extends LightningElement {
 
     connectedCallback() {
         this.isLoaded=true;
-        console.log('objectRecordId-',this.objectRecordId);
-        getTemplateSections({templateId : this.templateId, recordId:this.objectRecordId, objectApiName: this.objectName}).then((result) => {
+        /*  returning map of resultdata from apex call
+            which contains documentId and document template section data */
+        getTemplateSections({templateId : this.templateId, recordId:this.objectRecordId, objectApiName: this.objectName}).then((resultdata) => {
             this.isLoaded=false;
-
+            var result=resultdata.selectedTemplateContents;     
+            this.documentIdVal=resultdata.documentId;
             if(result && result.length>0){
                 result.forEach(tempSec=>{
-                    
+                     
                     if(tempSec.DxCPQ__Type__c=='Context' || tempSec.DxCPQ__Type__c=='Table' || tempSec.DxCPQ__Type__c=='Clause' ){
                         
                         let tempObj={};
@@ -194,8 +197,8 @@ export default class DxShowSelectedTemplate extends LightningElement {
         this.isLoaded2=true;
         const container = this.template.querySelector('.wholecontent');
         var headfooterstr=JSON.stringify(this.headerfooter);
-
-        generateDocument({templateId : this.templateId, quoteId:this.objectRecordId, pdfbody:container.innerHTML,pdfheaderfooter:headfooterstr}).then((result) => {
+        /*parameter templatedId changed to doucmentId*/
+        generateDocument({documentId : this.documentIdVal, quoteId:this.objectRecordId, pdfbody:container.innerHTML,pdfheaderfooter:headfooterstr}).then((result) => {
             
             console.log('this is result'+JSON.parse(JSON.stringify(result)));
             console.log('this is result',result);

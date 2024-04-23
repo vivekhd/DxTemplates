@@ -14,9 +14,6 @@
 							onnewtemplate={handleNewTemplateCreationscreen} onfilteredvalue={handleFilterSelection}>
 						</c-menu-setup>
 					</div>
-					<!-- <div class="slds-col" style="padding:44px 20px; width:200px;">
-							
-						</div> -->
 				</div>
 			</div>
 			<div class="slds-col dx-p-left_200 ">
@@ -30,24 +27,17 @@
 		</div>
 
 		<c-modal onclosedialog ={handleDialogBoxClosed}>
-			<template if:true={showImportTemplates}>
-				<span slot="header">Import Templates</span>
-				<div style="background-color: #ffffff;padding: 1% 16px;">
-					<div>
-						<input type="file" accept="json/*" onchange={handleJSONUpload} class="dx-button">
-						<lightning-textarea name="import" label="Paste JSON" placeholder="paste here..." value={jsonData}></lightning-textarea>
-					</div>
-					<br>
-					<div class="slds-text-align_right">
-						<lightning-button variant="neutral" label="Create" title="Create template based on above JSON" onclick={createTemplateData}> </lightning-button>
-					</div>
-					<br>
-				</div>
-			</template>
-
-			<template if:true={showAllTemplates}>
-				<span slot="header">Export templates</span>
-				<div style="background-color: #ffffff;padding: 1% 16px;">
+			<!------Progress bar code added by Bhavya starts here ------>
+			<header style="background-color: #ffffff;padding: 1% 0;">
+				<lightning-progress-indicator current-step={currentStep} type="base" variant="base">
+					<lightning-progress-step label="" value="1" data-step = "1">
+					</lightning-progress-step>
+					<lightning-progress-step label="" value="2" data-step = "2">
+					</lightning-progress-step>
+				</lightning-progress-indicator>
+			</header>
+<template if:true={showAllTemplates}>
+				<div style="background-color: #ffffff;padding: 1% 0;">
 					<lightning-dual-listbox name="templates"
                             label="Select Templates"
                             source-label="Available Templates"
@@ -96,6 +86,35 @@
 							</div>
 							<div class="slds-col slds-size_1-of-1 slds-medium-size_6-of-12">
 								<lightning-input-field field-name="DxCPQ__Description__c"> </lightning-input-field>
+							</div>
+							<!-- Changes by Reethika - selecting apex classes and auto launched flows -->
+							<div class="slds-col slds-size_1-of-1 slds-medium-size_6-of-12">
+								<label class="slds-checkbox_toggle slds-grid">
+									<label class="slds-form-element__label slds-no-flex">PROCESS TYPE</label>
+									<input type="checkbox" class="slds-p-top_x-large" name="checkbox-toggle-16"
+										onchange={handleRelationshipType}
+										aria-describedby="checkbox-toggle-16" />
+									<span id="checkbox-toggle-16" class="slds-checkbox_faux_container" aria-live="assertive">
+										<span class="slds-checkbox_faux"></span>
+										<span class="slds-checkbox_on">APEX CLASS</span>
+										<span class="slds-checkbox_off">FLOW</span>
+									</span>
+								</label>
+							</div>
+							<div class="slds-col slds-size_1-of-1 slds-medium-size_6-of-12">
+								<template if:true={isBundled}>
+								 	<c-search-category has-multi-select="false" data-id="object" options={classTypeOptions}
+						     label="Select the class name" searchtext="Select the class name"
+						     onselectedcategoryvalues={handleClassselection} disabled={isDisabled}></c-search-category>
+								</template>
+							</div>
+							
+							<div class="slds-col slds-size_1-of-1 slds-medium-size_6-of-12">
+									<template if:false={isBundled}>
+								 	<c-search-category has-multi-select="false" data-id="object" options={flowTypeOptions}
+						     label="Select the flow name" searchtext="Select the flow name"
+						     onselectedcategoryvalues={handleFlowselection} disabled={isDisabled}></c-search-category>
+									</template>
 							</div>
 						</div>
 
