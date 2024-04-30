@@ -148,6 +148,11 @@
     </fieldPermissions>
     <fieldPermissions>
         <editable>true</editable>
+        <field>Document_Clause__c.External_Id__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>true</editable>
         <field>Document_Clause__c.IsActive__c</field>
         <readable>true</readable>
     </fieldPermissions>
@@ -229,6 +234,11 @@
     <fieldPermissions>
         <editable>true</editable>
         <field>Document_Template__c.Description__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>true</editable>
+        <field>Document_Template__c.External_Id__c</field>
         <readable>true</readable>
     </fieldPermissions>
     <fieldPermissions>
@@ -451,15 +461,15 @@
         <enabled>true</enabled>
     </pageAccesses>
     <tabSettings>
+        <tab>Document_Clause__c</tab>
+        <visibility>Visible</visibility>
+    </tabSettings>
+    <tabSettings>
         <tab>DxTemplates</tab>
         <visibility>Visible</visibility>
     </tabSettings>
     <tabSettings>
         <tab>TransactionLog__c</tab>
-        <visibility>Visible</visibility>
-    </tabSettings>
-    <tabSettings>
-        <tab>Document_Clause__c</tab>
         <visibility>Visible</visibility>
     </tabSettings>
 </PermissionSet>

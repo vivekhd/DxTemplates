@@ -575,11 +575,15 @@ public static List<Map<String, String>> saveContentVersion(String title, List<Ma
         }
          if (Schema.sObjectType.ContentVersion.isCreateable()) {
             insert contentVersionsToInsert;
+            List<ContentVersion> contentVersionsToUpdate = new List<ContentVersion>();
             for(ContentVersion contentVersion : contentVersionsToInsert) {
                 Map<String, String> savedId = new Map<String, String>();
                 savedId.put(contentVersion.Title, contentVersion.Id);
                 savedIds.add(savedId);
+                contentVersion.External_Id__c = contentVersion.Id;
+                contentVersionsToUpdate.add(contentVersion);
             }
+             update contentVersionsToUpdate;
              return savedIds;
          }
         else{

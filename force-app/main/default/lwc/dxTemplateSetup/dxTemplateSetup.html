@@ -32,17 +32,45 @@
 		<c-modal onclosedialog ={handleDialogBoxClosed}>
 			<template if:true={showImportTemplates}>
 				<span slot="header">Import Templates</span>
-				<div style="background-color: #ffffff;padding: 1% 16px;">
-					<div>
-						<input type="file" accept="json/*" onchange={handleJSONUpload} class="dx-button">
-						<lightning-textarea name="import" label="Paste JSON" placeholder="paste here..." value={jsonData}></lightning-textarea>
+				<header style="background-color: #ffffff;padding: 1% 0;">
+					<lightning-progress-indicator current-step={currentStep} type="base" variant="base">
+						<lightning-progress-step label="" value="1" data-step = "1">
+						</lightning-progress-step>
+						<lightning-progress-step label="" value="2" data-step = "2">
+						</lightning-progress-step>
+						<lightning-progress-step label="" value="3" data-step = "3">
+						</lightning-progress-step>
+					</lightning-progress-indicator>
+				</header>
+				<template if:true={showFirstImportScreen}>
+					<div style="background-color: #ffffff;padding: 1% 16px;">
+						<div>
+							<input type="file" accept="json/*" onchange={handleJSONUpload} class="dx-button">
+							<lightning-textarea name="import" label="Paste JSON" placeholder="paste here..." value={jsonData} onchange={pastedjson}></lightning-textarea>
+						</div>
+						<br>
+						<div class="slds-text-align_right">
+							<lightning-button variant="neutral" label="Create" title="Create template based on above JSON" onclick={createTemplateData} disabled={createDisabledButton}> </lightning-button>
+						</div>
+						<br>
 					</div>
-					<br>
-					<div class="slds-text-align_right">
-						<lightning-button variant="neutral" label="Create" title="Create template based on above JSON" onclick={createTemplateData}> </lightning-button>
+				</template>
+				<template if:true={showDuplicateTemplates}>
+					<div style="background-color: #ffffff;padding: 1% 16px;">
+						<div>
+							{errorMessage}
+						</div>
+						<!-- <div class="slds-text-align_right" style="padding: 16px;">
+							<lightning-button variant="brand" label="Skip" title="Skip" onclick={skipTemplate} style="margin: 6px;"></lightning-button>
+							<lightning-button variant="neutral" label="Create as new version" title="Create as new version" onclick={continueTemplate}></lightning-button>
+						</div> -->
 					</div>
-					<br>
-				</div>
+				</template>
+				<template if:true={showTemplateMessage}>
+					<div style="background-color: #ffffff;padding: 1% 16px;">
+						{templateSuccessMessage}
+					</div>
+				</template>
 			</template>
 
 			<template if:true={showAllTemplates}>
@@ -56,14 +84,24 @@
                             onchange={handleExportTemplateList}>
 					</lightning-dual-listbox>
 					<div class="slds-text-align_right" style="padding: 16px;">
-						<lightning-button variant="neutral" label={previewLabel} title="Preview Selected Templates" onclick={exportTemplateList} style="margin: 6px;"></lightning-button>
+						<template if:true={showPreviewButton}>
+							<lightning-button variant="neutral" label={previewLabel} title="Preview Selected Templates" onclick={exportTemplateList} style="margin: 6px;"></lightning-button>
+						</template>
 						<lightning-button variant="brand" label="Download" title="Download Templates" onclick={downloadJson}></lightning-button>
 					</div>
-					<template if:true={showTextArea}>
-						<div style="padding: 16px 16px 0px 0px;">
-							<lightning-textarea label="JSON Preview" name="Data" readonly value={exportList} style="height:180px;"> 
-    						</lightning-textarea>
-						</div>
+					<template if:true={showPreviewButton}>
+						<template if:true={showTextArea}>
+							<!-- <div class="slds-text-align_right">
+								<lightning-button-icon variant="container" icon-name="utility:copy_to_clipboard" title="Copy to clipboard"></lightning-button-icon>
+							</div> -->
+							<div style="padding: 0px 16px 0px 0px;">
+								<div class="slds-text-align_right">
+									<lightning-button-icon variant="bare" icon-name="utility:copy_to_clipboard" title="Copy to clipboard" onclick={copyJsonData} style="position: absolute;z-index: 1;margin: 28px 0px 0px -36px;"></lightning-button-icon>
+								</div>
+								<lightning-textarea label="JSON Preview" name="Data" readonly value={exportList} style="height:180px;"> 
+								</lightning-textarea>
+							</div>
+						</template>
 					</template>
 				</div>
 			</template>

@@ -231,6 +231,7 @@ public with sharing class SaveDocumentTemplate {
 
             docTemp.Parent_Template__c = docTemp.Id;
             docTemp.Version_Number__c = 1;
+            docTemp.External_ID__c= docTemp.Id;
             docTempId = docTemp.Id;
 
             if (sp1 == null) sp1 = Database.setSavepoint();
