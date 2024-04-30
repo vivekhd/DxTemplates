@@ -5,7 +5,7 @@ public with sharing class SaveDocumentTemplate {
     @AuraEnabled
     public static String saveDocumentTemplatedetails(Document_Template__c Recorddetails , String hasRecordId){
         String insertedID = '';
-        String Updatedrecord = '';
+        String Updatedrecord = ''; 
         try{
             Document_Template__c DocTemp = new Document_Template__c();
             if( hasRecordId ==''){

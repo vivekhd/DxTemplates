@@ -175,7 +175,7 @@ public class ImportExportData {
 		for (Document_Clause__c obj : createdRecords) {
             map<String,String> newRecords = new Map<String,String>();
             newRecords.put('Id', String.valueOf(obj.Id));
-            newRecords.put('ExternalId', obj.DxCPQ__External_ID__c);
+            newRecords.put('ExternalId', obj.External_Id__c);
             recordIds.add(newRecords);
         }
         return recordIds;       
@@ -194,7 +194,7 @@ public class ImportExportData {
 		for (Rule__c obj : createdRecords) {
             map<String,String> newRecords = new Map<String,String>();
             newRecords.put('Id', String.valueOf(obj.Id));
-            newRecords.put('ExternalId', obj.DxCPQ__External_Id__c);
+            newRecords.put('ExternalId', obj.External_Id__c);
             recordIds.add(newRecords);
         }
         return recordIds;        
@@ -213,7 +213,7 @@ public class ImportExportData {
 		for (Rule_Condition__c obj : createdRecords) {
             map<String,String> newRecords = new Map<String,String>();
             newRecords.put('Id', String.valueOf(obj.Id));
-            newRecords.put('ExternalId', obj.DxCPQ__External_Id__c);
+            newRecords.put('ExternalId', obj.External_Id__c);
             recordIds.add(newRecords);
         }
         return recordIds;        
