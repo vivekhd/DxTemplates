@@ -1,14 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <CustomMetadata xmlns="http://soap.sforce.com/2006/04/metadata" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
-    <label>Div Header Left Style</label>
+    <label>Div Header Center Style LandScape</label>
     <protected>false</protected>
     <values>
         <field>CSS_Style_List__c</field>
-        <value xsi:type="xsd:string">div.header_left {
-            position:running(header_left);
+        <value xsi:type="xsd:string">div.header_center {
+            position: running(header_center);
             top: 0;
             left: 0;
-            height: 70px;
             padding-bottom: 10px;
             width: 100%;
             border-bottom:none;

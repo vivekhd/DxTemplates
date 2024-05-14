@@ -5,9 +5,16 @@
     <meta http-equiv="Content-Type" content="text/html;charset=UTF-8" />
     <style type="text/css" media="print">
       {!styleList['P_Line_Height']}
-      {!styleList['Div Header Left Style']}
-      {!styleList['Div Header Center Style']}
-      {!styleList['Div Header Right Style']}
+        <apex:outputText rendered="{!if(isLandscape== false,true,false)}">
+              {!styleList['Div Header Left Style']}
+              {!styleList['Div Header Center Style']}
+              {!styleList['Div Header Right Style']}
+        </apex:outputText>
+        <apex:outputText rendered="{!if(isLandscape== true,true,false)}">
+              {!styleList['Div Header Left Style Landscape']}
+              {!styleList['Div Header Center Style Landscape']}
+              {!styleList['Div Header Right Style Landscape']}
+        </apex:outputText>
       {!styleList['Div Footer Left Style']}
       {!styleList['Div Footer Center Style']}
       {!styleList['Div Footer Right Style']}
@@ -27,7 +34,20 @@
     tr{ page-break-inside:avoid; page-break-after:auto; }
     <apex:outputText rendered="{!if(defaultCSS== true,true,false)}">
         @page {
-             {!styleList['Page Style']}
+        	 <apex:outputText rendered="{!if(isNoHeader == true,true,false)}">
+            	size: {!selectedSize};
+                margin-left: 0px;
+                margin-right: 0px;
+                margin-top: 0px;
+                margin-bottom: 80px;  
+        	</apex:outputText>
+        	<apex:outputText rendered="{!if(isNoHeader == false,true,false)}">
+                size: {!selectedSize};
+                margin-left: 0px;
+                margin-right: 0px;
+                margin-top: 90px;
+                margin-bottom: 80px;
+        	</apex:outputText>
             <apex:outputText rendered="{!if(headersectionsCount== 1,true,false)}">
             	@top-left { content:element(header_left); width:100%;}
             </apex:outputText>
@@ -61,7 +81,7 @@
      <apex:outputText rendered="{!if(defaultCSS== false,true,false)}">
         <apex:outputText rendered="{!if(showAllPages== 'All Pages',true,false)}">
             @page {
-                size: A4;
+                size: {!selectedSize};
                 margin-left: 0px;
                 margin-right: 0px;
                 margin-top: 90px;
@@ -85,7 +105,7 @@
         </apex:outputText>
        	<apex:outputText rendered="{!if(showAllPages== 'All Pages Except First Page',true,false)}">
             @page {
-                size: A4;
+                size: {!selectedSize};
                 margin-left: 0px;
                 margin-right: 0px;
                 margin-top: 90px;
@@ -106,7 +126,7 @@
             }
             
             @page :first {
-                size: A4;
+                size: {!selectedSize};
                 margin-left: 0px;
                 margin-right: 0px;
                 margin-top: 90px;
@@ -128,7 +148,7 @@
         </apex:outputText>
         <apex:outputText rendered="{!if(showAllPages== 'Only First Page',true,false)}">
         @page {
-                size: A4;
+                size: {!selectedSize};
                 margin-left: 0px;
                 margin-right: 0px;
                 margin-top: 90px;
@@ -150,7 +170,7 @@
             }
             
             @page :first {
-                size: A4;
+                size: {!selectedSize};
                 margin-left: 0px;
                 margin-right: 0px;
                 margin-top: 90px;
@@ -179,9 +199,9 @@
         <div> AM I VISIBLE? - First</div>
   		<div class="header_left">
             <div> AM I VISIBLE? - Second </div>
-            <div style="position:relative; width:100%;overflow:hidden;height: 70px;">
+            <div style="{!headerRelative}">
                 <div> AM I VISIBLE? - Third </div>
-                <div style="position:absolute; width:100%;overflow:hidden;height: 70px;"> 
+                <div style="{!headerAbsolute}"> 
                     <div> AM I VISIBLE? - Fourth </div>
                     <apex:outputText value="{!leftheadertext}" escape="false" />
                 </div>
@@ -190,43 +210,40 @@
     </apex:outputText>
     
     <apex:outputText rendered="{!if(headersectionsCount== 2,true,false)}">
-        <div class="header_left">        
-        <div style="position:relative; width:100%; overflow:hidden;height: 70px;">
-          <div style="position:absolute; width:100%; overflow:hidden;height: 70px;">
-               <div>
-                  AM I VISIBLE?
-              </div>
+        <div class="header_left">
+			<div style="{!headerRelative}">
+          <div style="{!headerAbsolute}">
             <apex:outputText value="{!leftheadertext}" escape="false" />
-            </div>
-        </div>
-      </div>
-        <div class="header_center">
-            <div style="position:relative; width:100%; overflow:hidden;height: 70px;">
-              <div style="position:absolute; width:100%; overflow:hidden;height: 70px;">
-                <apex:outputText value="{!centerheadertext}" escape="false" />
-              </div>
-            </div>
+			</div>
+			</div>
           </div>
+        <div class="header_center">
+		<div style="{!headerRelative}">
+              <div style="{!headerAbsolute}">
+			<apex:outputText value="{!centerheadertext}" escape="false" />
+			</div>
+			</div>
+         </div>
     </apex:outputText>
     
     <apex:outputText rendered="{!if(headersectionsCount== 3,true,false)}">	
       <div class="header_left">
-        <div style="position:relative; width:100%;overflow:hidden;height: 70px;">
-          <div style="position:absolute; width:100%;overflow:hidden;height: 70px;">
+        <div style="{!headerRelative}">
+          <div style="{!headerAbsolute}">
             <apex:outputText value="{!leftheadertext}" escape="false" />
           </div>
         </div>
       </div>
         <div class="header_center">
-            <div style="position:relative; width:100%;overflow:hidden;height: 70px;">
-              <div style="position:absolute; width:100%;overflow:hidden;height: 70px;">
+            <div style="{!headerRelative}">
+              <div style="{!headerAbsolute}">
                 <apex:outputText value="{!centerheadertext}" escape="false" />
 			</div>
             </div>
           </div>
          <div class="header_right">
-            <div style="position:relative; width:100%;overflow:hidden;height: 70px;">
-              <div style="position:absolute; width:100%;overflow:hidden;height: 70px;">
+            <div style="{!headerRelative}">
+              <div style="{!headerAbsolute}">
                 <apex:outputText value="{!rightheadertext}" escape="false" />
               </div>
             </div>
@@ -238,6 +255,9 @@
             <div style="position:relative; width:100%; overflow:hidden;height: 70px;">
                 <div style="position:absolute; width:100%; overflow:hidden;height: 70px;">
                     <apex:outputText value="{!leftfootertext}" escape="false" />
+                     <apex:outputPanel rendered="{!displaypagesequence}" style="color:#999999;font-size:11px;position:absolute; right:20px; top:10px; font:Arial">
+                        Page <span class="pagenumber"/> of <span class="pagecount"/>
+                    </apex:outputPanel>
                 </div>
             </div>
         </div>
@@ -255,6 +275,9 @@
             <div style="position:relative; width:100%; overflow:hidden;height: 70px;">
                 <div style="position:absolute; width:100%; overflow:hidden;height: 70px;">
                     <apex:outputText value="{!centerfootertext}" escape="false" />
+                     <apex:outputPanel rendered="{!displaypagesequence}" style="color:#999999;font-size:11px;position:absolute; right:20px; top:10px; font:Arial">
+                        Page <span class="pagenumber"/> of <span class="pagecount"/>
+                    </apex:outputPanel>
                 </div>
             </div>
         </div>  

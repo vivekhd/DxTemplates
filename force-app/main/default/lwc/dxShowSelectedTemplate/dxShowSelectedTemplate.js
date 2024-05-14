@@ -15,6 +15,7 @@ export default class DxShowSelectedTemplate extends LightningElement {
     @api quoteId;
     @api objectRecordId;
     @api objectName;
+    @api pageProperties;
     pdfheaderfooter;
     
     templatesectionid;
@@ -215,7 +216,7 @@ export default class DxShowSelectedTemplate extends LightningElement {
 
     handleAttachment(documentid)
     {
-        generatePDFAttachment({documentid : documentid, quoteId:this.objectRecordId}).then((result) => {
+        generatePDFAttachment({documentid : documentid, quoteId:this.objectRecordId, pageProperties : JSON.stringify(this.pageProperties)}).then((result) => {
            if(result && result.length>0){
                 this.isLoaded=false;
                 this.downloadURL = '/servlet/servlet.FileDownload?file='+result;

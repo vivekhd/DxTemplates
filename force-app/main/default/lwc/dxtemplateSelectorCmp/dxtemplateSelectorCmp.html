@@ -72,6 +72,21 @@
 								</lightning-button>
 							</li> -->
 								</ul>
+								<div if:true={showgeneratepdf}>
+									<div class = "Slds-p-right_small"><lightning-combobox
+										name="Page Size"
+										label="Page Size"
+										value={value}
+										options={pageSizeOptions}
+										onchange={handleChange} ></lightning-combobox>
+										<lightning-combobox
+										name="Page Orientation"
+										label="Page Orientation"
+										value={value}
+										options={pageOrientationOptions}
+										onchange={handleChange} ></lightning-combobox>
+										</div>
+								</div>
 							</div>
 
 							<div class="slds-align_absolute-center">

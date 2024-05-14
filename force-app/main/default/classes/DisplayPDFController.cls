@@ -61,6 +61,8 @@ global with sharing class DisplayPDFController
      * @description Text for the left side of the header.
      */
     public String leftheadertext {get; set;}
+    public String leftheaderstyle {get; set;}
+    public String headerHeight {get; set;}
     
     /**
      * @description Text for the center of the header.
@@ -100,6 +102,11 @@ global with sharing class DisplayPDFController
      */
 	private static final String[] html_ENCODED  = new String[]{ '&amp;', '&lt;', '&gt;', '&quot;', '&#39;' };
     
+    public static String selectedPageOrientation {get;set;}
+    public static Boolean isLandscape {get;set;}
+    public static Boolean isNoHeader {get;set;}
+    public static String headerRelative {get;set;}
+    public static String headerAbsolute {get;set;}
 
     /**
     * @description Constructor for the DisplayPDFController class.
@@ -116,6 +123,17 @@ global with sharing class DisplayPDFController
             Document__c docrec = [SELECT Id, Document_Body__c, Document_Content__c, Document_Template__r.Watermark_Data__c  
                                   FROM Document__c 
                                   WHERE Id = :inputparam WITH SECURITY_ENFORCED];
+     
+                selectedSize= ApexPages.currentPage().getParameters().get('selectedPageSize') +' ' +ApexPages.currentPage().getParameters().get('selectedPageOrientation');
+  				isLandscape = selectedPageOrientation=='Landscape' ? true : false;
+            if(isLandscape == true) {
+                headerRelative = 'position:relative; width:100%;overflow:hidden;height: 0px;';
+                headerAbsolute = 'position:absolute; width:100%;overflow:hidden;height: 0px;';
+            }
+            else {
+                headerRelative = 'position:relative; width:100%;overflow:hidden;height: 70px;';
+                headerAbsolute = 'position:absolute; width:100%;overflow:hidden;height: 70px;';
+            }
             DxTemplates_VF_Style__mdt[] stylesLst = [select Id, Label, MasterLabel,DeveloperName,  CSS_Style_List__c from DxTemplates_VF_Style__mdt with USER_MODE];
             //System.debug('stylesLst ---> '+ stylesLst);
             for(DxTemplates_VF_Style__mdt style: stylesLst){
@@ -155,7 +173,8 @@ global with sharing class DisplayPDFController
             }
             
             if(docrec.Document_Content__c != null){
-                Map<String, Object> mapjson = (Map<String, Object>) JSON.deserializeUntyped(docrec.Document_Content__c);      
+                Map<String, Object> mapjson = (Map<String, Object>) JSON.deserializeUntyped(docrec.Document_Content__c);  
+                 isNoHeader = mapjson.containsKey('header')?false:true;
                 if(mapjson.containsKey('header')){
                     List<Object> headerListObject = new List<Object>();
                     Map<String, Object> headerMap = (Map<String, Object>) mapjson.get('header');
@@ -181,7 +200,7 @@ global with sharing class DisplayPDFController
                     footersectionsCount = Integer.valueOf(footerMap.get('sectionsCount'));
                     displaypagesequence = (Boolean) footerMap.get('displaypagesequence');
                     footerListObject = (List<Object>) footerMap.get('sectionsContent');
-                    
+                   
                     if(!footerListObject.isEmpty()){
                         for(Object objrec : footerListObject){
                             Map<String, Object> wrec = (Map<String, Object>) objrec;  
@@ -197,9 +216,8 @@ global with sharing class DisplayPDFController
                 }
             } else {
                 displayText = 'ID not found';
-            }      
-            sampleStyle = '@page { size: A4; margin-left: 0px; margin-right: 0px; margin-top: 90px; margin-bottom: 80px; <apex:outputText rendered="{!if(headersectionsCount== 1,true,false)}"> @top-left { content:element(header_left);  width:100%;} </apex:outputText> <apex:outputText rendered="{!if(headersectionsCount== 2,true,false)}"> @top-left { content:element(header_left);width:50%;} @top-right { content:element(header_center);width:50%;} </apex:outputText> <apex:outputText rendered="{!if(headersectionsCount== 3,true,false)}"> @top-left { content:element(header_left);} @top-center	 { content:element(header_center);} @top-right { content:element(header_right);} </apex:outputText> <apex:outputText rendered="{!if(footersectionsCount== 1,true,false)}"> @bottom-left { content:element(footer_left); width:100%; } </apex:outputText> <apex:outputText rendered="{!if(footersectionsCount== 2,true,false)}"> @bottom-left { content:element(footer_left); width:50%;} @bottom-right { content:element(footer_center);width:50%; } </apex:outputText> <apex:outputText rendered="{!if(footersectionsCount== 3,true,false)}"> @bottom-left { content:element(footer_left);} @bottom-center { content:element(footer_center);} @bottom-right { content:element(footer_right);} </apex:outputText>}';           
-            displayText += '<h1>PDF Fonts Test Page</h1><p>This text, which has no styles applied, is styled in the default font for the Visualforce PDF rendering engine.</p><p>The fonts available when rendering a page as a PDF are as follows. The first listed <code>font-family</code> value for each typeface is the recommended choice.</p><table border="1" cellpadding="6"><tr><th>Font Name</th><th>Style <code>font-family</code> Value to Use (Synonyms)</th></tr><tr><td><span style="font-family: Arial Unicode MS; font-size: 14pt;">Arial Unicode MS</span></td><td><ul><li><span style="font-family: Arial Unicode MS; font-size: 14pt;">Arial Unicode MS</span></li></ul></td></tr><tr><td><span style="font-family: Helvetica; font-size: 14pt;">Helvetica</span></td><td><ul><li><span style="font-family: sans-serif; font-size: 14pt;">sans-serif</span></li><li><span style="font-family: SansSerif; font-size: 14pt;">SansSerif</span></li><li><span style="font-family: Dialog; font-size: 14pt;">Dialog</span></li></ul></td></tr><tr><td><span style="font-family: Times; font-size: 14pt;">Times</span></td><td><ul><li><span style="font-family: serif; font-size: 14pt;">serif</span></li><li><span style="font-family: Times; font-size: 14pt;">Times</span></li></ul></td></tr><tr><td><span style="font-family: Courier; font-size: 14pt;">Courier</span></td><td><ul><li><span style="font-family: monospace; font-size: 14pt;">monospace</span></li><li><span style="font-family: Courier; font-size: 14pt;">Courier</span></li><li><span style="font-family: Monospaced; font-size: 14pt;">Monospaced</span></li><li><span style="font-family: DialogInput; font-size: 14pt;">DialogInput</span></li></ul></td></tr></table>';
+            }
+            //displayText = '<div dxcpq-dxshowselectedtemplate_dxshowselectedtemplate="" class="my-content"></div><div dxcpq-dxshowselectedtemplate_dxshowselectedtemplate="" class="my-contents"></div><div dxcpq-dxshowselectedtemplate_dxshowselectedtemplate="" data-id="0"><table data-id="Arrowtabledata" style="border:3px solid red;width: 100%; word-break: break-all;" border="1" cellspacing="0"class="tableMainClass" dxcpq-dxshowselectedtemplate_dxshowselectedtemplate=""><thead dxcpq-dxshowselectedtemplate_dxshowselectedtemplate=""><tr dxcpq-dxshowselectedtemplate_dxshowselectedtemplate=""><th scope="col" style="width:10px; border: 1px solid black ; background-color: ; color:; font-size:10px; font-family:Verdana; text-align: center;" dxcpq-dxshowselectedtemplate_dxshowselectedtemplate=""><div title="Opportunity ID.Name" dxcpq-dxshowselectedtemplate_dxshowselectedtemplate="">Opportunity ID.Name</div></th><th scope="col" style="width:10px; border: 1px solid black ; background-color: ; color:; font-size:10px; font-family:Verdana; text-align: center;" dxcpq-dxshowselectedtemplate_dxshowselectedtemplate=""><div title="Opportunity ID.Opportunity ID" dxcpq-dxshowselectedtemplate_dxshowselectedtemplate="">Opportunity ID.Opportunity ID</div></th><th scope="col" style="width:10px; border: 1px solid black ; background-color: ; color:; font-size:10px; font-family:Verdana; text-align: center;" dxcpq-dxshowselectedtemplate_dxshowselectedtemplate=""><div title="Opportunity ID.Description" dxcpq-dxshowselectedtemplate_dxshowselectedtemplate="">Opportunity ID.Description</div></th></tr></thead><tbody dxcpq-dxshowselectedtemplate_dxshowselectedtemplate=""><tr dxcpq-dxshowselectedtemplate_dxshowselectedtemplate=""><td scope="col" style="border: none; text-align: center; background-color:transparent;" dxcpq-dxshowselectedtemplate_dxshowselectedtemplate="">Pioneer Works</td><td scope="col" style="border: none; text-align: center; background-color:transparent;" dxcpq-dxshowselectedtemplate_dxshowselectedtemplate="">006O4000008AeCTIA0</td><td scope="col" style="border: none; text-align: center; background-color:transparent;" dxcpq-dxshowselectedtemplate_dxshowselectedtemplate="">Pioneer Flour Mills was initially founded as the C.H. Guenther Mill by Carl Hilmar Guenther, a millwright who immigrated to the United States from Germany in the late 1840s. Guenther built his first mill in 1851 in Fredericksburg and later relocated it one mile south of San Antonio in 1859.</td></tr><tr dxcpq-dxshowselectedtemplate_dxshowselectedtemplate=""><td scope="col" style="border: none; text-align: center; background-color:transparent;" dxcpq-dxshowselectedtemplate_dxshowselectedtemplate="">Pioneer Works</td><td scope="col" style="border: none; text-align: center; background-color:transparent;" dxcpq-dxshowselectedtemplate_dxshowselectedtemplate="">006O4000008AeCTIA0</td><td scope="col" style="border: none; text-align: center; background-color:transparent;" dxcpq-dxshowselectedtemplate_dxshowselectedtemplate="">Pioneer Flour Mills was initially founded as the C.H. Guenther Mill by Carl Hilmar Guenther, a millwright who immigrated to the United States from Germany in the late 1840s. Guenther built his first mill in 1851 in Fredericksburg and later relocated it one mile south of San Antonio in 1859.</td></tr></tbody></table><br dxcpq-dxshowselectedtemplate_dxshowselectedtemplate=""></div><c-display-related-objects-data dxcpq-dxshowselectedtemplate_dxshowselectedtemplate=""></c-display-related-objects-data><div dxcpq-dxshowselectedtemplate_dxshowselectedtemplate="" class="clause"></div>';
         } catch(Exception ex) {
              //LogHandler.createLog((Id) null,'DisplayPDFController.DisplayPDFController() - Constructor','Template Id-  '+ex.getLineNumber()+ex.getStackTraceString()+ex.getCause(),ex.getMessage(),'Exception');
             throw new AuraHandledException(ex.getMessage());
@@ -277,11 +295,23 @@ global with sharing class DisplayPDFController
      * @return         ID          ID of the generated PDF attachment
      */
     @AuraEnabled
-    public static string generatePDFAttachment(ID documentid, String quoteId){
-        try{ 
-            Id insertedattachmentId;
+    public static string generatePDFAttachment(ID documentid, String quoteId, String pageProperties){
+        try{
             Pagereference pg = Page.renderAsPdfLWC;
             pg.getParameters().put('documentid', documentid);
+
+            if(pageProperties != null){
+                system.debug('page prop '+pageProperties);
+                Map<String, Object> jsonDataMap = (Map<String, Object>) JSON.deserializeUntyped(pageProperties);
+					system.debug('jsonDataMap '+jsonDataMap);
+                selectedPageSize = (String)jsonDataMap.get('pageSize');
+                selectedPageOrientation = (String)jsonDataMap.get('pageOrientation');
+                selectedSize= selectedPageSize +' ' + selectedPageOrientation;
+                pg.getParameters().put('selectedPageSize', selectedPageSize);
+                pg.getParameters().put('selectedPageOrientation', selectedPageOrientation);
+                system.debug('selectedPageSize '+selectedPageSize+' selectedPageOrientation '+selectedPageOrientation);
+            }
+            Id insertedattachmentId;
             Attachment objAttachment = new Attachment();
             objAttachment.Name = quoteId+'.pdf';
             objAttachment.ParentId = documentid;

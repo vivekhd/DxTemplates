@@ -38,6 +38,31 @@ export default class DxtemplateSelectorCmp extends NavigationMixin(LightningElem
     @track isDisabled = true;
     @track showSendEmailModal = false;
     @track modifiedPDFName ;
+    pageSize = 'A4';
+    pageOrientation = 'Potrait';
+    pageProperties = {'pageSize' : 'A4','pageOrientation' : 'Potrait'};
+    @track pageSizeOptions = [
+            { label: 'A4', value: 'A4' },
+            { label: 'A5', value: 'A5' },
+            { label: 'Letter', value: 'Letter' },
+        ];
+      @track  pageOrientationOptions = [
+            { label: 'Potrait', value: 'Potrait' },
+            { label: 'LandScape', value: 'LandScape' }
+        ];
+
+    handleChange(event) {
+        console.log('event.detail.name',event.target.label);
+        if(event.target.label === 'Page Size') {
+            this.pageSize = event.target.value;
+        }
+        if(event.target.label === 'Page Orientation') {
+            this.pageOrientation = event.target.value;
+        }
+        this.pageProperties.pageSize = this.pageSize;
+        this.pageProperties.pageOrientation = this.pageOrientation;
+        console.log('this.pageProperties ',this.pageProperties);
+    }
 
     get pdfmodeoptions() {
         return [
@@ -100,7 +125,8 @@ export default class DxtemplateSelectorCmp extends NavigationMixin(LightningElem
 
     handlePDF()
     {
-        this.isLoaded=true;        
+        this.isLoaded=true;  
+        this.template.querySelector('c-dx-show-selected-template').pageProperties = this.pageProperties;     
         this.template.querySelector('c-dx-show-selected-template').handlePDF();
         this.modifiedPDFName = this.recordId;
     }
@@ -113,6 +139,7 @@ export default class DxtemplateSelectorCmp extends NavigationMixin(LightningElem
                 this.downloadURL=event.detail.downloadURL;
         this.pdfdocumentid=event.detail.attachmentid;
         this.isLoaded=false;
+        this.pageProperties = {'pageSize' : 'A4','pageOrientation' : 'Potrait'};
     }   
 
     previewPDF()
