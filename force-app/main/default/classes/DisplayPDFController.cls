@@ -102,7 +102,9 @@ global with sharing class DisplayPDFController
      */
 	private static final String[] html_ENCODED  = new String[]{ '&amp;', '&lt;', '&gt;', '&quot;', '&#39;' };
     
-    public static String selectedPageOrientation {get;set;}
+      public static String selectedPageSize {get;set;}
+      public static String selectedSize {get;set;}
+      public static String selectedPageOrientation {get;set;}
     public static Boolean isLandscape {get;set;}
     public static Boolean isNoHeader {get;set;}
     public static String headerRelative {get;set;}
@@ -123,7 +125,8 @@ global with sharing class DisplayPDFController
             Document__c docrec = [SELECT Id, Document_Body__c, Document_Content__c, Document_Template__r.Watermark_Data__c  
                                   FROM Document__c 
                                   WHERE Id = :inputparam WITH SECURITY_ENFORCED];
-     
+            	selectedPageSize = ApexPages.currentPage().getParameters().get('selectedPageSize');
+     			selectedPageOrientation = ApexPages.currentPage().getParameters().get('selectedPageOrientation');
                 selectedSize= ApexPages.currentPage().getParameters().get('selectedPageSize') +' ' +ApexPages.currentPage().getParameters().get('selectedPageOrientation');
   				isLandscape = selectedPageOrientation=='Landscape' ? true : false;
             if(isLandscape == true) {
