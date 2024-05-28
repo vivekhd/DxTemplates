@@ -1,37 +1,17 @@
 import { getRecord } from "lightning/uiRecordApi";
 import rte_tbl from '@salesforce/resourceUrl/rte_tbl';
-import { NavigationMixin } from 'lightning/navigation';
 import {api, LightningElement, track, wire } from 'lwc';
-import { CurrentPageReference } from 'lightning/navigation';
 import {loadStyle } from 'lightning/platformResourceLoader';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 import dexcpqcartstylesCSS from '@salesforce/resourceUrl/dexcpqcartstyles';
 import saveAsRecordAttachment from '@salesforce/apex/DisplayPDFController.savePDFtoQuote';
 
-export default class DxtemplateSelectorCmp extends NavigationMixin(LightningElement) {
-
-    downloadURL;
-    pdfdocumentid;
-    showModal=true;
-    isLoaded=false;
-    selectedTemplateId;    
-    showTemplate=false;
-    templateWhereClause2;
-    //currentPageReference;
-    showPreviewButton=false;
-    showGenerateButton=false;
-    showSaveAttachmentButton=false;
-    showTemplateSelectionHolder=true;
-    templateWhereClause="IsActive__c = true";
-    pageProperties = {'pageSize' : 'A4','pageOrientation' : 'Potrait'};
+export default class DxtemplateSelectorCmp extends LightningElement {
 
     @api recordId;
-    @api objectApiName;
     @api objectLabel;
+    @api objectApiName;
 
-    //@track backtoObj;
-    //@track sendEmailWithAttachment;
-    @track isDisabled = true;
     @track modifiedPDFName;
     @track pageSize = 'A4';
     @track showSendEmailModal = false;
@@ -46,6 +26,20 @@ export default class DxtemplateSelectorCmp extends NavigationMixin(LightningElem
         { label: 'Potrait', value: 'Potrait' },
         { label: 'LandScape', value: 'LandScape' }
     ];
+  
+    downloadURL;
+    pdfdocumentid;
+    showModal=true;
+    isLoaded=false;
+    selectedTemplateId;    
+    showTemplate=false;
+    templateWhereClause2;
+    showPreviewButton=false;
+    showGenerateButton=false;
+    showSaveAttachmentButton=false;
+    showTemplateSelectionHolder=true;
+    templateWhereClause="IsActive__c = true";
+    pageProperties = {'pageSize' : 'A4','pageOrientation' : 'Potrait'};
 
     @wire(getRecord, { recordId: "$recordId" })
     recordDetails;
@@ -57,22 +51,14 @@ export default class DxtemplateSelectorCmp extends NavigationMixin(LightningElem
         this.pageProperties.pageOrientation = this.pageOrientation;
     }
 
-    //@wire(CurrentPageReference)
     connectedCallbackHandler() {
         this.saveRecordToAttachmentLabel = `Save as Attachment`;
         this.templateWhereClause2 = ` Related_To_Type__c = \'${this.objectApiName}\'`;
-        //this.backtoObj="Back to "+this.objectLabel;
-        //this.sendEmailWithAttachment = "Send Email With "+ this.objectLabel+" PDF Attachment";
-        //this.currentPageReference = currentPageReference;
-        //if( this.recordId != this.currentPageReference.state.c__recordId){
         this.selectedTemplateId=undefined;
         this.showTemplate=false;
         this.showPreviewButton =false;
         this.showSaveAttachmentButton=false;
         this.showGenerateButton=false;
-        //this.currentPageReference.state.c__recordId;
-        //this.template.querySelector('c-multi-lookup-component').clearPills();
-        //}
     }
 
     connectedCallback() {
@@ -146,48 +132,5 @@ export default class DxtemplateSelectorCmp extends NavigationMixin(LightningElem
         Promise.all([ loadStyle(this, rte_tbl + '/rte_tbl1.css'), loadStyle( this, dexcpqcartstylesCSS )])
         .then(() => { console.log( 'Files loaded'); })
         .catch(error => { console.log( error.body.message ); });
-    }
-
-    buttonClicked; //defaulted to false
-    @track cssMaxorMinClass2 = 'dxcappcontainer2nor';
-    @track iconMaxorMinName = 'utility:new_window';
-    @track titleMaxorMinName = 'Maximize Window';
-    productBundleRelationship;
-
-    //Handles click on the 'Show/hide content'button
-    minorMaxWindow() {
-        this.buttonClicked = !this.buttonClicked; //set to true if false, false if true.
-        this.cssMaxorMinClass2 = this.buttonClicked ? 'dxcappcontainer2max': 'dxcappcontainer2nor';
-        this.iconMaxorMinName = this.buttonClicked ? 'utility:pop_in': 'utility:new_window';
-        this.titleMaxorMinName =  this.buttonClicked ? 'Minimize Window': 'Maximize Window';
-    }
-
-    // Modified by Rahul
-    handleBacktoQuote(event){
-        this[NavigationMixin.Navigate]({
-            type: 'standard__recordPage',
-            attributes: {
-                recordId: this.recordId,
-                objectApiName: this.objectApiName,
-                actionName: 'view'
-            }
-        });
-    }
-
-    //js for calling screen flow in seperate moda
-    showSendEmailMethod(event) {
-        this.showSendEmailModal = true;
-    }
-
-    submitDetails() {
-        this.showSendEmailModal = false;
-    }
-
-    closeModal() {
-        this.showSendEmailModal = false;
-    }
-
-    disconnectedCallback() {
-        this.showTemplate = false;
     }
 }
