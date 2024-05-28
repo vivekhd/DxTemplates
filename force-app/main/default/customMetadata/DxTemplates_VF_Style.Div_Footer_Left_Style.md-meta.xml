@@ -8,10 +8,10 @@
         position:running(footer_left);
         top: 0;
         left: 0;
-        height: 70px;
+        height: 30px;
         padding-bottom:10px;
         width: 100%;
-        border-top:1px solid #e1e1e1;
+        border:none;
       }</value>
     </values>
 </CustomMetadata>

@@ -228,6 +228,11 @@
     </fieldPermissions>
     <fieldPermissions>
         <editable>true</editable>
+        <field>Document_Template__c.ClassId__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>true</editable>
         <field>Document_Template__c.Description__c</field>
         <readable>true</readable>
     </fieldPermissions>
@@ -266,11 +271,6 @@
         <field>Document_Template__c.Watermark_Data__c</field>
         <readable>true</readable>
     </fieldPermissions>
-<fieldPermissions>
-        <editable>true</editable>
-        <field>Document_Template__c.ClassId__c</field>
-        <readable>true</readable>
-    </fieldPermissions>
     <fieldPermissions>
         <editable>true</editable>
         <field>Document__c.Document_Body__c</field>
@@ -291,7 +291,7 @@
         <field>Document__c.Object_Id__c</field>
         <readable>true</readable>
     </fieldPermissions>
-<fieldPermissions>
+    <fieldPermissions>
         <editable>true</editable>
         <field>Document__c.Token_Data__c</field>
         <readable>true</readable>
@@ -466,15 +466,15 @@
         <enabled>true</enabled>
     </pageAccesses>
     <tabSettings>
+        <tab>Document_Clause__c</tab>
+        <visibility>Visible</visibility>
+    </tabSettings>
+    <tabSettings>
         <tab>DxTemplates</tab>
         <visibility>Visible</visibility>
     </tabSettings>
     <tabSettings>
         <tab>TransactionLog__c</tab>
-        <visibility>Visible</visibility>
-    </tabSettings>
-    <tabSettings>
-        <tab>Document_Clause__c</tab>
         <visibility>Visible</visibility>
     </tabSettings>
 </PermissionSet>

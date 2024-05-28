@@ -8,19 +8,26 @@ import { NavigationMixin } from 'lightning/navigation';
 export default class TemplateHeader extends NavigationMixin(LightningElement) {
 
   columnvalue;
+  columnfirstvalue;
   @api pdfLinks;
   @api rowcount;
   @api sectiontype;
   columnvalueList = [];
+  columnfirstvalueList=[];
   @api selectedObjectName;
   @api sectionrecordid;
   @api isDisabled = false;
+  headerMap =[];
   headerSectionsMap = [];
+  headerFirstSectionsMap=[];
   @api documenttemplaterecord;
   @api showheaderdetails = false;
   classvar = 'slds-col slds-size_1-of-3';
+  classfirstvar = 'slds-col slds-size_1-of-3';
+  showfirstpageheader=false;
   popUpMessage;
   oldHeaderColumnList = {};
+  oldHeaderFirstColumnList={};
   Recorddetailsnew = {
     Name: '', DxCPQ__Section_Content__c: '', DxCPQ__DisplaySectionName__c: false,
     DxCPQ__New_Page__c: false,
@@ -40,6 +47,45 @@ export default class TemplateHeader extends NavigationMixin(LightningElement) {
     } else {
       this.error = error;
     }
+  }
+
+  handleDiffHeader(event){
+    this.showfirstpageheader = event.detail.checked;
+  }
+
+  handlefirstcolumncomboChange(event){
+    this.columnfirstvalueList = [];
+    this.columnfirstvalue = event.detail.value;
+    this.handlefirstcolumnsClass(this.columnfirstvalue);
+    if (this.headerFirstSectionsMap.length > 0) {
+      if (this.headerFirstSectionsMap.length < this.columnfirstvalue) {
+        for (var i = this.headerFirstSectionsMap.length; i < this.columnfirstvalue; i++) {
+          if (this.oldHeaderFirstColumnList[i]) {
+            this.headerFirstSectionsMap.push(this.oldHeaderFirstColumnList[i]);
+          }
+          else {
+            this.columnfirstvalueList.push(i);
+            this.headerFirstSectionsMap.push({ "value": "", "indexvar": i+3, "key": (new Date()).getTime() + ":" + i })
+            //this.headerSectionsMap.push({ "value": "", "indexvar": i+3,  "key": (new Date()).getTime() + ":" + i })
+          }
+        }
+      }
+      else if (this.headerFirstSectionsMap.length > this.columnfirstvalue) {
+        this.handleColumnRemoval();
+      }
+    }
+    else {
+      for (var i = 0; i < this.columnfirstvalue; i++) {
+        this.columnfirstvalueList.push(i);
+        this.headerFirstSectionsMap.push({ "value": "", "indexvar": i+3, "key": (new Date()).getTime() + ":" + i })
+        //this.headerSectionsMap.push({ "value": "", "indexvar": i+3, "key": (new Date()).getTime() + ":" + i })
+      }
+    } 
+    //this.headerSectionsMap.push (this.headerFirstSectionsMap) 
+  }
+
+  handlefirstcolumnsClass(columncount) {
+    this.classfirstvar = 'slds-col slds-size_1-of-' + columncount;
   }
 
   handlecolumnsClass(columncount) {
@@ -89,7 +135,27 @@ export default class TemplateHeader extends NavigationMixin(LightningElement) {
   /* Header Changes Start*/
   handleColumnRemoval() {
     let headerColumnsList = {};
+    let headerFirstColumnsList ={};
     let size = 0;
+    const tempColumnfirstValue = +this.columnfirstvalue+3;
+
+    for (let i = 0; i < this.headerFirstSectionsMap.length; i++) {
+      let tempColumnDetail = this.headerFirstSectionsMap[i];
+      // if (tempColumnDetail.indexvar < this.columnvalue && tempColumnDetail.uniqueFirst == null) {
+      //   headerColumnsList[tempColumnDetail.indexvar] = tempColumnDetail;
+      //   size += 1;
+      // }
+      if(tempColumnDetail.indexvar < tempColumnfirstValue){
+        //headerColumnsList[tempColumnDetail.indexvar] = tempColumnDetail;
+        let tempindexvar = +tempColumnDetail.indexvar-3;
+        headerFirstColumnsList[tempindexvar] = tempColumnDetail;
+        size += 1;
+      }
+      else {
+        let tempindexvar = +tempColumnDetail.indexvar-3;
+        this.oldHeaderFirstColumnList[tempindexvar] = tempColumnDetail;
+      }
+    }
 
     for (let i = 0; i < this.headerSectionsMap.length; i++) {
       let tempColumnDetail = this.headerSectionsMap[i];
@@ -103,9 +169,14 @@ export default class TemplateHeader extends NavigationMixin(LightningElement) {
     }
     
     this.headerSectionsMap = [];
-    for (let i = 0; i < size; i++) {
+    this.headerFirstSectionsMap = [];
+    for (let i = 0; i < 6; i++) {
       if (headerColumnsList[i]) {
         this.headerSectionsMap.push(headerColumnsList[i]);
+      }
+      if (headerFirstColumnsList[i]){
+        //this.headerSectionsMap.push(headerColumnsList[i]);
+        this.headerFirstSectionsMap.push(headerFirstColumnsList[i]);
       }
     }
     let headerVal='';
@@ -136,13 +207,23 @@ export default class TemplateHeader extends NavigationMixin(LightningElement) {
         this.headerSectionsMap.push(data);
       }
     });
+    this.headerFirstSectionsMap.forEach((loopvar, index) => {
+      if (loopvar.indexvar == data.indexvar) {
+        this.headerFirstSectionsMap.splice(index, 1);
+        this.headerFirstSectionsMap.push(data);
+      }
+    });
   }
 
   @api loadsectionsvaluesforCreation() {
     this.showheaderdetails = true;
     this.columnvalue = null;
+    this.columnfirstvalue = null;
     this.columnvalueList = [];
+    this.columnfirstvalueList = [];
     this.headerSectionsMap = [];
+    this.headerFirstSectionsMap = [];
+    this.showfirstpageheader = false;
 
     this.Recorddetailsnew = {
       Name: '', DxCPQ__Section_Content__c: '', DxCPQ__DisplaySectionName__c: false,
@@ -157,21 +238,51 @@ export default class TemplateHeader extends NavigationMixin(LightningElement) {
 
   @api loadsectionvaluesforedit(recordID) {
     this.showheaderdetails = true;
+    this.headerSectionsMap = [];
+    this.headerFirstSectionsMap = [];
+    this.showfirstpageheader = false;
     gettemplatesectiondata({ editrecordid: recordID })
       .then(result => {
         if (result != null) {
           var sectioncontent = JSON.parse(result.DxCPQ__Section_Content__c);
           this.columnvalue = sectioncontent.sectionsCount;
+          this.columnfirstvalue = sectioncontent.sectionsFirstCount;
+          if (sectioncontent.sectionsFirstCount>0){
+            this.showfirstpageheader = true;
+          }
+          //this.showfirstpageheader = true;
+          setTimeout(() => { 
+            try{
+              this.template.querySelector('[data-id="uniqueheader"]').checked = this.showfirstpageheader; 
+              // this.columnfirstvalue = sectioncontent.sectionsFirstContent;
+              // this.template.querySelector('[data-id="firstcombobox"]').value = this.columnfirstvalue;
+              //this.columnfirstvalue = sectioncontent.sectionsFirstContent;
+              this.handlefirstcolumnsClass(this.columnfirstvalue);
+            }
+            catch(error){
+              console.log('error in setTimeout for checked error >> ', error.message);
+            }
+          });
 
            /* Fix for Header Onload Alignment by Rahul*/
           let sectionsMapTemp = sectioncontent.sectionsContent;
           sectionsMapTemp.sort((a, b) => {
             return a.indexvar - b.indexvar;
           });
-          this.headerSectionsMap = sectionsMapTemp;
+          let firstSectionsMap =[];
+          let sectionsMap=[];
+          sectionsMapTemp.forEach((sectionmap)=>{
+            if (sectionmap.indexvar>2){
+              firstSectionsMap.push(sectionmap)
+            }
+            else sectionsMap.push(sectionmap)
+          })
+          this.headerFirstSectionsMap= firstSectionsMap;
+          this.headerSectionsMap = sectionsMap; 
+          //this.headerSectionsMap = sectionsMapTemp;
            /* Fix for Header Onload Alignment by Rahul*/
-           
           this.handlecolumnsClass(this.columnvalue);
+          //this.handlefirstcolumnsClass(this.columnfirstvalue);
         }
       })
       .catch(error => {
@@ -182,8 +293,9 @@ export default class TemplateHeader extends NavigationMixin(LightningElement) {
   handlesectionsave(event) {
     this.Recorddetailsnew.Name = this.sectiontype;
     var currecid = this.sectionrecordid;
-    if (this.headerSectionsMap.length > 0) {
-      this.headerSectionsMap.forEach((loopvar) => {
+    this.headerMap = this.headerSectionsMap.concat(this.headerFirstSectionsMap);
+    if (this.headerMap.length > 0) {
+      this.headerMap.forEach((loopvar) => {
         var sectionval = loopvar.value;
         if (sectionval.includes('img') && !sectionval.includes('style')) {
           const styletag = 'style=\"max-height:100% ; max-width:100%; height:40px; margin:10px 20px;\"';
@@ -193,7 +305,8 @@ export default class TemplateHeader extends NavigationMixin(LightningElement) {
       });
       var obj = {};
       obj.sectionsCount = this.columnvalue;
-      obj.sectionsContent = this.headerSectionsMap;
+      obj.sectionsFirstCount = this.columnfirstvalue;
+      obj.sectionsContent = this.headerMap;
       this.Recorddetailsnew.DxCPQ__Section_Content__c = JSON.stringify(obj);
     }
 

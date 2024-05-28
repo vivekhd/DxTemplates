@@ -53,6 +53,11 @@ global with sharing class DisplayPDFController
     public Integer headersectionsCount {get; set;}
     
     /**
+     * @description Number of first header sections.
+     */
+    public Integer headerfirstsectionsCount {get; set;}
+    
+    /**
      * @description Number of footer sections.
      */
     public Integer footersectionsCount {get; set;}
@@ -73,6 +78,21 @@ global with sharing class DisplayPDFController
      * @description Text for the right side of the header.
      */
     public String rightheadertext {get; set;}
+    
+    /**
+     * @description Text for the first left side of the header.
+     */
+    public String leftfirstheadertext {get; set;}
+    
+    /**
+     * @description Text for the first center of the header.
+     */
+    public String centerfirstheadertext {get; set;}
+    
+    /**
+     * @description Text for the first right side of the header.
+     */
+    public String rightfirstheadertext {get; set;}
     
     /**
      * @description Text for the left side of the footer.
@@ -182,6 +202,7 @@ global with sharing class DisplayPDFController
                     List<Object> headerListObject = new List<Object>();
                     Map<String, Object> headerMap = (Map<String, Object>) mapjson.get('header');
                     headersectionsCount = Integer.valueOf(headerMap.get('sectionsCount'));
+                    headerfirstsectionsCount = Integer.valueOf(headerMap.get('sectionsFirstCount'));
                     headerListObject = (List<Object>) headerMap.get('sectionsContent');
 
                     if(!headerListObject.isEmpty()){
@@ -193,7 +214,18 @@ global with sharing class DisplayPDFController
                                 centerheadertext = (String) wrec.get('value');
                             } else if(wrec.get('indexvar') == 2){
                                 rightheadertext = (String) wrec.get('value');
+                            } else if(wrec.get('indexvar') == 3){
+                                leftfirstheadertext = (String) wrec.get('value');
+                            } else if(wrec.get('indexvar') == 4){
+                                centerfirstheadertext = (String) wrec.get('value');
+                            } else if(wrec.get('indexvar') == 5){
+                                rightfirstheadertext = (String) wrec.get('value');
                             }
+                        }
+                        if (headerfirstsectionsCount == null){
+                            leftfirstheadertext = leftheadertext;
+                            centerfirstheadertext = centerheadertext;
+                            rightfirstheadertext = rightheadertext;
                         }
                     }
                 }

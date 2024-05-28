@@ -1,14 +1,14 @@
 <template>
 	
-	<template if:true={showHeader}>
+	<template lwc:if={showHeader}>
 		<div class="slds-grid slds-gutters">
-			<div class="slds-col" data-indexhead1></div>
-			<div class="slds-col" data-indexhead2></div>
-			<div class="slds-col" data-indexhead3></div>
+			<div hidden class="slds-col" data-indexhead1></div>
+			<div hidden class="slds-col" data-indexhead2></div>
+			<div hidden class="slds-col" data-indexhead3></div>
 		</div>
 	</template>
 
-	<div class="slds-col slds-size_12-of-12 wholecontent">
+	<div hidden class="slds-col slds-size_12-of-12 wholecontent">
 
 		<div if:true={isLoaded} class="slds-is-relative">
 			<div class="slds-m-around_large">
@@ -81,8 +81,6 @@
 				</template>
 			</template>
 		</template> -->
-
-        
 	</div>
 
 	<template if:true={isModalOpen}>
@@ -119,11 +117,11 @@
 		</template>
 	</c-modal>
 
-	<template if:true={showFooter}>
+	<template lwc:if={showFooter}>
 		<div class="slds-grid slds-gutters">
-			<div class="slds-col" data-indexfoot1></div>
-			<div class="slds-col" data-indexfoot2></div>
-			<div class="slds-col" data-indexfoot3></div>
+			<div hidden class="slds-col" data-indexfoot1></div>
+			<div hidden class="slds-col" data-indexfoot2></div>
+			<div hidden class="slds-col" data-indexfoot3></div>
 		</div>
 	</template>
 	

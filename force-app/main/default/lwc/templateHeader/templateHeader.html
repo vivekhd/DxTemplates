@@ -9,6 +9,10 @@
 					onchange={handlename} disabled=true>
 				</lightning-input>
 			</div>
+			<div class="slds-col slds-text-align_right slds-p-top_x-small">
+                <lightning-input class="green-checkbox checkboxlabel dx-chk-h" type="checkbox" disabled={isDisabled} data-id="uniqueheader" name="Unique First Page Header" label="Unique First Page Header" value={showfirstpageheader} onchange={handleDiffHeader}>
+                </lightning-input>
+            </div>
 			<div class="slds-is-relative slds-col_bump-left">
 				<lightning-button-icon icon-name="utility:help_doc_ext" onclick={handlehelp}
 					alternative-text="Need Help?" title="Need Help?" size="medium" variant="bare"
@@ -47,6 +51,27 @@
 				</div>
 			</div>
 		</div>
+		<!-- Show First Header Section -->
+		<template if:true={showfirstpageheader}>
+            <lightning-combobox
+                name="progress"
+                label="(First page Header) Select column count"
+                value={columnfirstvalue}
+                data-id="firstcombobox"
+                placeholder="(First Page Header) Select column count"
+                field-level-help="Header Count"
+                options={countoptions}
+                onchange={handlefirstcolumncomboChange} disabled={isDisabled} variant="label-stacked" >
+            </lightning-combobox>
+            <br/>
+            <div class="slds-grid slds-gutters">
+                <template for:each={headerFirstSectionsMap} for:item="loopvar">
+                    <div class={classfirstvar} key={loopvar.key}>
+                        <c-template-header-type is-disabled={isDisabled} indexvar={loopvar.indexvar} editorcontent={loopvar.value} documenttemplaterecord={documenttemplaterecord} onsaverichtextheader={saverichtextheader} object-name={selectedObjectName} ></c-template-header-type>
+                    </div>
+                </template>
+            </div>
+        </template>
 		<!-- Select Header Count::: -->
 		<lightning-combobox name="progress" label="Select column count" value={columnvalue}
 			placeholder="Select column count" field-level-help="Header Count" options={countoptions}
@@ -68,7 +93,7 @@
 				</div>
 			</template>
 		</div>
-		<!-- <img if:true={imageselected} src={selectedimageurl} alt="User Image"
+		<!-- <img if:true={imageselec  ted} src={selectedimageurl} alt="User Image"
     height="100px"
     width="100px"/>
     <lightning-button   variant="brand" label={imagebuttonlabel}

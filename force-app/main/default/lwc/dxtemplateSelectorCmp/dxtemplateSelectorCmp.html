@@ -1,11 +1,10 @@
 <template>
-	<div class="dxt" style="height:100%;">
-		<div data-id="minorMax2" class={cssMaxorMinClass2}>
-			<div class="slds-col slds-size_1-of-1 row region-header">
-				<div class="highlights slds-clearfix slds-page-header slds-page-header_record-home fixed-position"
-					style="padding:10px 15px; border-radius:0px; position: fixed; width: 100%; z-index: 9;">
-					<div class="slds-grid primaryFieldRow">
-						<div class="slds-grid slds-col slds-has-flexi-truncate">
+	<!-- <div class="dxt"> -->
+		<!-- <div class={cssMaxorMinClass2}> -->
+			<!-- <div class="slds-col slds-size_1-of-1 row region-header">
+				<div class="highlights slds-clearfix slds-page-header slds-page-header_record-home">
+					<div class="slds-grid primaryFieldRow"> -->
+						<!-- <div class="slds-grid slds-col slds-has-flexi-truncate">
 							<div class="slds-media slds-no-space">
 								<div class=" slds-avatar slds-m-right_small icon">
 									<lightning-icon icon-name="doctype:pdf" alternative-text="PDF Generator" title="PDF Generator"></lightning-icon>
@@ -14,137 +13,59 @@
 							<div class="slds-media__body">
 								<h1>
 									<div class="entityNameTitle slds-line-height--reset">
-										<strong>PDF Generator</strong>
+										<strong>DXTemplates PDF Generator</strong>
 									</div>
 								</h1>
 							</div>
-						</div>
-
+						</div> -->
 						<!-- Modified by Rahul Starts-->
-						<ul class="slds-button-group-row">
+						<!-- <ul class="slds-button-group-row">
 							<li class="slds-button-group-item">
 								<lightning-button label={backtoObj} onclick={handleBacktoQuote} icon-name="utility:back"
-									icon-position="left"></lightning-button></br>
-							</li>
-						</ul>
-						<!-- Modified by Rahul Ends-->
-					</div>
-				</div>
-			</div>
-			<div class="contentmain_base" style="padding-top:54px;">
-				<div class="contentmain_base_innertab2">
-					<div class="slds-grid slds-p-around_small slds-wrap">
-						<div class="slds-col slds-size_1-of-4  slds-p-right_small">
-							<template if:true={showTemplateSelector}>
-								<c-multi-lookup-component label-name="Search Template"
-									object-api-name="Document_Template__c" field-api-names="Id,Name"
-									filter-field-api-name="Name" icon-name="standard:account"
-									onsinglepill={selectItemEventHandler} onremovepill={updateItemEventHandler}
-									has-multi-select="false" where-clause={templateWhereClause}
-									where-clause-two={templateWhereClause2}>
-								</c-multi-lookup-component>
-							</template>
-							<div class="slds-m-horizontal_large">
-								<div if:true={isLoaded} class="slds-is-relative">
-									<lightning-spinner alternative-text="Loading..." variant="brand">
-									</lightning-spinner>
-								</div>
-							</div>
-
-							<div class="slds-align_absolute-center">
-								</br><br/><br/>
-								<ul class="slds-button-group-row">
-									<li class="slds-button-group-item">
-										<lightning-button label="Generate PDF" onclick={handlePDF}
-											if:true={showgeneratepdf} icon-name="utility:page" icon-position="left">
-										</lightning-button></br>
-									</li>
-
-									<li class="slds-button-group-item">
-										<lightning-button label="Preview PDF" onclick={previewPDF}
-											if:true={showpreviewbutton} icon-name="utility:preview"
-											icon-position="left"></lightning-button>
-									</li>
-
-									<!-- <li class="slds-button-group-item">
-								<lightning-button label="Send Email" onclick={showSendEmailMethod} 
-									if:true={showsendemail} icon-name="utility:save" icon-position="left">
+									variant='label-hidden' icon-position="left">
 								</lightning-button>
-							</li> -->
-								</ul>
-								<div if:true={showgeneratepdf}>
-									<div class = "Slds-p-right_small"><lightning-combobox
-										name="Page Size"
-										label="Page Size"
-										value={value}
-										options={pageSizeOptions}
-										onchange={handleChange} ></lightning-combobox>
-										<lightning-combobox
-										name="Page Orientation"
-										label="Page Orientation"
-										value={value}
-										options={pageOrientationOptions}
-										onchange={handleChange} ></lightning-combobox>
-										</div>
-								</div>
-							</div>
-
-							<div class="slds-align_absolute-center">
-								<template if:true={showsavepdftoquote}>
-									<div class="slds-grid slds-wrap slds-gutters_x-small">
-										<div class="slds-col slds-size_1-of-2">
-											<lightning-input name="Rename Document" label="Document Name"
-												value={recordId} onchange={handlePDFRename} class="heightcng26">
-											</lightning-input>
-										</div>
-
-										<div class="slds-col slds-size_1-of-2">
-											<label class="slds-form-element__label slds-no-flex">&nbsp;</label>
-											<lightning-button label={savePDFtoObj} onclick={savePDFtoQuote}
-												icon-name="utility:save" icon-position="left">
-											</lightning-button>
-										</div>
-									</div>
-								</template>
-							</div>
-						</div>
-
-						<div class="slds-col slds-size_3-of-4 pdfbook"
-							style="height: calc(100vh - 170px); overflow: auto;">
-							<template if:true={showTemplate}>
-								<div class="page">
-									<div size="A4" class="subpage">
-										<c-dx-show-selected-template template-id={selectedTemplateId}
-											object-record-id={recordId} object-name={objectApiName}
-											onpdfgeneration={handlepdfgeneration}></c-dx-show-selected-template>
-									</div>
-								</div>
-							</template>
-						</div>
+								</br>
+							</li>
+						</ul> -->
+						<!-- Modified by Rahul Ends-->
+					<!-- </div>
+				</div>
+			</div> -->
+			<!-- <div class="contentmain_base"> <div class="contentmain_base_innertab2"> -->
+			<div class="slds-grid slds-grid_vertical slds-p-around_small" style="background-color:#f3f3f3; border:1px solid #c9c9c9; border-radius:5px;">
+				<div class="slds-col">
+					<div class="slds-grid">
+						<lightning-icon class="slds-col slds-size_1-of-8" icon-name="doctype:pdf" alternative-text="PDF Generator" title="PDF Generator"></lightning-icon>
+						<div class="slds-col slds-size_7-of-8 slds-text-heading_small"> <strong> DXTemplates PDF Generator </strong></div>
+					</div>
+				</div>
+				<div class="slds-col slds-p-right_small">
+					<c-multi-lookup-component lwc:if={showTemplateSelectionHolder} label-name="Search Template" object-api-name="Document_Template__c" field-api-names="Id,Name" 
+						filter-field-api-name="Name" icon-name="standard:account" onsinglepill={selectItemEventHandler} onremovepill={updateItemEventHandler} 
+						has-multi-select="false" where-clause={templateWhereClause} where-clause-two={templateWhereClause2}>
+					</c-multi-lookup-component>
+					<div lwc:if={isLoaded} class="slds-m-horizontal_large slds-is-relative">
+						<lightning-spinner alternative-text="Loading..." variant="brand"> </lightning-spinner>
+					</div>
+					<div lwc:if={showGenerateButton} class="slds-p-right_small slds-grid slds-gutters">
+						<lightning-combobox class="slds-col slds-size_2-of-4" name="Page Size" label="Page Size" value={pageSize} options={pageSizeOptions} onchange={handlePdfModeSelection}> </lightning-combobox>
+						<lightning-combobox class="slds-col slds-size_2-of-4" name="Page Orientation" label="Page Orientation" value={pageOrientation} options={pageOrientationOptions} onchange={handlePdfModeSelection}> </lightning-combobox>
+					</div>
+					<div class="slds-align_absolute-center slds-grid slds-gutters">
+						<lightning-button lwc:if={showGenerateButton} class="slds-col slds-size_2-of-4 slds-p-around_small" label="Generate PDF" onclick={handlePDF} icon-name="utility:page" icon-position="left"> </lightning-button>
+						<lightning-button lwc:if={showPreviewButton} class="slds-col slds-size_2-of-4 slds-p-around_small" label="Preview PDF" onclick={previewPDF} icon-name="utility:preview" icon-position="left"> </lightning-button>
+					</div>
+					<div lwc:if={showSaveAttachmentButton} class="slds-align_absolute-center slds-grid slds-wrap slds-gutters_x-small">
+						<lightning-input class="slds-col slds-size_1-of-2" name="Rename Document" label="Document Name" value={recordId} onchange={handlePDFRename}> </lightning-input>
+						<lightning-button class="slds-col slds-size_1-of-2" label={saveRecordToAttachmentLabel} onclick={saveRecordToAttachment} icon-name="utility:save" icon-position="left"> </lightning-button>
+					</div>
+				</div>
+				<div hidden class="slds-col" style="height:calc(100vh - 170px); overflow:auto;">
+					<div lwc:if={showTemplate} hidden class="page subpage">
+						<c-dx-show-selected-template template-id={selectedTemplateId} object-record-id={recordId} object-name={objectApiName} onpdfgeneration={handlepdfgeneration}> </c-dx-show-selected-template>
 					</div>
 				</div>
 			</div>
-		</div>
-	</div>
-
-
-	<!--- Send Email functionality not intended in this release. ---->
-	<!-- <template if:true={showSendEmailModal}>
-        <section role="dialog" tabindex="-1" aria-labelledby="modal-heading-01" aria-modal="true" aria-describedby="modal-content-id-1" class="slds-modal slds-fade-in-open slds-modal_large" >
-            <div class="slds-modal__container">
-                <header class="slds-modal__header">
-                    <button class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse" title="Close" onclick={closeModal}>
-                        <lightning-icon icon-name="utility:close"
-                            alternative-text="close"
-                            variant="inverse"
-                            size="small" ></lightning-icon>
-                        <span class="slds-assistive-text" onclick={closeModal} >Close</span>
-                    </button>
-                    <h2 id="modal-heading-01" class="slds-text-heading_medium slds-hyphenate" style="color: #6f00ff; font-size: 25px;font-weight:bolder;">{sendEmailWithAttachment}</h2>
-                </header>
-            </div>
-        </section>
-        <div class="slds-backdrop slds-backdrop_open"></div>
-    </template> -->
-
+			<!-- </div> </div> -->
+		<!-- </div> </div> -->
 </template>
