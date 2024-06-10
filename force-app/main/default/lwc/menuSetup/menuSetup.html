@@ -47,7 +47,7 @@
 		<template for:each={gridDataSet} for:item="arrItem">
 			<template if:true={arrItem.isVisible}>
 				<c-menu-setup-row key={arrItem.ukey} my-wrapper={arrItem} ontoggle={hanldleVisibility}
-					onselect={handleSelection}></c-menu-setup-row>
+					onselect={handleSelection} is-saved={isSaved} ondatasaved={handleDataSaved}></c-menu-setup-row>
 			</template>
 		</template>
 	</ul>

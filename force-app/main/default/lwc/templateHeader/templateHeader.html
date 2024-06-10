@@ -67,7 +67,7 @@
             <div class="slds-grid slds-gutters">
                 <template for:each={headerFirstSectionsMap} for:item="loopvar">
                     <div class={classfirstvar} key={loopvar.key}>
-                        <c-template-header-type is-disabled={isDisabled} indexvar={loopvar.indexvar} editorcontent={loopvar.value} documenttemplaterecord={documenttemplaterecord} onsaverichtextheader={saverichtextheader} object-name={selectedObjectName} ></c-template-header-type>
+                        <c-template-header-type is-disabled={isDisabled} indexvar={loopvar.indexvar} editorcontent={loopvar.value} documenttemplaterecord={documenttemplaterecord} onsaverichtextheader={saverichtextheader} object-name={selectedObjectName} header-align ={loopvar.headerVal}></c-template-header-type>
                     </div>
                 </template>
             </div>

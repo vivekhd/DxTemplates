@@ -8,6 +8,9 @@ import createImportedTemplateSections from '@salesforce/apex/ImportExportData.cr
 import createImportedClauses from '@salesforce/apex/ImportExportData.createImportedClauses';
 import createImportedRules from '@salesforce/apex/ImportExportData.createImportedRules';
 import createImportedRuleConditions from '@salesforce/apex/ImportExportData.createImportedRuleConditions';
+import templateExternalList from '@salesforce/apex/ImportExportData.templateExternalList';
+import getWatermarkContent from '@salesforce/apex/ImportExportData.getWatermarkContent';
+import createImportedWatermark from '@salesforce/apex/ImportExportData.createImportedWatermark';
 
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 import getAllPopupMessages from '@salesforce/apex/PopUpMessageSelector.getAllConstants';
@@ -32,11 +35,18 @@ export default class DxTemplateSetup extends LightningElement {
   exportList;
   showAllTemplates=false;
   showImportTemplates=false;
+  showFirstImportScreen=false;
+  showDuplicateTemplates=false;
+  showTemplateMessage=false;
+  showPreviewButton=false;
   allTemplates;
   templatesOptions=[];
-  previewLabel='Show Preview'
+  previewLabel='Show Preview';
+  createDisabledButton=true;
+  showDuplicate=false;
+  errorMessage='';
   @track jsonData;
-
+  @track isSaved = true;
 
   @track activeTab =''; // It stores the active tab value
   @track outerContainer = ''; //The styling of the container which holds the canvas
@@ -683,13 +693,15 @@ try{
     }
 
     /* Import Export Functionality*/
+
+    //Export button clicked. Fetches all relevent data and displays a pop up
     exportTemplate(){
         this.showAllTemplates=true;
         this.showAddNewTemplate=false;
         getAllDocumentTemplatesData()
         .then(data => {
             let exportTemplateData = JSON.parse(data);
-            console.log('exportTemplate', exportTemplateData);
+            //console.log('exportTemplate', exportTemplateData);
             this.allTemplates= exportTemplateData;
             this.templatesOptions = exportTemplateData.Templates.map(exportTemplatelst => ({
                 label: exportTemplatelst.Name + ' - v'+ exportTemplatelst.DxCPQ__Version_Number__c,
@@ -702,9 +714,11 @@ try{
         this.template.querySelector('c-modal').show();
     }
 
+    //Import button clicked. Displays a pop up
     importTemplate(){
         this.showImportTemplates=true;
         this.showAddNewTemplate=false;
+        this.showFirstImportScreen=true;
         getDocumentTemplates()
         .then(data => {
             console.log('exportTemplate', data);
@@ -715,6 +729,7 @@ try{
         this.template.querySelector('c-modal').show();
     }
 
+    //File uploaded for importing
     handleJSONUpload(event){
         const file = event.target.files[0];
         const reader = new FileReader();
@@ -722,105 +737,285 @@ try{
             try {
                 const jsonContent = JSON.parse(reader.result);
                 this.jsonData = JSON.stringify(jsonContent, null, 4);
+                this.createDisabledButton=false;
             } catch (error) {
                 console.error('Error parsing JSON file:', error);
             }
         };
         reader.readAsText(file);
     }
-    createTemplateData(){
-        console.log('createTemplateData got triggered');
-        try{
-            let createImportedRecords = JSON.parse(this.jsonData);
-            createImportedRecords.Templates.forEach(importTemplates => {
-                importTemplates.DxCPQ__External_ID__c=importTemplates.Id;
-                importTemplates.Id= undefined;
-            });
-            let templatesjson = JSON.stringify(createImportedRecords.Templates);
-            createImportedTemplates({tempLst:templatesjson})
-            .then(data=> {
-                data.forEach(item =>{
-                    let newTempId= item.Id;
-                    let oldTempId= item.ExternalId;
-                    createImportedRecords['Template Sections'].forEach(tempSecItem => {
-                        if (tempSecItem.DxCPQ__Document_Template__c == oldTempId){
-                            tempSecItem.DxCPQ__Document_Template__c= newTempId;
-                        }
-                        tempSecItem.Id=undefined;
-                    });
+
+    pastedjson(event){
+        let pasteddata = event.target.value;
+        this.jsonData = pasteddata;
+        this.createDisabledButton=this.jsonData !="" ? false : true;
+    }
+
+    // checkForDuplicate() {
+    //     return templateExternalList()
+    //     .then(data => {
+    //         this.showDuplicate = data.some(item => {
+    //             let createImportedRecords = JSON.parse(this.jsonData);
+    //             let exterID = item.ExternalId;
+    //             return createImportedRecords.Templates.some(importTemplates => {
+    //                 return importTemplates.DxCPQ__External_Id__c === exterID;
+    //             });
+    //         });
+    //         return this.showDuplicate;
+    //     })
+    //     .catch(error => {
+    //         console.error('Error:', error);
+    //         return this.showDuplicate;
+    //     });
+    // }
+
+
+    checkJsonInput(){
+        try {
+            let checkJSON = JSON.parse(this.jsonData);
+            if (checkJSON && typeof checkJSON === "object" && checkJSON.Templates){ 
+                return checkJSON;
+            }
+            else{
+                this.errorMessage = 'Data is not in JSON format or does not contain Templates. Please check the data and try again';
+                return null;
+            }
+        } catch (e) {
+            this.errorMessage = 'Data is not in JSON format. Please try again';
+            return null;
+        }
+    }
+
+    checkForDuplicate() {
+        let importedRecords  = this.checkJsonInput();
+        if (!importedRecords) return;
+        return templateExternalList()
+        .then(data => {
+            this.showDuplicate = data.some(item => {
+                //let createImportedRecords = JSON.parse(this.jsonData);
+                let exterID = item.ExternalId;
+                return importedRecords.Templates.some(importTemplates => {
+                    return importTemplates.DxCPQ__External_Id__c === exterID;
                 });
-            })
-            .then(()=>{
-                createImportedRecords.Rules.forEach(importRules => {
-                    importRules.DxCPQ__External_Id__c= importRules.Id;
-                    importRules.Id= undefined;
-                })
-                let rulesjson = JSON.stringify(createImportedRecords.Rules);
-                createImportedRules({tempRuleLst:rulesjson})
-                .then(data => {
-                    data.forEach(item=>{
-                        let newTempId = item.Id;
-                        let oldTempId= item.ExternalId;
-                        createImportedRecords['Template Sections'].forEach(tempSecItem =>{
-                            if(tempSecItem.DxCPQ__RuleId__c == oldTempId){
-                                tempSecItem.DxCPQ__RuleId__c = newTempId;
-                            }
-                        })
-                        createImportedRecords['Rule Conditions'].forEach(importRuleConds => {
-                            if(importRuleConds.DxCPQ__Rule__c == oldTempId){
-                                importRuleConds.DxCPQ__Rule__c = newTempId;
-                            }
-                            importRuleConds.Id= undefined;
+            });
+            //this.errorMessage = 'Duplicates found. Please check your file and make sure to upload the correct data'
+            return this.showDuplicate;
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            return this.showDuplicate;
+        });
+    }
+
+    //Create button clicked in Import functionality. Parses through the data to assign the related objects with one another
+    createTemplateData(){
+        //console.log('createTemplateData got triggered');
+        this.showFirstImportScreen=false;
+        this.showDuplicateTemplates = true;
+        this.currentStep = "2";
+        // 1. Check if any uploaded template has already been uploaded
+        this.checkForDuplicate()
+        .then(()=>{
+            if (this.showDuplicate == true){
+                this.errorMessage = 'Duplicates found. Please check your file and make sure to upload the correct data'
+            }
+            else {
+                this.errorMessage = 'Creating templates'
+                // 2. Duplicate not found so the whole JSON file is checked and IDs for each record is manipulated.
+                try{
+                    let createImportedRecords = JSON.parse(this.jsonData);
+                    createImportedRecords.Templates.forEach(importTemplates => {
+                        //importTemplates.DxCPQ__External_ID__c=importTemplates.Id;
+                        //let watermarkData= JSON.parse(importTemplates.DxCPQ__Watermark_Data__c);
+                        importTemplates.Id= undefined;
+                    });
+                    let templatesjson = JSON.stringify(createImportedRecords.Templates);
+                    // 3. Templates are created first and then their new ID is inserted into the Doc Temp Section and the Watermark Images
+                    createImportedTemplates({tempLst:templatesjson})
+                    .then(data=> {
+                        data.forEach(item =>{
+                            let newTempId= item.Id;
+                            let oldTempId= item.ExternalId;
+                            // 3.1 Template ID into Doc Temp Section
+                            createImportedRecords['Template Sections'].forEach(tempSecItem => {
+                                if (tempSecItem.DxCPQ__External_Document_Template__c == oldTempId){
+                                    tempSecItem.DxCPQ__Document_Template__c= newTempId;
+                                }
+                                tempSecItem.Id=undefined;
+                            })
+                            // 3.2 Template ID into Watermark
+                            //let watermarkjson = createImportedRecords.Watermark;
+                            // for (let watermarkId in createImportedRecords.Watermark){
+                            //     if (createImportedRecords.Watermark.hasOwnProperty(watermarkId)){
+                            //         let watermarkData = createImportedRecords.Watermark[watermarkId];
+                            //         if (watermarkData.ContentVersionData.FirstPublishLocationId == oldTempId){
+                            //             watermarkData.ContentVersionData.FirstPublishLocationId = newTempId;
+                            //             watermarkData.ContentVersionData.DxCPQ__External_Id__c= watermarkData.ContentVersionData.Id;
+                            //             watermarkData.ContentVersionData.Id = undefined;
+                            //         } 
+                            //     }
+                            // }
+                            // createImportedRecords.Watermark.forEach(waterdata=> {
+                            //     if (waterdata.ContentVersionData.FirstPublishLocationId == oldTempId){
+                            //         waterdata.ContentVersionData.FirstPublishLocationId = newTempId;
+                            //         waterdata.ContentVersionData.DxCPQ__External_Id__c= waterdata.ContentVersionData.Id;
+                            //         waterdata.ContentVersionData.Id = undefined;
+                            //     }
+                            // });
+                        });
+                        let watermarkjson = JSON.stringify(createImportedRecords.Watermark);
+                        // 4. Watermarks are created
+                        createImportedWatermark({watermarkLst:watermarkjson})
+                        .then(data =>{
+
                         })
                     })
-                })
-                .then(()=>{
-                    let ruleConditionjson = JSON.stringify(createImportedRecords['Rule Conditions']);
-                    createImportedRuleConditions({tempRuleCondLst:ruleConditionjson});
-                    console.log('Rule Condtions Created');
-                })
-            })
-            .then(()=>{
-                createImportedRecords['Document Clauses'].forEach(importClauses => {
-                    importClauses.DxCPQ__External_ID__c= importClauses.Id;
-                    importClauses.Id= undefined;
-                })
-                let clausesjson = JSON.stringify(createImportedRecords['Document Clauses']);
-                createImportedClauses({tempClausesLst:clausesjson})
-                .then(data=> {
-                    data.forEach(item =>{
-                        let newTempId= item.Id;
-                        let oldTempId= item.ExternalId;
-                        createImportedRecords['Template Sections'].forEach(tempSecItem => {
-                            if (tempSecItem.DxCPQ__Document_Clause__c == oldTempId){
-                                tempSecItem.DxCPQ__Document_Clause__c = newTempId;
-                            }
-                        });
+                    // 5. After templates are created, Rules and Rule Conditions are created
+                    .then(()=>{
+                        createImportedRecords.Rules.forEach(importRules => {
+                            //importRules.DxCPQ__External_Id__c= importRules.Id;
+                            importRules.Id= undefined;
+                        })
+                        let rulesjson = JSON.stringify(createImportedRecords.Rules);
+                        createImportedRules({tempRuleLst:rulesjson})
+                        .then(data => {
+                            data.forEach(item=>{
+                                let newTempId = item.Id;
+                                let oldTempId= item.ExternalId;
+                                createImportedRecords['Template Sections'].forEach(tempSecItem =>{
+                                    if(tempSecItem.DxCPQ__External_RuleID__c == oldTempId){
+                                        tempSecItem.DxCPQ__RuleId__c = newTempId;
+                                    }
+                                })
+                                createImportedRecords['Rule Conditions'].forEach(importRuleConds => {
+                                    if(importRuleConds.DxCPQ__External_Id__c == oldTempId){
+                                        importRuleConds.DxCPQ__Rule__c = newTempId;
+                                    }
+                                    importRuleConds.Id= undefined;
+                                })
+                            })
+                        })
+                        .then(()=>{
+                            let ruleConditionjson = JSON.stringify(createImportedRecords['Rule Conditions']);
+                            createImportedRuleConditions({tempRuleCondLst:ruleConditionjson});
+                            console.log('Rule Condtions Created');
+                        })
+                    })
+                    // 6. Document clauses are created and linked to the necessary Doc Temp Sec
+                    .then(()=>{
+                        createImportedRecords['Document Clauses'].forEach(importClauses => {
+                            importClauses.DxCPQ__External_Id__c= importClauses.Id;
+                            //importClauses.DxCPQ__External_Id__c= importClauses.DxCPQ__External_Id__c!=null? importClauses.DxCPQ__External_Id__c : importClauses.Id;
+                            importClauses.Id= undefined;
+                        })
+                        let clausesjson = JSON.stringify(createImportedRecords['Document Clauses']);
+                        createImportedClauses({tempClausesLst:clausesjson})
+                        .then(data=> {
+                            data.forEach(item =>{
+                                let newTempId= item.Id;
+                                let oldTempId= item.ExternalId;
+                                createImportedRecords['Template Sections'].forEach(tempSecItem => {
+                                    if (tempSecItem.DxCPQ__Document_Clause__c == oldTempId){
+                                        tempSecItem.DxCPQ__Document_Clause__c = newTempId;
+                                    }
+                                });
+                            });
+                        })
+                        .then(()=>{
+                            let templatesectionjson = JSON.stringify(createImportedRecords['Template Sections']);
+                            createImportedTemplateSections({tempSecLst:templatesectionjson});
+                            console.log('Template Section created!');
+                            this.showDuplicateTemplates=false;
+                            this.showTemplateMessage=true;
+                            this.templateSuccessMessage = 'Templates have been successfully created';
+                            this.currentStep="3";
+                        })
+                    })
+                    .catch (error=>{
+                        console.error('Error in creating the data- ',error);
+                        this.showDuplicateTemplates=false;
+                        this.showTemplateMessage=true;
+                        this.templateSuccessMessage = 'The template creation process ran into some issue. Please check the data and try again';
+                        this.currentStep="3";
                     });
-                })
-                .then(()=>{
-                    let templatesectionjson = JSON.stringify(createImportedRecords['Template Sections']);
-                    createImportedTemplateSections({tempSecLst:templatesectionjson});
-                    console.log('Template Section created!');
-                })
-            })
-        }
-        catch (error){
+                    // const toastTemplateCreated = new ShowToastEvent({
+                    //         title: 'Success!',
+                    //         message: 'Template information has been received and will take a while to create. Please refresh the page',//this.popUpMessage.DXTEMPLATESETUP_CREATED,//'Created Successfully',
+                    //         variant: 'Success',
+                    //     });
+                    // this.dispatchEvent(toastTemplateCreated);
+                    // this.template.querySelector('c-modal').hide();
+                    // this.showImportTemplates=false;
+                }
+                catch (error){
+                    console.error('Error in creating the data- ',error);
+                    this.showDuplicateTemplates=false;
+                    this.showTemplateMessage=true;
+                    this.templateSuccessMessage = 'The template creation process ran into some issue. Please check the data and try again';
+                    this.currentStep="3";
+                }
+            }
+        })
+        .catch (error=>{
             console.error('Error in creating the data- ',error);
-        }
+            this.showDuplicateTemplates=false;
+            this.showTemplateMessage=true;
+            this.templateSuccessMessage = 'The template creation process ran into some issue. Please check the data and try again';
+            this.currentStep="3";
+        });
+    }
+
+    copyJsonData(){
+        //navigator.clipboard.writeText(this.exportList)
+        let tempTextAreaField = document.createElement('textarea');
+        tempTextAreaField.style = 'position:fixed;top:-5rem;height:1px;width:10px;';
+        tempTextAreaField.value = this.exportList;
+        document.body.appendChild(tempTextAreaField);
+        tempTextAreaField.select();
+        document.execCommand('copy');
+        tempTextAreaField.remove();
+    }
+
+    refreshPageAfterCreate() {
+        setTimeout(() => {
+            eval("$A.get('e.force:refreshView').fire();");
+        }, 100);
     }
 
     handleExportTemplateList(event){
+        let watermarkTempIds = [];
         this._selected = event.detail.value;
-        const exportTmpList= JSON.parse(JSON.stringify(this.allTemplates));;
+        this.showPreviewButton = this._selected!=0 ? true : false;
+        const exportTmpList= JSON.parse(JSON.stringify(this.allTemplates));
         //this.exportList= this.allTemplates;
         exportTmpList.Templates= exportTmpList.Templates.filter(item => this._selected.includes(item.Id));
         exportTmpList['Template Sections']= exportTmpList['Template Sections'].filter(item => this._selected.includes(item.DxCPQ__Document_Template__c));
-        this.exportList= JSON.stringify(exportTmpList,null, 4);
-        console.log('The selected templates are- ',this._selected);
-        console.log('The json data is', this.exportList);
+        //exportTmpList.Rules=exportTmpList.Rules.filter(item=> exportTmpList['Template Sections'].includes(item.Id));
+        exportTmpList.Rules = exportTmpList.Rules.filter(rule => {
+            return exportTmpList['Template Sections'].some(section => section.DxCPQ__RuleId__c === rule.Id);
+        });
+        exportTmpList['Rule Conditions'] = exportTmpList['Rule Conditions'].filter(ruleCond => {
+            return exportTmpList.Rules.some(rule => rule.Id === ruleCond.DxCPQ__Rule__c);
+        });
+        //exportTmpList['Rule Conditions']=exportTmpList['Rule Conditions'].filter(item=> exportTmpList['Rules'].includes(item.Rule__c));
+        exportTmpList.Templates.forEach(tempID=>{
+            if (tempID.DxCPQ__Watermark_Data__c !=null){
+                watermarkTempIds.push(tempID.Id);
+                console.log('watermarkTempIds- '+watermarkTempIds)
+            }
+        })
+        getWatermarkContent({idList:watermarkTempIds})
+        .then(data => {
+            console.log('Watermark data has been achieved',data);
+            exportTmpList.Watermark = data;
+            this.exportList= JSON.stringify(exportTmpList,null, 4);
+            console.log('The selected templates are- ',this._selected);
+        })
+        
+        //console.log('The json data is', this.exportList);
     }
 
+    //Handling the Show/Hide Preview button in Export
     exportTemplateList(e){
         console.log('The selected templates are- ',this._selected);
         this.previewLabel = this.previewLabel === 'Show Preview' ? 'Hide Preview' : 'Show Preview';
@@ -831,6 +1026,7 @@ try{
     //     this.jsonData=event.target.value;
     // }
 
+    //Downloads the selected templates data as JSON file
     downloadJson(){
         const element = document.createElement('a');
         const file = new Blob([this.exportList], {type: 'application/json'});
@@ -905,12 +1101,20 @@ try{
         this.checkedValImage = false;
         this.showAllTemplates=false;
         this.showImportTemplates=false;
+        this.showFirstImportScreen=false;
+        this.showDuplicateTemplates=false;
+        this.showDuplicate=false;
+        this.showTemplateMessage=false;
+        this.showPreviewButton=false;
+        this.currentStep="1";
         this.exportList='';
         this.showAddNewTemplate=false;
         this.showwatermarkbtn=false;
         this.previewLabel='Show Preview';
         this.showTextArea=false;
         this.jsonData='';
+        this.errorMessage='';
+        this.createDisabledButton=true;
     }
 
     /**
@@ -944,4 +1148,40 @@ try{
         this.classname=[];
 
     }
+
+    handleAllButtonsClicked(event){
+        if (this.isSaved == true){
+            if (event.target.dataset.id == 'import'){
+                this.importTemplate(event);
+            }
+            else if (event.target.dataset.id == 'export'){
+                this.exportTemplate(event);
+            }
+        }
+        else{
+            if (confirm("Changes not saved. Please click Cancel and save the changes or Ok to continue.") == true){
+                this.isSaved = true;
+                const saveEvent = new CustomEvent('datasaved', {detail: this.isSaved});
+                this.dispatchEvent(saveEvent)
+                this.handleAllButtonsClicked(event);
+            }
+        }
+    }
+
+    handleDataSaved(event){
+        this.isSaved = event.detail;
+        if (this.isSaved == false){
+            window.addEventListener('beforeunload', this.handleBeforeUnload);
+        }
+        else {
+            window.removeEventListener('beforeunload', this.handleBeforeUnload);
+        }
+    }
+    
+    handleBeforeUnload(event) {
+    if (!this.isSaved) {
+      event.preventDefault();
+      event.returnValue = '';
+    }
+  }
 }

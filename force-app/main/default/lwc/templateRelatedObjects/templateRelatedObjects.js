@@ -519,7 +519,9 @@ export default class TemplateRelatedObjects extends NavigationMixin(LightningEle
 
   // This function takes the user input for the section name 
   handlename(event) {
-      this.Recorddetailsnew.Name = event.detail.value;
+    this.Recorddetailsnew.Name = event.detail.value;
+    const saveEvent = new CustomEvent('datasaved', {detail: false });
+    this.dispatchEvent(saveEvent);
   }
 
   @api assignDocTempId(recordID) {
@@ -967,30 +969,32 @@ export default class TemplateRelatedObjects extends NavigationMixin(LightningEle
   /*
   Based on the user selection on the picklist field, the selected picklist field will be used in grouping the data in the table.
   */
-  handleSelectedGroupingValue(event) {
-      if (event.detail.values.length != 0) {
-          this.noGrouping = true;
-          this.selectchildpicklist = event.detail.values[0];
-          this.getselectionfieldvalues = this.getpicklistdata[this.selectchildpicklist];
-          this.showpicklistValues = true;
-          this.tabsection = [];
-          for (let i = 0; i < this.getselectionfieldvalues.length; i++) {
-              this.tabsection.push(this.getselectionfieldvalues[i].value.toUpperCase());
-          }
-          if (this.tabsection.length > 0) {
-              this.showChartBox = true;
-          }
-      } else {
-          this.tabsection = [];
-          this.noGrouping = false;
-          this.selectchildpicklist = '';
-      }
-      this.chartControl = this.noGrouping && this.displayChart && this.nosubTotal;
-  }
+    handleSelectedGroupingValue(event) {
+        if (event.detail.values.length != 0) {
+            this.noGrouping = true;
+            this.selectchildpicklist = event.detail.values[0];
+            this.getselectionfieldvalues = this.getpicklistdata[this.selectchildpicklist];
+            this.showpicklistValues = true;
+            this.tabsection = [];
+            for (let i = 0; i < this.getselectionfieldvalues.length; i++) {
+                this.tabsection.push(this.getselectionfieldvalues[i].value.toUpperCase());
+            }
+            if (this.tabsection.length > 0) {
+                this.showChartBox = true;
+            }
+        } else {
+            this.tabsection = [];
+            this.noGrouping = false;
+            this.selectchildpicklist = '';
+        }
+        this.chartControl = this.noGrouping && this.displayChart && this.nosubTotal;
+        const saveEvent = new CustomEvent('datasaved', {detail: false });
+        this.dispatchEvent(saveEvent);
+    }
 
-  get options() {
-      return this.calculateOptions;
-  }
+    get options() {
+        return this.calculateOptions;
+    }
 
   /*
    Based on the user input on Object, the related fields are displayed in the dual list box.
@@ -1089,7 +1093,8 @@ export default class TemplateRelatedObjects extends NavigationMixin(LightningEle
       } else {
           var childloopkupfieldAPIname;
           var jsonString = '';
-
+          const saveEvent = new CustomEvent('datasaved', {detail: true });
+          this.dispatchEvent(saveEvent);
           var obj = {};
 
           if (this.ruleIdCreated != '' && this.ruleIdCreated != null) {
@@ -1286,6 +1291,8 @@ export default class TemplateRelatedObjects extends NavigationMixin(LightningEle
               })
           }
       })
+      const saveEvent = new CustomEvent('datasaved', {detail: false });
+      this.dispatchEvent(saveEvent);
   }
 
   /*
@@ -1345,6 +1352,7 @@ export default class TemplateRelatedObjects extends NavigationMixin(LightningEle
       } else {
           this.chartControl = true;
       }
+      this.unsavedChanges();
   }
 
   /*
@@ -1364,6 +1372,7 @@ export default class TemplateRelatedObjects extends NavigationMixin(LightningEle
       }
 
       this.modifyOptions();
+      this.unsavedChanges();
   }
 
   /*
@@ -1382,6 +1391,7 @@ export default class TemplateRelatedObjects extends NavigationMixin(LightningEle
           this.chartControl = true;
       }
       this.modifyOptions();
+      this.unsavedChanges();
   }
 
   /*
@@ -1558,6 +1568,7 @@ export default class TemplateRelatedObjects extends NavigationMixin(LightningEle
    */
   handleRichTextArea(event) {
       this.changedLabel = event.detail.value;
+      this.unsavedChanges();
   }
 
   /*
@@ -1568,6 +1579,7 @@ export default class TemplateRelatedObjects extends NavigationMixin(LightningEle
       let select = event.target.id;
       let a = this.template.querySelectorAll('[data-id="' + this.selectedTableRow + '"]')[0];
       this.handleActionButtonsVisibility(this.selectedTableRow);
+      this.unsavedChanges();
   }
 
   /*
@@ -1677,11 +1689,13 @@ export default class TemplateRelatedObjects extends NavigationMixin(LightningEle
 
   handleSerialNumber(event) {
       this.SerialNumber = event.detail.checked;
+      this.unsavedChanges();
   }
 
   handleDisplayChart(event) {
       this.displayChart = event.detail.checked;
       this.chartControl = !this.noGrouping && this.displayChart && this.nosubTotal;
+      this.unsavedChanges();
 
       if (this.displayChart) {
           var _this = this;
@@ -1702,14 +1716,17 @@ export default class TemplateRelatedObjects extends NavigationMixin(LightningEle
 
   handleChartNewPage(event) {
       this.chartNewPage = event.detail.checked;
+      this.unsavedChanges();
   }
 
   handleHFontColorChange(event) {
       this.selectedHFontColor = event.detail.value;
+      this.unsavedChanges();
   }
 
   handleHbgColorChange(event) {
       this.selectedHbgColor = event.detail.value;
+      this.unsavedChanges();
   }
 
   handlesubtotal(event) {
@@ -1720,21 +1737,25 @@ export default class TemplateRelatedObjects extends NavigationMixin(LightningEle
       this.fontfamily = event.detail.value.replace('&quot;', '');
       this.template.querySelectorAll('.mytable')[0].style.fontFamily = this.fontfamily;
       this.catStyle = "background-color :" + this.selectedBBgcolor + "; color:" + this.selectedBFontColor + ';font-size:' + this.fontsize + ';font-family:' + this.fontfamily + ';';
+      this.unsavedChanges();
   }
 
   handleBFontColorChange(event) {
       this.selectedBFontColor = event.detail.value;
       this.template.querySelectorAll('.mytable')[0].style.color = this.selectedBFontColor;
+      this.unsavedChanges();
   }
 
   handleBBgColorchange(event) {
       this.selectedBBgcolor = event.detail.value;
       this.template.querySelectorAll('.mytable')[0].style.backgroundColor = this.selectedBBgcolor;
+      this.unsavedChanges();
   }
 
   handleBDRbgColorchange(event) {
       this.selectedBDRbgcolor = event.detail.value;
       this.template.querySelectorAll('.mytable').style.border = "5px solid" + this.selectedBDRbgcolor;
+      this.unsavedChanges();
   }
 
   handleBarChartColorChange(event) {
@@ -1743,6 +1764,7 @@ export default class TemplateRelatedObjects extends NavigationMixin(LightningEle
       dataIdArray.forEach((item) => {
           this.template.querySelector(`[data-id=${item}]`).style.background = this.selectedBarChartColor;
       });
+      this.unsavedChanges();
   }
 
   newfontsize() {
@@ -1762,26 +1784,32 @@ export default class TemplateRelatedObjects extends NavigationMixin(LightningEle
           this.template.querySelectorAll('th')[i].style.fontSize = this.fontsize;
       }
       this.catStyle = "background-color :" + this.selectedBBgcolor + "; color:" + this.selectedBFontColor + ';font-size:' + this.fontsize + ';font-family:' + this.fontfamily + ';';
+      this.unsavedChanges();
   }
 
   handleDateFormat(event) {
       this.dateFormatvalue = event.detail.value;
+      this.unsavedChanges();
   }
 
   handleTimeFormat(event) {
       this.timeFormatvalue = event.detail.value;
+      this.unsavedChanges();
   }
 
   handleNumFormat(event) {
       this.numFormatvalue = event.detail.value;
+      this.unsavedChanges();
   }
 
   handlecurFormat(event) {
       this.curFormatvalue = event.detail.value;
+      this.unsavedChanges();
   }
 
   handleNewPage(event) {
       this.newPage = event.detail.checked;
+      this.unsavedChanges();
   }
 
   /* Filtering based on Objects -> All changes by Rahul */
@@ -1796,6 +1824,7 @@ export default class TemplateRelatedObjects extends NavigationMixin(LightningEle
   handleFiltering(event) {
       this.ruleCondition = true;
       this.template.querySelector('c-modal').show();
+      this.unsavedChanges();
   }
 
   /* The piece of code is to get the object names for selection in rules */
@@ -2046,4 +2075,8 @@ export default class TemplateRelatedObjects extends NavigationMixin(LightningEle
         this[NavigationMixin.Navigate](config);
     }
 
+    unsavedChanges(){
+        const saveEvent = new CustomEvent('datasaved', {detail: false });
+        this.dispatchEvent(saveEvent);
+    }
 }

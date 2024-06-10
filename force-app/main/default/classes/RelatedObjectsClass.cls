@@ -184,6 +184,7 @@ global with sharing class RelatedObjectsClass {
             System.debug(deleteIds);
             Id RuleId;
             Id tempruleId;
+            Id tempexternalruleId;
             String ruleName;
             //System.debug(deleteIds.size());
             if(deleteIds != null && deleteIds.size() > 0){
@@ -207,10 +208,18 @@ global with sharing class RelatedObjectsClass {
                         throw new SafeClassException(String.join( errorList1, ', ' ));
                     } else{
                         newRule.Id = srLst1[0].Id;
+                        // Created Id is inserted into External Id field. Used for Export Import functionality
+                        newRule.External_Id__c = newRule.Id;
+                        Database.SaveResult[] updateResult = safe.doUpdate(new List<Rule__C> {newRule});
+        				List<String> errorList2 = Safely.safeClassExceptionHandlerInsert(updateResult);
+                        if (errorList2.size() > 0) {
+                            throw new SafeClassException(String.join(errorList2, ', '));
+                        }
                     }
                 
                 
                     tempruleId = newRule.Id;
+                    tempexternalruleId = newRule.External_Id__c;
                     //Rule__c arr = [Select Name from Rule__c where Id=:tempruleId WITH SECURITY_ENFORCED];
                     //ruleName = arr.Name;
                     ruleName = tempruleId;
@@ -264,6 +273,7 @@ global with sharing class RelatedObjectsClass {
                     condition.Name = ruleCondition.conditionName;
                     if(condition.Id==null){
                         condition.Rule__c= tempruleId;
+                        condition.External_Id__c = tempexternalruleId;
                     }               
                     
                     condition.Operator__c= ruleCondition.operator;

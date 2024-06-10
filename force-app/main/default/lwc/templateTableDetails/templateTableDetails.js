@@ -71,7 +71,7 @@ export default class TemplateTableDetails extends LightningElement {
     initialResizeX;
     resizingColumn = null;
 
-
+    tablehasdata=false;
 
     fontsize = "12px";
 
@@ -280,6 +280,7 @@ export default class TemplateTableDetails extends LightningElement {
         } else {
             this.divContentArray.push({ 'data-id': divElement.dataset.id, 'Content': divContent, 'backgroundColor': backgroundColor });
         }
+        //this.unsavedChanges();
        // console.log('div content array in head ' + JSON.stringify(this.divContentArray));
     }
 
@@ -315,6 +316,7 @@ export default class TemplateTableDetails extends LightningElement {
 
     getSelectedTableRowHandler(event) {
         this.selectedTableRow = (event.target.dataset.id == undefined) ? this.selectedTableRow : event.target.dataset.id;
+        this.unsavedChanges();
     }
 
     /**
@@ -323,6 +325,7 @@ export default class TemplateTableDetails extends LightningElement {
 
     getSelectedTableHeader(event) {
         this.selectedHeader = (event.target.dataset.head == undefined) ? this.selectedHeader : event.target.dataset.head;
+        this.unsavedChanges();
     }
 
     /**
@@ -508,6 +511,10 @@ export default class TemplateTableDetails extends LightningElement {
                 myObj.columns = columns;
                 this.tablerows.push(myObj);
             }
+            if (this.tablehasdata == false){
+                this.unsavedChanges();
+                this.tablehasdata= true;
+            }
         }
     }
 
@@ -520,6 +527,7 @@ export default class TemplateTableDetails extends LightningElement {
         if (this.rownumber > 1 && this.tablerows.length > 0) {
             this.tablerows.pop();
             this.rownumber = Number(this.rownumber) - 1;
+            this.unsavedChanges();
         }
         else {
             let errormsg = new ShowToastEvent({
@@ -563,6 +571,7 @@ export default class TemplateTableDetails extends LightningElement {
                     }
                 }
             });
+            this.unsavedChanges();
             // console.log('table data after deleting ' + JSON.stringify(this.tablerows))
         } else {
             let errormsg1 = new ShowToastEvent({
@@ -625,6 +634,7 @@ export default class TemplateTableDetails extends LightningElement {
     */
     handlerowchange(event) {
         this.rownumber = event.target.value;
+        this.unsavedChanges();
     }
 
     /**
@@ -632,6 +642,7 @@ export default class TemplateTableDetails extends LightningElement {
     */
     handlecolchange(event) {
         this.colnumber = event.target.value;
+        this.unsavedChanges();
     }
 
     /**
@@ -639,6 +650,7 @@ export default class TemplateTableDetails extends LightningElement {
     */
     handlename(event) {
         this.Recorddetailsnew.Name = event.detail.value;
+        this.unsavedChanges();
     }
 
     /**
@@ -647,6 +659,7 @@ export default class TemplateTableDetails extends LightningElement {
 
     handleMenuItemSelect(event) {
         this.selectedBorderStyle = event.detail.value;
+        this.unsavedChanges();
         //console.log('Selected value:', this.selectedBorderStyle);
     }
 
@@ -664,6 +677,8 @@ export default class TemplateTableDetails extends LightningElement {
             this.dispatchEvent(showTableClickCheck);
         }
         else {
+            const saveEvent = new CustomEvent('datasaved', {detail: true });
+            this.dispatchEvent(saveEvent);
             this.isColResizeCheck = false;
             this.isColSwapCheck = false;
             let jsonString = '';
@@ -767,6 +782,7 @@ export default class TemplateTableDetails extends LightningElement {
 
     handlefontsizeChange(event) {
         this.fontsize = event.detail.value;
+        this.unsavedChanges();
     }
 
     /**
@@ -776,6 +792,7 @@ export default class TemplateTableDetails extends LightningElement {
     handlefontfamilyChange(event) {
         this.fontfamily = event.detail.value;
         this.template.querySelectorAll('.mytable')[0].style.fontFamily = this.fontfamily;
+        this.unsavedChanges();
     }
 
     /**
@@ -920,7 +937,7 @@ export default class TemplateTableDetails extends LightningElement {
                     this.isHeaderSelectedCheck = parsedJson.headersIncluded;
                     this.isColWidthChangedCheck = parsedJson.colWidthChanged;
                     this.selectedBorderStyle = parsedJson.borderstyle;
-
+                    this.tablehasdata= true;
 
                     this.newPage = parsedJson.newPage;
                     setTimeout(() => {
@@ -1010,6 +1027,7 @@ export default class TemplateTableDetails extends LightningElement {
 
     handleHFontColorChange(event) {
         this.selectedHFontColor = event.detail.value;
+        this.unsavedChanges();
     }
 
     /**
@@ -1018,6 +1036,7 @@ export default class TemplateTableDetails extends LightningElement {
 
     handleHbgColorChange(event) {
         this.selectedHbgColor = event.detail.value;
+        this.unsavedChanges();
     }
 
     /**
@@ -1026,6 +1045,7 @@ export default class TemplateTableDetails extends LightningElement {
 
     handleBFontColorChange(event) {
         this.selectedBFontColor = event.detail.value;
+        this.unsavedChanges();
     }
 
     /**
@@ -1034,6 +1054,7 @@ export default class TemplateTableDetails extends LightningElement {
 
     handleBBgColorchange(event) {
         this.selectedBBgcolor = event.detail.value;
+        this.unsavedChanges();
     }
 
     /**
@@ -1043,6 +1064,7 @@ export default class TemplateTableDetails extends LightningElement {
     handleBDRbgColorchange(event) {
         this.selectedBDRbgcolor = event.detail.value;
         this.handleBorderStyling();
+        this.unsavedChanges();
     }
 
     /**
@@ -1212,6 +1234,7 @@ export default class TemplateTableDetails extends LightningElement {
     handleSnoClick(event) {
         this.isSerialNumberCheck = event.target.checked;
         let parentData = this;
+        this.unsavedChanges();
         setTimeout(function () { parentData.handleBorderStyling(); }, 100);
     }
 
@@ -1222,6 +1245,7 @@ export default class TemplateTableDetails extends LightningElement {
     handleHeaderInclusionClick(event) {
         this.isHeaderSelectedCheck = event.target.checked;
         let parentData = this;
+        this.unsavedChanges();
         setTimeout(function () { parentData.handleBorderStyling(); }, 100);
     }
 
@@ -1638,6 +1662,7 @@ export default class TemplateTableDetails extends LightningElement {
 
     handleNewPage(event) {
         this.newPage = event.detail.checked;
+        this.unsavedChanges();
     }
 
 
@@ -1712,6 +1737,7 @@ export default class TemplateTableDetails extends LightningElement {
     handleColResize(event) {
         this.isColSwapCheck = false;
         let parentData = this;
+        this.unsavedChanges();
         setTimeout(function () { parentData.handleBorderStyling(); }, 100);
         this.isColResizeCheck = event.target.checked;
     }
@@ -1719,7 +1745,13 @@ export default class TemplateTableDetails extends LightningElement {
     handleColSwap(event) {
         this.isColResizeCheck = false;
         let parentData = this;
+        this.unsavedChanges();
         setTimeout(function () { parentData.handleBorderStyling(); }, 100);
         this.isColSwapCheck = event.target.checked;
+    }
+
+    unsavedChanges(){
+        const saveEvent = new CustomEvent('datasaved', {detail: false });
+        this.dispatchEvent(saveEvent);
     }
 }

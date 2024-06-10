@@ -34,6 +34,7 @@ export default class TemplateContentDetails extends NavigationMixin(LightningEle
   @track globalItems;
   @track selectedMergefields = [];
   whereClause = " IsActive__c = true";
+  @api isSaved;
   @track Recorddetailsnew = {
     Name: '',
     DxCPQ__Section_Content__c: '',
@@ -73,6 +74,8 @@ export default class TemplateContentDetails extends NavigationMixin(LightningEle
 
   handlename(event) {
     this.Recorddetailsnew.Name = event.detail.value;
+    const saveEvent = new CustomEvent('datasaved', {detail: false });
+    this.dispatchEvent(saveEvent);
   }
 
   selectItemEventHandler(event) {
@@ -116,6 +119,8 @@ export default class TemplateContentDetails extends NavigationMixin(LightningEle
 
   handlechange(event) {
     this.newpage = event.detail.checked;
+    const saveEvent = new CustomEvent('datasaved', {detail: false });
+    this.dispatchEvent(saveEvent);
   }
 
   handleclauseremoval() {
@@ -174,6 +179,8 @@ export default class TemplateContentDetails extends NavigationMixin(LightningEle
             this.dispatchEvent(event4);
             var firecustomevent = new CustomEvent('savesectiondata', { detail: this.savedRecordID });
             this.dispatchEvent(firecustomevent);
+            const saveEvent = new CustomEvent('datasaved', {detail: true });
+            this.dispatchEvent(saveEvent);
           }
         })
         .catch(error => {
@@ -247,7 +254,11 @@ export default class TemplateContentDetails extends NavigationMixin(LightningEle
 
   handleRichTextArea(event) {
     this.Recorddetailsnew.DxCPQ__Section_Content__c = event.detail.value;
-    this.richtextVal = event.detail.value;
+    if(this.richtextVal != event.detail.value){
+      this.richtextVal = event.detail.value;
+      const saveEvent = new CustomEvent('datasaved', {detail: false });
+      this.dispatchEvent(saveEvent);
+    }
   }
 
   handlesectionDelete(event) {
@@ -270,6 +281,7 @@ export default class TemplateContentDetails extends NavigationMixin(LightningEle
   }
 
   @api resetvaluesonchildcmp() {
+    this.dispatchEvent(new CustomEvent('datasaved', {detail: true }));
     this.showclause = false;
     this.ukey = (new Date()).getTime();
     this.Recorddetailsnew.Id = '';

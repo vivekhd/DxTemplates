@@ -16,7 +16,7 @@ export default class DxCpqMenuSetup extends LightningElement {
     @track globalSelectedIndex = 0;
     @track masterData;
     @api isTemplate;
-
+    @api isSaved;
 
     @api templateValue;
     @api relatedTypeOptionData;
@@ -245,10 +245,42 @@ export default class DxCpqMenuSetup extends LightningElement {
 
     //Added below method for template creation - VIVEK
     createNewTemplateHandler() {
-        const newDocTempEvt = new CustomEvent('newtemplate', {
-            detail: { newtemplatecreation: true }, bubbles: true
-            });
+        if (this.isSaved == true){
+            const newDocTempEvt = new CustomEvent('newtemplate', {
+                detail: { newtemplatecreation: true }, bubbles: true
+                });
             this.dispatchEvent(newDocTempEvt);
+        }
+        else{
+            if (confirm("Changes not saved. Please click Cancel and save the changes or Ok to continue.") == true){
+                this.isSaved = true;
+                const saveEvent = new CustomEvent('datasaved', {detail: true });
+                this.dispatchEvent(saveEvent);
+                this.createNewTemplateHandler(event);
+            }
+        }
+    }
+
+    // handleAllButtonsClicked(event){
+    //     if (this.isSaved == true){
+    //         if (event.target.label == 'New template'){
+    //             this.createNewTemplateHandler(event);
+    //         }
+    //     }
+    //     else{
+    //         if (confirm("Changes not saved. Please click Cancel and save the changes or Ok to continue.") == true){
+    //             this.isSaved = true;
+    //             const saveEvent = new CustomEvent('datasaved', {detail: this.isSaved});
+    //             this.dispatchEvent(saveEvent)
+    //             this.handleAllButtonsClicked(event);
+    //         }
+    //     }
+    // }
+
+    handleDataSaved(event){
+        this.isSaved = event.detail;
+        const saveEvent = new CustomEvent('datasaved', {detail: event.detail });
+        this.dispatchEvent(saveEvent);
     }
 
 }

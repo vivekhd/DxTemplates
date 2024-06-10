@@ -26,7 +26,7 @@ public with sharing class SaveDocumentTemplate {
                 insertedID = DocTemp.ID;
             }
             else if (hasRecordId != null && hasRecordId != ''){
-                                DocTemp.ID = hasRecordId;
+                DocTemp.ID = hasRecordId;
                 DocTemp.Description__c = Recorddetails.Description__c;
                 List<Document_Template__c> listtobeupdated=new List<Document_Template__c>();
                 listtobeupdated.add(DocTemp);
@@ -229,6 +229,7 @@ public with sharing class SaveDocumentTemplate {
             }
             docTemp.Parent_Template__c = docTemp.Id;
             docTemp.Version_Number__c = 1;
+            docTemp.External_ID__c = docTemp.Id;
             docTempId = docTemp.Id;
             if (sp1 == null) sp1 = Database.setSavepoint();
             Database.UpsertResult[] urList2 = safe.doupsert(docTemp);

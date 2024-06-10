@@ -6,38 +6,77 @@
 					<div class="slds-col sidenavleft">
 						<!-- Changes by Kapil - fix for SObj Filters -->
 						<lightning-button-group class="slds-float_right" style="padding-top:40px; margin: 2px 10px 0px 0px;">
-							<lightning-button-icon onclick={importTemplate} variant="border-filled" icon-name="utility:upload" style="z-index:1;"></lightning-button-icon>
-							<lightning-button-icon onclick={exportTemplate} variant="border-filled" icon-name="utility:download" style="z-index:1;"></lightning-button-icon>
+							<lightning-button-icon onclick={handleAllButtonsClicked} data-id="import" variant="border-filled" icon-name="utility:upload" style="z-index:1;"></lightning-button-icon>
+							<lightning-button-icon onclick={handleAllButtonsClicked} data-id="export" variant="border-filled" icon-name="utility:download" style="z-index:1;"></lightning-button-icon>
 						</lightning-button-group>
 						<c-menu-setup if:true={documentsExist} grid-data={docGridData} is-template='true' template-value={templateRelatedTo}
 							placeholder-text="Search..." onactive={handleTemplateSelection} related-type-option-data={relatedTypeOptions} 
-							onnewtemplate={handleNewTemplateCreationscreen} onfilteredvalue={handleFilterSelection}>
+							onnewtemplate={handleNewTemplateCreationscreen} onfilteredvalue={handleFilterSelection} is-saved={isSaved} ondatasaved={handleDataSaved}>
 						</c-menu-setup>
 					</div>
+
 				</div>
 			</div>
 			<div class="slds-col dx-p-left_200 ">
 				<template if:true={showUpdatedTemplate}>
 					<c-template-designer-c-m-p record-id={selectedDocumentId} relatedto-type-obj-name={relatedtoTypeObj}
 						ondoccreated={handleNewTemplateCreation} ondeletetemplate={deleteTemplateHandler}
-						ondocedited={editTemplateHandler}>
+						ondocedited={editTemplateHandler} ondatasaved={handleDataSaved} is-saved={isSaved}>
 					</c-template-designer-c-m-p>
 				</template>
 			</div>
 		</div>
 
 		<c-modal onclosedialog ={handleDialogBoxClosed}>
-			<!------Progress bar code added by Bhavya starts here ------>
-			<header style="background-color: #ffffff;padding: 1% 0;">
-				<lightning-progress-indicator current-step={currentStep} type="base" variant="base">
-					<lightning-progress-step label="" value="1" data-step = "1">
-					</lightning-progress-step>
-					<lightning-progress-step label="" value="2" data-step = "2">
-					</lightning-progress-step>
-				</lightning-progress-indicator>
-			</header>
-<template if:true={showAllTemplates}>
-				<div style="background-color: #ffffff;padding: 1% 0;">
+			<template if:true={showImportTemplates}>
+				<span slot="header">Import Templates</span>
+				<header style="background-color: #ffffff;padding: 1% 0;">
+					<lightning-progress-indicator current-step={currentStep} type="base" variant="base">
+						<lightning-progress-step label="" value="1" data-step = "1">
+						</lightning-progress-step>
+						<lightning-progress-step label="" value="2" data-step = "2">
+						</lightning-progress-step>
+						<lightning-progress-step label="" value="3" data-step = "3">
+						</lightning-progress-step>
+					</lightning-progress-indicator>
+				</header>
+				<template if:true={showFirstImportScreen}>
+					<div style="background-color: #ffffff;padding: 1% 16px;">
+						<div>
+							<input type="file" accept="json/*" onchange={handleJSONUpload} class="dx-button">
+							<lightning-textarea name="import" label="Paste JSON" placeholder="paste here..." value={jsonData} onchange={pastedjson}></lightning-textarea>
+						</div>
+						<br>
+						<div class="slds-text-align_right">
+							<lightning-button variant="neutral" label="Create" title="Create template based on above JSON" onclick={createTemplateData} disabled={createDisabledButton}> </lightning-button>
+						</div>
+						<br>
+					</div>
+				</template>
+				<template if:true={showDuplicateTemplates}>
+					<div style="background-color: #ffffff;padding: 1% 16px;">
+						<div>
+							{errorMessage}
+						</div>
+						<!-- <div class="slds-text-align_right" style="padding: 16px;">
+							<lightning-button variant="brand" label="Skip" title="Skip" onclick={skipTemplate} style="margin: 6px;"></lightning-button>
+							<lightning-button variant="neutral" label="Create as new version" title="Create as new version" onclick={continueTemplate}></lightning-button>
+						</div> -->
+					</div>
+				</template>
+				<template if:true={showTemplateMessage}>
+					<div style="background-color: #ffffff;padding: 1% 16px;">
+						{templateSuccessMessage}
+					</div>
+					<div class="slds-text-align_right">
+						<lightning-button variant="neutral" label="Done" title="Done" onclick={refreshPageAfterCreate}> </lightning-button>
+					</div>
+				</template>
+			</template>
+
+			<template if:true={showAllTemplates}>
+				<span slot="header">Export templates</span>
+				<div style="background-color: #ffffff;padding: 1% 16px;">
 					<lightning-dual-listbox name="templates"
                             label="Select Templates"
                             source-label="Available Templates"
@@ -46,26 +85,27 @@
                             onchange={handleExportTemplateList}>
 					</lightning-dual-listbox>
 					<div class="slds-text-align_right" style="padding: 16px;">
-						<lightning-button variant="neutral" label={previewLabel} title="Preview Selected Templates" onclick={exportTemplateList} style="margin: 6px;"></lightning-button>
+						<template if:true={showPreviewButton}>
+							<lightning-button variant="neutral" label={previewLabel} title="Preview Selected Templates" onclick={exportTemplateList} style="margin: 6px;"></lightning-button>
+						</template>
 						<lightning-button variant="brand" label="Download" title="Download Templates" onclick={downloadJson}></lightning-button>
 					</div>
-					<template if:true={showTextArea}>
-						<div style="padding: 16px 16px 0px 0px;">
-							<lightning-textarea label="JSON Preview" name="Data" readonly value={exportList} style="height:180px;"> 
-    						</lightning-textarea>
-						</div>
+					<template if:true={showPreviewButton}>
+						<template if:true={showTextArea}>
+							<!-- <div class="slds-text-align_right">
+								<lightning-button-icon variant="container" icon-name="utility:copy_to_clipboard" title="Copy to clipboard"></lightning-button-icon>
+							</div> -->
+							<div style="padding: 0px 16px 0px 0px;">
+								<div class="slds-text-align_right">
+									<lightning-button-icon variant="bare" icon-name="utility:copy_to_clipboard" title="Copy to clipboard" onclick={copyJsonData} style="position: absolute;z-index: 1;margin: 28px 0px 0px -36px;"></lightning-button-icon>
+								</div>
+								<lightning-textarea label="JSON Preview" name="Data" readonly value={exportList} style="height:180px;"> 
+								</lightning-textarea>
+							</div>
+						</template>
 					</template>
 				</div>
 			</template>
-			<!------Progress bar code added by Bhavya starts here ------>
-			<!-- <header style="background-color: #ffffff;padding: 1% 0;">
-				<lightning-progress-indicator current-step={currentStep} type="base" variant="base">
-					<lightning-progress-step label="" value="1" data-step = "1">
-					</lightning-progress-step>
-					<lightning-progress-step label="" value="2" data-step = "2">
-					</lightning-progress-step>
-				</lightning-progress-indicator>
-			</header> -->
 			<!------Progress bar code added by Bhavya ends here------>
 			<template if:true={showAddNewTemplate}>
 				<span slot="header">Add New Template</span>

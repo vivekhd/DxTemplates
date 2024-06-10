@@ -27,6 +27,7 @@ export default class TemplateDesignerCMP extends NavigationMixin(LightningElemen
   @api recordId; // Selected Template ID
   @track pdfLinksData;
   @track isActivateTemplateDisabled = true;// to disable the Activate
+  @api isSaved; //to check for unsaved changes
   //variables added by Bhavya for watermark starts here
 
   step = 1; // progress bar increases with a step value 1
@@ -199,7 +200,7 @@ export default class TemplateDesignerCMP extends NavigationMixin(LightningElemen
     * @param {String} sectionid The ID of the section.
     */
   handlechildcomponents(selectedOption, isNewSection, sectionid) {
-        if (selectedOption == 'Clause') {
+    if (selectedOption == 'Clause') {
       this.showclausescreen = true;
       this.showtabledetails = false;
       this.showrelatedobjectdetails = false;
@@ -284,7 +285,7 @@ export default class TemplateDesignerCMP extends NavigationMixin(LightningElemen
       this.showtabledetails = false;
       this.showrelatedobjectdetails = false;
       this.SectionTypename = 'Header';
-            this.opensection = true;
+      this.opensection = true;
       this.showcontextdetails = false;
       this.showheaderdetails = true;
       this.showfooterdetails = false;
@@ -311,6 +312,73 @@ export default class TemplateDesignerCMP extends NavigationMixin(LightningElemen
       }
     }
   }
+
+  handleDataSaved(event){
+    //window.addEventListener('beforeunload', this.handleBeforeUnload);
+    console.log('handleDataSaved triggered', event.detail);
+    this.isSaved = event.detail;
+    const saveEvent = new CustomEvent('datasaved', {detail: event.detail });
+    this.dispatchEvent(saveEvent);
+  }
+
+  handleAllButtonsClicked(event){
+    if (this.isSaved == true){
+      if (event.target.label == 'Activate Template' || event.target.label == 'Deactivate Template'){
+        this.handleActiveTemplate(event);
+      }
+      else if (event.target.label == 'Clone Template'){
+        this.handleCloneTemplate(event);
+      }
+      else if (event.target.label == 'Delete Template'){
+        this.handleDeleteTemplateHandler(event);
+      }
+      else if (event.target.label == 'Refresh Template'){
+        this.handleRefreshTemplateHandler(event);
+      }
+      else if (event.target.label == 'Preview Template'){
+        this.handlePreview(event);
+      }
+      else if (event.target.title == 'Section : Context'){
+        this.handleNewContext(event);
+      }
+      else if (event.target.title == 'Section : Related Objects'){
+        this.handleNewRelatedObjects(event);
+      }
+      else if (event.target.title == 'Section : Clause'){
+        this.handleNewClause(event);
+      }
+      else if (event.target.title == 'Section : Table'){
+        this.handleNewTable(event);
+      }
+      else if (event.target.title == 'Edit Template'){
+        this.handleEditTemplate(event);
+      }
+      else if (event.currentTarget.dataset.sectiontype == 'Header'){
+        this.handleHeaderClick(event);
+      }
+      else if (event.currentTarget.dataset.sectiontype!='Header'&&event.currentTarget.dataset.sectionType!='Footer'){
+        this.handleSectionClick(event);
+      }
+      else if (event.currentTarget.dataset.sectiontype == 'Footer'){
+        this.handleFooterClick(event);
+      }
+    }
+    else{
+      event.preventDefault();
+      if (confirm("Changes not saved. Please click Cancel and save the changes or Ok to continue.") == true){
+        this.isSaved = true;
+        const saveEvent = new CustomEvent('datasaved', {detail: this.isSaved});
+        this.dispatchEvent(saveEvent)
+        this.handleConfirmScreen(event);
+      }
+    }
+  }
+
+  handleConfirmScreen(event){
+    this.handleAllButtonsClicked(event);
+  }
+
+
   /**
    * Method to add a new Context section to the sections stack
   */
@@ -519,12 +587,13 @@ export default class TemplateDesignerCMP extends NavigationMixin(LightningElemen
   * Method to reset all the values on all the section components
   */
   @api resetallvaluesonAllcmp() {
+    //this.isSaved = true;
     this.documenttemplaterecordid = '';
     this.doctemplatedetails.Id = '';
     this.doctemplatedetails.Name = '';
     this.doctemplatedetails.DxCPQ__Related_To_Type__c = '';
     this.relatedtoTypeObjChild = '',
-      this.doctemplatedetails.DxCPQ__IsActive__c = false;
+    this.doctemplatedetails.DxCPQ__IsActive__c = false;
     this.doctemplatedetails.DxCPQ__Version_Number__c = '';
     this.doctemplatedetails.DxCPQ__Previously_Active__c = false;
     this.doctemplatedetails.DxCPQ__Parent_Template__c = '';
@@ -546,6 +615,8 @@ export default class TemplateDesignerCMP extends NavigationMixin(LightningElemen
     this.header = { Id: 'headerNotSaved', Type: 'Header', rowCount: this.rowCount, sectionNameEntered: 'Header' };
     this.footer = { Id: 'footerNotSaved', Type: 'Footer', rowCount: this.rowCount, sectionNameEntered: 'Footer' };
     this.showPreview = false;
+    const saveEvent = new CustomEvent('datasaved', {detail: true});
+    this.dispatchEvent(saveEvent);
   }
 
   resetImageWatermarkFields() {

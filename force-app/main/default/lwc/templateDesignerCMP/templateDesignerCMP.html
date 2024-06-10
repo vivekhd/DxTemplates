@@ -5,15 +5,15 @@
 			<div class="slds-grid slds-wrap">
 				<div class="slds-col slds-text-align_left" style="padding-top:2px;">
 					<lightning-button-group>
-						<lightning-button label={activateTemplateLabel} onclick={handleActiveTemplate} disabled={isActivateTemplateDisabled}>
+						<lightning-button label={activateTemplateLabel} onclick={handleAllButtonsClicked} disabled={isActivateTemplateDisabled}>
 						</lightning-button>
-						<lightning-button label="Clone Template" onclick={handleCloneTemplate}></lightning-button>
-						<lightning-button label="Delete Template" onclick={handleDeleteTemplateHandler}>
+						<lightning-button label="Clone Template" onclick={handleAllButtonsClicked}></lightning-button>
+						<lightning-button label="Delete Template" onclick={handleAllButtonsClicked}>
 						</lightning-button>
-						<lightning-button label="Refresh Template" onclick={handleRefreshTemplateHandler}>
+						<lightning-button label="Refresh Template" onclick={handleAllButtonsClicked}>
 						</lightning-button>
 						<template if:true={showPreview}>
-							<lightning-button label="Preview Template" onclick={handlePreview}>
+							<lightning-button label="Preview Template" onclick={handleAllButtonsClicked}>
 							</lightning-button>
 						</template>
 					</lightning-button-group>
@@ -28,20 +28,20 @@
 						<lightning-button-group data-id='section menu items' class="slds-button-group" role="group">
 
 							<lightning-button-icon icon-name="utility:snippet" alternative-text="Section : Context"
-								title="Section : Context" onclick={handleNewContext} disabled={disableEditing}>
+								title="Section : Context" onclick={handleAllButtonsClicked} disabled={disableEditing}>
 							</lightning-button-icon>
 							<lightning-button-icon icon-name="utility:strategy"
 								alternative-text="Section : Related Objects" title="Section : Related Objects"
-								onclick={handleNewRelatedObjects} disabled={disableEditing}></lightning-button-icon>
+								onclick={handleAllButtonsClicked} disabled={disableEditing}></lightning-button-icon>
 							<lightning-button-icon icon-name="utility:task" alternative-text="Section : Clause"
-								title="Section : Clause" onclick={handleNewClause} disabled={disableEditing}>
+								title="Section : Clause" onclick={handleAllButtonsClicked} disabled={disableEditing}>
 							</lightning-button-icon>
 							<lightning-button-icon icon-name="utility:table" alternative-text="Section : Table"
-								title="Section : Table" onclick={handleNewTable} disabled={disableEditing}>
+								title="Section : Table" onclick={handleAllButtonsClicked} disabled={disableEditing}>
 							</lightning-button-icon>
 							<span style="line-height:32px"> &nbsp; - &nbsp; </span>
 							<lightning-button-icon icon-name="utility:edit" alternative-text="Edit Template"
-								title="Edit Template" onclick={handleEditTemplate}>
+								title="Edit Template" onclick={handleAllButtonsClicked}>
 							</lightning-button-icon>
 						</lightning-button-group>
 					</lightning-layout>
@@ -62,12 +62,12 @@
 								rowcount={header.rowCount} sectiontype={header.Type}
 								ondeletesectiondata={handledeletesectiondata} onsavesectiondata={handlesavedheaderdata}
 								recordidtoedit={recordidtoedit} sectionrecordid={header.Id}
-								documenttemplaterecord={doctemplatedetails} pdf-links ={pdfLinksData}>
+								documenttemplaterecord={doctemplatedetails} pdf-links ={pdfLinksData} ondatasaved={handleDataSaved}>
 							</c-template-header>
 
 							<c-template-content-details showdetails={showcontextdetails}
 								selected-object-name={relatedtoTypeObjChild} recordidvalueprop={recordIDValueprop}
-								rowcount={rowCount} sectiontype={SectionTypename}
+								rowcount={rowCount} sectiontype={SectionTypename} ondatasaved={handleDataSaved}
 								onsavesectiondata={handlesavedsectiondata} ondeletesectiondata={handledeletesectiondata}
 								showclausescreen={showclausescreen} recordidtoedit={recordidtoedit}
 								sectionrecordid={selectedSectionRecordID} documenttemplaterecord={doctemplatedetails} pdf-links ={pdfLinksData}> </c-template-content-details>
@@ -79,7 +79,7 @@
 								onsavesectiondata={handlesavedsectiondata} ondeletesectiondata={handledeletesectiondata}
 								recordidtoedit={recordidtoedit} sectionrecordid={selectedSectionRecordID}
 								documenttemplaterecordid={doctemplatedetails.Id}
-								documenttemplaterecord={doctemplatedetails} >
+								documenttemplaterecord={doctemplatedetails} ondatasaved={handleDataSaved}>
 							</c-template-table-details>
 
 							<c-template-related-objects showrelatedobjectdetails={showrelatedobjectdetails}
@@ -87,13 +87,13 @@
 								rowcount={rowCount} sectiontype={SectionTypename}
 								onsavesectiondata={handlesavedsectiondata} ondeletesectiondata={handledeletesectiondata}
 								recordidtoedit={recordidtoedit} sectionrecordid={selectedSectionRecordID}
-								documenttemplaterecordid={doctemplatedetails.Id}
+								documenttemplaterecordid={doctemplatedetails.Id} ondatasaved={handleDataSaved}
 								documenttemplaterecord={doctemplatedetails} pdf-links ={pdfLinksData}>
 							</c-template-related-objects>
 
 							<c-template-footer showfooterdetails={showfooterdetails}
 								selected-object-name={relatedtoTypeObjChild} recordidvalueprop={recordIDValueprop}
-								rowcount={footer.rowCount} sectiontype={footer.Type}
+								rowcount={footer.rowCount} sectiontype={footer.Type} ondatasaved={handleDataSaved}
 								ondeletesectiondata={handledeletesectiondata} onsavesectiondata={handlesavedfooterdata}
 								recordidtoedit={recordidtoedit} sectionrecordid={footer.Id}
 								documenttemplaterecord={doctemplatedetails} pdf-links ={pdfLinksData}>
@@ -124,8 +124,8 @@
 							</div>
 
 							<template if:true={header}>
-								<div class="grabable" key={header.Id} id={header.Id} data-drag-id={header.Id}
-									data-onload='templateHeader' onclick={handleHeaderClick} data-index={header.Id}
+								<div class="grabable" key={header.Id} id={header.Id} data-drag-id={header.Id} data-sectiontype={header.Type}
+									data-onload='templateHeader' onclick={handleAllButtonsClicked} data-index={header.Id}
 									data-id={header.Id}>
 									<div scope="col" class="slds-grid slds-wrap"
 										style="padding:10px 10px 10px 10px; width:100%; box-shadow:0px 0px 2px rgb(229, 229, 229)">
@@ -150,7 +150,8 @@
 								<template for:each={sections} for:item="section" for:index="index">
 									<div class="grabable" key={section.Id} id={section.Id} draggable="true"
 										data-drag-id={index} ondragstart={onDragStart} ondragover={onDragOver}
-										ondrop={onDrop} onclick={handleSectionClick} data-index={index} data-id={index}>
+										data-sectiontype={section.Type}
+										ondrop={onDrop} onclick={handleAllButtonsClicked} data-index={index} data-id={index}>
 
 										<div scope="col" class="slds-grid slds-wrap"
 											style="padding:10px 10px 10px 10px; width:100%; box-shadow:0px 0px 2px rgb(229, 229, 229)">
@@ -180,8 +181,8 @@
 							<template if:false={sections}>No rows found.</template>
 
 							<template if:true={footer}>
-								<div class="grabable" key={footer.Id} id={footer.Id} data-drag-id={footer.Id}
-									data-onload='templateFooter' onclick={handleFooterClick} data-index={footer.Id}
+								<div class="grabable" key={footer.Id} id={footer.Id} data-drag-id={footer.Id} data-sectiontype={footer.Type}
+									data-onload='templateFooter' onclick={handleAllButtonsClicked} data-index={footer.Id}
 									data-id={footer.Id}>
 									<div scope="col" class="slds-grid slds-wrap"
 										style="padding:10px 10px 10px 10px; width:100%; box-shadow:0px 0px 2px rgb(229, 229, 229)">

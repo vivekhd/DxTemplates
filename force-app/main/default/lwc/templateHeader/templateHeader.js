@@ -28,6 +28,9 @@ export default class TemplateHeader extends NavigationMixin(LightningElement) {
   popUpMessage;
   oldHeaderColumnList = {};
   oldHeaderFirstColumnList={};
+  whereCondition ="";
+  whereClause = " IsActive__c = true";
+
   Recorddetailsnew = {
     Name: '', DxCPQ__Section_Content__c: '', DxCPQ__DisplaySectionName__c: false,
     DxCPQ__New_Page__c: false,
@@ -49,6 +52,12 @@ export default class TemplateHeader extends NavigationMixin(LightningElement) {
     }
   }
 
+  connectedCallback() {
+    this.whereCondition ="DxCPQ__Document_Template__r.DxCPQ__Related_To_Type__c = " +"\'"+this.selectedObjectName+"\'"+" AND DxCPQ__Type__c = "+"\'"+this.sectiontype+"\'";
+    this.whereClause = this.whereCondition;
+ 
+  }
+
   handleDiffHeader(event){
     this.showfirstpageheader = event.detail.checked;
   }
@@ -65,7 +74,7 @@ export default class TemplateHeader extends NavigationMixin(LightningElement) {
           }
           else {
             this.columnfirstvalueList.push(i);
-            this.headerFirstSectionsMap.push({ "value": "", "indexvar": i+3, "key": (new Date()).getTime() + ":" + i })
+            this.headerFirstSectionsMap.push({ "value": "", "indexvar": i+3, "columnFirstCount":this.columnfirstvalue, "key": (new Date()).getTime() + ":" + i, "headerVal": "" })
             //this.headerSectionsMap.push({ "value": "", "indexvar": i+3,  "key": (new Date()).getTime() + ":" + i })
           }
         }
@@ -77,11 +86,20 @@ export default class TemplateHeader extends NavigationMixin(LightningElement) {
     else {
       for (var i = 0; i < this.columnfirstvalue; i++) {
         this.columnfirstvalueList.push(i);
-        this.headerFirstSectionsMap.push({ "value": "", "indexvar": i+3, "key": (new Date()).getTime() + ":" + i })
+        this.headerFirstSectionsMap.push({ "value": "", "indexvar": i+3, "columnFirstCount":this.columnfirstvalue, "key": (new Date()).getTime() + ":" + i, "headerVal": "" })
         //this.headerSectionsMap.push({ "value": "", "indexvar": i+3, "key": (new Date()).getTime() + ":" + i })
       }
     } 
     //this.headerSectionsMap.push (this.headerFirstSectionsMap) 
+    let refData = {
+      "0":{"0":""},
+      "1":{"0":"Left", "1":"Right"},
+      "2":{"0":"Left", "1":"Center", "2":"Right"}
+    }
+    this.headerFirstSectionsMap.forEach(item => {
+        item.columnFirstCount = this.columnfirstvalue;
+        item.headerVal = refData[this.columnfirstvalue - 1][item.indexvar-3];
+    });
   }
 
   handlefirstcolumnsClass(columncount) {
@@ -189,8 +207,11 @@ export default class TemplateHeader extends NavigationMixin(LightningElement) {
         item.columnCount = this.columnvalue;
         item.headerVal = refData[this.columnvalue - 1][item.indexvar];
     });
-
- }
+    this.headerFirstSectionsMap.forEach(item => {
+        item.columnFirstCount = this.columnfirstvalue;
+        item.headerVal = refData[this.columnfirstvalue - 1][item.indexvar];
+    });
+  }
   /* Header Changes End by Rahul */
 
   @api
