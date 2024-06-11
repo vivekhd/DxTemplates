@@ -5,7 +5,10 @@ import deletetemplate from '@salesforce/apex/SaveDocumentTemplatesection.deletet
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 import { NavigationMixin } from 'lightning/navigation';
 import gettemplatesectiondata from '@salesforce/apex/SaveDocumentTemplatesection.gettemplatesectiondata';
-
+import getSObjectListFiltering from '@salesforce/apex/RelatedObjectsClass.getSObjectListFiltering';
+import createRuleCondition from '@salesforce/apex/RelatedObjectsClass.createRuleCondition';
+import getConditions from '@salesforce/apex/RelatedObjectsClass.getExistingConditions';
+import { createRuleConditionHierarcy } from 'c/conditionUtil';
 export default class TemplateContentDetails extends NavigationMixin(LightningElement) {
   isLoaded = false;
   showMergeFields = false;
@@ -31,8 +34,10 @@ export default class TemplateContentDetails extends NavigationMixin(LightningEle
   @track savedRecordID;
   isDisabled = false;
   selectedClauseId;
+  @track ruleCondition = false;
   @track globalItems;
   @track selectedMergefields = [];
+  @api whereCondition ="";
   whereClause = " IsActive__c = true";
   @api isSaved;
   @track Recorddetailsnew = {
@@ -45,7 +50,8 @@ export default class TemplateContentDetails extends NavigationMixin(LightningEle
     DxCPQ__Type__c: '',
     Id: '',
     DxCPQ__RuleId__c: '',
-    DxCPQ__Document_Clause__c: ''
+    DxCPQ__Document_Clause__c: '',
+    DxCPQ__Section_Visibility_Rule__c:''
   };
     formats = [
         'font',
@@ -65,6 +71,17 @@ export default class TemplateContentDetails extends NavigationMixin(LightningEle
         'code-block',
         'script', 'direction'
     ];
+ //filter
+  @track ruleCondition;
+  @track listOfExistingConditions = [];
+  @track fieldWrapper;
+  ruleExpression;
+  ruleConditions = [];
+  ruleExists = false;
+  allConditions=[];
+  conditionExists=false;
+  conditionsArr = [];
+  mapOfRC = new Map();
 
   renderedCallback() {
     if (this.documenttemplaterecord && this.documenttemplaterecord.DxCPQ__Previously_Active__c == true) {
@@ -84,7 +101,145 @@ export default class TemplateContentDetails extends NavigationMixin(LightningEle
     this.richtextVal = event.detail.selectedRecord.recordObject.DxCPQ__Body__c;
     this.Recorddetailsnew.Name = event.detail.selectedRecord.recordName;
   }
+/*filter*/
 
+  connectedCallback() {
+    this.handleRuleWrapperMaking();
+   // this.whereCondition = `DxCPQ__Document_Template__r.DxCPQ__Related_To_Type__c = '${this.selectedObjectName}' AND DxCPQ__Type__c = 'Context'`;
+    this.whereClause = this.whereCondition;
+    console.log('sectionrecordid',this.sectionrecordid);
+  }
+   handleFiltering() {
+      this.ruleCondition = true;
+      this.template.querySelector('[data-id="filter"]').show();
+  }
+   closePreviewModal() {
+      this.ruleCondition = false;
+      this.template.querySelector('[data-id="filter"]').hide();
+  }
+  handleRuleWrapperMaking() {
+    if (this.selectedObjectName !== undefined) {
+      getSObjectListFiltering({
+        selectedChildObjectLabel: this.selectedObjectName
+        })
+      .then((result) => {
+          this.fieldWrapper = result;
+      })
+      .catch((error) => {
+          console.log('error while Filtering the Object -> handleRuleWrapperMaking', error);
+      });
+    }
+  }
+     handleCreateRules(event) {
+      const conditionChild = this.template.querySelector('c-conditioncmp').getConditionDetails();
+      this.ruleExpression = conditionChild.expression;
+      this.createRuleConditionObjects(conditionChild.listOfConditions);
+      let listOfConditions = JSON.stringify(this.ruleConditions);
+      let deleteIds = null;
+      let ruleExp = JSON.stringify(this.ruleExpression);
+      createRuleCondition({
+              ruleConditions: listOfConditions,
+              ruleExpression: ruleExp,
+              deleteIds: deleteIds,
+              sectionrecordid: this.sectionrecordid
+          })
+          .then(result => {
+              this.ruleIdCreated = result;
+              this.ruleExists = true;
+              let event = new Object();
+              this.getExistingConditions(event);
+          })
+          .catch(error => {
+              console.log('Error -> createRuleCondition' + JSON.stringify(error));
+          });
+      this.template.querySelector('c-modal').hide();
+  }
+   createRuleConditionObjects(arrayList) {
+      this.hasSpecialCharacter = false;
+      let regExpr = /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]+/;
+      arrayList.forEach(condition => {
+          let tempObj = {};
+          tempObj.Id = condition.Id;
+          tempObj.conditionName = condition.conditionName;
+          tempObj.dataType = condition.dataType;
+          if (condition.operator == '==') {
+              tempObj.operator = '==';
+          } else {
+              tempObj.operator = condition.operator;
+          }
+          tempObj.selectedObject = condition.selectedObject;
+          tempObj.selectedField = condition.selectedField;
+          tempObj.value = condition.value;
+          if (regExpr.test(tempObj.value)) {
+              this.hasSpecialCharacter = true;
+          }
+          tempObj.conditionIndex = condition._index;
+          this.ruleConditions.push(tempObj);
+          if (condition.children && condition.children.length > 0) {
+              condition.children.forEach(child => {
+                  if (child.group && child.group.length > 0) {
+                      this.createRuleConditionObjects(child.group);
+                  }
+              })
+          }
+      })
+  }
+   handleRuleUpdates(event) {
+      this.ruleConditions = [];
+      const conditionChild = this.template.querySelector('c-conditioncmp').getConditionDetails();
+      this.createRuleConditionObjects(conditionChild.listOfConditions);
+      let listOfConditions = JSON.stringify(this.ruleConditions);
+      let expression = JSON.stringify(conditionChild.expression);
+      let deleteIds = this.removeDeletedConditions(this.ruleConditions, this.conditionsArr);
+      if (!this.hasSpecialCharacter) {
+          createRuleCondition({
+                  ruleConditions: listOfConditions,
+                  ruleExpression: expression,
+                  deleteIds: deleteIds,
+                  sectionrecordid: this.sectionrecordid
+              })
+              .then(result => {
+                  this.ruleExists = true;
+                  this.ruleExpression = expression;
+
+                  let event = new Object();
+                  this.getExistingConditions(event);
+              })
+              .catch(error => {
+                  console.log('createRuleCondition error occurred' + JSON.stringify(error));
+              });
+      }
+      this.template.querySelector('c-modal').hide();
+  }
+   getExistingConditions(event) {
+      this.mapOfRC = new Map();
+      this.conditionsArr = [];
+      this.conditionExists = false;
+      this.allConditions = [];
+      this.listOfExistingConditions = [];
+      getConditions({ ruleName: this.ruleIdCreated })
+        .then(result => {
+            if (result.length > 0) {
+                this.conditionsArr = JSON.parse(JSON.stringify(result));
+                this.lstofactualConditions = this.conditionsArr;
+                this.conditionsArr.forEach(con => {
+                    this.mapOfRC.set(con.Name, con);
+                });
+                if (this.fieldWrapper !== undefined) {
+                    let conditionResult = createRuleConditionHierarcy(this.ruleExpression, this.mapOfRC, this.fieldWrapper);
+                    this.listOfExistingConditions = conditionResult.listOfConditions;
+                    this.selectedGlobalValue = conditionResult.selectedGlobalValue;
+                    this.conditionExists = true;
+                }
+            }
+        })
+        .catch(error => {
+            console.log('Apex Call getExistingConditions Erroneous');
+            console.log(error);
+        })
+  }
+
+  /*filter*/
   updateItemEventHandler(event) {
     this.selectedClauseId = undefined;
     this.richtextVal = '';
@@ -154,6 +309,7 @@ export default class TemplateContentDetails extends NavigationMixin(LightningEle
     this.Recorddetailsnew.DxCPQ__Sequence__c = this.rowcount;
     this.Recorddetailsnew.DxCPQ__Type__c = this.sectiontype;
     this.Recorddetailsnew.DxCPQ__RuleId__c = '';
+    this.Recorddetailsnew.DxCPQ__Section_Visibility_Rule__c = this.ruleIdCreated;
 
     let clauseCheck = true;
     if (this.Recorddetailsnew.DxCPQ__Type__c == 'Clause') {
@@ -290,8 +446,31 @@ export default class TemplateContentDetails extends NavigationMixin(LightningEle
     this.richtextVal = '';
     this.clauseId = '';
     this.Recorddetailsnew.DxCPQ__New_Page__c = false;
+    this.Recorddetailsnew.DxCPQ__Section_Visibility_Rule__c = '';
     this.newpage = false;
-
+    this.Recorddetailsnew = {
+    Name: '',
+    DxCPQ__Section_Content__c: '',
+    DxCPQ__DisplaySectionName__c: false,
+    DxCPQ__New_Page__c: false,
+    DxCPQ__Document_Template__c: '',
+    DxCPQ__Sequence__c: 0,
+    DxCPQ__Type__c: '',
+    Id: '',
+    DxCPQ__RuleId__c: '',
+    DxCPQ__Document_Clause__c: '',
+    DxCPQ__Section_Visibility_Rule__c:''
+  };
+   this.ruleCondition = false;
+  this.listOfExistingConditions = [];
+  //this.fieldWrapper=[];
+  this.ruleExpression = '';
+  this.ruleConditions = [];
+  this.ruleExists = false;
+  this.allConditions=[];
+  this.conditionExists=false;
+  this.conditionsArr = [];
+  this.mapOfRC = new Map();
     this.template.querySelectorAll('lightning-input-rich-text').forEach(element => {
       if (element.value != null) {
         element.value = '';
@@ -316,6 +495,8 @@ export default class TemplateContentDetails extends NavigationMixin(LightningEle
   @api loadsectionsectionvaluesforedit(recordID) {
     this.isLoaded = true;
     this.value = [];
+    this.ruleExists = false;
+    this.sectionrecordid = recordID;
     this.Recorddetailsnew.Id = recordID;
     gettemplatesectiondata({ editrecordid: recordID })
       .then(result => {
@@ -328,7 +509,7 @@ export default class TemplateContentDetails extends NavigationMixin(LightningEle
           this.Recorddetailsnew.DxCPQ__New_Page__c = result.DxCPQ__New_Page__c;
           this.Recorddetailsnew.DxCPQ__DisplaySectionName__c = result.DxCPQ__DisplaySectionName__c;
           this.Recorddetailsnew.DxCPQ__Section_Content__c = result.DxCPQ__Section_Content__c;
-
+          this.Recorddetailsnew.DxCPQ__Section_Visibility_Rule__c = result.DxCPQ__Section_Visibility_Rule__c;
           this.sectiontype = result.DxCPQ__Type__c;
           if (this.Recorddetailsnew.DxCPQ__Type__c == 'Clause' && result.DxCPQ__Document_Clause__c != null) {
             this.clauseId = result.DxCPQ__Document_Clause__c;
@@ -352,6 +533,29 @@ export default class TemplateContentDetails extends NavigationMixin(LightningEle
           } else if (result.DxCPQ__Section_Content__c == undefined) {
             this.richtextVal = '';
           }
+          if (result.DxCPQ__Section_Visibility_Rule__c != null && result.DxCPQ__Section_Visibility_Rule__c != '') {
+                      this.Recorddetailsnew.DxCPQ__Section_Visibility_Rule__c = result.DxCPQ__Section_Visibility_Rule__c;
+                      this.ruleExpression = result.DxCPQ__Section_Visibility_Rule__r.DxCPQ__Rule_Expression__c;
+                  } else {
+                      this.Recorddetailsnew.DxCPQ__Section_Visibility_Rule__c = '';
+                  }
+          if (result.DxCPQ__Section_Visibility_Rule__c != null) {
+                      this.ruleIdCreated = result.DxCPQ__Section_Visibility_Rule__c;
+                      this.ruleExists = true;
+                  } else {
+                      this.ruleIdCreated = null;
+                      this.listOfExistingConditions = [];
+                      this.conditionsArr = [];
+                      this.ruleExists = false;
+                      this.filteringCondition = '';
+                  }
+
+                  if (this.ruleIdCreated != null && this.ruleIdCreated != '') {
+                      this.handleRuleWrapperMaking();
+                      let event = new Object();
+                      this.getExistingConditions(event);
+                      this.ruleExists = true;
+                  }
           this.template.querySelectorAll('lightning-checkbox-group ').forEach(element => {
             if (result.DxCPQ__New_Page__c == true) {
               this.value.push('New Page');

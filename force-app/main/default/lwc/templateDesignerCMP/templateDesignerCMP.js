@@ -28,6 +28,7 @@ export default class TemplateDesignerCMP extends NavigationMixin(LightningElemen
   @track pdfLinksData;
   @track isActivateTemplateDisabled = true;// to disable the Activate
   @api isSaved; //to check for unsaved changes
+  @track whereCondition = '';
   //variables added by Bhavya for watermark starts here
 
   step = 1; // progress bar increases with a step value 1
@@ -556,6 +557,8 @@ export default class TemplateDesignerCMP extends NavigationMixin(LightningElemen
     * @returns value of the field based on their respective format.
     */
   displaysectionbasedontype(sectionid, sectiontype) {
+        this.whereCondition = `DxCPQ__Document_Template__r.DxCPQ__Related_To_Type__c = '${this.relatedtoTypeObjName}' AND DxCPQ__Type__c = '${sectiontype}'`;
+
     if (sectiontype == 'Header' || sectiontype == 'Footer') {
       var isnew = true;
       if (sectionid.indexOf('NotSaved') !== -1) {
@@ -651,7 +654,7 @@ export default class TemplateDesignerCMP extends NavigationMixin(LightningElemen
   optionsList = []; // Variable used to store the event value
   @track header = { Id: 'headerNotSaved', Type: 'Header', rowCount: this.rowCount, sectionNameEntered: 'Header' }; // Variable used to store the event value
   @track footer = { Id: 'footerNotSaved', Type: 'Footer', rowCount: this.rowCount, sectionNameEntered: 'Footer' }; // Variable used to store the event value
-
+  @track isTemplateSectionsFetched = false; 
 
   connectedCallback() {
     this.isActivateTemplateDisabled = true;
@@ -681,6 +684,7 @@ export default class TemplateDesignerCMP extends NavigationMixin(LightningElemen
       getAllDocumentTemplateSections({ docTempId: this.documenttemplaterecordid })
         .then(result => {
           if (result != null) {
+            this.isTemplateSectionsFetched = true;
             if (result.length > 0) {
               result.forEach(res => {
                 if (res.DxCPQ__Type__c !== 'Header' && res.DxCPQ__Type__c !== 'Footer' && this.isActivateTemplateDisabled) {

@@ -57,6 +57,7 @@
 					<div class="slds-grid slds-wrap slds-p-right_small">
 
 						<div class="slds-col slds-size_12-of-12">
+							<!-- <template if:true={isTemplateSectionsFetched}> -->
 							<c-template-header showheaderdetails={showheaderdetails}
 								selected-object-name={relatedtoTypeObjChild} recordidvalueprop={recordIDValueprop}
 								rowcount={header.rowCount} sectiontype={header.Type}
@@ -66,7 +67,7 @@
 							</c-template-header>
 
 							<c-template-content-details showdetails={showcontextdetails}
-								selected-object-name={relatedtoTypeObjChild} recordidvalueprop={recordIDValueprop}
+								selected-object-name={relatedtoTypeObjChild} recordidvalueprop={recordIDValueprop} wherecondition = {whereCondition}
 								rowcount={rowCount} sectiontype={SectionTypename} ondatasaved={handleDataSaved}
 								onsavesectiondata={handlesavedsectiondata} ondeletesectiondata={handledeletesectiondata}
 								showclausescreen={showclausescreen} recordidtoedit={recordidtoedit}
@@ -98,6 +99,7 @@
 								recordidtoedit={recordidtoedit} sectionrecordid={footer.Id}
 								documenttemplaterecord={doctemplatedetails} pdf-links ={pdfLinksData}>
 							</c-template-footer>
+							<!-- </template> -->
 						</div>
 					</div>
 				</div>

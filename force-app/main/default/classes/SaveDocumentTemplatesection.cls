@@ -85,7 +85,7 @@ public with sharing class SaveDocumentTemplatesection {
                 DocTempsec.Document_Clause__c = Recorddetails.Document_Clause__c;
                 DocTempsec.Section_Details__c = String.Valueof(Recorddetails.Section_Details__c);
                 DocTempsec.RuleId__c = Recorddetails.RuleId__c ;
-                
+                DocTempsec.Section_Visibility_Rule__c = Recorddetails.Section_Visibility_Rule__c;
                 List<Document_Template_Section__c> listtobeupdated=new List<Document_Template_Section__c>();
                 listtobeupdated.add(DocTempsec);
                 if (sp1 == null) sp1 = Database.setSavepoint();
@@ -130,7 +130,9 @@ public with sharing class SaveDocumentTemplatesection {
                 if(Recorddetails.RuleId__c!=null){
                     DocTempsec.RuleId__c = Recorddetails.RuleId__c ;
                 }                
-                
+                 if(Recorddetails.Section_Visibility_Rule__c!=null){
+                   DocTempsec.Section_Visibility_Rule__c = Recorddetails.Section_Visibility_Rule__c ;
+                }  
                 List<Document_Template_Section__c> listtobecreated=new List<Document_Template_Section__c>();
                     listtobecreated.add(DocTempsec);
                 if (sp1 == null) sp1 = Database.setSavepoint();
@@ -252,7 +254,7 @@ public with sharing class SaveDocumentTemplatesection {
     @AuraEnabled
     public static Document_Template_Section__c gettemplatesectiondata(String editrecordid){
         Document_Template_Section__c recorddata = new Document_Template_Section__c();
-        recorddata =[SELECT Section_Details__c,DisplaySectionName__c,Document_Clause__c,Document_Clause__r.name,Id,Name,New_Page__c,Section_Content__c,Sequence__c,Type__c,RuleId__r.Name,RuleId__r.Rule_Expression__c
+        recorddata =[SELECT Section_Details__c,DisplaySectionName__c,Document_Clause__c,Document_Clause__r.name,Id,Name,New_Page__c,Section_Content__c,Sequence__c,Type__c,RuleId__r.Name,RuleId__r.Rule_Expression__c,Section_Visibility_Rule__c,Section_Visibility_Rule__r.Rule_Expression__c
                      FROM Document_Template_Section__c where id =:editrecordid WITH SECURITY_ENFORCED];
         return recorddata;
     }

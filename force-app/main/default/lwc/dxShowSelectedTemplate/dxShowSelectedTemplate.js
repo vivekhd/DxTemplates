@@ -39,6 +39,11 @@ export default class DxShowSelectedTemplate extends LightningElement {
     showpreview=false;
     popUpMessage;
     documentIdVal='';
+
+    //section Visibility variables
+    calculatedResults =[];
+    ruleObjData =[];
+    modifiedJson =[];
   
 
     @wire(getAllPopupMessages) 
@@ -50,34 +55,126 @@ export default class DxShowSelectedTemplate extends LightningElement {
                 this.error = error;
             }
         }
+    
+    evaluateExpression(expression) {
+        const record = this.modifiedJson.record[0];
+        const conditions = expression.split(/\s*(?:\|\||&&)\s*/);
+        for (let condition of conditions) {
+            const [field, value] = condition.split(/\s*==\s*/);
+            if (record[field.charAt(0).toUpperCase() + field.slice(1)] !== value) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    performCalculations() {
+        for (let expression of this.ruleObjData) {
+            const result = this.evaluateExpression(expression.conditionString);
+            this.calculatedResults.push({ ruleId: expression.ruleId, result });
+        }
+        console.log('Calculated Results:', this.calculatedResults);
+    }
 
     connectedCallback() {
+        let ruleInfo = [];
         this.isLoaded=true;
         /*  returning map of resultdata from apex call
             which contains documentId and document template section data */
         getTemplateSections({templateId : this.templateId, recordId:this.objectRecordId, objectApiName: this.objectName}).then((resultdata) => {
+            console.log('template sections result ---> ',resultdata);
+            //code added by Tanmayee & Bhavya for Filter Sections starts here
+            this.tempSecsRes =  resultdata;
+            ruleInfo = resultdata.Rules;
+            let ruleObjArr = [];
+            if (ruleInfo && ruleInfo.length > 0) {
+                ruleInfo.forEach(rule => {
+                    let conditionString = rule.DxCPQ__Rule_Expression__c;
+                    if(rule.DxCPQ__Rule_Conditions__r){
+                        let rc = rule.DxCPQ__Rule_Conditions__r;
+                        for (let i = 0; i < rc.length; i++) {
+                            let field = rc[i].DxCPQ__Condition_Field__c.replace(/[^a-zA-Z0-9 ]/g, "");
+                            field = field.replace(/\s/g, "").replaceAll("-", "");
+                            let str = field.toLowerCase() + " " + rc[i].DxCPQ__Operator__c + " " + rc[i].DxCPQ__Value__c.replace(/\s/g, "").replaceAll("-", "");
+                            conditionString = conditionString.replace(rc[i].Name, str);
+                        }
+                    }
+                    else{
+                        conditionString = '';
+                    }
+                    let ruleObj = {};
+                    ruleObj.ruleId = rule.Id;
+                    ruleObj.conditionString = conditionString.trim() !== ''? conditionString.replaceAll('"', '') : '';
+                    ruleObj.ruleExpression = rule.DxCPQ__Rule_Expression__c;
+                    ruleObjArr.push(ruleObj);
+                })
+            }
+            this.ruleObjData = ruleObjArr;
+            console.log('ruleObjArr after getting the condition String ---> ', ruleObjArr);
+
+            let recordData = resultdata.record;
+            this.modifiedJson = JSON.parse(JSON.stringify(resultdata));
+            this.modifiedJson.selectedTemplateContents.forEach(section => {
+                if (section.DxCPQ__Section_Visibility_Rule__c) {
+                    const rule = this.modifiedJson.Rules.find(rule => rule.Id === section.DxCPQ__Section_Visibility_Rule__c);
+                    if (rule) {
+                        section.RuleData = rule;
+                    }
+                }
+            });
+
+            console.log('modified JSON inside the Connectedcallback() ---> ', this.modifiedJson);
+            this.performCalculations();
+            //code added by Tanmayee & Bhavya ends here
             this.isLoaded=false;
             var result=resultdata.selectedTemplateContents;     
             this.documentIdVal=resultdata.documentId;
-            if(result && result.length>0){
-                result.forEach(tempSec=>{
-                     
+            if(this.modifiedJson){
+                this.modifiedJson.selectedTemplateContents.forEach(tempSec=>{                    
                     if(tempSec.DxCPQ__Type__c=='Context' || tempSec.DxCPQ__Type__c=='Table' || tempSec.DxCPQ__Type__c=='Clause' ){
-                        
-                        let tempObj={};
-                        tempObj.index = tempSec.DxCPQ__Sequence__c;
-                        tempObj.isRelated=false;
-                        tempObj.isContext=true;
-                        tempObj.content=tempSec.DxCPQ__Section_Content__c;
-                        this.sectionContentArr.push(tempObj);
+                        let showSec = false;
+                        if(tempSec.DxCPQ__Section_Visibility_Rule__c != null){
+                            const foundResult = this.calculatedResults.find(result => result.ruleId === tempSec.DxCPQ__Section_Visibility_Rule__c);
+                            if (foundResult && foundResult.result == true) {
+                               showSec = true
+                            } else {
+                               showSec = false;
+                            }
+                        }
+                        else{
+                            showSec = true;
+                        }
+                        if(showSec){
+                            let tempObj={};
+                            tempObj.index = tempSec.DxCPQ__Sequence__c;
+                            tempObj.isRelated=false;
+                            tempObj.isContext=true;
+                            tempObj.content=tempSec.DxCPQ__Section_Content__c;
+                            this.sectionContentArr.push(tempObj);
+                        }   
+                       
                     }else if(tempSec.DxCPQ__Type__c=='Related Objects')
                     {
-                        let tempObj={};
-                        tempObj.index = tempSec.DxCPQ__Sequence__c;
-                        tempObj.isRelated=true;
-                        tempObj.isContext=false;
-                        tempObj.templatesectionid=tempSec.Id;
-                        this.sectionContentArr.push(tempObj);
+                        let showSec = false;
+                        if(tempSec.DxCPQ__Section_Visibility_Rule__c != null){
+                            const foundResult = this.calculatedResults.find(result => result.ruleId === tempSec.DxCPQ__Section_Visibility_Rule__c);
+                            if (foundResult && foundResult.result == true) {
+                               showSec = true
+                            } else {
+                               showSec = false;
+                            }
+                        }
+                        else{
+                            showSec = true;
+                        }
+                        if(showSec){
+                            let tempObj={};
+                            tempObj.index = tempSec.DxCPQ__Sequence__c;
+                            tempObj.isRelated=true;
+                            tempObj.isContext=false;
+                            tempObj.templatesectionid=tempSec.Id;
+                            this.sectionContentArr.push(tempObj);
+                        }
                     }
                     else if(tempSec.DxCPQ__Type__c=='Header')
                     {
@@ -100,11 +197,11 @@ export default class DxShowSelectedTemplate extends LightningElement {
                                 index = seccon.sectionsContent[i].indexvar;
                                 lst[index]='<p> </p>';
                             }
-                             else
-                             {
+                            else
+                            {
                                 index = seccon.sectionsContent[i].indexvar;
                                 lst[index] = seccon.sectionsContent[i].value;
-                             }
+                            }
                             count++;
                         }
                         while(count<3)
@@ -264,5 +361,7 @@ export default class DxShowSelectedTemplate extends LightningElement {
             });
         });*/
     } 
+
+
 
 }

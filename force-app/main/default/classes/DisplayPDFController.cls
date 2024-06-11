@@ -203,7 +203,7 @@ global with sharing class DisplayPDFController
                     Map<String, Object> headerMap = (Map<String, Object>) mapjson.get('header');
                     headersectionsCount = Integer.valueOf(headerMap.get('sectionsCount'));
                     headerfirstsectionsCount = Integer.valueOf(headerMap.get('sectionsFirstCount'));
-                    headerListObject = (List<Object>) headerMap.get('sectionsContent');
+                    headerListObject = (List<Object>) headerMap.get('sectionsContent'); 
 
                     if(!headerListObject.isEmpty()){
                         for(Object objrec : headerListObject){
@@ -461,7 +461,24 @@ global with sharing class DisplayPDFController
     @AuraEnabled
     public static Map<String,Object> getTemplateSections(ID templateId, String recordId, String objectApiName){ 
         try{
-            List<Document_Template_Section__c> selectedTemplateContents=[select id,Section_Content__c, Type__c, New_Page__c, Sequence__c from Document_Template_Section__c where Document_Template__c=:templateId WITH SECURITY_ENFORCED ORDER BY Sequence__c ASC];
+            Map<String,Object> templatecontentsData=new Map<String,Object>();
+            List<Document_Template_Section__c> selectedTemplateContents=[select id,Section_Content__c, Type__c, New_Page__c, Sequence__c, Section_Visibility_Rule__c from Document_Template_Section__c where Document_Template__c=:templateId WITH SECURITY_ENFORCED ORDER BY Sequence__c ASC];
+            //code added by Tanmayee and Bhavya
+            List<Id> sectionVisibilityId = new List<Id>();
+            for(Document_Template_Section__c sec:selectedTemplateContents){
+                sectionVisibilityId.add(sec.Section_Visibility_Rule__c);
+            }
+            List<Rule__c> rules = [select Id, Name, Evaluation_Object__c,External_Id__c, Rule_Description__c, Rule_Expression__c, Rule_Service__c,Rule_Type__c, Service__c,(Select Id,Rule__c,Name,ConditionIndex__c,Condition_Field__c,DataType__c,Evaluation_Object__c,Is_Cart_Item_Condition__c,Operator__c,Value__c from Rule_Conditions__r)  from Rule__c WHERE Id IN: sectionVisibilityId];
+            String queryString = 'SELECT ';
+            Map<String, Schema.SObjectField> fieldMap = Schema.getGlobalDescribe().get(objectApiName).getDescribe().fields.getMap();
+            for (String fieldName : fieldMap.keySet()) {
+                queryString += fieldName + ', ';
+            }
+            queryString = queryString.removeEnd(', ') + ' FROM ' + objectApiName + ' WHERE Id = :recordId';
+            List<sObject> records = Database.query(queryString);
+            templatecontentsData.put('Rules',rules);            
+            templatecontentsData.put('record',records);
+            //Code added by Tanmayee and Bhavya ends here
             List<Document_Template__c> templateData=[SELECT ClassId__c,FlowId__c FROM Document_Template__c WHERE id=:templateId WITH SECURITY_ENFORCED];
             Map<String,Object> replaceData=new Map<String,Object>();
             if(!string.isEmpty(templateData[0].ClassId__c)) {
@@ -519,7 +536,7 @@ global with sharing class DisplayPDFController
             }
 
             selectedTemplateContents = MergeFieldsClass.mergefieldsMethod(selectedTemplateContents,recordId,replaceData);            
-            Map<String,Object> templatecontentsData=new Map<String,Object>();
+            
             templatecontentsData.put('selectedTemplateContents',selectedTemplateContents);            
             templatecontentsData.put('documentId',docid);
             return templatecontentsData;
@@ -528,7 +545,29 @@ global with sharing class DisplayPDFController
             return null;
         }  
     }
-       
+        //To fetch the template sections and the rules related to the template sections
+    @AuraEnabled
+    public static Map<String,Object> getSectionConditions(Id templateId,String recordId,String objectApiName){
+        Map<String,Object> sectionsMap = new Map<String,Object>();
+        List<Document_Template_Section__c> selectedTemplateContents=[select id,Section_Content__c, Type__c, New_Page__c, Sequence__c,Section_Visibility_Rule__c from Document_Template_Section__c where Document_Template__c=:templateId WITH SECURITY_ENFORCED ORDER BY Sequence__c ASC];
+        List<Id> sectionVisibilityId = new List<Id>();
+        for(Document_Template_Section__c sec:selectedTemplateContents){
+            sectionVisibilityId.add(sec.Section_Visibility_Rule__c);
+        }
+        List<Rule__c> rules = [select Id, Name, Evaluation_Object__c,External_Id__c, Rule_Description__c,Rule_Expression__c, DxCPQ__Rule_Service__c, DxCPQ__Rule_Type__c, DxCPQ__Service__c,(Select Id,DxCPQ__Rule__c,Name,DxCPQ__ConditionIndex__c,DxCPQ__Condition_Field__c,DxCPQ__DataType__c,DxCPQ__Evaluation_Object__c,DxCPQ__Is_Cart_Item_Condition__c,DxCPQ__Operator__c,DxCPQ__Value__c from DxCPQ__Rule_Conditions__r)  from DxCPQ__Rule__c WHERE Id IN: sectionVisibilityId];
+        String queryString = 'SELECT ';
+        Map<String, Schema.SObjectField> fieldMap = Schema.getGlobalDescribe().get(objectApiName).getDescribe().fields.getMap();
+        for (String fieldName : fieldMap.keySet()) {
+            queryString += fieldName + ', ';
+        }
+        queryString = queryString.removeEnd(', ') + ' FROM ' + objectApiName + ' WHERE Id = :recordId';
+        List<sObject> records = Database.query(queryString);
+        sectionsMap.put('TempSections',selectedTemplateContents);
+        sectionsMap.put('Rules',rules); 
+        sectionsMap.put('record',records);
+        System.debug('Result......'+sectionsMap);
+        return sectionsMap;
+    }
     //getting the template sections for the Multiple recordIds
     @AuraEnabled
     public static List<Document_Template_Section__c> getTemplateSectionsMulRecords(ID templateId, List<String> recordIdLst, String objectApiName){ 

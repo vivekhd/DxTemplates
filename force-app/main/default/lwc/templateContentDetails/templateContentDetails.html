@@ -3,13 +3,13 @@
 
 		<div class="slds-grid slds-wrap slds-m-bottom_small slds-p-around_small slds-border_bottom"
 			style="border:1px solid #e5e5e5; border-radius:5px; background: rgb(243 243 243);">
-			
+
 			<div class="slds-col slds-size_1-of-1 slds-medium-size_4-of-12 slds-large-size_4-of-12">
 				<lightning-input type="text" disabled={isDisabled} variant="standard" name="name" label="Name"
 					value={Recorddetailsnew.Name} onchange={handlename} placeholder="Type Section Name Here..." required>
 				</lightning-input>
 			</div>
-			
+
 			<template if:true={showclausescreen}>
 				<div class="slds-col slds-size_1-of-1 slds-medium-size_4-of-12 slds-large-size_4-of-12 slds-p-left_small">
 					<c-multi-lookup-component label-name="*Document Clause" object-api-name="DxCPQ__Document_Clause__c"
@@ -24,25 +24,44 @@
 			<div class="slds-col slds-size_1-of-1 slds-medium-size_2-of-12 slds-large-size_2-of-12 slds-p-left_small">
 				<!--<button type="save" disabled={disableButton} class="slds-button slds-button_brand slds-var-m-top_medium slds-float_right" onclick={handlesectionsave}>save</button>-->
 				<label class="slds-form-element__label">&nbsp;</label>
-				<lightning-button disabled={disableButton} variant="brand" label="Update"
-					onclick={handlesectionsave}>
+				<lightning-button disabled={disableButton} variant="brand" label="Update" onclick={handlesectionsave}>
 				</lightning-button>
 			</div>
-			
-			<div class="slds-col slds-size_1-of-1 slds-medium-size_2-of-12 slds-large-size_2-of-12 slds-p-top_x-large slds-float_right">
+
+			<div
+				class="slds-col slds-size_1-of-1 slds-medium-size_2-of-12 slds-large-size_2-of-12 slds-p-top_x-large slds-float_right">
 				<lightning-input type="checkbox" data-id="newpage" label="New Page" name="New Page"
-					class="slds-list_horizontal" onchange={handlechange} value={newpage} disabled={isDisabled} title="Displays this section in the next page of the PDF">
+					class="slds-list_horizontal" onchange={handlechange} value={newpage} disabled={isDisabled}
+					title="Displays this section in the next page of the PDF">
 				</lightning-input>
 			</div>
+			<div>
+
+				<lightning-button class="slds-p-top_large" icon-name="utility:filter_criteria" label="Apply Filter(s)"
+					title="Apply Filter(s)" onclick={handleFiltering} disabled={isDisabled}></lightning-button>
+
+			</div>
+			<template if:false={showclausescreen}>
+				<div
+					class="slds-col slds-size_1-of-1 slds-medium-size_4-of-12 slds-large-size_4-of-12 slds-p-left_small">
+					<c-multi-lookup-component label-name="* Search Section" object-api-name="DxCPQ__Document_Template_Section__c"
+						field-api-names="Id,Name, DxCPQ__DisplaySectionName__c,DxCPQ__Document_Template__c,DxCPQ__Document_Template__r.DxCPQ__Related_To_Type__c, DxCPQ__Type__c,DxCPQ__Section_Content__c, DxCPQ__Header_Content__c" filter-field-api-name="Name"
+						icon-name="standard:account" has-multi-select="false" read-only={isDisabled}
+						where-clause={whereClause}>
+					</c-multi-lookup-component>
+				</div>
+			</template>
 			<!-- <template if:true={showclausescreen}>
 				<div class="slds-is-relative slds-col_bump-left">					
 					<lightning-button-icon icon-name="utility:help_doc_ext" onclick={handlehelp} alternative-text="Need Help?" title="Need Help?" variant="brand" class="slds-is-absolute slds-button_icon-help" style="right:0px"></lightning-button-icon>
 				</div>
 			</template> -->
 			<!-- <template if:false={showclausescreen}> -->
-				<div class="slds-is-relative slds-col_bump-left">
-					<lightning-button-icon icon-name="utility:help_doc_ext" onclick={handlehelp} alternative-text="Need Help?" title="Need Help?" size="medium" variant="bare" class="slds-is-absolute slds-button_icon-help" style="right:0px"></lightning-button-icon>
-				</div>
+			<div class="slds-is-relative slds-col_bump-left">
+				<lightning-button-icon icon-name="utility:help_doc_ext" onclick={handlehelp}
+					alternative-text="Need Help?" title="Need Help?" size="medium" variant="bare"
+					class="slds-is-absolute slds-button_icon-help" style="right:0px"></lightning-button-icon>
+			</div>
 			<!-- </template> -->
 		</div>
 
@@ -66,10 +85,10 @@
 
 		<div class="slds-col slds-size_12-of-12 slds-text-align_right slds-p-top_small">
 			<lightning-button class="slds-m-left_small" disabled={disabledeleteButton} variant="neutral" label="Delete"
-				 onclick={handlesectionDelete}>
+				onclick={handlesectionDelete}>
 			</lightning-button>
 			<lightning-button class="slds-m-left_small" disabled={disableButton} variant="brand" label="Save"
-				 onclick={handlesectionsave}>
+				onclick={handlesectionsave}>
 			</lightning-button>
 		</div>
 
@@ -88,6 +107,50 @@
 				</div>
 			</footer>
 		</c-modal>
+		<c-modal data-id="filter">
 
+			<template if:true={ruleCondition}>
+
+				<span slot="header">Apply Filter(s)</span>
+
+				<div class="slds-modal__content slds-p-around_medium" style="min-height: 300px;">
+
+					<c-conditioncmp list-of-existing-conditions={listOfExistingConditions} field-wrapper={fieldWrapper}
+						existing-global-value={selectedGlobalValue} existing-expression={ruleExpression}
+						style="width:100%"></c-conditioncmp>
+
+				</div>
+
+				<footer class="slds-modal__footer">
+
+					<div class="slds-text-align_right">
+
+						<lightning-button class="slds-p-right_x-small" variant="brand" label="Cancel" title="Cancel"
+							onclick={closePreviewModal}></lightning-button>
+
+						<template if:true={ruleExists}>
+
+							<lightning-button class="slds-p-right_x-small" variant="brand" label="Reset Rule & Save"
+								title="Reset" onclick={handleFilterRuleReset}></lightning-button>
+
+							<lightning-button class="slds-p-right_x-small" variant="brand" label="Update Rule"
+								title="Update" onclick={handleRuleUpdates}></lightning-button>
+
+						</template>
+
+						<template if:false={ruleExists}>
+
+							<lightning-button class="slds-p-right_x-small" variant="brand" label="Create Rule"
+								title="Create" onclick={handleCreateRules}></lightning-button>
+
+						</template>
+
+					</div>
+
+				</footer>
+
+			</template>
+
+		</c-modal>
 	</template>
 </template>
