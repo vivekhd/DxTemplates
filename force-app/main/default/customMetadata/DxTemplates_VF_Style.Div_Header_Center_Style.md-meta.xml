@@ -8,10 +8,10 @@
             position: running(header_center);
             top: 0;
             left: 0;
-            height: 70px;
+            height: 150px;
             padding-bottom: 10px;
             width: 100%;
-            border-bottom:none;
+            border-bottom: none;
           }</value>
     </values>
 </CustomMetadata>

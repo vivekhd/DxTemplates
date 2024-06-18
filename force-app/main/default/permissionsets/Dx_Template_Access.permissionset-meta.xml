@@ -233,6 +233,11 @@
     </fieldPermissions>
     <fieldPermissions>
         <editable>true</editable>
+        <field>Document_Template_Section__c.Section_Visibility_Rule__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>true</editable>
         <field>Document_Template_Section__c.Sequence__c</field>
         <readable>true</readable>
     </fieldPermissions>

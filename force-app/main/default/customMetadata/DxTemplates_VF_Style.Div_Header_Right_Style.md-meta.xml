@@ -8,8 +8,9 @@
             position: running(header_right);
             top: 0;
             left: 0;
-            height: 70px;
+            height: 150px;
             padding-bottom: 10px;
+            padding-right:30px;
             width: 100%;
             border-bottom:none;
           }</value>

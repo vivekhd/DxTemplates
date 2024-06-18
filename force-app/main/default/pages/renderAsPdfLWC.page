@@ -51,9 +51,10 @@
                     size: {!selectedSize};
                     margin-left: 0px;
                     margin-right: 0px;
-                    margin-top: 90px;
+                    margin-top: 130px;
                     margin-bottom: 80px;
                 </apex:outputText>
+                
                 <apex:outputText rendered="{!if(headersectionsCount== 1,true,false)}">
                     @top-left { content:element(header_left); width:100%;}
                 </apex:outputText>
@@ -538,7 +539,7 @@
         </div>
     </apex:outputText>
     
-    <div class="content" style="padding-top:20px;padding-right:30px;padding-bottom:20px;padding-left:30px;">
+    <div class="content" style="padding-top:20px;padding-right:30px;padding-bottom:20px;padding-left:30px;font-family:Arial;">
         <div class="dxqt">
             <apex:outputText value="{!displayText}" escape="false" /> 
         </div>

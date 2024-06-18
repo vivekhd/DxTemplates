@@ -319,7 +319,7 @@ export default class TemplateHeader extends NavigationMixin(LightningElement) {
       this.headerMap.forEach((loopvar) => {
         var sectionval = loopvar.value;
         if (sectionval.includes('img') && !sectionval.includes('style')) {
-          const styletag = 'style=\"max-height:100% ; max-width:100%; height:40px; margin:10px 20px;\"';
+          const styletag = 'style=\"max-height:100% ; max-width:100%; width:80%;margin:0 50px 0 0;\"';
           sectionval =  sectionval.slice(0, sectionval.lastIndexOf('"') + 1) + ' ' + styletag + sectionval.slice(sectionval.lastIndexOf('"') + 1, sectionval.length);
           loopvar.value = sectionval;
         }
