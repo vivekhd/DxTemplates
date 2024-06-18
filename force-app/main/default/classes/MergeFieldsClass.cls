@@ -23,6 +23,7 @@ public with sharing class MergeFieldsClass {
       
      public static List<Document_Template_Section__c> mergefieldsMethod(List<Document_Template_Section__c> selectedTemplateContents, Id recordId,Map<String,Object> replaceData) {   
         try{
+            Id templateSectionId;
             String objectName = recordId.getSObjectType().getDescribe().getName();
             String mainstr;
             for(Document_Template_Section__c sec: selectedTemplateContents) {
@@ -92,12 +93,36 @@ public with sharing class MergeFieldsClass {
                                     }
                                 }
                             }
-                            String mergefieldsyntax = '{!' + mainObject + '.' + str + '}';
-                            String finalvalueReplaced = (finalvalue != null) ? finalvalue : '';
-                            sec.Section_Content__c = sec.Section_Content__c.replace(mergefieldsyntax, finalvalueReplaced);
+                            if(finalvalue!=null)  {
+                                string mergefieldsyntax='{!'+mainObject+'.'+str+'}';
+                                sec.Section_Content__c=sec.Section_Content__c.replace(mergefieldsyntax, finalvalue); 
+                            }
                         }
                     }
                 }
+            }
+            templateSectionId = selectedTemplateContents[0].Id;
+            Id  docTemplate = [Select id,Document_Template__c from Document_Template_Section__c where Id =: templateSectionId].Document_Template__c;
+            Map<String, String> nameTransValueMap = new map<String, String>();
+            String userLanguage = [SELECT LanguageLocaleKey FROM User WHERE Id = : UserInfo.getUserId() WITH SECURITY_ENFORCED].LanguageLocaleKey;
+            List<Translator__c> translatorList = [select id, DocumentTemplate__c, Name, Translated_Value__c, Language__c  from Translator__c where Language__c =:userLanguage and DocumentTemplate__c=:docTemplate WITH SECURITY_ENFORCED];
+            for(Translator__c transRec: translatorList){
+                string value;
+                if(transRec.Translated_Value__c != null  && transRec.Translated_Value__c.contains('<') && transRec.Translated_Value__c.contains('>')){
+                   value = transRec.Translated_Value__c.replaceAll('<[^>]+>', ''); 
+                }else{
+                    value = transRec.Translated_Value__c;
+                }
+                nameTransValueMap.put(transRec.Name, value);
+            }
+            for (Document_Template_Section__c sec : selectedTemplateContents) {
+                String sectionContent = sec.Section_Content__c;
+                for(String str : nameTransValueMap.keySet()){
+                    if(nameTransValueMap.get(str)!=null){
+                      sectionContent = sectionContent.replace('&lt;&lt;' + str + '&gt;&gt;', nameTransValueMap.get(str));  
+                    }
+                }
+                sec.Section_Content__c = sectionContent;
             }
         } catch(Exception ex) {
             LogHandler.createLog((Id) null,'MergeFieldsClass Error',ex.getLineNumber()+ex.getStackTraceString()+ex.getCause(),ex.getMessage(),'Exception');

@@ -5,10 +5,18 @@ import deletetemplate from '@salesforce/apex/SaveDocumentTemplatesection.deletet
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 import { NavigationMixin } from 'lightning/navigation';
 import gettemplatesectiondata from '@salesforce/apex/SaveDocumentTemplatesection.gettemplatesectiondata';
+import createUpdateMethod from '@salesforce/apex/LanguageTranslatorClass.createUpdateMethod';
+import deleteMethod from '@salesforce/apex/LanguageTranslatorClass.deleteMethod';
+import selectedLangMethod from '@salesforce/apex/LanguageTranslatorClass.selectedLangMethod';
+import currectUserLang from '@salesforce/apex/LanguageTranslatorClass.currectUserLang';
+import allUserLanguages from '@salesforce/apex/LanguageTranslatorClass.getAllUserLanguages';
+import createLog from '@salesforce/apex/LogHandler.createLog';
 import getSObjectListFiltering from '@salesforce/apex/RelatedObjectsClass.getSObjectListFiltering';
 import createRuleCondition from '@salesforce/apex/RelatedObjectsClass.createRuleCondition';
 import getConditions from '@salesforce/apex/RelatedObjectsClass.getExistingConditions';
 import { createRuleConditionHierarcy } from 'c/conditionUtil';
+
+
 export default class TemplateContentDetails extends NavigationMixin(LightningElement) {
   isLoaded = false;
   showMergeFields = false;
@@ -39,6 +47,29 @@ export default class TemplateContentDetails extends NavigationMixin(LightningEle
   @track selectedMergefields = [];
   @api whereCondition ="";
   whereClause = " IsActive__c = true";
+  @track isTranslateModalOpen = false;
+  @track translatedRecords=[{
+        'Name': '',
+        'DxCPQ__FieldValue__c': '',
+        'DxCPQ__Translated_Value__c': '',
+        'Id': ''
+    }]; 
+  @track languages = [];
+  @track selectedLanguage; 
+  uniqueIdentifierVal = 0;
+  get uniqueIdentifier() {
+        this.uniqueIdentifierVal = this.uniqueIdentifierVal + 1;
+        return this.uniqueIdentifierVal;
+  }
+  @track dataArray = [{
+              'Name': '',
+              'DxCPQ__FieldValue__c': '',
+              'DxCPQ__Translated_Value__c': '',
+              'Id': this.uniqueIdentifier
+          }]; 
+  @track extractedWords = [];
+  transRecordNameArray = [];
+  translateEnabled = true;
   @api isSaved;
   @track Recorddetailsnew = {
     Name: '',
@@ -101,7 +132,7 @@ export default class TemplateContentDetails extends NavigationMixin(LightningEle
     this.richtextVal = event.detail.selectedRecord.recordObject.DxCPQ__Body__c;
     this.Recorddetailsnew.Name = event.detail.selectedRecord.recordName;
   }
-/*filter*/
+  /*filter*/
 
   connectedCallback() {
     this.handleRuleWrapperMaking();
@@ -257,8 +288,10 @@ export default class TemplateContentDetails extends NavigationMixin(LightningEle
         }
       })
       .catch(error => {
-        console.log('Content Section Error', error);
-      })
+        let errorMessage = error.message || 'Unknown error message';
+          let tempError = error.toString();
+          createLog({ recordId: '', className: 'TemplateContentDetails LWC Component - connectedCallback()', exceptionMessage: errorMessage, logData: tempError, logType: 'Exception' });
+        });
   }
 
   @api handleObjectNameSelection(objName) {
@@ -337,11 +370,14 @@ export default class TemplateContentDetails extends NavigationMixin(LightningEle
             this.dispatchEvent(firecustomevent);
             const saveEvent = new CustomEvent('datasaved', {detail: true });
             this.dispatchEvent(saveEvent);
+            this.translateEnabled = false;
           }
         })
         .catch(error => {
-          console.log('Error in saving this section ' + JSON.stringify(error));
-        })
+          let errorMessage = error.message || 'Unknown error message';
+          let tempError = error.toString();
+          createLog({ recordId: '', className: 'TemplateContentDetails LWC Component - connectedCallback()', exceptionMessage: errorMessage, logData: tempError, logType: 'Exception' });
+        });
       this.clickedfirsttime = true;
     }
     else {
@@ -411,7 +447,7 @@ export default class TemplateContentDetails extends NavigationMixin(LightningEle
   handleRichTextArea(event) {
     this.Recorddetailsnew.DxCPQ__Section_Content__c = event.detail.value;
     if(this.richtextVal != event.detail.value){
-      this.richtextVal = event.detail.value;
+    this.richtextVal = event.detail.value;
       const saveEvent = new CustomEvent('datasaved', {detail: false });
       this.dispatchEvent(saveEvent);
     }
@@ -431,8 +467,10 @@ export default class TemplateContentDetails extends NavigationMixin(LightningEle
           }
         })
         .catch(error => {
-          console.log('section deletion failed' + JSON.stringify(error));
-        })
+          let errorMessage = error.message || 'Unknown error message';
+          let tempError = error.toString();
+          createLog({ recordId: '', className: 'TemplateContentDetails LWC Component - connectedCallback()', exceptionMessage: errorMessage, logData: tempError, logType: 'Exception' });
+        });
     }
   }
 
@@ -555,7 +593,7 @@ export default class TemplateContentDetails extends NavigationMixin(LightningEle
                       let event = new Object();
                       this.getExistingConditions(event);
                       this.ruleExists = true;
-                  }
+          }
           this.template.querySelectorAll('lightning-checkbox-group ').forEach(element => {
             if (result.DxCPQ__New_Page__c == true) {
               this.value.push('New Page');
@@ -568,8 +606,10 @@ export default class TemplateContentDetails extends NavigationMixin(LightningEle
       })
       .catch(error => {
         this.isLoaded = false;
-        console.log('Error while fetching data ' + JSON.stringify(error));
-      })
+        let errorMessage = error.message || 'Unknown error message';
+        let tempError = error.toString();
+        createLog({ recordId: '', className: 'TemplateContentDetails LWC Component - connectedCallback()', exceptionMessage: errorMessage, logData: tempError, logType: 'Exception' });
+      });
   }
 
 
@@ -590,5 +630,255 @@ export default class TemplateContentDetails extends NavigationMixin(LightningEle
           }
     };
     this[NavigationMixin.Navigate](config);
+  }
+
+  handleTranslate(event) {
+      this.extractedWords = [];
+      this.extractWords();
+      this.template.querySelector('c-modal').show();
+      this.isTranslateModalOpen = true;
+
+      allUserLanguages().then(result =>{
+        this.languages = result.map(option => {
+          return { label: option.label, value: option.value };
+      });
+
+      }).catch(error=>{
+        let errorMessage = error.message || 'Unknown error message';
+        let tempError = error.toString();
+        createLog({ recordId: '', className: 'TemplateContentDetails LWC Component - connectedCallback()', exceptionMessage: errorMessage, logData: tempError, logType: 'Exception' });
+      });
+
+      currectUserLang()
+      .then(result => {
+        this.selectedLanguage = this.getLanguageValueByLabel(result); // Set the default value to English
+        //result;//languages.find(language => language.label == result);
+        this.transRecordsRetrive();
+      })
+      .catch(error => {
+        let errorMessage = error.message || 'Unknown error message';
+        let tempError = error.toString();
+        createLog({ recordId: '', className: 'TemplateContentDetails LWC Component - connectedCallback()', exceptionMessage: errorMessage, logData: tempError, logType: 'Exception' });
+      });
+  }
+
+  getLanguageValueByLabel(label) {
+    const language = this.languages.find(lang => lang.label === label);
+    return language ? language.value : null;
+  }
+
+  extractWords() {
+      const regex = /&lt;&lt;([^>]+?)&gt;&gt;/g;
+      let m;
+      while ((m = regex.exec(this.richtextVal)) !== null) {
+        // This is necessary to avoid infinite loops with zero-width matches
+        if (m.index === regex.lastIndex) {
+            regex.lastIndex++;
+        }
+        
+        // The result can be accessed through the `m`-variable.
+        m.forEach((match, groupIndex) => {
+          if(groupIndex%2!=0) this.extractedWords.push(match);
+        });
+      }
+      console.log('extractedWords-'+this.extractedWords);
+  }
+
+  transRecordsRetrive(){
+    selectedLangMethod({language : this.selectedLanguage, extractedWords : JSON.stringify(this.extractedWords)})
+          .then(result => {
+          if (result && result.length > 0) {
+            this.translatedRecords = [];
+            this.transRecordNameArray = [];
+              result.forEach(record => {
+                  // Iterate over each record and push it into translatedRecords array
+                  this.transRecordNameArray.push(record.Name);
+                  this.translatedRecords.push({
+                      'Name': record.Name,
+                      'DxCPQ__FieldValue__c': record.DxCPQ__FieldValue__c,
+                      'DxCPQ__Translated_Value__c': record.DxCPQ__Translated_Value__c,
+                      'Id': record.Id
+                  });
+              });
+              console.log('aray-'+this.transRecordNameArray);
+              if(this.transRecordNameArray.length != this.extractedWords.length){
+                this.extractedWords.forEach((extraxtElem) => {
+                if(!this.transRecordNameArray.includes(extraxtElem)){
+                  this.translatedRecords.push({
+                       'Name': extraxtElem,
+                       'DxCPQ__FieldValue__c': '',
+                       'DxCPQ__Translated_Value__c': '',
+                       'Id': ''
+                   });
+                }})
+              }
+              //this.selectedLanguage = this.translatedRecords[0].DxCPQ__Language__c;
+          } else {
+                  this.translatedRecords = [];
+                  if(this.extractedWords.length>0){
+                    this.extractedWords.forEach((extraxtElem) => {
+                    this.translatedRecords.push({
+                       'Name': extraxtElem,
+                       'DxCPQ__FieldValue__c': '',
+                       'DxCPQ__Translated_Value__c': '',
+                       'Id': ''
+                   });
+                })
+                  }else{
+                    this.translatedRecords = this.dataArray;
+                  } 
+              }
+          })
+          .catch(error => {
+            let errorMessage = error.message || 'Unknown error message';
+            let tempError = error.toString();
+            createLog({ recordId: '', className: 'TemplateContentDetails LWC Component - connectedCallback()', exceptionMessage: errorMessage, logData: tempError, logType: 'Exception' });
+          });
+  }
+
+  handleClick() {
+  const newDataArray = {
+          'Name': '',
+          'DxCPQ__FieldValue__c': '',
+          'DxCPQ__Translated_Value__c': '',
+          'Id' : this.uniqueIdentifier
+      };
+      this.translatedRecords.push(newDataArray);
+  }
+
+  handleRemoveRow(event) {
+      event.preventDefault();
+      const indexVal = event.target.dataset.index;
+      //let rowDelete= false;
+      /* const deleteData = [{
+          'FieldName': this.translatedRecords[indexVal].Name,
+          'FieldValue': this.translatedRecords[indexVal].DxCPQ__FieldValue__c,
+          'TranslatedValue': this.translatedRecords[indexVal].DxCPQ__Translated_Value__c,
+          'Id': this.translatedRecords[indexVal].Id
+      }]; */
+
+      var id = this.translatedRecords[indexVal].Id;
+      var regex = /^([a-zA-Z0-9_-]){18}$/;
+
+      if(regex.test(id)){
+          deleteMethod({deleteRecordId : id })
+          .then(result => {
+            if(result){
+              this.translatedRecords.splice(indexVal, 1);
+              this.translatedRecords = [...this.translatedRecords];
+              this.showToast('Success', 'Record deleted successfully', 'success'); 
+            }else{
+              this.showToast('Error', 'Error in deleting records, please check the logs', 'error');
+            }    
+          }).catch(error => {
+            this.showToast('Error', 'An error occurred while deliting the record', 'error');   
+            let errorMessage = error.message || 'Unknown error message';
+            let tempError = error.toString();
+            createLog({ recordId: '', className: 'TemplateContentDetails LWC Component - connectedCallback()', exceptionMessage: errorMessage, logData: tempError, logType: 'Exception' });
+          });
+      }else{
+          this.translatedRecords.splice(indexVal, 1);
+          this.translatedRecords = [...this.translatedRecords];
+      }
+  }
+
+  handleLanguageChange(event) {
+    this.selectedLanguage = event.detail.value;
+    this.transRecordsRetrive();
+  }
+
+  handleCellOneInputChange(event) {
+    const indexVal = parseInt(event.target.dataset.index);
+    // Check if indexVal is valid
+    if (isNaN(indexVal) || indexVal < 0 || indexVal >= this.translatedRecords.length) {
+      console.error('Invalid index:', indexVal);
+      return;
+    } 
+    this.translatedRecords[indexVal].Name = event.target.value; 
+  }
+
+  handleCellTwoInputChange(event) {
+    const indexVal = parseInt(event.target.dataset.index);
+    if(isNaN(indexVal) || indexVal<0 || indexVal >= this.translatedRecords.length){
+      console.error('Invalid index:', indexVal);
+      return;
+    }
+    this.translatedRecords[indexVal].DxCPQ__FieldValue__c = event.target.value; 
+  }
+
+  handleCellThreeInputChange(event) {
+    const indexVal = parseInt(event.target.dataset.index);
+    if(isNaN(indexVal) || indexVal<0 || indexVal >= this.translatedRecords.length){
+      console.error('Invalid index:', indexVal);
+    }
+    this.translatedRecords[indexVal].DxCPQ__Translated_Value__c = event.target.value; 
+  }
+
+  handleSave() {
+    this.translatedRecords.forEach(record => {
+      if (record.Name === null || record.Name === '') {
+        this.showToast('Error','Some of the row(s) Name has no values','error');
+      }
+    });
+
+    let fieldNameRequire = true;
+    this.translatedRecords.forEach(record => {
+      if (!record.Name) {
+        fieldNameRequire = false;
+      }
+    });
+
+    if(fieldNameRequire){
+      this.translatedRecords.forEach(record => {
+        // Rename DxCPQ__FieldValue__c to FieldValue
+        if (record.hasOwnProperty('DxCPQ__FieldValue__c')) {
+          record.FieldValue = record['DxCPQ__FieldValue__c'];
+          delete record['DxCPQ__FieldValue__c'];
+        }
+        
+        // Rename DxCPQ__Translated_Value__c to TranslatedValue
+        if (record.hasOwnProperty('DxCPQ__Translated_Value__c')) {
+          record.TranslatedValue = record['DxCPQ__Translated_Value__c'];
+          delete record['DxCPQ__Translated_Value__c'];
+        }
+      });
+
+      createUpdateMethod({ 
+        jsonStringData: JSON.stringify(this.translatedRecords), 
+        language: this.selectedLanguage,
+        sectionId: this.sectionrecordid
+      })
+      .then(result => {
+        this.showToast('Success', 'Record saved successfully', 'success'); 
+        this.isTranslateModalOpen = false;
+        this.translatedRecords = [];
+      })
+      .catch(error => {
+        this.showToast('Error', 'An error occurred while saving the record', 'error');
+        let errorMessage = error.message || 'Unknown error message';
+        let tempError = error.toString();
+        createLog({ recordId: '', className: 'TemplateContentDetails LWC Component - connectedCallback()', exceptionMessage: errorMessage, logData: tempError, logType: 'Exception' });});
+      }
+
+      /* else{
+        this.showToast('Error', 'Please fill Field Names in all rows', 'error');
+      } */
+      this.template.querySelector('c-modal').hide();
+    }
+    
+  showToast(title, message, variant) {
+    const toastEvent = new ShowToastEvent({
+        title: title,
+        message: message,
+        variant: variant
+    });
+    this.dispatchEvent(toastEvent);
+  }
+
+  closeTranslateModal() {
+    this.translatedRecords = [];
+    this.transRecordNameArray = [];
+    this.extractedWords = [];
+    this.isTranslateModalOpen = false;
   }
 }

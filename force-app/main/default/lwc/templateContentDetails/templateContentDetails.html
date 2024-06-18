@@ -1,15 +1,12 @@
 <template>
 	<template if:true={showdetails}>
-
 		<div class="slds-grid slds-wrap slds-m-bottom_small slds-p-around_small slds-border_bottom"
 			style="border:1px solid #e5e5e5; border-radius:5px; background: rgb(243 243 243);">
-
 			<div class="slds-col slds-size_1-of-1 slds-medium-size_4-of-12 slds-large-size_4-of-12">
 				<lightning-input type="text" disabled={isDisabled} variant="standard" name="name" label="Name"
 					value={Recorddetailsnew.Name} onchange={handlename} placeholder="Type Section Name Here..." required>
 				</lightning-input>
 			</div>
-
 			<template if:true={showclausescreen}>
 				<div class="slds-col slds-size_1-of-1 slds-medium-size_4-of-12 slds-large-size_4-of-12 slds-p-left_small">
 					<c-multi-lookup-component label-name="*Document Clause" object-api-name="DxCPQ__Document_Clause__c"
@@ -20,30 +17,24 @@
 					</c-multi-lookup-component>
 				</div>
 			</template>
-
 			<div class="slds-col slds-size_1-of-1 slds-medium-size_2-of-12 slds-large-size_2-of-12 slds-p-left_small">
-				<!--<button type="save" disabled={disableButton} class="slds-button slds-button_brand slds-var-m-top_medium slds-float_right" onclick={handlesectionsave}>save</button>-->
 				<label class="slds-form-element__label">&nbsp;</label>
 				<lightning-button disabled={disableButton} variant="brand" label="Update" onclick={handlesectionsave}>
 				</lightning-button>
 			</div>
-
-			<div
-				class="slds-col slds-size_1-of-1 slds-medium-size_2-of-12 slds-large-size_2-of-12 slds-p-top_x-large slds-float_right">
+			<div class="slds-col slds-size_1-of-1 slds-medium-size_2-of-12 slds-large-size_2-of-12 slds-p-top_x-large slds-float_right">
 				<lightning-input type="checkbox" data-id="newpage" label="New Page" name="New Page"
 					class="slds-list_horizontal" onchange={handlechange} value={newpage} disabled={isDisabled}
 					title="Displays this section in the next page of the PDF">
 				</lightning-input>
 			</div>
 			<div>
-
 				<lightning-button class="slds-p-top_large" icon-name="utility:filter_criteria" label="Apply Filter(s)"
-					title="Apply Filter(s)" onclick={handleFiltering} disabled={isDisabled}></lightning-button>
-
+					title="Apply Filter(s)" onclick={handleFiltering} disabled={isDisabled}>
+				</lightning-button>
 			</div>
 			<template if:false={showclausescreen}>
-				<div
-					class="slds-col slds-size_1-of-1 slds-medium-size_4-of-12 slds-large-size_4-of-12 slds-p-left_small">
+				<div class="slds-col slds-size_1-of-1 slds-medium-size_4-of-12 slds-large-size_4-of-12 slds-p-left_small">
 					<c-multi-lookup-component label-name="* Search Section" object-api-name="DxCPQ__Document_Template_Section__c"
 						field-api-names="Id,Name, DxCPQ__DisplaySectionName__c,DxCPQ__Document_Template__c,DxCPQ__Document_Template__r.DxCPQ__Related_To_Type__c, DxCPQ__Type__c,DxCPQ__Section_Content__c, DxCPQ__Header_Content__c" filter-field-api-name="Name"
 						icon-name="standard:account" has-multi-select="false" read-only={isDisabled}
@@ -51,27 +42,23 @@
 					</c-multi-lookup-component>
 				</div>
 			</template>
-			<!-- <template if:true={showclausescreen}>
-				<div class="slds-is-relative slds-col_bump-left">					
-					<lightning-button-icon icon-name="utility:help_doc_ext" onclick={handlehelp} alternative-text="Need Help?" title="Need Help?" variant="brand" class="slds-is-absolute slds-button_icon-help" style="right:0px"></lightning-button-icon>
-				</div>
-			</template> -->
-			<!-- <template if:false={showclausescreen}> -->
+			<div class="slds-col slds-size_1-of-1 slds-medium-size_2-of-12 slds-large-size_2-of-12 slds-p-top_x-large slds-float_right">
+				<lightning-button variant="brand" label="Translate" title="Translate" disabled={translateEnabled} onclick={handleTranslate}
+        		class="slds-m-right_large"></lightning-button>
+			</div>
 			<div class="slds-is-relative slds-col_bump-left">
 				<lightning-button-icon icon-name="utility:help_doc_ext" onclick={handlehelp}
 					alternative-text="Need Help?" title="Need Help?" size="medium" variant="bare"
-					class="slds-is-absolute slds-button_icon-help" style="right:0px"></lightning-button-icon>
+					class="slds-is-absolute slds-button_icon-help" style="right:0px">
+				</lightning-button-icon>
 			</div>
-			<!-- </template> -->
 		</div>
-
 		<div class="slds-m-horizontal_large">
 			<div if:true={isLoaded} class="slds-is-relative">
 				<lightning-spinner alternative-text="Loading..." variant="brand">
 				</lightning-spinner>
 			</div>
 		</div>
-
 		<div class="slds-col slds-size_12-of-12">
 			<lightning-input-rich-text value={richtextVal} formats={formats} onchange={handleRichTextArea}
 				aria-placeholder="Enter Text here" disabled={isDisabled}>
@@ -82,7 +69,6 @@
 				</lightning-rich-text-toolbar-button-group>
 			</lightning-input-rich-text>
 		</div>
-
 		<div class="slds-col slds-size_12-of-12 slds-text-align_right slds-p-top_small">
 			<lightning-button class="slds-m-left_small" disabled={disabledeleteButton} variant="neutral" label="Delete"
 				onclick={handlesectionDelete}>
@@ -91,13 +77,71 @@
 				onclick={handlesectionsave}>
 			</lightning-button>
 		</div>
-
+		<c-modal>
+			<template lwc:if={isTranslateModalOpen}>
+				<span slot="header">Translate</span>
+				<div class="slds-modal__content slds-p-around_x-small">						
+					<template if:true={translatedRecords}>	
+						<div class="slds-grid slds-gutters slds-p-around_x-small">
+							<div class="slds-col slds-large-size_4-of-12 slds-medium-size_4-of-12 slds-size_4-of-12 slds-p-top_x-small">
+								<lightning-combobox label="Select Translation Output Language" value={selectedLanguage}
+									options={languages} onchange={handleLanguageChange}>
+								</lightning-combobox>
+							</div>
+						</div>
+						<div class="table-container">
+							<table class="slds-table slds-table_bordered slds-table_cell-buffer">
+								<thead>
+									<tr class="slds-line-height_reset">
+										<th class="slds-text-title_caps">Field Name</th>
+										<th class="slds-text-title_caps">Field Value</th>
+										<th class="slds-text-title_caps">Translated Value</th>
+										<th class="slds-text-title_caps"></th>
+									</tr>
+								</thead>
+								<tbody>
+									<template for:each={translatedRecords} for:item="row" for:index="index">
+										<tr key={row.id}>
+											<td>
+												<div>
+													<lightning-input type="text" onchange={handleCellOneInputChange} data-index={index} class = "field-input" value ={row.Name}></lightning-input>
+												</div>
+											</td>
+											<td>
+												<div>
+													<lightning-input type="text" onchange={handleCellTwoInputChange} data-index={index} class = "field-value" value ={row.DxCPQ__FieldValue__c}></lightning-input>
+												</div>
+											</td>
+											<td>
+												<div>
+													<lightning-textarea onchange={handleCellThreeInputChange} data-index={index} class = "trans-value" value ={row.DxCPQ__Translated_Value__c}></lightning-textarea>
+												</div>
+											</td>
+											<td>
+												<div>
+													<lightning-button-icon icon-name="utility:delete" alternative-text="Delete" onclick={handleRemoveRow} data-index={index} class="slds-m-left_xx-small" title="Delete"></lightning-button-icon>
+													<lightning-button-icon icon-name="utility:new" alternative-text="New" onclick={handleClick} class="slds-m-left_xx-small" title="New"></lightning-button-icon>
+												</div>
+											</td>
+										</tr>
+									</template>
+								</tbody>
+							</table>
+						</div>
+						<footer class="slds-modal__footer">
+							<div class="slds-text-align_right">
+								<lightning-button variant="brand" label="Save" title="Save" onclick={handleSave}></lightning-button>
+							</div>
+						</footer>								    
+					</template>						
+				</div>
+			</template>
+		</c-modal>
 		<c-modal>
 			<span slot="header">Merge Field(s)</span>
 			<div class="slds-modal__content slds-p-around_medium" style="min-height: 240px;">
 				<c-dx-lookup-fields-displaycmp selection-object={selectedObjectName}></c-dx-lookup-fields-displaycmp>
 			</div>
-
 			<footer class="slds-modal__footer">
 				<div class="slds-text-align_right">
 					<lightning-button variant="brand" label="insert" title="insert" onclick={getMergeField}>
@@ -108,49 +152,32 @@
 			</footer>
 		</c-modal>
 		<c-modal data-id="filter">
-
 			<template if:true={ruleCondition}>
-
 				<span slot="header">Apply Filter(s)</span>
-
 				<div class="slds-modal__content slds-p-around_medium" style="min-height: 300px;">
-
 					<c-conditioncmp list-of-existing-conditions={listOfExistingConditions} field-wrapper={fieldWrapper}
 						existing-global-value={selectedGlobalValue} existing-expression={ruleExpression}
-						style="width:100%"></c-conditioncmp>
-
+						style="width:100%">
+					</c-conditioncmp>
 				</div>
-
 				<footer class="slds-modal__footer">
-
 					<div class="slds-text-align_right">
-
 						<lightning-button class="slds-p-right_x-small" variant="brand" label="Cancel" title="Cancel"
-							onclick={closePreviewModal}></lightning-button>
-
+							onclick={closePreviewModal}>
+						</lightning-button>
 						<template if:true={ruleExists}>
-
 							<lightning-button class="slds-p-right_x-small" variant="brand" label="Reset Rule & Save"
 								title="Reset" onclick={handleFilterRuleReset}></lightning-button>
-
 							<lightning-button class="slds-p-right_x-small" variant="brand" label="Update Rule"
 								title="Update" onclick={handleRuleUpdates}></lightning-button>
-
 						</template>
-
 						<template if:false={ruleExists}>
-
 							<lightning-button class="slds-p-right_x-small" variant="brand" label="Create Rule"
 								title="Create" onclick={handleCreateRules}></lightning-button>
-
 						</template>
-
 					</div>
-
 				</footer>
-
 			</template>
-
 		</c-modal>
 	</template>
 </template>

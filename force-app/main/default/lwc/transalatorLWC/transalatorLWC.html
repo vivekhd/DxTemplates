@@ -1,0 +1,59 @@
+<template>
+    <lightning-card>
+        <div class="slds-grid slds-gutters slds-p-around_medium">
+        <div class="slds-col slds-large-size_4-of-12 slds-medium-size_4-of-12 slds-size_4-of-12 slds-p-top_medium">
+            <lightning-combobox
+                label="Select Transalation Output Language"
+                value={selectedLanguage}
+                placeholder="Select Language"
+                options={languages}
+                onchange={handleLanguageChange} ></lightning-combobox>
+        </div>
+        </div>
+    <template if:true={data}>
+        <div class="table-container">
+            <table class="slds-table slds-table_bordered slds-table_cell-buffer">
+                    <thead>
+                        <tr class="slds-line-height_reset">
+                            <th class="slds-text-title_caps">Field Name</th>
+                            <th class="slds-text-title_caps">Field Value</th>
+                            <th class="slds-text-title_caps">Translated Value</th>
+                            <th class="slds-text-title_caps"></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <template for:each={translatedRecords} for:item="row" for:index="index">
+                            <tr key={row.id}>
+                                <td>
+                                    <div>
+                                        <lightning-input type="text" onchange={handleCellOneInputChange} data-index={index} value = {row.TranslatedFieldName__c}></lightning-input>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div>
+                                        <lightning-input type="text" onchange={handleCellTwoInputChange} data-index={index} value = {row.FieldValue__c}></lightning-input>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div>
+                                        <lightning-textarea onchange={handleCellThreeInputChange} data-index={index} value = {row.TranslatedFieldValue__c}></lightning-textarea>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div>
+                                        <lightning-button-icon icon-name="utility:delete" alternative-text="Delete" onclick={handleRemoveRow} data-index={index} class="slds-m-left_xx-small" title="Delete"></lightning-button-icon>
+                                        <lightning-button-icon icon-name="utility:new" alternative-text="New" onclick={handleClick} class="slds-m-left_xx-small" title="New"></lightning-button-icon>
+                                    </div>
+                                </td>
+                            </tr>
+                        </template>
+                    </tbody>
+                </table>
+            <div class="slds-col slds-modal__footer">
+                <lightning-button label="Save" onclick={handleSave} variant="brand" class="slds-m-left_x-small">
+                </lightning-button>
+            </div>  
+        </div>       
+    </template>
+    </lightning-card>
+</template>
