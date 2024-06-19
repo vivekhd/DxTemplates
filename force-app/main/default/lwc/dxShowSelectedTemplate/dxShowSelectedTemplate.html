@@ -29,7 +29,7 @@
 					<div lwc:dom="manual" key={secarr.index} data-id={dataIndex}></div>
 					<c-display-related-objects-data key={secarr.index} index={dataIndex} parentrecordid={objectRecordId}
 						templatesectionid={secarr.templatesectionid} onchildcontent={displayChildContent}
-						onclauseevent={handleClauseContent}>
+						onclauseevent={handleClauseContent} >
 					</c-display-related-objects-data>
 					<div lwc:dom="manual" key={secarr.index} class="clause"></div>
 				</template>
@@ -91,13 +91,11 @@
                     <lightning-icon icon-name="utility:close"
                         alternative-text="close"
                         variant="inverse"
-                        size="small" ></lightning-icon>
+                        size="small" >
+					</lightning-icon>
                     <span class="slds-assistive-text">Close</span>
                 </button>
-
-				<iframe src={siteURL} height="1000px" width="1000px"></iframe>
-				<lightning-button variant="brand" label="Save" title="Save" onclick={handleAddNewRow}>
-				</lightning-button>
+				<lightning-button variant="brand" label="Save" title="Save" onclick={handleAddNewRow}> </lightning-button>
 			</div>
 		</section>
 		<div class="slds-backdrop slds-backdrop_open"></div>
@@ -105,8 +103,7 @@
 
 	<div class="slds-m-horizontal_large">
 		<div if:true={isLoaded2} class="slds-is-relative">
-			<lightning-spinner alternative-text="Loading..." variant="brand">
-			</lightning-spinner>
+			<lightning-spinner alternative-text="Loading..." variant="brand"></lightning-spinner>
 		</div>
 	</div>
 

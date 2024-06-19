@@ -154,8 +154,8 @@ global with sharing class DisplayPDFController
                 headerAbsolute = 'position:absolute; width:100%;overflow:hidden;height: 0px;';
             }
             else {
-                headerRelative = 'position:relative; width:100%;overflow:hidden;height: 70px;';
-                headerAbsolute = 'position:absolute; width:100%;overflow:hidden;height: 70px;';
+                headerRelative = 'position:relative; width:100%;overflow:hidden;height: 150px;';
+                headerAbsolute = 'position:absolute; width:100%;overflow:hidden;height: 150px;';
             }
             DxTemplates_VF_Style__mdt[] stylesLst = [select Id, Label, MasterLabel,DeveloperName,  CSS_Style_List__c from DxTemplates_VF_Style__mdt with USER_MODE];
             //System.debug('stylesLst ---> '+ stylesLst);
@@ -194,10 +194,9 @@ global with sharing class DisplayPDFController
             } else {
                 displayText = 'ID not found ' + inputparam;
             }
-            
             if(docrec.Document_Content__c != null){
                 Map<String, Object> mapjson = (Map<String, Object>) JSON.deserializeUntyped(docrec.Document_Content__c);  
-                 isNoHeader = mapjson.containsKey('header')?false:true;
+                isNoHeader = mapjson.containsKey('header')?false:true;
                 if(mapjson.containsKey('header')){
                     List<Object> headerListObject = new List<Object>();
                     Map<String, Object> headerMap = (Map<String, Object>) mapjson.get('header');

@@ -59,6 +59,11 @@ export default class DxtemplateSelectorCmp extends LightningElement {
         this.showPreviewButton =false;
         this.showSaveAttachmentButton=false;
         this.showGenerateButton=false;
+        this.template.addEventListener('showgenerate', this.handleGeneration.bind(this));
+    }
+
+    handleGeneration(event){
+        this.showGenerateButton = true;
     }
 
     connectedCallback() {
@@ -72,7 +77,6 @@ export default class DxtemplateSelectorCmp extends LightningElement {
         if(this.selectedTemplateId!=undefined){
             this.showTemplate=true;
             this.showTemplateSelectionHolder=true;
-            this.showGenerateButton = true;
         }
     }
 
@@ -82,6 +86,7 @@ export default class DxtemplateSelectorCmp extends LightningElement {
         this.showGenerateButton=false;
         this.selectedTemplateId=undefined;
         this.showSaveAttachmentButton=false;
+        this.pageOrientation = 'Potrait';
     }
 
     closeModal(){
@@ -97,8 +102,8 @@ export default class DxtemplateSelectorCmp extends LightningElement {
 
     handlepdfgeneration(event) {
         this.isLoaded=false;
-        this.showPreviewButton=true;
         this.showGenerateButton = false;
+        this.showPreviewButton = true;
         this.showSaveAttachmentButton =true;
         this.downloadURL=event.detail.downloadURL;
         this.pdfdocumentid=event.detail.attachmentid;
@@ -106,7 +111,7 @@ export default class DxtemplateSelectorCmp extends LightningElement {
 
     previewPDF() {
         this.pageSize = 'A4';
-        this.pageOrientation = 'Potrait';        
+        this.pageOrientation = 'Potrait';
         window.open(this.downloadURL, "_blank");
     }
 

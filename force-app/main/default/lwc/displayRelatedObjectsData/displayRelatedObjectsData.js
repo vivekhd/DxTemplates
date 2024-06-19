@@ -81,21 +81,19 @@ export default class DisplayRelatedObjectsData extends LightningElement {
                             }
                             var cellList = [];
                             for (let i in records) {
-                                if (i % 2 == 0 && this.showslno == true) {
-                                    let cellData = this.handleCellCreation(records, i);                                    
+                                if (this.showslno == true && i % 2 == 0) {
+                                    let cellData = this.handleCellCreation(records, i, index);
                                     cellList.push(cellData);
-                                }
-                                if (this.showslno == false && (i % 2) != 0) {
-                                    let cellData = this.handleCellCreation(records, i);
+                                }else if (this.showslno == false && (i % 2) != 0) {
+                                    let cellData = this.handleCellCreation(records, i, index);
                                     cellList.push(cellData);
-                                }
+                                }                              
                             }
                             rowData.columns = cellList;
                             this.tablerows.push(rowData);
                         }
                         else if (element.type == "Category") {
                             rowData.rowType = 'Category';
-
                             var records = element.values;
                             var cellList = [];
                             const cellData = new Object();
@@ -168,7 +166,6 @@ export default class DisplayRelatedObjectsData extends LightningElement {
                                     if (element.type == 'SubTotal') {
                                         if(this.currencyIndexCounter.includes(i)) {cellData.value = this.currencySymbols[this.currencyLabel] + '' + Number(records[i]).toFixed(this.currencyFormat);}
                                         else{cellData.value = Number(records[i]).toFixed(this.currencyFormat);}
-                                        //cellData.value = Number(records[i]).toFixed(this.currencyFormat);
                                         cellData.style = 'border: 1px solid black; background-color: #0077b6 ; color: white; font-size: 12px; text-align: center;';
                                     }
                                     else {
@@ -192,8 +189,7 @@ export default class DisplayRelatedObjectsData extends LightningElement {
                         this.handleChart();
                     }
 
-                    if(parsedjson.newPage)
-                    {
+                    if(parsedjson.newPage) {
                         setTimeout(()=> {this.className = 'newPagetableMainClass';});
                     }
                 }
@@ -226,7 +222,7 @@ export default class DisplayRelatedObjectsData extends LightningElement {
     }
 
 
-    handleCellCreation(records, i) {
+    handleCellCreation(records, i, index) {
         const cellData = new Object();
         cellData.attr = false;
 
@@ -239,8 +235,7 @@ export default class DisplayRelatedObjectsData extends LightningElement {
         else {
             if (records[i] == null) {
                 cellData.value = '';
-            }
-            else if (records[i - 1] == 'DATETIME') {
+            } else if (records[i - 1] == 'DATETIME') {
                 let dateList = records[i].split('T')[0].split('-');
                 let timeStr = records[i].split('T')[1].split('.');
                 cellData.value = this.handleDateTime(dateList, this.dateFormatStr, timeStr[0], this.timeFormatStr, -1);
@@ -262,8 +257,7 @@ export default class DisplayRelatedObjectsData extends LightningElement {
                 cellData.value = Number(records[i]).toFixed(this.numberFormat);
             }
             else { cellData.value = records[i]; }
-
-            cellData.style = 'border: 1px solid black; text-align: center; background-color:transparent;';
+            cellData.style = (index%2 == 0) ? 'border: 1px solid black; text-align: center; background-color:transparent;' : 'border: 1px solid black; text-align: center; background-color:#75736E;';                                    
             cellData.imgcell = false;
             if (records[i - 1] == 'CURRENCY' || records[i - 1] == 'NUMBER' || records[i - 1] == 'BOOLEAN') {
                 cellData.width = '30px';
@@ -388,6 +382,7 @@ export default class DisplayRelatedObjectsData extends LightningElement {
         if (elementDiv) {
             const childContent = new CustomEvent('childcontent', { detail: { content: elementDiv, index: this.index } });
             this.dispatchEvent(childContent);
+            this.dispatchEvent(new CustomEvent('showgenerate', { bubbles: true , composed : true, detail: 'loaded' }));
         }
     }
 }

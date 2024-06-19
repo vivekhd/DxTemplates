@@ -25,7 +25,6 @@
 
 				<tbody>
 					<template for:each={tablerows} for:item="rowvar">
-						<!-- <tr key={rowvar.rownumber} style={rowvar.style}> -->
 						<tr key={rowvar.rownumber}>
 							<template for:each={rowvar.columns} for:item="colvar">
 								<td scope="col" key={colvar} style={colvar.style} colspan={colvar.colspan}

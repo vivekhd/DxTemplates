@@ -11,8 +11,13 @@
 private class PostInstallDataCreation_Test {
     @IsTest           
     public static void runTestClass() {
-        PostInstallDataCreation myClass = new PostInstallDataCreation();
-        Test.testInstall(myClass, null);
-	    System.assert(true);
+        insert new DxCPQ__Document__c(DxCPQ__Document_Body__c = '<div>Test</div>');
+        insert new Attachment(Name = 'Test Document', Body = Blob.valueOf('<div>Test</div>'),parentId = newDoc.Id);
+        
+        Test.startTest();
+            PostInstallDataCreation myClass = new PostInstallDataCreation();
+            Test.testInstall(myClass, null);
+            System.assert(true);
+        Test.stopTest();
     }
 }

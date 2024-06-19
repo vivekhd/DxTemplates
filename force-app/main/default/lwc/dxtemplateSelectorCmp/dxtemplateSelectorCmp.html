@@ -22,7 +22,7 @@
 			</div>
 			<div lwc:if={showSaveAttachmentButton} class="slds-align_absolute-center slds-grid slds-wrap slds-gutters_x-small">
 				<lightning-input class="slds-col slds-size_1-of-2" name="Rename Document" label="Document Name" value={recordId} onchange={handlePDFRename}> </lightning-input>
-				<lightning-button class="slds-col slds-size_1-of-2" label={saveRecordToAttachmentLabel} onclick={saveRecordToAttachment} icon-name="utility:save" icon-position="left"> </lightning-button>
+				<lightning-button class="slds-col slds-size_1-of-2 slds-p-top_large" label={saveRecordToAttachmentLabel} onclick={saveRecordToAttachment} icon-name="utility:save" icon-position="left"> </lightning-button>
 			</div>
 		</div>
 		<div hidden class="slds-col">

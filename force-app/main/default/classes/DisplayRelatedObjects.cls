@@ -15,18 +15,14 @@ public with sharing class DisplayRelatedObjects {
     
     @AuraEnabled
     public static string getsectionData(String recordid,String templatesectionid){
-        system.debug('templatesectionid- '+templatesectionid);
         currTemplate = templatesectionid;
         List<RowWrapper> rowWrapperList=new List<RowWrapper>(); 
         
         List<sObject> childRecords=new List<sObject>();
         try
         {
-            //System.debug('templatesectionid >> ' + templatesectionid);
             Document_Template_Section__c dsrec=[select id,Section_Content__c from Document_Template_Section__c where id=:templatesectionid WITH SECURITY_ENFORCED];
-            //System.debug('dsrec >> ' + dsrec);
-            Map<string,Object> jsonMap = (Map<string,Object>)JSON.deserializeUntyped(dsrec.Section_Content__c);
-                        
+            Map<string,Object> jsonMap = (Map<string,Object>)JSON.deserializeUntyped(dsrec.Section_Content__c);   
             String objectName = 'Document_Template_Section__c';
             List<Object> fieldsObjList = (List<Object>) jsonMap.get('tablelistValues');
             List<Object> fieldsObjListValues = (List<Object>) jsonMap.get('tablelistLabels');
@@ -77,18 +73,13 @@ public with sharing class DisplayRelatedObjects {
                         recordStyles.add(attributeVal);
                     }
                 }
-            }
-            System.debug(headerStyles);
-            System.debug(recordStyles);
-                        
+            }                        
             List<string> fieldsList= new List<string> ();
-            System.debug(fieldsObjList);
             for(Object rec: fieldsObjList){
                 fieldsList.add(String.valueOf(rec));
             }
             string fieldString = string.join(fieldsList,',');
             Map<String,String> fieldNameType = getObjectFieldTypeMap(childObject, fieldsList);
-            System.debug(fieldNameType);
             
             currencyFieldTotals = new Map<String,Decimal> {};
                 for(Object currTempField : subTotFieldNames)
@@ -96,13 +87,11 @@ public with sharing class DisplayRelatedObjects {
                 currencyFieldTotals.put((String) currTempField,0);
             }
             currencyFieldSubTotals = currencyFieldTotals.clone();
-            System.debug(currencyFieldTotals);
             
             List<string> headerValues= new List<string> ();
             for(Object rec: fieldsObjListValues){
                 headerValues.add(String.valueOf(rec));
             }
-            System.debug(headerValues);
             
             String securityEnforced=' WITH SECURITY_ENFORCED';
             //if grouping category is selected
@@ -114,14 +103,9 @@ public with sharing class DisplayRelatedObjects {
                     fieldStringSet.add(field.tolowercase());
                 }
                 fieldStringSet.add(grpby.tolowercase());
-                System.debug(fieldStringSet);
                 
-                String fieldStringquery = String.join(new List<String>(fieldStringSet), ', ');             
-                
-                System.debug(fieldStringquery);
+                String fieldStringquery = String.join(new List<String>(fieldStringSet), ', ');    
                 String recordsQuery = 'select '+String.escapeSingleQuotes(fieldStringquery)+' from '+String.escapeSingleQuotes(childObject)+' where '+String.escapeSingleQuotes(string.valueof(jsonMap.get('childLookupfieldAPIname')))+'='+'\''+String.escapeSingleQuotes(recordid)+'\''+' '+ whereClauseinQuery+' '+String.escapeSingleQuotes(securityEnforced)+' order by '+String.escapeSingleQuotes(grpby)+' desc';
-                
-                System.debug(recordsQuery);
                 ChildRecords = Database.query(recordsQuery);
                 
                 Map<Object, List<SObject>> recordCategoryMap = new Map<Object, List<SObject>>();
@@ -211,7 +195,6 @@ public with sharing class DisplayRelatedObjects {
             }
             else{
                 String recordsQuery = 'select '+String.escapeSingleQuotes(fieldString)+' from '+String.escapeSingleQuotes(childObject)+' where '+String.escapeSingleQuotes(string.valueof(jsonMap.get('childLookupfieldAPIname')))+'='+'\''+String.escapeSingleQuotes(recordid)+'\''+' '+ whereClauseinQuery+' '+String.escapeSingleQuotes(securityEnforced);
-                System.debug(recordsQuery);
                 ChildRecords = Database.query(recordsQuery);
                 for(Sobject currRecord: ChildRecords) {
                     //qliRecIds.add(currRecord.get('Id'));
@@ -270,7 +253,6 @@ public with sharing class DisplayRelatedObjects {
             masterWrapper.chartNewPage = chartNewPage;
               
             string jsonstring = JSON.serialize(masterWrapper);
-            System.debug(jsonstring);
             ROHtmlContent += '</tbody>'; 
             //return ROHtmlContent;
             return jsonstring;
@@ -418,8 +400,6 @@ public with sharing class DisplayRelatedObjects {
                         List<String> lkpFieldSplit = fieldStr.split('\\.');
                         Map<String, Object> childLkpData = (Map<String, Object>) currRecordLkpData.get(lkpFieldSplit[0]);
                         recVal = childLkpData.get(lkpFieldSplit[1]);
-                        System.debug('fieldStr >> ' + fieldStr);
-                        System.debug('currencyFieldTotals >> ' + currencyFieldTotals);
                         if(currencyFieldTotals.containsKey(fieldStr)) {
                             if(recVal == null) {recVal = 0;}
                             
@@ -447,10 +427,8 @@ public with sharing class DisplayRelatedObjects {
                 }
             }
         Catch(Exception ex) {
-            System.debug(ex.getMessage());
             if(errType==null){
                 errType = ex.getTypeName();
-                System.debug(errType);
                 LogHandler.createLog((Id) null,'DisplayRelatedObjects.RecordDataWrapperCreation()','Template Id- '+currTemplate+' '+ex.getLineNumber()+ex.getStackTraceString()+ex.getCause(),ex.getMessage(),'Exception');
             }
             else if(ex.getTypeName()!=errType) {

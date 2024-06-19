@@ -297,13 +297,9 @@ export default class DxShowSelectedTemplate extends LightningElement {
         var headfooterstr=JSON.stringify(this.headerfooter);
         /*parameter templatedId changed to doucmentId*/
         generateDocument({documentId : this.documentIdVal, quoteId:this.objectRecordId, pdfbody:container.innerHTML,pdfheaderfooter:headfooterstr}).then((result) => {
-            
-            console.log('this is result'+JSON.parse(JSON.stringify(result)));
-            console.log('this is result',result);
             if(result && result.length>0){
                 this.handleAttachment(result);
             }
-            
         }).catch((err) => {
             this.isLoaded2=false;
             console.log('this is error handlePDF',err);
@@ -311,28 +307,24 @@ export default class DxShowSelectedTemplate extends LightningElement {
         
     }
 
-    handleAttachment(documentid)
-    {
+    handleAttachment(documentid) {
         generatePDFAttachment({documentid : documentid, quoteId:this.objectRecordId, pageProperties : JSON.stringify(this.pageProperties)}).then((result) => {
-           if(result && result.length>0){
+            if(result && result.length>0){
                 this.isLoaded=false;
-                this.downloadURL = '/servlet/servlet.FileDownload?file='+result;
                 this.showpreviewbutton=true;
+                this.downloadURL = '/servlet/servlet.FileDownload?file='+result;
                 var docdetailsobj={documentid:documentid,downloadURL:this.downloadURL,attachmentid:result};
 
                 var firecustomevent = new CustomEvent('pdfgeneration', { detail:docdetailsobj});
                 this.dispatchEvent(firecustomevent);
 
-                const event4 = new ShowToastEvent({
+                this.dispatchEvent(new ShowToastEvent({
                     title: 'Success',
                     message: this.popUpMessage.DXSHOWSELECTEDTEMPLATE_PDF,
                     variant: 'success',
-                    });
-    
-                    this.dispatchEvent(event4);
-                    this.isLoaded2=false;
+                }));
+                this.isLoaded2=false;
             }
-            
         }).catch((err) => {
             console.log('this is error handleAttachment',err);
         });
@@ -343,6 +335,7 @@ export default class DxShowSelectedTemplate extends LightningElement {
         let content = event.detail.content;
         let elementDiv = this.template.querySelector(`[data-id="${index}"]`);
         elementDiv.innerHTML=content.innerHTML;
+        this.showPreviewButton=true;
     }  
 
     /* Commented by Rahul - not intended in this release */

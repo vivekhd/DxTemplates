@@ -20,10 +20,8 @@ private class DisplayPDFController_Test {
                 Map<String,Object> result = DisplayPDFController.getTemplateSections(
                     testTemplate.Id, testOpportunity.Id, 'Opportunity'
                 );
-                System.assertEquals(2, result.size(), 'Expected one section');
-                //System.assertEquals('<p>Test Section Content</p>', result[0].Section_Content__c);
-                            }
-            catch(exception ex){
+                System.assertEquals(4, result.size(), 'Expected one section');
+            } catch (exception ex){
                 System.assert(ex.getMessage().contains('Script-thrown exception'));
             }
         }
