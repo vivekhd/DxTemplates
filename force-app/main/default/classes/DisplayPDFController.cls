@@ -154,8 +154,8 @@ global with sharing class DisplayPDFController
                 headerAbsolute = 'position:absolute; width:100%;overflow:hidden;height: 0px;';
             }
             else {
-                headerRelative = 'position:relative; width:100%;overflow:hidden;height: 150px;';
-                headerAbsolute = 'position:absolute; width:100%;overflow:hidden;height: 150px;';
+                headerRelative = 'position:relative; width:100%;overflow:hidden;height: 180px;';
+                headerAbsolute = 'position:absolute; width:100%;overflow:hidden;height: 180px;';
             }
             DxTemplates_VF_Style__mdt[] stylesLst = [select Id, Label, MasterLabel,DeveloperName,  CSS_Style_List__c from DxTemplates_VF_Style__mdt with USER_MODE];
             //System.debug('stylesLst ---> '+ stylesLst);
@@ -190,7 +190,7 @@ global with sharing class DisplayPDFController
                 defaultCSS = true;  
             } 
             if(inputparam != null){
-                displayText = String.escapeSingleQuotes(docrec.Document_Body__c);        
+                displayText = String.escapeSingleQuotes(docrec.Document_Body__c).replace('\\', '');       
             } else {
                 displayText = 'ID not found ' + inputparam;
             }
@@ -209,6 +209,7 @@ global with sharing class DisplayPDFController
                             Map<String, Object> wrec = (Map<String, Object>) objrec;  
                             if(wrec.get('indexvar') == 0){
                                 leftheadertext = (String) wrec.get('value');
+                                System.debug('leftheadertext ---> '+ leftheadertext);
                             } else if(wrec.get('indexvar') == 1){
                                 centerheadertext = (String) wrec.get('value');
                             } else if(wrec.get('indexvar') == 2){

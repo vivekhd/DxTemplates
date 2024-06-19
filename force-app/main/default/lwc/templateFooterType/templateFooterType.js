@@ -191,4 +191,23 @@ export default class TemplateFooterType extends LightningElement {
             this.imageUrls = this.mainimageUrls;
         }
     }
+
+    //code added by Bhavya for Custom Font Family in Rich Text Area
+    get fontFamilies() {
+        return [
+            { label: 'Times New Roman', value: 'serif' },
+            { label: 'Arial', value: 'sans-serif' },
+            { label: 'serif', value: 'serif' },
+            { label: 'Courier', value: 'courier' },
+        ];
+    }
+    
+    handleFontFamilySelection(event){
+        let applySelectedFormats = {
+            font: event.target.value,
+        };
+        let selection = window.getSelection().toString();
+        let editor = this.template.querySelector('lightning-input-rich-text');
+        editor.setFormat(applySelectedFormats);
+    }
 }

@@ -94,6 +94,8 @@ export default class TemplateFooter extends NavigationMixin(LightningElement) {
         item.columnCount = this.columnvalue;
         item.footerVal = refData[this.columnvalue - 1][item.indexvar];
     });
+    const saveEvent = new CustomEvent('datasaved', {detail: false });
+    this.dispatchEvent(saveEvent);
   }
 
   /* Footer Changes Start by Rahul*/
@@ -142,6 +144,8 @@ export default class TemplateFooter extends NavigationMixin(LightningElement) {
         this.footerSectionsMap.push(data);
       }
     });
+    const saveEvent = new CustomEvent('datasaved', {detail: false });
+    this.dispatchEvent(saveEvent);
   }
 
   handlecheckboxChange(event) {
@@ -152,6 +156,8 @@ export default class TemplateFooter extends NavigationMixin(LightningElement) {
     else {
       this.displaypagesequence = false;
     }
+    const saveEvent = new CustomEvent('datasaved', {detail: false });
+    this.dispatchEvent(saveEvent);
   }
 
   @api loadsectionsvaluesforCreation() {
@@ -169,6 +175,8 @@ export default class TemplateFooter extends NavigationMixin(LightningElement) {
       Id: '',
       DxCPQ__Document_Clause__c: ''
     };
+    const saveEvent = new CustomEvent('datasaved', {detail: false });
+    this.dispatchEvent(saveEvent);
   }
 
   @api loadsectionvaluesforedit(recordID) {
@@ -195,6 +203,8 @@ export default class TemplateFooter extends NavigationMixin(LightningElement) {
               this.value.push('Display Page Number Sequence');
             }
           });
+          const saveEvent = new CustomEvent('datasaved', {detail: true });
+          this.dispatchEvent(saveEvent);
         }
       })
       .catch(error => {
@@ -243,6 +253,8 @@ export default class TemplateFooter extends NavigationMixin(LightningElement) {
             this.dispatchEvent(event4);
             var firecustomevent = new CustomEvent('savesectiondata', { detail: this.savedRecordID });
             this.dispatchEvent(firecustomevent);
+            const saveEvent = new CustomEvent('datasaved', {detail: true });
+            this.dispatchEvent(saveEvent);
           }
         })
         .catch(error => {

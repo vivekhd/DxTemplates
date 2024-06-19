@@ -57,9 +57,17 @@ export default class TemplateHeaderType extends LightningElement {
 
     handleRichTextArea(event) {
         this.richtextVal = event.detail.value;
-        var rtdetails = { value: this.richtextVal, indexvar: this.indexvar, key: (new Date()).getTime() + ":" + this.indexvar };
+        var rtdetails = { value: this.richtextVal, indexvar: this.indexvar, key: (new Date()).getTime() + ":" + this.indexvar };    
+        this.richtextVal = this.handleWhiteSpacesinText(this.richtextVal);
         var firecustomevent = new CustomEvent('saverichtextheader', { detail: rtdetails });
         this.dispatchEvent(firecustomevent);
+    }
+
+    //code added by Bhavya for preserving multiple spaces in Context region
+    handleWhiteSpacesinText(str){
+        str = str.replace(/  /g, '&nbsp;&nbsp;');
+        console.log('preserving whitespaces in header ---> ', str);
+        return str;
     }
 
     handleRichTextAreaSave() {
@@ -190,5 +198,24 @@ export default class TemplateHeaderType extends LightningElement {
         } else {
             this.imageUrls = this.mainimageUrls;
         }
+    }
+
+    //code added by Bhavya for Custom Font Family in Rich Text Area
+    get fontFamilies() {
+        return [
+            { label: 'Times New Roman', value: 'serif' },
+            { label: 'Arial', value: 'sans-serif' },
+            { label: 'serif', value: 'serif' },
+            { label: 'Courier', value: 'courier' },
+        ];
+    }
+    
+    handleFontFamilySelection(event){
+        let applySelectedFormats = {
+            font: event.target.value,
+        };
+        let selection = window.getSelection().toString();
+        let editor = this.template.querySelector('lightning-input-rich-text');
+        editor.setFormat(applySelectedFormats);
     }
 }

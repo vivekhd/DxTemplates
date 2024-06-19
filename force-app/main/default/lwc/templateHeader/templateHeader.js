@@ -100,6 +100,8 @@ export default class TemplateHeader extends NavigationMixin(LightningElement) {
         item.columnFirstCount = this.columnfirstvalue;
         item.headerVal = refData[this.columnfirstvalue - 1][item.indexvar-3];
     });
+    const saveEvent = new CustomEvent('datasaved', {detail: false });
+    this.dispatchEvent(saveEvent);
   }
 
   handlefirstcolumnsClass(columncount) {
@@ -146,6 +148,8 @@ export default class TemplateHeader extends NavigationMixin(LightningElement) {
         item.columnCount = this.columnvalue;
         item.headerVal = refData[this.columnvalue - 1][item.indexvar];
     });
+    const saveEvent = new CustomEvent('datasaved', {detail: false });
+    this.dispatchEvent(saveEvent);
     //console.log('columnvalueList ---> ', this.columnvalueList);
     console.log('headerSectionsMap after column value changed ---> ', this.headerSectionsMap);
   }
@@ -234,6 +238,8 @@ export default class TemplateHeader extends NavigationMixin(LightningElement) {
         this.headerFirstSectionsMap.push(data);
       }
     });
+    const saveEvent = new CustomEvent('datasaved', {detail: false });
+    this.dispatchEvent(saveEvent);
   }
 
   @api loadsectionsvaluesforCreation() {
@@ -258,6 +264,8 @@ export default class TemplateHeader extends NavigationMixin(LightningElement) {
   }
 
   @api loadsectionvaluesforedit(recordID) {
+    const saveEvent = new CustomEvent('datasaved', {detail: true});
+    this.dispatchEvent(saveEvent);
     this.showheaderdetails = true;
     this.headerSectionsMap = [];
     this.headerFirstSectionsMap = [];
@@ -311,19 +319,36 @@ export default class TemplateHeader extends NavigationMixin(LightningElement) {
       })
   }
 
+  //code added by Bhavya to check if the style attribute is present in the Img tag
+  identifyStyleTag(str){
+    const regex = /<img\b[^>]*\bstyle\s*=\s*["'][^"']*["']/i;
+    return regex.test(str);
+    
+  }
+
   handlesectionsave(event) {
     this.Recorddetailsnew.Name = this.sectiontype;
     var currecid = this.sectionrecordid;
     this.headerMap = this.headerSectionsMap.concat(this.headerFirstSectionsMap);
     if (this.headerMap.length > 0) {
       this.headerMap.forEach((loopvar) => {
+
         var sectionval = loopvar.value;
-        if (sectionval.includes('img') && !sectionval.includes('style')) {
-          const styletag = 'style=\"max-height:100% ; max-width:100%; width:80%;margin:0 50px 0 0;\"';
-          sectionval =  sectionval.slice(0, sectionval.lastIndexOf('"') + 1) + ' ' + styletag + sectionval.slice(sectionval.lastIndexOf('"') + 1, sectionval.length);
+        if (sectionval.includes('img') && !this.identifyStyleTag(sectionval)) {
+          const styleTag = 'style="max-height:100%; max-width:100%; width:80%; margin:0 50px 0 0;"';
+          sectionval = sectionval.replace(/(<img\b[^>]*)(style\s*=\s*["'][^"']*["'])?([^>]*>)/i, (match, p1, p2, p3) => {
+              if (p2) {
+                  return `${p1}${p2.slice(0, -1)}; ${styleTag.slice(7)}`;
+              }
+              return `${p1} ${styleTag}${p3}`;
+          });
+
+          console.log('Updated sectionVal:', sectionval);
           loopvar.value = sectionval;
         }
       });
+
+      console.log('this.headerMap after adding styles ---> ', this.headerMap);
       var obj = {};
       obj.sectionsCount = this.columnvalue;
       obj.sectionsFirstCount = this.columnfirstvalue;
@@ -351,6 +376,8 @@ export default class TemplateHeader extends NavigationMixin(LightningElement) {
             });
 
             this.dispatchEvent(event4);
+            const saveEvent = new CustomEvent('datasaved', {detail: true });
+            this.dispatchEvent(saveEvent);
             var firecustomevent = new CustomEvent('savesectiondata', { detail: this.savedRecordID });
             this.dispatchEvent(firecustomevent);
           }
