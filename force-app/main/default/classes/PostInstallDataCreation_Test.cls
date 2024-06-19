@@ -11,7 +11,8 @@
 private class PostInstallDataCreation_Test {
     @IsTest           
     public static void runTestClass() {
-        insert new DxCPQ__Document__c(DxCPQ__Document_Body__c = '<div>Test</div>');
+        Document__c newDoc = new Document__c(Document_Body__c = '<div>Test</div>');
+        insert newDoc;
         insert new Attachment(Name = 'Test Document', Body = Blob.valueOf('<div>Test</div>'),parentId = newDoc.Id);
         
         Test.startTest();
