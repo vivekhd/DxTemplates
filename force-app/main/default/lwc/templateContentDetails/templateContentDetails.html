@@ -28,12 +28,12 @@
 					title="Displays this section in the next page of the PDF">
 				</lightning-input>
 			</div>
-			<div>
+			<!-- <div>
 				<lightning-button class="slds-p-top_large" icon-name="utility:filter_criteria" label="Apply Filter(s)"
 					title="Apply Filter(s)" onclick={handleFiltering} disabled={isDisabled}>
 				</lightning-button>
-			</div>
-			<template if:false={showclausescreen}>
+			</div> -->
+			<!-- <template if:false={showclausescreen}>
 				<div class="slds-col slds-size_1-of-1 slds-medium-size_4-of-12 slds-large-size_4-of-12 slds-p-left_small">
 					<c-multi-lookup-component label-name="* Search Section" object-api-name="DxCPQ__Document_Template_Section__c"
 						field-api-names="Id,Name, DxCPQ__DisplaySectionName__c,DxCPQ__Document_Template__c,DxCPQ__Document_Template__r.DxCPQ__Related_To_Type__c, DxCPQ__Type__c,DxCPQ__Section_Content__c, DxCPQ__Header_Content__c" filter-field-api-name="Name"
@@ -41,7 +41,7 @@
 						where-clause={whereClause}>
 					</c-multi-lookup-component>
 				</div>
-			</template>
+			</template> -->
 			<div class="slds-col slds-size_1-of-1 slds-medium-size_2-of-12 slds-large-size_2-of-12 slds-p-top_x-large slds-float_right">
 				<lightning-button variant="brand" label="Translate" title="Translate" disabled={translateEnabled} onclick={handleTranslate}
         		class="slds-m-right_large"></lightning-button>
@@ -77,7 +77,7 @@
 				onclick={handlesectionsave}>
 			</lightning-button>
 		</div>
-		<c-modal>
+		<c-modal onclosedialog ={closeTranslateModal}>
 			<template lwc:if={isTranslateModalOpen}>
 				<span slot="header">Translate</span>
 				<div class="slds-modal__content slds-p-around_x-small">						
@@ -89,8 +89,8 @@
 								</lightning-combobox>
 							</div>
 						</div>
-						<div class="table-container">
-							<table class="slds-table slds-table_bordered slds-table_cell-buffer">
+						<div class="table-container ">
+								<table class="slds-table slds-table_bordered slds-table_cell-buffer">
 								<thead>
 									<tr class="slds-line-height_reset">
 										<th class="slds-text-title_caps">Field Name</th>
@@ -136,20 +136,20 @@
 					</template>						
 				</div>
 			</template>
-		</c-modal>
-		<c-modal>
-			<span slot="header">Merge Field(s)</span>
-			<div class="slds-modal__content slds-p-around_medium" style="min-height: 240px;">
-				<c-dx-lookup-fields-displaycmp selection-object={selectedObjectName}></c-dx-lookup-fields-displaycmp>
-			</div>
-			<footer class="slds-modal__footer">
-				<div class="slds-text-align_right">
-					<lightning-button variant="brand" label="insert" title="insert" onclick={getMergeField}>
-					</lightning-button>
-					<lightning-button variant="brand" label="CopyToClipboard" title="insert"
-						onclick={getMergeFieldCopy}></lightning-button>
+			<template lwc:else>
+				<span slot="header">Merge Field(s)</span>
+				<div class="slds-modal__content slds-p-around_medium" style="min-height: 240px;">
+					<c-dx-lookup-fields-displaycmp selection-object={selectedObjectName}></c-dx-lookup-fields-displaycmp>
 				</div>
-			</footer>
+				<footer class="slds-modal__footer">
+					<div class="slds-text-align_right">
+						<lightning-button variant="brand" label="insert" title="insert" onclick={getMergeField}>
+						</lightning-button>
+						<lightning-button variant="brand" label="CopyToClipboard" title="insert"
+							onclick={getMergeFieldCopy}></lightning-button>
+					</div>
+				</footer>
+			</template>
 		</c-modal>
 		<c-modal data-id="filter">
 			<template if:true={ruleCondition}>

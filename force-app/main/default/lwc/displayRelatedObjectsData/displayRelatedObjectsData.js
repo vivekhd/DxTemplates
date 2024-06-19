@@ -8,8 +8,8 @@ export default class DisplayRelatedObjectsData extends LightningElement {
     @api parentrecordid;
     @api templatesectionid;
     @api index;
-
     @track showSpinner = true;
+    recordDataFontFamily = 'Sans-Serif';
 
     showtablecontent = false;
     tableheaders = [];
@@ -61,7 +61,9 @@ export default class DisplayRelatedObjectsData extends LightningElement {
                     this.chartLabel = parsedjson.chartLabel;
                     this.displayChart = parsedjson.displayChart;
                     this.barChartColor = parsedjson.barChartColor;
-                    this.currencyLabel = "USD"
+                    this.currencyLabel = "USD";
+                    this.recordDataFontFamily = parsedjson.catFontFam;
+                    
                     parsedjson.headers.forEach((element) => {
                         this.tableheaders.push(element);
                     });
@@ -84,16 +86,16 @@ export default class DisplayRelatedObjectsData extends LightningElement {
                                 if (this.showslno == true && i % 2 == 0) {
                                     let cellData = this.handleCellCreation(records, i, index);
                                     cellList.push(cellData);
-                                }else if (this.showslno == false && (i % 2) != 0) {
+                                } else if (this.showslno == false && (i % 2) != 0) {
                                     let cellData = this.handleCellCreation(records, i, index);
                                     cellList.push(cellData);
-                                }                              
+                                }
                             }
                             rowData.columns = cellList;
                             this.tablerows.push(rowData);
-                        }
-                        else if (element.type == "Category") {
+                        } else if (element.type == "Category") {
                             rowData.rowType = 'Category';
+
                             var records = element.values;
                             var cellList = [];
                             const cellData = new Object();
@@ -106,10 +108,8 @@ export default class DisplayRelatedObjectsData extends LightningElement {
                             rowData.columns = cellList;
                             this.tablerows.push(rowData);
                             this.subtotalLabel.push(cellData.value);
-                        }
-                        else if (element.type == "Total" || element.type == "SubTotal") {
+                        } else if (element.type == "Total" || element.type == "SubTotal") {
                             rowData.rowType = 'Totals';
-
                             var records = element.values;
                             this.subtotalVal.push(records);
                             var cellList = [];
@@ -141,42 +141,36 @@ export default class DisplayRelatedObjectsData extends LightningElement {
                                     if (find) {
                                         if (element.type == 'SubTotal') {
                                             cellData.value = 'Sub Total';
-                                            cellData.style = 'border: 1px solid black; background-color: #0077b6 ; color: white; border-right-style: none; font-size: 12px';
-                                        }
-                                        else {
+                                            cellData.style = `border: 1px solid black; background-color: #0077b6 ; color: white; border-right-style: none; font-size: 12px; font-family: ${this.recordDataFontFamily}`;
+                                        } else {
                                             cellData.value = 'Grand Total';
-                                            cellData.style = 'border: 1px solid black; background-color:#03045e ; color: white; border-right-style: none; font-size: 12px';
+                                            cellData.style = `border: 1px solid black; background-color:#03045e ; color: white; border-right-style: none; font-size: 12px; font-family: ${this.recordDataFontFamily}`;
                                         }
                                         cellData.colspan = span + 1;
                                         find = false;
                                         cellList.push(cellData);
                                         continue;
                                     }
-
                                     if (element.type == 'SubTotal') {
                                         cellData.value = '';
                                         cellData.style = 'border: 1px solid black; background-color: #0077b6 ; color: white; border-left-style: none; border-right-style: none;';
-                                    }
-                                    else {
+                                    } else {
                                         cellData.value = '';
                                         cellData.style = 'border: 1px solid black; background-color:#03045e ; color: white; border-left-style: none; border-right-style: none;';
                                     }
-                                }
-                                else {
+                                }  else {
                                     if (element.type == 'SubTotal') {
                                         if(this.currencyIndexCounter.includes(i)) {cellData.value = this.currencySymbols[this.currencyLabel] + '' + Number(records[i]).toFixed(this.currencyFormat);}
                                         else{cellData.value = Number(records[i]).toFixed(this.currencyFormat);}
-                                        cellData.style = 'border: 1px solid black; background-color: #0077b6 ; color: white; font-size: 12px; text-align: center;';
-                                    }
-                                    else {
+                                        cellData.style = `border: 1px solid black; background-color: #0077b6 ; color: white; font-size: 12px; text-align: center; font-family: ${this.recordDataFontFamily}`;
+                                    } else {
                                         if(this.currencyIndexCounter.includes(i)) {cellData.value = this.currencySymbols[this.currencyLabel] + '' + Number(records[i]).toFixed(this.currencyFormat);}
                                         else{cellData.value = Number(records[i]).toFixed(this.currencyFormat);}
-                                        cellData.style = 'border: 1px solid black; background-color:#03045e ; color: white; font-size: 12px; text-align: center;';
+                                        cellData.style = `border: 1px solid black; background-color:#03045e ; color: white; font-size: 12px; text-align: center; font-family: ${this.recordDataFontFamily}`;
                                     }
                                 }
                                 cellList.push(cellData);
                             }
-
                             rowData.columns = cellList;
                             this.tablerows.push(rowData);
                         }
@@ -231,8 +225,7 @@ export default class DisplayRelatedObjectsData extends LightningElement {
             cellData.style = 'border: 1px solid black; text-align: center; background-color:transparent;';
             cellData.imgcell = true;
             cellData.width = '100px';
-        }
-        else {
+        } else {
             if (records[i] == null) {
                 cellData.value = '';
             } else if (records[i - 1] == 'DATETIME') {
@@ -240,24 +233,21 @@ export default class DisplayRelatedObjectsData extends LightningElement {
                 let timeStr = records[i].split('T')[1].split('.');
                 cellData.value = this.handleDateTime(dateList, this.dateFormatStr, timeStr[0], this.timeFormatStr, -1);
 
-            }
-            else if (records[i - 1] == 'TIME') {
+            } else if (records[i - 1] == 'TIME') {
                 let timeStr = records[i].split('T')[0].split('.');
                 cellData.value = this.handleDateTime(null, null, timeStr[0], this.timeFormatStr, 1);
-            }
-            else if (records[i - 1] == 'DATE') {
+            } else if (records[i - 1] == 'DATE') {
                 let dateList = records[i].split('T')[0].split('-');
                 cellData.value = this.handleDateTime(dateList, this.dateFormatStr, null, null, 0);
-            }
-            else if (records[i - 1] == 'CURRENCY') {
+            } else if (records[i - 1] == 'CURRENCY') {
                 this.currencyIndexCounter.push(Math.floor(i/2));
                 cellData.value = this.currencySymbols[this.currencyLabel]+ '' + Number(records[i]).toFixed(this.currencyFormat);
-            }
-            else if (records[i - 1] == 'NUMBER') {
+            } else if (records[i - 1] == 'NUMBER') {
                 cellData.value = Number(records[i]).toFixed(this.numberFormat);
+            } else { 
+                cellData.value = records[i]; 
             }
-            else { cellData.value = records[i]; }
-            cellData.style = (index%2 == 0) ? 'border: 1px solid black; text-align: center; background-color:transparent;' : 'border: 1px solid black; text-align: center; background-color:#75736E;';                                    
+            cellData.style = (index%2 == 0) ? `border: 1px solid black; text-align: center; background-color:transparent;font-family:${this.recordDataFontFamily}` : `border: 1px solid black; text-align: center; background-color:#75736E; font-family:${this.recordDataFontFamily}`;                                    
             cellData.imgcell = false;
             if (records[i - 1] == 'CURRENCY' || records[i - 1] == 'NUMBER' || records[i - 1] == 'BOOLEAN') {
                 cellData.width = '30px';

@@ -415,6 +415,7 @@ export default class TemplateContentDetails extends NavigationMixin(LightningEle
   }
 
   handlemergefieldadd() {
+    this.isTranslateModalOpen = false;
     this.template.querySelector('c-modal').show();
   }
 
@@ -486,6 +487,7 @@ export default class TemplateContentDetails extends NavigationMixin(LightningEle
     this.Recorddetailsnew.DxCPQ__New_Page__c = false;
     this.Recorddetailsnew.DxCPQ__Section_Visibility_Rule__c = '';
     this.newpage = false;
+    this.isTranslateModalOpen = false;
     this.Recorddetailsnew = {
     Name: '',
     DxCPQ__Section_Content__c: '',
@@ -635,14 +637,14 @@ export default class TemplateContentDetails extends NavigationMixin(LightningEle
   handleTranslate(event) {
       this.extractedWords = [];
       this.extractWords();
-      this.template.querySelector('c-modal').show();
       this.isTranslateModalOpen = true;
+      this.template.querySelector('c-modal').show();
 
-      allUserLanguages().then(result =>{
+      allUserLanguages()
+      .then(result =>{
         this.languages = result.map(option => {
-          return { label: option.label, value: option.value };
-      });
-
+        return { label: option.label, value: option.value };
+        });
       }).catch(error=>{
         let errorMessage = error.message || 'Unknown error message';
         let tempError = error.toString();
@@ -652,7 +654,6 @@ export default class TemplateContentDetails extends NavigationMixin(LightningEle
       currectUserLang()
       .then(result => {
         this.selectedLanguage = this.getLanguageValueByLabel(result); // Set the default value to English
-        //result;//languages.find(language => language.label == result);
         this.transRecordsRetrive();
       })
       .catch(error => {
@@ -673,7 +674,7 @@ export default class TemplateContentDetails extends NavigationMixin(LightningEle
       while ((m = regex.exec(this.richtextVal)) !== null) {
         // This is necessary to avoid infinite loops with zero-width matches
         if (m.index === regex.lastIndex) {
-            regex.lastIndex++;
+          regex.lastIndex++;
         }
         
         // The result can be accessed through the `m`-variable.
@@ -681,7 +682,6 @@ export default class TemplateContentDetails extends NavigationMixin(LightningEle
           if(groupIndex%2!=0) this.extractedWords.push(match);
         });
       }
-      console.log('extractedWords-'+this.extractedWords);
   }
 
   transRecordsRetrive(){
@@ -700,35 +700,33 @@ export default class TemplateContentDetails extends NavigationMixin(LightningEle
                       'Id': record.Id
                   });
               });
-              console.log('aray-'+this.transRecordNameArray);
               if(this.transRecordNameArray.length != this.extractedWords.length){
                 this.extractedWords.forEach((extraxtElem) => {
                 if(!this.transRecordNameArray.includes(extraxtElem)){
                   this.translatedRecords.push({
-                       'Name': extraxtElem,
-                       'DxCPQ__FieldValue__c': '',
-                       'DxCPQ__Translated_Value__c': '',
-                       'Id': ''
-                   });
+                    'Name': extraxtElem,
+                    'DxCPQ__FieldValue__c': '',
+                    'DxCPQ__Translated_Value__c': '',
+                    'Id':''
+                  });
                 }})
               }
               //this.selectedLanguage = this.translatedRecords[0].DxCPQ__Language__c;
           } else {
-                  this.translatedRecords = [];
-                  if(this.extractedWords.length>0){
-                    this.extractedWords.forEach((extraxtElem) => {
-                    this.translatedRecords.push({
-                       'Name': extraxtElem,
-                       'DxCPQ__FieldValue__c': '',
-                       'DxCPQ__Translated_Value__c': '',
-                       'Id': ''
-                   });
-                })
-                  }else{
-                    this.translatedRecords = this.dataArray;
-                  } 
-              }
-          })
+            this.translatedRecords = [];
+            if(this.extractedWords.length>0){
+              this.extractedWords.forEach((extraxtElem) => {
+              this.translatedRecords.push({
+                'Name': extraxtElem,
+                'DxCPQ__FieldValue__c': '',
+                'DxCPQ__Translated_Value__c': '',
+                'Id': ''
+                });
+              })
+            } else {
+              this.translatedRecords = this.dataArray;
+            }
+          }})
           .catch(error => {
             let errorMessage = error.message || 'Unknown error message';
             let tempError = error.toString();
@@ -876,9 +874,12 @@ export default class TemplateContentDetails extends NavigationMixin(LightningEle
   }
 
   closeTranslateModal() {
-    this.translatedRecords = [];
-    this.transRecordNameArray = [];
-    this.extractedWords = [];
-    this.isTranslateModalOpen = false;
+      if(this.isTranslateModalOpen){
+        this.translatedRecords = [];
+        this.transRecordNameArray = [];
+        this.extractedWords = [];
+        this.isTranslateModalOpen = false;
+      }
+      this.template.querySelector('c-modal').hide();
   }
 }
