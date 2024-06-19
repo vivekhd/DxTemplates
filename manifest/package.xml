@@ -201,5 +201,5 @@
 		<members>rte_tbl</members>
 		<name>StaticResource</name>
 	</types>
-	<version>58.0</version>
+	<version>59.0</version>
 </Package>

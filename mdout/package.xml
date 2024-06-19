@@ -170,7 +170,6 @@
 	<types>
 		<members>Document_Template_Record_Page</members>
 		<members>Document_Template_Section_Record_Page</members>
-		<members>LightningSales_UtilityBar</members>
 		<name>FlexiPage</name>
 	</types>
 	<types>		
@@ -184,8 +183,8 @@
 		<name>ListView</name>
 	</types>
 	<types>	
-	        <members>Generate_Document_from_Template</members>
+	    <members>Generate_Document_from_Template</members>
 		<name>Flow</name>
 	</types>
-	<version>55.0</version>
+	<version>59.0</version>
 </Package>
