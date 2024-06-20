@@ -357,7 +357,7 @@ export default class TemplateDesignerCMP extends NavigationMixin(LightningElemen
       else if (event.currentTarget.dataset.sectiontype == 'Header'){
         this.handleHeaderClick(event);
       }
-      else if (event.currentTarget.dataset.sectiontype!='Header'&&event.currentTarget.dataset.sectionType!='Footer'){
+      else if (event.currentTarget.dataset.sectiontype!='Header'&&event.currentTarget.dataset.sectiontype!='Footer'){
         this.handleSectionClick(event);
       }
       else if (event.currentTarget.dataset.sectiontype == 'Footer'){
