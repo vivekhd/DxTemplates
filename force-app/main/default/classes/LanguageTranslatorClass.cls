@@ -37,7 +37,7 @@ public with sharing class LanguageTranslatorClass {
  	* @param          language String representing the language for which to retrieve translation records.
  	* @return         List<DxCPQ__Translator__c> List of translation records for the specified language.
  	*/
-    @AuraEnabled(cacheable=true)
+    @AuraEnabled
     public static List<DxCPQ__Translator__c> langTransRecs(String language){ 
         String str;  
         if(language!=null){
@@ -64,7 +64,7 @@ public with sharing class LanguageTranslatorClass {
  	* @description    Retrieves the current user's language setting.
  	* @return         String Current user's language setting.
  	*/
-    @AuraEnabled(cacheable=true)
+    @AuraEnabled
     public static String currectUserLang(){    
         return [SELECT toLabel(LanguageLocaleKey) FROM User WHERE Id= :UserInfo.getUserId()].LanguageLocaleKey;
     }  
