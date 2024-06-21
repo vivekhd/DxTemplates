@@ -154,8 +154,8 @@ global with sharing class DisplayPDFController
                 headerAbsolute = 'position:absolute; width:100%;overflow:hidden;height: 0px;';
             }
             else {
-                headerRelative = 'position:relative; width:100%;overflow:hidden;height: 180px;';
-                headerAbsolute = 'position:absolute; width:100%;overflow:hidden;height: 180px;';
+                headerRelative = 'position:relative; width:100%;overflow:hidden;height: 150px;';
+                headerAbsolute = 'position:absolute; width:100%;overflow:hidden;height: 150px;';
             }
             DxTemplates_VF_Style__mdt[] stylesLst = [select Id, Label, MasterLabel,DeveloperName,  CSS_Style_List__c from DxTemplates_VF_Style__mdt with USER_MODE];
             //System.debug('stylesLst ---> '+ stylesLst);
@@ -209,7 +209,6 @@ global with sharing class DisplayPDFController
                             Map<String, Object> wrec = (Map<String, Object>) objrec;  
                             if(wrec.get('indexvar') == 0){
                                 leftheadertext = (String) wrec.get('value');
-                                System.debug('leftheadertext ---> '+ leftheadertext);
                             } else if(wrec.get('indexvar') == 1){
                                 centerheadertext = (String) wrec.get('value');
                             } else if(wrec.get('indexvar') == 2){
@@ -336,15 +335,12 @@ global with sharing class DisplayPDFController
             pg.getParameters().put('documentid', documentid);
 
             if(pageProperties != null){
-                system.debug('page prop '+pageProperties);
                 Map<String, Object> jsonDataMap = (Map<String, Object>) JSON.deserializeUntyped(pageProperties);
-					system.debug('jsonDataMap '+jsonDataMap);
-                selectedPageSize = (String)jsonDataMap.get('pageSize');
+				selectedPageSize = (String)jsonDataMap.get('pageSize');
                 selectedPageOrientation = (String)jsonDataMap.get('pageOrientation');
                 selectedSize= selectedPageSize +' ' + selectedPageOrientation;
                 pg.getParameters().put('selectedPageSize', selectedPageSize);
                 pg.getParameters().put('selectedPageOrientation', selectedPageOrientation);
-                system.debug('selectedPageSize '+selectedPageSize+' selectedPageOrientation '+selectedPageOrientation);
             }
             Id insertedattachmentId;
             Attachment objAttachment = new Attachment();
@@ -353,14 +349,13 @@ global with sharing class DisplayPDFController
             
             if(!Test.isrunningTest()){
                 objAttachment.Body = pg.getContentAsPDF(); 
-            }
-            else{
+            } else {
                 objAttachment.Body = Blob.valueof('text');
             }
             
             objAttachment.IsPrivate = false;
             List<Attachment> atttobeinserted=new List<Attachment>();
-                atttobeinserted.add(objAttachment);
+            atttobeinserted.add(objAttachment);
             Savepoint sp = Database.setSavepoint();
             List<Database.SaveResult> sResult = safe.doInsert(atttobeinserted);
             List<String> errorList = Safely.safeClassExceptionHandlerInsert(sResult);
@@ -373,8 +368,7 @@ global with sharing class DisplayPDFController
             for(Integer i=0;i<sResult.size();i++){
                 if (sResult.get(i).isSuccess()){
                     Id attachmentid=sResult.get(i).getId();
-                    if(attachmentid!=null)
-                    {
+                    if(attachmentid!=null) {
                         insertedattachmentId = attachmentid;
                     }
                 }else if (!sResult.get(i).isSuccess()){
@@ -534,9 +528,7 @@ global with sharing class DisplayPDFController
                     LogHandler.createLog((Id) null,'DisplayPDFController.getTemplateSections()','Template Id- '+templateId+' '+'Database Error while saving the result --> ',String.valueof(error),'Exception');
                 }               
             }
-
-            selectedTemplateContents = MergeFieldsClass.mergefieldsMethod(selectedTemplateContents,recordId,replaceData);            
-            
+            selectedTemplateContents = MergeFieldsClass.mergefieldsMethod(selectedTemplateContents,recordId,replaceData);
             templatecontentsData.put('selectedTemplateContents',selectedTemplateContents);            
             templatecontentsData.put('documentId',docid);
             return templatecontentsData;
@@ -565,7 +557,6 @@ global with sharing class DisplayPDFController
         sectionsMap.put('TempSections',selectedTemplateContents);
         sectionsMap.put('Rules',rules); 
         sectionsMap.put('record',records);
-        System.debug('Result......'+sectionsMap);
         return sectionsMap;
     }
     //getting the template sections for the Multiple recordIds
@@ -660,23 +651,6 @@ global with sharing class DisplayPDFController
         public HeaderFooterWrapper(String value, String indexvar) {
             this.value = value;
             this.indexvar = indexvar;
-        }
-    }
-    
-    /**
-     * @description    Retrieves a list of Opportunities created within the last 30 days
-     * @return         List<Opportunity> List of Opportunities
-     */
-    @AuraEnabled(cacheable=true)
-    public static List<Opportunity> getOpportunities() {
-        try {
-            List<Opportunity> opportunities = [SELECT Amount, Name, StageName 
-                                               FROM Opportunity 
-                                               WHERE CreatedDate = LAST_N_DAYS:30 WITH USER_MODE];
-            return opportunities;
-        } catch(Exception ex) {
-            LogHandler.createLog((Id) null,'DisplayPDFController.getOpportunities()','Template Id- '+ex.getLineNumber()+ex.getStackTraceString()+ex.getCause(),ex.getMessage(),'Exception');
-            return null;
         }
     }
      

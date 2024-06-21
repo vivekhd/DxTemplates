@@ -1,9 +1,9 @@
-import { getRecord } from "lightning/uiRecordApi";
 import rte_tbl from '@salesforce/resourceUrl/rte_tbl';
 import {api, LightningElement, track, wire } from 'lwc';
 import {loadStyle } from 'lightning/platformResourceLoader';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 import dexcpqcartstylesCSS from '@salesforce/resourceUrl/dexcpqcartstyles';
+import pdfObjectdetails from '@salesforce/apex/PdfDisplay.getObjectDetails';
 import saveAsRecordAttachment from '@salesforce/apex/DisplayPDFController.savePDFtoQuote';
 
 export default class DxtemplateSelectorCmp extends LightningElement {
@@ -28,6 +28,7 @@ export default class DxtemplateSelectorCmp extends LightningElement {
     ];
   
     downloadURL;
+    recordName = '';
     pdfdocumentid;
     showModal=true;
     isLoaded=false;
@@ -40,9 +41,6 @@ export default class DxtemplateSelectorCmp extends LightningElement {
     showTemplateSelectionHolder=true;
     templateWhereClause="IsActive__c = true";
     pageProperties = {'pageSize' : 'A4','pageOrientation' : 'Potrait'};
-
-    @wire(getRecord, { recordId: "$recordId" })
-    recordDetails;
 
     handlePdfModeSelection(event) {
         this.pageSize = (event.target.label === 'Page Size') ? event.target.value : this.pageSize;
@@ -60,6 +58,15 @@ export default class DxtemplateSelectorCmp extends LightningElement {
         this.showSaveAttachmentButton=false;
         this.showGenerateButton=false;
         this.template.addEventListener('showgenerate', this.handleGeneration.bind(this));
+        pdfObjectdetails({recordId : this.recordId})
+        .then(data =>{
+            this.recordName = data.recordName;
+            let dateKey = new Date().toLocaleString().split(', ');
+            this.modifiedPDFName = this.recordName + '-' + dateKey[0].replaceAll('/','') + '-' + dateKey[1].split(' ')[0].replaceAll(':','');    
+        })
+        .catch(error =>{
+            console.log('error');
+        });
     }
 
     handleGeneration(event){
@@ -87,6 +94,9 @@ export default class DxtemplateSelectorCmp extends LightningElement {
         this.selectedTemplateId=undefined;
         this.showSaveAttachmentButton=false;
         this.pageOrientation = 'Potrait';
+
+        let dateKey = new Date().toLocaleString().split(', ');
+        this.modifiedPDFName = this.recordName + '-' + dateKey[0].replaceAll('/','') + '-' + dateKey[1].split(' ')[0].replaceAll(':','');    
     }
 
     closeModal(){
@@ -95,7 +105,6 @@ export default class DxtemplateSelectorCmp extends LightningElement {
 
     handlePDF() {
         this.isLoaded=true;    
-        this.modifiedPDFName = this.recordId;    
         this.template.querySelector('c-dx-show-selected-template').pageProperties = this.pageProperties;     
         this.template.querySelector('c-dx-show-selected-template').handlePDF();
     }
@@ -135,7 +144,7 @@ export default class DxtemplateSelectorCmp extends LightningElement {
 
     renderedCallback() {
         Promise.all([ loadStyle(this, rte_tbl + '/rte_tbl1.css'), loadStyle( this, dexcpqcartstylesCSS )])
-        .then(() => { console.log( 'Files loaded'); })
+        .then(() => { console.log( ''); })
         .catch(error => { console.log( error.body.message ); });
     }
 }

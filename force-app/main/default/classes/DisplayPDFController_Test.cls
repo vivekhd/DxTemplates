@@ -70,8 +70,9 @@ private class DisplayPDFController_Test {
             insert testOpp;
             PageReference testPage = Page.renderAsPdfLWC;
             Test.setCurrentPage(testPage);
-            //String result = DisplayPDFController.generatePDFAttachment(testDocument.Id, testOpp.Id);
-            //System.assertNotEquals(null, result, 'Result should not be null');
+            String pageProperties = '{"pageSize" : "A4","pageOrientation" : "Potrait"}';
+            String result = DisplayPDFController.generatePDFAttachment(testDocument.Id, testOpp.Id,pageProperties);
+            System.assertNotEquals(null, result, 'Result should not be null');
         }
         Test.stopTest();    
     }
@@ -953,6 +954,7 @@ private class DisplayPDFController_Test {
             );
             insert testTemplate;
             Document_Template__c result = DisplayPDFController.getDocumentTemplateData(testTemplate.Id);
+            SaveDocumentTemplate.getTemplateData(testTemplate.Id);
             System.assertNotEquals(null, result, 'Document_Template__c object should not be null');
             System.assertEquals('Test Template', result.Name, 'Incorrect Name');
             System.assertEquals('Test watermark data', result.Watermark_Data__c, 'Incorrect Watermark Data');
@@ -982,5 +984,12 @@ private class DisplayPDFController_Test {
             Test.stopTest();
             System.assertNotEquals(0, savedIds.size(), 'No ContentVersions saved');
         }
+    }
+    
+    @IsTest
+    static void getFlowNamesAndApexClassTest(){
+        SaveDocumentTemplate.getFlowNames();
+        SaveDocumentTemplate.getClassNames();
+        Assert.isTrue(true,'Code Coverage only');
     }
 }

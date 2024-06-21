@@ -4,24 +4,24 @@
 			<lightning-icon class="slds-col slds-size_1-of-8" icon-name="doctype:pdf" alternative-text="PDF Generator" title="PDF Generator"></lightning-icon>
 			<div class="slds-col slds-size_7-of-8 slds-text-heading_small"> <strong> DXTemplates PDF Generator </strong></div>
 		</div>
-		<div class="slds-col slds-p-right_small">
-			<c-multi-lookup-component lwc:if={showTemplateSelectionHolder} label-name="Search Template" object-api-name="Document_Template__c" field-api-names="Id,Name" 
+		<div class="slds-col slds-grid slds-grid_vertical">
+			<c-multi-lookup-component class='slds-col' lwc:if={showTemplateSelectionHolder} label-name="Search Template" object-api-name="Document_Template__c" field-api-names="Id,Name" 
 				filter-field-api-name="Name" icon-name="standard:account" onsinglepill={selectItemEventHandler} onremovepill={updateItemEventHandler} 
 				has-multi-select="false" where-clause={templateWhereClause} where-clause-two={templateWhereClause2}>
 			</c-multi-lookup-component>
-			<div lwc:if={isLoaded} class="slds-m-horizontal_large slds-is-relative">
+			<div lwc:if={isLoaded} class="slds-col slds-m-horizontal_large slds-is-relative">
 				<lightning-spinner alternative-text="Loading..." variant="brand"> </lightning-spinner>
 			</div>
-			<div lwc:if={showGenerateButton} class="slds-p-right_small slds-grid slds-gutters">
+			<div lwc:if={showGenerateButton} class="slds-col slds-grid slds-gutters">
 				<lightning-combobox class="slds-col slds-size_2-of-4" name="Page Size" label="Page Size" value={pageSize} options={pageSizeOptions} onchange={handlePdfModeSelection}> </lightning-combobox>
 				<lightning-combobox class="slds-col slds-size_2-of-4" name="Page Orientation" label="Page Orientation" value={pageOrientation} options={pageOrientationOptions} onchange={handlePdfModeSelection}> </lightning-combobox>
 			</div>
-			<div class="slds-grid slds-gutters">
-				<lightning-button lwc:if={showGenerateButton} class="slds-col slds-align_absolute-center slds-p-around_small" label="Generate PDF" onclick={handlePDF} icon-name="utility:page" icon-position="left"> </lightning-button>
-				<lightning-button lwc:if={showPreviewButton} class="slds-col slds-align_absolute-center slds-p-around_small" label="Preview PDF" onclick={previewPDF} icon-name="utility:preview" icon-position="left"> </lightning-button>
+			<div class="slds-col slds-grid slds-align_absolute-center">
+				<lightning-button lwc:if={showGenerateButton} class="slds-col slds-p-around_small" label="Generate PDF" onclick={handlePDF} icon-name="utility:page" icon-position="left"> </lightning-button>
+				<lightning-button lwc:if={showPreviewButton} class="slds-col slds-p-around_small" label="Preview PDF" onclick={previewPDF} icon-name="utility:preview" icon-position="left"> </lightning-button>
 			</div>
-			<div lwc:if={showSaveAttachmentButton} class="slds-align_absolute-center slds-grid slds-wrap slds-gutters_x-small">
-				<lightning-input class="slds-col slds-size_1-of-2" name="Rename Document" label="Document Name" value={recordId} onchange={handlePDFRename}> </lightning-input>
+			<div lwc:if={showSaveAttachmentButton} class="slds-col slds-align_absolute-center slds-grid slds-wrap slds-gutters_x-small">
+				<lightning-input class="slds-col slds-size_1-of-2" name="Rename Document" label="Document Name" value={modifiedPDFName} onchange={handlePDFRename}> </lightning-input>
 				<lightning-button class="slds-col slds-size_1-of-2 slds-p-top_large" label={saveRecordToAttachmentLabel} onclick={saveRecordToAttachment} icon-name="utility:save" icon-position="left"> </lightning-button>
 			</div>
 		</div>
