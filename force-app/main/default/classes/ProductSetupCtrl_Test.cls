@@ -20,7 +20,7 @@ private class ProductSetupCtrl_Test {
         System.runAs(us){
             Test.startTest();
             List<Account> acc = DexUtilTestDataFactory.createAccounts(3, true, null);
-            MultiSelectLookupController.retrieveRecords('Account','Name','ShippingCity','Name','','Name!=NULL');
+            MultiSelectLookupController.retrieveRecords('Account','Name','ShippingCity','Name','','Name!=NULL',false);
             System.assert(true);
             Test.stopTest();
         }

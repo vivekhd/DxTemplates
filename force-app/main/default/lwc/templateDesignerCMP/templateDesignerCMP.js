@@ -2,6 +2,7 @@ import { LightningElement, track, wire, api } from 'lwc';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 import { NavigationMixin } from 'lightning/navigation';
 import saveDocumentTemplateSectionSequences from '@salesforce/apex/SaveDocumentTemplatesection.saveDocumentTemplateSectionSequences';
+import CloneTemplateSection from '@salesforce/apex/SaveDocumentTemplatesection.CloneTemplateSection';
 import getAllDocumentTemplateSections from '@salesforce/apex/SaveDocumentTemplatesection.getAllDocumentTemplateSections';
 import activateTemplate from '@salesforce/apex/SaveDocumentTemplate.activateTemplate';
 import deleteTemplate from '@salesforce/apex/SaveDocumentTemplate.deleteTemplate';
@@ -30,7 +31,9 @@ export default class TemplateDesignerCMP extends NavigationMixin(LightningElemen
   @api isSaved; //to check for unsaved changes
   @track whereCondition = '';
   //variables added by Bhavya for watermark starts here
-
+  currentSequence = 0;
+  sectionsData;
+  @track isSectionClone = true;
   step = 1; // progress bar increases with a step value 1
   currentStep = "1"; // It reflects the current (or) active step in the progress bar
   baseURL; // domain base url of the ORG
@@ -127,6 +130,7 @@ export default class TemplateDesignerCMP extends NavigationMixin(LightningElemen
   previewRecordId; // ID of the preview record.
   templateId; // ID of the template.
   templatename; // Name of the template.
+  sectionToClone;
   @api relatedtoTypeObjName; // Related to type object name.
   @track relatedtoTypeObjChild; // Child of the related to type object.
   quoteName; // Name of the quote.
@@ -557,8 +561,6 @@ export default class TemplateDesignerCMP extends NavigationMixin(LightningElemen
     * @returns value of the field based on their respective format.
     */
   displaysectionbasedontype(sectionid, sectiontype) {
-        this.whereCondition = `DxCPQ__Document_Template__r.DxCPQ__Related_To_Type__c = '${this.relatedtoTypeObjName}' AND DxCPQ__Type__c = '${sectiontype}'`;
-
     if (sectiontype == 'Header' || sectiontype == 'Footer') {
       var isnew = true;
       if (sectionid.indexOf('NotSaved') !== -1) {
@@ -684,6 +686,7 @@ export default class TemplateDesignerCMP extends NavigationMixin(LightningElemen
       getAllDocumentTemplateSections({ docTempId: this.documenttemplaterecordid })
         .then(result => {
           if (result != null) {
+            this.sectionsData = result;
             this.isTemplateSectionsFetched = true;
             if (result.length > 0) {
               result.forEach(res => {
@@ -1079,6 +1082,53 @@ export default class TemplateDesignerCMP extends NavigationMixin(LightningElemen
     this.previewRecordId = event.detail.selectedRecord.recordId;
     this.templateId = this.doctemplatedetails.Id;
     this.templatename = this.doctemplatedetails.Name;
+     this.sectionToClone = event.detail.selectedRecord;
+  }
+
+  handleClone(event) {
+     let sectionObj ={'sobjectType':'DxCPQ__Document_Template_Section__c'};
+     sectionObj.Name = this.sectionToClone.sectionName;
+     sectionObj.DxCPQ__Document_Template__c = this.templateId;
+     sectionObj.DxCPQ__Section_Content__c = this.sectionToClone.recordObject.DxCPQ__Section_Content__c;
+     sectionObj.DxCPQ__Type__c = this.sectionToClone.recordObject.DxCPQ__Type__c;
+     
+    //  this.sectionsData.forEach(res=>{
+    //     if (res.DxCPQ__Type__c !== 'Header' && res.DxCPQ__Type__c !== 'Footer') {
+    //       if(res.DxCPQ__Sequence__c >= this.currentSequence) {
+    //         this.currentSequence = res.DxCPQ__Sequence__c;
+    //       }      
+    //     }
+       this.sections.forEach(res=>{
+        if (res.Type !== 'Header' && res.Type !== 'Footer') {
+          if(res.rowCount >= this.currentSequence) {
+            this.currentSequence = res.rowCount;
+          }      
+        }
+        if(this.sectionToClone.recordObject.DxCPQ__Section_Details__c != null) {
+          sectionObj.DxCPQ__Section_Details__c = this.sectionToClone.recordObject.DxCPQ__Section_Details__c;
+        }
+        else if(this.sectionToClone.recordObject.DxCPQ__Header_Content__c != null) {
+          sectionObj.DxCPQ__Header_Content__c = this.sectionToClone.recordObject.DxCPQ__Header_Content__c;
+        }
+     });
+     sectionObj.DxCPQ__Sequence__c = this.currentSequence+1;
+
+     CloneTemplateSection({Recorddetails : sectionObj}).then(result=>{
+       if(result) {
+         const successEvent = new ShowToastEvent({
+              title: 'Success',
+              message: 'Section "' + result.Name + '"' + ' was Cloned',
+              variant: 'success',
+            });
+            this.dispatchEvent(successEvent);
+            const newSection = {Id: result.Id,Type: result.DxCPQ__Type__c,rowCount: result.DxCPQ__Sequence__c,sectionNameEntered: result.Name,index: this.sections.length};
+            this.sections = [...this.sections, newSection];
+            this.previewRecordId = undefined;
+            this.template.querySelector("c-multi-lookup-component").clearPills();;
+         console.log('CloneTemplateSection result ',result);
+         console.log('this.sections ',this.sections);
+       }
+     }).catch(error=>{});
   }
 
   /**

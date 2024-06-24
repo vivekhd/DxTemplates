@@ -9,7 +9,11 @@ import getAllPopupMessages from '@salesforce/apex/PopUpMessageSelector.getAllCon
 import gettemplatesectiondata from '@salesforce/apex/SaveDocumentTemplatesection.gettemplatesectiondata';
 import getContentVersions from '@salesforce/apex/FooterClass.getContentVersions';
 import getSearchedContentVersions from '@salesforce/apex/FooterClass.getSearchedContentVersions';
-
+import getSObjectListFiltering from '@salesforce/apex/RelatedObjectsClass.getSObjectListFiltering';
+import createRuleCondition from '@salesforce/apex/RelatedObjectsClass.createRuleCondition';
+import getConditions from '@salesforce/apex/RelatedObjectsClass.getExistingConditions';
+import { createRuleConditionHierarcy } from 'c/conditionUtil';
+import resetRulesForTemplate from '@salesforce/apex/RelatedObjectsClass.handleTemplateRuleResetCondition';
 export default class TemplateTableDetails extends LightningElement {
 
     @track tableOnLoad = true;
@@ -71,7 +75,7 @@ export default class TemplateTableDetails extends LightningElement {
     initialResizeX;
     resizingColumn = null;
 
-    tablehasdata=false;
+    tablehasdata = false;
 
     fontsize = "12px";
 
@@ -152,6 +156,7 @@ export default class TemplateTableDetails extends LightningElement {
     @track savedRecordID;
     @api recordidvalueprop;
     selectedTableRow;
+    hasSpecialCharacter;
     disableButton = false;
 
     @track Recorddetailsnew = {
@@ -162,7 +167,8 @@ export default class TemplateTableDetails extends LightningElement {
         DxCPQ__Document_Template__c: '',
         DxCPQ__Sequence__c: 0,
         DxCPQ__Type__c: '',
-        Id: '', DxCPQ__Section_Details__c: ''
+        Id: '', DxCPQ__Section_Details__c: '',
+        DxCPQ__Section_Visibility_Rule__c: ''
     };
 
     isLoaded = false;
@@ -173,11 +179,204 @@ export default class TemplateTableDetails extends LightningElement {
     @track selectedfontcolor = '#8DC141';
     @track selectedbgcolor = '#003366';
     @api sectionrecordid;
-
+    @track ruleCondition = false;
+    @track listOfExistingConditions = [];
+    @track fieldWrapper;
+    ruleExpression;
+    ruleConditions = [];
+    ruleExists = false;
+    allConditions = [];
+    conditionExists = false;
+    conditionsArr = [];
+    mapOfRC = new Map();
 
     connectedCallback() {
         this.getContentVersionData();
+        this.handleRuleWrapperMaking();
     }
+    /*filter*/
+    handleFiltering() {
+        this.ruleCondition = true;
+        this.template.querySelector('[data-id="filter"]').show();
+    }
+    closePreviewModal() {
+        this.ruleCondition = false;
+        this.template.querySelector('[data-id="filter"]').hide();
+    }
+    handleRuleWrapperMaking() {
+        if (this.selectedObjectName !== undefined) {
+            getSObjectListFiltering({
+                selectedChildObjectLabel: this.selectedObjectName
+            })
+                .then((result) => {
+                    this.fieldWrapper = result;
+                })
+                .catch((error) => {
+                    console.log('error while Filtering the Object -> handleRuleWrapperMaking', error);
+                });
+        }
+    }
+    handleCreateRules(event) {
+        const conditionChild = this.template.querySelector('c-conditioncmp').getConditionDetails();
+        this.ruleExpression = conditionChild.expression;
+        this.createRuleConditionObjects(conditionChild.listOfConditions);
+        let listOfConditions = JSON.stringify(this.ruleConditions);
+        let deleteIds = null;
+        let ruleExp = JSON.stringify(this.ruleExpression);
+        let ruleType = this.visibilityRuleCondition == true? 'Section Visibility Rule': '';
+        createRuleCondition({
+            ruleConditions: listOfConditions,
+            ruleExpression: ruleExp,
+            deleteIds: deleteIds,
+            sectionrecordid: this.sectionrecordid,
+             ruleType: ruleType
+        })
+            .then(result => {
+                this.ruleIdCreated = result;
+                this.ruleExists = true;
+                let event = new Object();
+                this.getExistingConditions(event);
+            })
+            .catch(error => {
+                console.log('Error -> createRuleCondition' + JSON.stringify(error));
+            });
+        this.template.querySelector('c-modal').hide();
+    }
+    createRuleConditionObjects(arrayList) {
+        this.hasSpecialCharacter = false;
+        let regExpr = /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]+/;
+        arrayList.forEach(condition => {
+            let tempObj = {};
+            tempObj.Id = condition.Id;
+            tempObj.conditionName = condition.conditionName;
+            tempObj.dataType = condition.dataType;
+            if (condition.operator == '==') {
+                tempObj.operator = '==';
+            } else {
+                tempObj.operator = condition.operator;
+            }
+            tempObj.selectedObject = condition.selectedObject;
+            tempObj.selectedField = condition.selectedField;
+            tempObj.value = condition.value;
+            if (regExpr.test(tempObj.value)) {
+                this.hasSpecialCharacter = true;
+            }
+            tempObj.conditionIndex = condition._index;
+            this.ruleConditions.push(tempObj);
+            if (condition.children && condition.children.length > 0) {
+                condition.children.forEach(child => {
+                    if (child.group && child.group.length > 0) {
+                        this.createRuleConditionObjects(child.group);
+                    }
+                })
+            }
+        })
+    }
+    handleRuleUpdates(event) {
+        this.ruleConditions = [];
+        const conditionChild = this.template.querySelector('c-conditioncmp').getConditionDetails();
+        this.createRuleConditionObjects(conditionChild.listOfConditions);
+        let listOfConditions = JSON.stringify(this.ruleConditions);
+        let expression = JSON.stringify(conditionChild.expression);
+        let deleteIds = this.removeDeletedConditions(this.ruleConditions, this.conditionsArr);
+        if (!this.hasSpecialCharacter) {
+            createRuleCondition({
+                ruleConditions: listOfConditions,
+                ruleExpression: expression,
+                deleteIds: deleteIds,
+                sectionrecordid: this.sectionrecordid
+            })
+                .then(result => {
+                    this.ruleExists = true;
+                    this.ruleExpression = expression;
+
+                    let event = new Object();
+                    this.getExistingConditions(event);
+                })
+                .catch(error => {
+                    console.log('createRuleCondition error occurred' + JSON.stringify(error));
+                });
+        }
+        this.template.querySelector('c-modal').hide();
+    }
+    getExistingConditions(event) {
+        this.mapOfRC = new Map();
+        this.conditionsArr = [];
+        this.conditionExists = false;
+        this.allConditions = [];
+        this.listOfExistingConditions = [];
+        getConditions({ ruleName: this.ruleIdCreated })
+            .then(result => {
+                if (result.length > 0) {
+                    this.conditionsArr = JSON.parse(JSON.stringify(result));
+                    this.lstofactualConditions = this.conditionsArr;
+                    this.conditionsArr.forEach(con => {
+                        this.mapOfRC.set(con.Name, con);
+                    });
+                    if (this.fieldWrapper !== undefined) {
+                        let conditionResult = createRuleConditionHierarcy(this.ruleExpression, this.mapOfRC, this.fieldWrapper);
+                        this.listOfExistingConditions = conditionResult.listOfConditions;
+                        this.selectedGlobalValue = conditionResult.selectedGlobalValue;
+                        this.conditionExists = true;
+                    }
+                }
+            })
+            .catch(error => {
+                console.log('Apex Call getExistingConditions Erroneous');
+                console.log(error);
+            })
+    }
+    removeDeletedConditions(listOfConditions, receivedConditions) {
+      let existingIds = [];
+      let receivedIds = [];
+      listOfConditions.forEach(con => {
+          if (con.Id) {
+              existingIds.push(con.Id);
+          }
+      })
+      receivedConditions.forEach(con => {
+          receivedIds.push(con.Id);
+      })
+      receivedIds = receivedIds.filter(el => {
+          return !existingIds.includes(el);
+      });
+      return receivedIds;
+  }
+
+     handleFilterRuleReset() {
+
+      resetRulesForTemplate({
+              templateRuleId: this.ruleIdCreated
+          })
+          .then(result => {
+              if (result == 'Success') {
+
+                  this.ruleIdCreated = null;
+
+                  this.listOfExistingConditions = [];
+                  this.conditionsArr = [];
+                  this.ruleExists = false;
+                  this.filteringCondition = '';
+                  this.ruleConditions = [];
+                  this.ruleCondition = false;
+
+                  this.handlesectionsave(null);
+              } else {
+                  const Errormsg = new ShowToastEvent({
+                      title: 'Error',
+                      message: 'Reset didn\'t work',
+                      variant: 'Error'
+                  });
+                  this.dispatchEvent(Errormsg);
+              }
+          })
+          .catch(error => {
+              console.log('reset Rules error occurred' + JSON.stringify(error));
+          });
+      this.ruleCondition = false;
+      this.template.querySelector('c-modal').hide();
+  }
+    /*filter*/
 
     /**
     * Method to get Content version data for Images.
@@ -281,7 +480,7 @@ export default class TemplateTableDetails extends LightningElement {
             this.divContentArray.push({ 'data-id': divElement.dataset.id, 'Content': divContent, 'backgroundColor': backgroundColor });
         }
         //this.unsavedChanges();
-       // console.log('div content array in head ' + JSON.stringify(this.divContentArray));
+        // console.log('div content array in head ' + JSON.stringify(this.divContentArray));
     }
 
     /**
@@ -511,9 +710,9 @@ export default class TemplateTableDetails extends LightningElement {
                 myObj.columns = columns;
                 this.tablerows.push(myObj);
             }
-            if (this.tablehasdata == false){
+            if (this.tablehasdata == false) {
                 this.unsavedChanges();
-                this.tablehasdata= true;
+                this.tablehasdata = true;
             }
         }
     }
@@ -729,6 +928,7 @@ export default class TemplateTableDetails extends LightningElement {
             this.Recorddetailsnew.DxCPQ__New_Page__c = this.newPage;
             this.Recorddetailsnew.DxCPQ__Sequence__c = this.rowcount;
             this.Recorddetailsnew.DxCPQ__Type__c = this.sectiontype;
+            this.Recorddetailsnew.DxCPQ__Section_Visibility_Rule__c = this.ruleIdCreated;
             let currecid = this.sectionrecordid;
             if (currecid != '' && this.sectionrecordid.indexOf('NotSaved') == -1) {
                 this.Recorddetailsnew.Id = this.sectionrecordid;
@@ -838,8 +1038,20 @@ export default class TemplateTableDetails extends LightningElement {
             DxCPQ__Sequence__c: 0,
             DxCPQ__Type__c: '',
             Id: '',
+            DxCPQ__Section_Visibility_Rule__c:''
         };
+        this.ruleIdCreated = null;
+        this.ruleCondition = false;
+        this.listOfExistingConditions = [];
         this.clauseId = '';
+        this.ruleExpression = '';
+        this.ruleConditions = [];
+        this.ruleExists = false;
+        this.allConditions=[];
+        this.conditionExists=false;
+        this.conditionsArr = [];
+        this.mapOfRC = new Map();
+        this.Recorddetailsnew.DxCPQ__Section_Visibility_Rule__c = '';
         this.template.querySelectorAll('lightning-input-rich-text').forEach(element => {
             if (element.value != null) {
                 element.value = '';
@@ -920,6 +1132,7 @@ export default class TemplateTableDetails extends LightningElement {
             .then(result => {
                 if (result != null) {
                     this.Recorddetailsnew = { ...this.Recorddetailsnew, ...result };
+                    this.Recorddetailsnew.DxCPQ__Section_Visibility_Rule__c = result.DxCPQ__Section_Visibility_Rule__c;
                     let parsedJson = JSON.parse(this.Recorddetailsnew.DxCPQ__Section_Details__c);
 
                     parsedContent = parsedJson.sectionInfo;
@@ -937,13 +1150,35 @@ export default class TemplateTableDetails extends LightningElement {
                     this.isHeaderSelectedCheck = parsedJson.headersIncluded;
                     this.isColWidthChangedCheck = parsedJson.colWidthChanged;
                     this.selectedBorderStyle = parsedJson.borderstyle;
-                    this.tablehasdata= true;
+                    this.tablehasdata = true;
 
                     this.newPage = parsedJson.newPage;
                     setTimeout(() => {
                         this.template.querySelector('[data-id="newPageTable"]').checked = parsedJson.newPage;
                     });
+                    if (result.DxCPQ__Section_Visibility_Rule__c != null && result.DxCPQ__Section_Visibility_Rule__c != '') {
+                        this.Recorddetailsnew.DxCPQ__Section_Visibility_Rule__c = result.DxCPQ__Section_Visibility_Rule__c;
+                        this.ruleExpression = result.DxCPQ__Section_Visibility_Rule__r.DxCPQ__Rule_Expression__c;
+                    } else {
+                        this.Recorddetailsnew.DxCPQ__Section_Visibility_Rule__c = '';
+                    }
+                    if (result.DxCPQ__Section_Visibility_Rule__c != null) {
+                        this.ruleIdCreated = result.DxCPQ__Section_Visibility_Rule__c;
+                        this.ruleExists = true;
+                    } else {
+                        this.ruleIdCreated = null;
+                        this.listOfExistingConditions = [];
+                        this.conditionsArr = [];
+                        this.ruleExists = false;
+                        this.filteringCondition = '';
+                    }
 
+                    if (this.ruleIdCreated != null && this.ruleIdCreated != '') {
+                        this.handleRuleWrapperMaking();
+                        let event = new Object();
+                        this.getExistingConditions(event);
+                        this.ruleExists = true;
+                    }
                     this.handletablecreate();
                 }
             })
@@ -1750,8 +1985,8 @@ export default class TemplateTableDetails extends LightningElement {
         this.isColSwapCheck = event.target.checked;
     }
 
-    unsavedChanges(){
-        const saveEvent = new CustomEvent('datasaved', {detail: false });
+    unsavedChanges() {
+        const saveEvent = new CustomEvent('datasaved', { detail: false });
         this.dispatchEvent(saveEvent);
     }
 }

@@ -11,6 +11,7 @@ export default class DxMultiLookupComponent extends LightningElement {
     @api whereClause;
     @api whereClauseTwo;
     @api readOnly = false;
+    @api isSectionClone = false;
     searchInput = "";
     @track
     selectedRecord;
@@ -58,6 +59,10 @@ export default class DxMultiLookupComponent extends LightningElement {
 
     handleKeyChange(event) {
         this.searchInput = event.target.value;
+        if(this.isSectionClone) {
+           this.whereClauseTwo =  'Name Like \'%'+this.searchInput+ '%\' OR '+'DxCPQ__Document_Template__r.Name Like \'%'+this.searchInput+ '%\'';
+           this.filterFieldApiName = "";
+        }
         this.lstResult = [];
         this.isDisplayErrorMessage = false;
         if (this.searchInput.trim().length > 0) {
@@ -67,11 +72,16 @@ export default class DxMultiLookupComponent extends LightningElement {
                 filterFieldAPIName: this.filterFieldApiName,
                 strInput: this.searchInput,
                 whereClauseTwo: this.whereClauseTwo ? this.whereClauseTwo : "",
-                whereClause: this.whereClause ? this.whereClause : ""
+                whereClause: this.whereClause ? this.whereClause : "",
+                isSectionClone : this.isSectionClone
             })
                 .then(result => {
                     if (result.length > 0) {
-                        this.lstResult = result;
+                        if(this.isSectionClone) {
+                            this.lstResult = this.constructSectionLabel(result);
+                        }else {
+                            this.lstResult = result;
+                        }
                         this.isDialogDisplay = true;
                         this.isDisplayErrorMessage = false;
                     }
@@ -92,6 +102,20 @@ export default class DxMultiLookupComponent extends LightningElement {
         } else {
             this.isDialogDisplay = false;
         }
+    }
+
+    constructSectionLabel(inputJson) {
+        const records = inputJson;
+        
+        records.forEach(record => {
+            const docTemplate = record.recordObject.DxCPQ__Document_Template__r;
+            record.sectionName = record.recordName;
+            const newRecordName = `${docTemplate.Name}-V${docTemplate.DxCPQ__Version_Number__c}: ${record.recordName} (${record.recordObject.DxCPQ__Type__c})`;
+            record.recordName = newRecordName;
+            
+        });
+        
+        return records;
     }
 
     handleSelectedRecord(event) {

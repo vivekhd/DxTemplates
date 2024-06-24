@@ -15,8 +15,7 @@ import getSObjectListFiltering from '@salesforce/apex/RelatedObjectsClass.getSOb
 import createRuleCondition from '@salesforce/apex/RelatedObjectsClass.createRuleCondition';
 import getConditions from '@salesforce/apex/RelatedObjectsClass.getExistingConditions';
 import { createRuleConditionHierarcy } from 'c/conditionUtil';
-
-
+import resetRulesForTemplate from '@salesforce/apex/RelatedObjectsClass.handleTemplateRuleResetCondition';
 export default class TemplateContentDetails extends NavigationMixin(LightningElement) {
   isLoaded = false;
   showMergeFields = false;
@@ -45,7 +44,7 @@ export default class TemplateContentDetails extends NavigationMixin(LightningEle
   @track ruleCondition = false;
   @track globalItems;
   @track selectedMergefields = [];
-  @api whereCondition ="";
+  @api wherecondition;
   whereClause = " IsActive__c = true";
   @track isTranslateModalOpen = false;
   @track translatedRecords=[{
@@ -132,12 +131,10 @@ export default class TemplateContentDetails extends NavigationMixin(LightningEle
     this.richtextVal = event.detail.selectedRecord.recordObject.DxCPQ__Body__c;
     this.Recorddetailsnew.Name = event.detail.selectedRecord.recordName;
   }
-  /*filter*/
+/*filter*/
 
   connectedCallback() {
     this.handleRuleWrapperMaking();
-   // this.whereCondition = `DxCPQ__Document_Template__r.DxCPQ__Related_To_Type__c = '${this.selectedObjectName}' AND DxCPQ__Type__c = 'Context'`;
-    this.whereClause = this.whereCondition;
     console.log('sectionrecordid',this.sectionrecordid);
   }
    handleFiltering() {
@@ -183,7 +180,7 @@ export default class TemplateContentDetails extends NavigationMixin(LightningEle
           .catch(error => {
               console.log('Error -> createRuleCondition' + JSON.stringify(error));
           });
-      this.template.querySelector('c-modal').hide();
+      this.template.querySelector('[data-id="filter"]').hide();
   }
    createRuleConditionObjects(arrayList) {
       this.hasSpecialCharacter = false;
@@ -240,7 +237,7 @@ export default class TemplateContentDetails extends NavigationMixin(LightningEle
                   console.log('createRuleCondition error occurred' + JSON.stringify(error));
               });
       }
-      this.template.querySelector('c-modal').hide();
+      this.template.querySelector('[data-id="filter"]').hide();
   }
    getExistingConditions(event) {
       this.mapOfRC = new Map();
@@ -268,6 +265,55 @@ export default class TemplateContentDetails extends NavigationMixin(LightningEle
             console.log('Apex Call getExistingConditions Erroneous');
             console.log(error);
         })
+  }
+  removeDeletedConditions(listOfConditions, receivedConditions) {
+      let existingIds = [];
+      let receivedIds = [];
+      listOfConditions.forEach(con => {
+          if (con.Id) {
+              existingIds.push(con.Id);
+          }
+      })
+      receivedConditions.forEach(con => {
+          receivedIds.push(con.Id);
+      })
+      receivedIds = receivedIds.filter(el => {
+          return !existingIds.includes(el);
+      });
+      return receivedIds;
+  }
+    handleFilterRuleReset() {
+
+      resetRulesForTemplate({
+              templateRuleId: this.ruleIdCreated
+          })
+          .then(result => {
+              if (result == 'Success') {
+
+                  this.ruleIdCreated = null;
+
+                  this.listOfExistingConditions = [];
+                  this.conditionsArr = [];
+                  this.ruleExists = false;
+                  this.filteringCondition = '';
+                  this.ruleConditions = [];
+                  this.ruleCondition = false;
+
+                  this.handlesectionsave(null);
+              } else {
+                  const Errormsg = new ShowToastEvent({
+                      title: 'Error',
+                      message: 'Reset didn\'t work',
+                      variant: 'Error'
+                  });
+                  this.dispatchEvent(Errormsg);
+              }
+          })
+          .catch(error => {
+              console.log('reset Rules error occurred' + JSON.stringify(error));
+          });
+      this.ruleCondition = false;
+      this.template.querySelector('c-modal').hide();
   }
 
   /*filter*/
@@ -448,7 +494,7 @@ export default class TemplateContentDetails extends NavigationMixin(LightningEle
   handleRichTextArea(event) {
     this.Recorddetailsnew.DxCPQ__Section_Content__c = event.detail.value;
     if(this.richtextVal != event.detail.value){
-    this.richtextVal = event.detail.value;
+      this.richtextVal = event.detail.value;
       const saveEvent = new CustomEvent('datasaved', {detail: false });
       this.dispatchEvent(saveEvent);
     }
@@ -501,9 +547,11 @@ export default class TemplateContentDetails extends NavigationMixin(LightningEle
     DxCPQ__Document_Clause__c: '',
     DxCPQ__Section_Visibility_Rule__c:''
   };
-   this.ruleCondition = false;
+  this.handleRuleWrapperMaking();
+  this.ruleCondition = false;
   this.listOfExistingConditions = [];
-  //this.fieldWrapper=[];
+  this.fieldWrapper=[];
+  this.ruleIdCreated='';
   this.ruleExpression = '';
   this.ruleConditions = [];
   this.ruleExists = false;
@@ -574,27 +622,27 @@ export default class TemplateContentDetails extends NavigationMixin(LightningEle
             this.richtextVal = '';
           }
           if (result.DxCPQ__Section_Visibility_Rule__c != null && result.DxCPQ__Section_Visibility_Rule__c != '') {
-                      this.Recorddetailsnew.DxCPQ__Section_Visibility_Rule__c = result.DxCPQ__Section_Visibility_Rule__c;
-                      this.ruleExpression = result.DxCPQ__Section_Visibility_Rule__r.DxCPQ__Rule_Expression__c;
-                  } else {
-                      this.Recorddetailsnew.DxCPQ__Section_Visibility_Rule__c = '';
-                  }
+              this.Recorddetailsnew.DxCPQ__Section_Visibility_Rule__c = result.DxCPQ__Section_Visibility_Rule__c;
+              this.ruleExpression = result.DxCPQ__Section_Visibility_Rule__r.DxCPQ__Rule_Expression__c;
+          } else {
+              this.Recorddetailsnew.DxCPQ__Section_Visibility_Rule__c = '';
+          }
           if (result.DxCPQ__Section_Visibility_Rule__c != null) {
-                      this.ruleIdCreated = result.DxCPQ__Section_Visibility_Rule__c;
-                      this.ruleExists = true;
-                  } else {
-                      this.ruleIdCreated = null;
-                      this.listOfExistingConditions = [];
-                      this.conditionsArr = [];
-                      this.ruleExists = false;
-                      this.filteringCondition = '';
-                  }
+              this.ruleIdCreated = result.DxCPQ__Section_Visibility_Rule__c;
+              this.ruleExists = true;
+          } else {
+              this.ruleIdCreated = null;
+              this.listOfExistingConditions = [];
+              this.conditionsArr = [];
+              this.ruleExists = false;
+              this.filteringCondition = '';
+          }
 
-                  if (this.ruleIdCreated != null && this.ruleIdCreated != '') {
-                      this.handleRuleWrapperMaking();
-                      let event = new Object();
-                      this.getExistingConditions(event);
-                      this.ruleExists = true;
+          if (this.ruleIdCreated != null && this.ruleIdCreated != '') {
+              this.handleRuleWrapperMaking();
+              let event = new Object();
+              this.getExistingConditions(event);
+              this.ruleExists = true;
           }
           this.template.querySelectorAll('lightning-checkbox-group ').forEach(element => {
             if (result.DxCPQ__New_Page__c == true) {

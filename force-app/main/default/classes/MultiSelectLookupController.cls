@@ -1,6 +1,6 @@
 public with sharing class MultiSelectLookupController {
     @AuraEnabled
-    public static List<SObjectQueryResult> retrieveRecords(String objectName, String fieldAPINames, String filterFieldAPIName, String strInput, String whereClause, String whereClauseTwo){
+    public static List<SObjectQueryResult> retrieveRecords(String objectName, String fieldAPINames, String filterFieldAPIName, String strInput, String whereClause, String whereClauseTwo, Boolean isSectionClone){
         List<SObjectQueryResult> lstReturnResult = new List<SObjectQueryResult>();
         String strQuery;
         try {
@@ -16,12 +16,23 @@ public with sharing class MultiSelectLookupController {
                 strQueryField = String.join(fieldList, ',');
             } else {
                 strQueryField = fieldAPINames;
-            }            
+            }       
+            if(isSectionClone != true)
+            {   
             strQuery = 'SELECT ' + String.escapeSingleQuotes(strQueryField) +
                             + ' FROM '+ String.escapeSingleQuotes(objectName)
                             + ' WHERE '+ (String.isEmpty(whereClauseTwo)?' ':(String.valueOf(whereClauseTwo)) + ' AND ') + String.escapeSingleQuotes(filterFieldAPIName) + ' LIKE :str'
                             +   (String.isEmpty(whereClause)?' ':' AND '+ String.valueOf(whereClause))
                             + ' WITH USER_MODE LIMIT 50';
+            }
+            else{
+                strQuery = 'SELECT ' + String.escapeSingleQuotes(strQueryField) +
+                            + ' FROM '+ String.escapeSingleQuotes(objectName)
+                            + ' WHERE '+ (String.isEmpty(whereClauseTwo)?' ':(String.valueOf(whereClauseTwo)))
+                            +   (String.isEmpty(whereClause)?' ':' AND '+ String.valueOf(whereClause))
+                            + ' WITH USER_MODE LIMIT 50';
+
+            }
             system.debug('----Query-->'+strQuery);
             List<SObject> lstResult = database.query(strQuery);
             for(SObject sobj : lstResult){

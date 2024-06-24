@@ -267,7 +267,7 @@ private class DisplayRelatedController_Test {
             Account testAccount = new Account(Name = 'Test Account');
             insert testAccount;
             List<MultiSelectLookupController.SObjectQueryResult> result = MultiSelectLookupController.retrieveRecords(
-                'Account', 'Id,Name', 'Name', 'Test', '', '');
+                'Account', 'Id,Name', 'Name', 'Test', '', '',false);
             System.assertEquals(1, result.size());
             System.assertEquals(testAccount.Id, result[0].recordId);
             System.assertEquals(testAccount.Name, result[0].recordName);
@@ -286,7 +286,7 @@ private class DisplayRelatedController_Test {
                 Account testAccount = new Account(Name = 'Test Account');
                 insert testAccount;
                 List<MultiSelectLookupController.SObjectQueryResult> result = MultiSelectLookupController.retrieveRecords(
-                    'Account', 'Id,Name', 'Name', 'Test', '', '');
+                    'Account', 'Id,Name', 'Name', 'Test', '', '',false);
                 System.assertEquals(1, result.size());
                 System.assertEquals(testAccount.Id, result[0].recordId);
                 System.assertEquals(testAccount.Name, result[0].recordName);
@@ -311,7 +311,7 @@ private class DisplayRelatedController_Test {
                 Account testAccount = new Account(Name = 'Test Account');
                 insert testAccount;
                 List<MultiSelectLookupController.SObjectQueryResult> result = MultiSelectLookupController.retrieveRecords(
-                    'Account', 'Id,Name', 'Name', '*', '', '');
+                    'Account', 'Id,Name', 'Name', '*', '', '',false);
                 System.assertEquals(1, result.size());
                 System.assertEquals(testAccount.Id, result[0].recordId);
                 System.assertEquals(testAccount.Name, result[0].recordName);

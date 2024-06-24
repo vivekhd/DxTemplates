@@ -19,6 +19,15 @@
 					</lightning-button-group>
 					<lightning-badge label={relatedtoTypeObjName} class="slds-badge_inverse slds-m-left_medium">
 					</lightning-badge>
+					<div class="slds-col slds-size_1-of-1 slds-medium-size_4-of-12 slds-large-size_3-of-12 slds-p-left_small">
+						<c-multi-lookup-component  object-api-name="DxCPQ__Document_Template_Section__c"
+							field-api-names="Id,Name, DxCPQ__DisplaySectionName__c,DxCPQ__Document_Template__c,DxCPQ__Document_Template__r.Name,DxCPQ__Document_Template__r.DxCPQ__Version_Number__c,DxCPQ__Document_Template__r.DxCPQ__Related_To_Type__c, DxCPQ__Type__c,DxCPQ__Section_Content__c, DxCPQ__Header_Content__c,DxCPQ__Section_Details__c"
+							icon-name="standard:account" is-section-clone = {isSectionClone} onsinglepill={selectItemEventHandler}
+							onremovepill={updateItemEventHandler} has-multi-select="false" read-only={isDisabled}
+						>
+						</c-multi-lookup-component>
+						<lightning-button label="Clone" title="Clone Section" onclick={handleClone}></lightning-button>
+					</div>
 				</div>
 
 				<div class="slds-col slds-text-align_right">

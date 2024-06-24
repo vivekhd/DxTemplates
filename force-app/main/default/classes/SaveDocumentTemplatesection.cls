@@ -286,6 +286,35 @@ public with sharing class SaveDocumentTemplatesection {
         }
     }
     
+     @AuraEnabled
+    public static Document_Template_Section__c CloneTemplateSection(Document_Template_Section__c Recorddetails){
+         Document_Template_Section__c clonedSection = new Document_Template_Section__c();
+        try{
+           
+            if (sp1 == null) sp1 = Database.setSavepoint();
+                Database.SaveResult[] sectionList = safe.doInsert(Recorddetails);
+                List<String> errorList = Safely.safeClassExceptionHandlerInsert(sectionList);
+                if(errorList.size()>0){
+                    Database.rollback(sp1);
+                    throw new SafeClassException(String.join( errorList, ', ' ));
+                }
+            else if(Recorddetails.Id != null){
+                clonedSection.Id = Recorddetails.Id;
+            }
+           
+        }
+        catch(Exception e) {
+            
+        }
+        if(Recorddetails.Id != null){
+                return Recorddetails;
+        }
+        else {
+            return clonedSection;
+        }
+         
+    }
+    
     public class SafeClassException extends Exception{     
     }  
 }

@@ -25,6 +25,11 @@
 					<lightning-input data-id="newPageTable" type="checkbox" label="New Page" name="New Page"
 						class="slds-list_horizontal" onchange={handleNewPage} disabled={isDisabled}></lightning-input>
 				</div>
+				<div>
+				<lightning-button class="slds-p-top_large" icon-name="utility:filter_criteria" label="Apply Filter(s)"
+					title="Apply Visibility Filter(s)" onclick={handleFiltering} disabled={isDisabled}>
+				</lightning-button>
+			</div>
 
 			</div>
 
@@ -34,7 +39,32 @@
 					</lightning-spinner>
 				</div>
 			</div>
-
+			<c-modal data-id="filter">
+			<template if:true={ruleCondition}>
+				<span slot="header">Apply Visibility Filter(s)</span>
+				<div class="slds-modal__content slds-p-around_medium" style="min-height: 300px;">
+					<c-conditioncmp list-of-existing-conditions={listOfExistingConditions} field-wrapper={fieldWrapper}
+						existing-global-value={selectedGlobalValue} existing-expression={ruleExpression}
+						style="width:100%"></c-conditioncmp>
+				</div>
+				<footer class="slds-modal__footer">
+					<div class="slds-text-align_right">
+						<lightning-button class="slds-p-right_x-small" variant="brand" label="Cancel" title="Cancel"
+							onclick={closePreviewModal}></lightning-button>
+						<template if:true={ruleExists}>
+							<lightning-button class="slds-p-right_x-small" variant="brand" label="Reset Rule & Save"
+								title="Reset" onclick={handleFilterRuleReset}></lightning-button>
+							<lightning-button class="slds-p-right_x-small" variant="brand" label="Update Rule"
+								title="Update" onclick={handleRuleUpdates}></lightning-button>
+						</template>
+						<template if:false={ruleExists}>
+							<lightning-button class="slds-p-right_x-small" variant="brand" label="Create Rule"
+								title="Create" onclick={handleCreateRules}></lightning-button>
+						</template>
+					</div>
+				</footer>
+			</template>
+		</c-modal>
 
 			<div class="slds-col slds-p-top_large slds-size_12-of-12">
 				<div class="slds-grid slds-wrap">
