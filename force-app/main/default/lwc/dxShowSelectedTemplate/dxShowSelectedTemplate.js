@@ -39,6 +39,7 @@ export default class DxShowSelectedTemplate extends LightningElement {
     showpreview=false;
     popUpMessage;
     documentIdVal='';
+    noROSectionsForGivenTemplate = true;
 
     //section Visibility variables
     calculatedResults =[];
@@ -174,6 +175,7 @@ export default class DxShowSelectedTemplate extends LightningElement {
                             tempObj.isContext=false;
                             tempObj.templatesectionid=tempSec.Id;
                             this.sectionContentArr.push(tempObj);
+                            this.noROSectionsForGivenTemplate = false;
                         }
                     }
                     else if(tempSec.DxCPQ__Type__c=='Header')
@@ -262,6 +264,9 @@ export default class DxShowSelectedTemplate extends LightningElement {
                         this.headerfooter.footer= seccon;
                     }
                 })                                
+            }
+            if(this.noROSectionsForGivenTemplate){
+                this.dispatchEvent(new CustomEvent('showgenerate', { bubbles: true , composed : true, detail: 'loaded' }));
             }
         }).catch((err) => {
             // this.isLoaded=false;
@@ -354,7 +359,4 @@ export default class DxShowSelectedTemplate extends LightningElement {
             });
         });*/
     } 
-
-
-
 }
