@@ -1460,27 +1460,29 @@ export default class TemplateDesignerCMP extends NavigationMixin(LightningElemen
    * Method to save the created Text & Image watermarks for the user given inputs
    * Once the images drawn in both cases - text & image are saved then their contentversion IDs are captured and using the updateRecord the Watermark_Data__c field on Document_Template__c object is updated based on the selected ID
    */
+
   handleWaterMarkSave() {
     try{
-    let canvasText = this.template.querySelector('.canvasText');
-    if (canvasText && this.watermarkText !== '') {
-      let dataURLText = canvasText.toDataURL();
-      this.baseDataLst.push({ 'text': dataURLText.split(',')[1], title:'Text' });
-    }
+      let canvasText = this.template.querySelector('.canvasText');
+      if (canvasText && this.watermarkText !== '') {
+        let dataURLText = canvasText.toDataURL();
+        this.baseDataLst.push({ 'text': dataURLText.split(',')[1], title:'Text' });
+      }
 
-    let canvasImage = this.template.querySelector('.canvasImage');
-    if (canvasImage && this.imageUrl) {
-      let dataURLImage = canvasImage.toDataURL();
-      this.baseDataLst.push({ 'Image': dataURLImage.split(',')[1], title:'Image' });
-}
+      let canvasImage = this.template.querySelector('.canvasImage');
+      if (canvasImage && this.imageUrl) {
+        let dataURLImage = canvasImage.toDataURL();
+        this.baseDataLst.push({ 'Image': dataURLImage.split(',')[1], title:'Image' });
+      }
     }
     catch(error){
       console.log('error while getting canvas line 1230 templatedesignerCMP --> ', error);
     }
 
-        const originalImageMap = this.baseDataLst.find(entry => entry.title === 'OriginalImg');
+    const originalImageMap = this.baseDataLst.find(entry => entry.title === 'OriginalImg');
     this.hasOriginalImage = originalImageMap != undefined ? true : false;
-    saveContentVersion({ title: "WatermarkImage", base64DataList: this.baseDataLst, templateId: this.documenttemplaterecordid, wtImage : this.hasOriginalImage })
+    if(this.baseDataLst.length > 0){
+      saveContentVersion({ title: "WatermarkImage", base64DataList: this.baseDataLst, templateId: this.documenttemplaterecordid, wtImage : this.hasOriginalImage })
       .then(result => {
                 this.imageSavedId = result;
         const fields = {};
@@ -1567,8 +1569,16 @@ export default class TemplateDesignerCMP extends NavigationMixin(LightningElemen
       .catch(error => {
         console.error('Error saving file:', error);
       });
+    }
+    else{
+      this.showwatermarkbtn = false;
+      this.template.querySelector('c-modal').hide();
+      this.resetWatermarkValues();
+      this.baseDataLst = [];
+      this.imageUrl = '';
+    }
   }
-
+  
   /**
   * Method to hide the Watermark Screen from UI
   */

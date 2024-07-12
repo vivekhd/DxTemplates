@@ -509,88 +509,98 @@ try{
     * Method to save the created Text & Image watermarks for the user given inputs
     * Once the images drawn in both cases - text & image are saved then their contentversion IDs are captured and using the updateRecord the Watermark_Data__c field on Document_Template__c object is updated based on the selected ID
     */
+
     handleWaterMarkSave(){
-try{
-      let canvasText = this.template.querySelector('.canvasText');
-      if(canvasText && this.watermarkText !== ''){
-        let dataURLText = canvasText.toDataURL();
-        this.baseDataLst.push({ 'text': dataURLText.split(',')[1], title:'Text' });
-      }
-      let canvasImage = this.template.querySelector('.canvasImage');
-      if(canvasImage && this.imageUrl){
-        let dataURLImage = canvasImage.toDataURL();
-        this.baseDataLst.push({ 'Image': dataURLImage.split(',')[1], title:'Image' });
-}
+        try{
+            let canvasText = this.template.querySelector('.canvasText');
+            if(canvasText && this.watermarkText !== ''){
+                let dataURLText = canvasText.toDataURL();
+                this.baseDataLst.push({ 'text': dataURLText.split(',')[1], title:'Text' });
+            }
+            let canvasImage = this.template.querySelector('.canvasImage');
+            if(canvasImage && this.imageUrl){
+                let dataURLImage = canvasImage.toDataURL();
+                this.baseDataLst.push({ 'Image': dataURLImage.split(',')[1], title:'Image' });
+            }
         }
         catch(error){
             console.log('error while getting canvas line 432 templateSetup --> ', error);
-      }
-      saveContentVersion({ title: "WatermarkImage", base64DataList: this.baseDataLst, templateId: this.documenttemplaterecordid, wtImage : true })
-        .then(result => {
-                        const fields ={};
-            let watermarkText = (result.filter(obj => Object.keys(obj).some(key => key.includes('Text'))) || [])[0];
-            let watermarkImage = (result.filter(obj => Object.keys(obj).some(key => key.includes('Image'))) || [])[0];
-            watermarkText = watermarkText ? watermarkText[Object.keys(watermarkText)[0]] : null;
-            watermarkImage = watermarkImage? watermarkImage[Object.keys(watermarkImage)[0]] : null;
-            let wtOriginalImage = (result.filter(obj => Object.keys(obj).some(key => key.includes('OriginalImg'))) || [])[0];
-            wtOriginalImage = wtOriginalImage ? wtOriginalImage[Object.keys(wtOriginalImage)[0]] : null;
-            this.originalImageCvId = wtOriginalImage? wtOriginalImage : this.prevoriginalImageCvId;
-            const watermarkImageIdText = {
-                name: 'Text',
-                isPrimary: this.checkedValText,
-                contentVersionID: watermarkText,
-                pageOption: this.pageTextOption,
-                fontsize: this.fontSizeValue,
-                opacity: this.opacityValue,
-                color: this.colorValue,
-                rotation: this.rotationValue,
-                textVal: this.watermarkText,
-                pageTextOption: this.pageTextOption
-            };
+        }
+        if(this.baseDataLst.length > 0){
+            saveContentVersion({ title: "WatermarkImage", base64DataList: this.baseDataLst, templateId: this.documenttemplaterecordid, wtImage : true })
+            .then(result => {
+                const fields ={};
+                let watermarkText = (result.filter(obj => Object.keys(obj).some(key => key.includes('Text'))) || [])[0];
+                let watermarkImage = (result.filter(obj => Object.keys(obj).some(key => key.includes('Image'))) || [])[0];
+                watermarkText = watermarkText ? watermarkText[Object.keys(watermarkText)[0]] : null;
+                watermarkImage = watermarkImage? watermarkImage[Object.keys(watermarkImage)[0]] : null;
+                let wtOriginalImage = (result.filter(obj => Object.keys(obj).some(key => key.includes('OriginalImg'))) || [])[0];
+                wtOriginalImage = wtOriginalImage ? wtOriginalImage[Object.keys(wtOriginalImage)[0]] : null;
+                this.originalImageCvId = wtOriginalImage? wtOriginalImage : this.prevoriginalImageCvId;
+                const watermarkImageIdText = {
+                    name: 'Text',
+                    isPrimary: this.checkedValText,
+                    contentVersionID: watermarkText,
+                    pageOption: this.pageTextOption,
+                    fontsize: this.fontSizeValue,
+                    opacity: this.opacityValue,
+                    color: this.colorValue,
+                    rotation: this.rotationValue,
+                    textVal: this.watermarkText,
+                    pageTextOption: this.pageTextOption
+                };
 
-            const watermarkImageIdImage = {
-                name: 'Image',
-                isPrimary: this.checkedValImage,
-                contentVersionID: watermarkImage,
-                pageOption: this.pageImageOption,
-                opacity: this.opacityImageValue,
-                rotation: this.rotationImagevalue,
-                pageImageOption: this.pageImageOption,
-                imageScale: this.imageScalingValue,
-                originalImageCVId : this.originalImageCvId
-            };
-            fields[DOCUMENTTEMPLATEID_FIELD.fieldApiName] = this.templateId;
-            let jsonDataLst = [watermarkImageIdText, watermarkImageIdImage];
-            fields[WATERMARKDATA_FIELD.fieldApiName] = JSON.stringify(jsonDataLst);
-            const recordInput = { fields };
-            updateRecord(recordInput)
-                .then(() => {
-                    const toastEvt = new ShowToastEvent({
-                        title: 'Success!',
-                        message: 'Watermark saved successfully',
-                        variant: 'Success',
+                const watermarkImageIdImage = {
+                    name: 'Image',
+                    isPrimary: this.checkedValImage,
+                    contentVersionID: watermarkImage,
+                    pageOption: this.pageImageOption,
+                    opacity: this.opacityImageValue,
+                    rotation: this.rotationImagevalue,
+                    pageImageOption: this.pageImageOption,
+                    imageScale: this.imageScalingValue,
+                    originalImageCVId : this.originalImageCvId
+                };
+                fields[DOCUMENTTEMPLATEID_FIELD.fieldApiName] = this.templateId;
+                let jsonDataLst = [watermarkImageIdText, watermarkImageIdImage];
+                fields[WATERMARKDATA_FIELD.fieldApiName] = JSON.stringify(jsonDataLst);
+                const recordInput = { fields };
+                updateRecord(recordInput)
+                    .then(() => {
+                        const toastEvt = new ShowToastEvent({
+                            title: 'Success!',
+                            message: 'Watermark saved successfully',
+                            variant: 'Success',
+                        });
+                        this.dispatchEvent(toastEvt);
+                        this.showwatermarkbtn = false;
+                        this.template.querySelector('c-modal').hide();
+                        this.resetWatermarkValues();
+                        this.baseDataLst = [];
+                        this.imageUrl = '';
+                    })
+                    .catch(error => {
+                        const toastEvt = new ShowToastEvent({
+                            title: 'Error!',
+                            message: 'Cannot save watermark Image',
+                            variant: 'error',
+                        });
+                        this.dispatchEvent(toastEvt);
+                        this.showwatermarkbtn = false;
+                        this.template.querySelector('c-modal').hide();
                     });
-                    this.dispatchEvent(toastEvt);
-                    this.showwatermarkbtn = false;
-                    this.template.querySelector('c-modal').hide();
-                    this.resetWatermarkValues();
-                    this.baseDataLst = [];
-                    this.imageUrl = '';
-                })
-                .catch(error => {
-                    const toastEvt = new ShowToastEvent({
-                        title: 'Error!',
-                        message: 'Cannot save watermark Image',
-                        variant: 'error',
-                    });
-                    this.dispatchEvent(toastEvt);
-                    this.showwatermarkbtn = false;
-                    this.template.querySelector('c-modal').hide();
-                });
-        })
-        .catch(error => {
-            console.error('Error saving file:', error);
-        });
+            })
+            .catch(error => {
+                console.error('Error saving file:', error);
+            });
+        }
+        else{
+            this.showwatermarkbtn = false;
+            this.template.querySelector('c-modal').hide();
+            this.resetWatermarkValues();
+            this.baseDataLst = [];
+            this.imageUrl = '';
+        }
     }
 
     /**
