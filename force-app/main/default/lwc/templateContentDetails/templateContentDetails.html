@@ -22,7 +22,7 @@
 				<lightning-button disabled={disableButton} variant="brand" label="Update" onclick={handlesectionsave}>
 				</lightning-button>
 			</div>
-			<div class="slds-col slds-size_1-of-1 slds-medium-size_2-of-12 slds-large-size_2-of-12 slds-p-top_x-large slds-float_right">
+			<div class="slds-col_bump-right slds-size_1-of-1 slds-medium-size_2-of-12 slds-large-size_2-of-12 slds-p-top_x-large slds-float_right">
 				<lightning-input type="checkbox" data-id="newpage" label="New Page" name="New Page"
 					class="slds-list_horizontal" onchange={handlechange} value={newpage} disabled={isDisabled}
 					title="Displays this section in the next page of the PDF">
@@ -42,15 +42,15 @@
 					</c-multi-lookup-component>
 				</div>
 			</template> -->
-			<div class="slds-col slds-size_1-of-1 slds-medium-size_2-of-12 slds-large-size_2-of-12 slds-p-top_x-large slds-float_right">
-				<lightning-button variant="brand" label="Translate" title="Translate" disabled={translateEnabled} onclick={handleTranslate}
-        		class="slds-m-right_large"></lightning-button>
-			</div>
-			<div class="slds-is-relative slds-col_bump-left">
-				<lightning-button-icon icon-name="utility:help_doc_ext" onclick={handlehelp}
-					alternative-text="Need Help?" title="Need Help?" size="medium" variant="bare"
-					class="slds-is-absolute slds-button_icon-help" style="right:0px">
-				</lightning-button-icon>
+			<div class="slds-col slds-size_1-of-1 slds-medium-size_2-of-12 slds-large-size_2-of-12 slds-p-left_small slds-text-align_right">
+				<div>
+					<lightning-button-icon icon-name="utility:help_doc_ext" onclick={handlehelp}
+						alternative-text="Need Help?" title="Need Help?" size="medium" variant="bare"
+						class="slds-button_icon-help">
+					</lightning-button-icon>
+				</div>
+				<button class="slds-button las la-language" disabled={translateEnabled} onclick={handleTranslate} style="font-size:40px">
+				</button>
 			</div>
 		</div>
 		<div class="slds-m-horizontal_large">
@@ -121,6 +121,9 @@
 												<div>
 													<lightning-button-icon icon-name="utility:delete" alternative-text="Delete" onclick={handleRemoveRow} data-index={index} class="slds-m-left_xx-small" title="Delete"></lightning-button-icon>
 													<lightning-button-icon icon-name="utility:new" alternative-text="New" onclick={handleClick} class="slds-m-left_xx-small" title="New"></lightning-button-icon>
+													<lightning-rich-text-toolbar-button icon-name="utility:merge" data-index={index}
+													icon-alternative-text="Add Merge Field" onclick={handlerowlevelmerge} disabled={isDisabled}>
+													</lightning-rich-text-toolbar-button>
 												</div>
 											</td>
 										</tr>

@@ -19,7 +19,7 @@ public with sharing class LanguageTranslatorClass {
 	* @description    Retrieves all available user languages from the LanguageLocaleKey picklist on the User object.
 	* @return         List<ComboBoxOption> List of available user languages as ComboBoxOption objects.
 	*/
-    @AuraEnabled
+    @AuraEnabled(cacheable=true)
     public static List<ComboBoxOption> getAllUserLanguages(){
         List<ComboBoxOption> options = new List<ComboBoxOption>();
         try {
@@ -37,7 +37,7 @@ public with sharing class LanguageTranslatorClass {
  	* @param          language String representing the language for which to retrieve translation records.
  	* @return         List<DxCPQ__Translator__c> List of translation records for the specified language.
  	*/
-    @AuraEnabled
+    @AuraEnabled(cacheable=true)
     public static List<DxCPQ__Translator__c> langTransRecs(String language){ 
         String str;  
         if(language!=null){
@@ -55,16 +55,22 @@ public with sharing class LanguageTranslatorClass {
  	* @return         List<DxCPQ__Translator__c> List of translation records for the specified language.
  	*/
     @AuraEnabled
-    public static List<DxCPQ__Translator__c> selectedLangMethod(String language){
-        List<DxCPQ__Translator__c> translatedList = [select id, name, DxCPQ__FieldValue__c, DxCPQ__Translated_Value__c,DxCPQ__Language__c, DxCPQ__DocumentTemplate__c  from DxCPQ__Translator__c  WHERE DxCPQ__Language__c =: language];
-        return translatedList;
+    public static List<DxCPQ__Translator__c> selectedLangMethod(String language, String docTempId){
+        List<DxCPQ__Translator__c> translatedList = [
+            SELECT Id, Name, DxCPQ__FieldValue__c, DxCPQ__Translated_Value__c, DxCPQ__Language__c, DxCPQ__DocumentTemplate__c
+            FROM DxCPQ__Translator__c
+            WHERE DxCPQ__Language__c = :language AND DxCPQ__DocumentTemplate__c =:docTempId
+            AND (NOT DxCPQ__FieldValue__c LIKE '%{%')
+        ];
+        
+                return translatedList;
     }
     
     /**
  	* @description    Retrieves the current user's language setting.
  	* @return         String Current user's language setting.
  	*/
-    @AuraEnabled
+    @AuraEnabled(cacheable=true)
     public static String currectUserLang(){    
         return [SELECT toLabel(LanguageLocaleKey) FROM User WHERE Id= :UserInfo.getUserId()].LanguageLocaleKey;
     }  
@@ -90,7 +96,7 @@ public with sharing class LanguageTranslatorClass {
                     transRec.Id = wrapItem.Id;
                 }
                 transRec.Name = wrapItem.Name;
-                transRec.DxCPQ__FieldValue__c = wrapItem.FieldValue;
+                transRec.DxCPQ__FieldValue__c = wrapItem.FieldValue !=null ? wrapItem.FieldValue : wrapItem.Name;
                 transRec.DxCPQ__Translated_Value__c = wrapItem.TranslatedValue;
                 transRec.DxCPQ__Language__c = language;
                 transRec.DxCPQ__DocumentTemplate__c = docTemplateId;
@@ -147,6 +153,37 @@ public with sharing class LanguageTranslatorClass {
             this.value = value;
             this.label = label;
         }
+    }
+    
+    /**
+ 	* @description    Retrieves the selected language from the custom Metadata
+ 	* @return         String selected language setting from Custom Metadata
+ 	*/
+    @AuraEnabled(cacheable=true)
+    public static String getLanguageSelected(Id recordId){  
+        Schema.SObjectType objectType = recordId.getSObjectType();
+        String objectAPIName = objectType.getDescribe().getName();
+        System.debug('objectAPIName --> '+ objectAPIName);
+        List<DxCPQ__Document_Translation__mdt> metadataRecords = [SELECT Field_API_Name__c FROM DxCPQ__Document_Translation__mdt  WHERE Object_API_Name__c = :objectAPIName];
+        System.debug('metadataRecords --> '+ metadataRecords);
+        if (metadataRecords.isEmpty()) {
+            return null;
+        }
+        String fieldAPIName = metadataRecords[0].Field_API_Name__c;
+        System.debug('fieldAPIName --> '+ fieldAPIName);
+        String soql = 'SELECT ' + fieldAPIName + ' FROM ' + objectAPIName + ' WHERE Id = :recordId LIMIT 1';
+        SObject record;
+
+        try {
+            record = Database.query(soql);
+        } catch (Exception e) {
+            System.debug('Error querying record: ' + e.getMessage());
+            return null;
+        }
+        if (record != null) {
+            return (String) record.get(fieldAPIName);
+        }
+        return null;
     }
     
 }

@@ -8,8 +8,8 @@ import gettemplatesectiondata from '@salesforce/apex/SaveDocumentTemplatesection
 import createUpdateMethod from '@salesforce/apex/LanguageTranslatorClass.createUpdateMethod';
 import deleteMethod from '@salesforce/apex/LanguageTranslatorClass.deleteMethod';
 import selectedLangMethod from '@salesforce/apex/LanguageTranslatorClass.selectedLangMethod';
+import getAllUserLanguages from '@salesforce/apex/LanguageTranslatorClass.getAllUserLanguages';
 import currectUserLang from '@salesforce/apex/LanguageTranslatorClass.currectUserLang';
-import allUserLanguages from '@salesforce/apex/LanguageTranslatorClass.getAllUserLanguages';
 import createLog from '@salesforce/apex/LogHandler.createLog';
 import getSObjectListFiltering from '@salesforce/apex/RelatedObjectsClass.getSObjectListFiltering';
 import createRuleCondition from '@salesforce/apex/RelatedObjectsClass.createRuleCondition';
@@ -44,7 +44,7 @@ export default class TemplateContentDetails extends NavigationMixin(LightningEle
   @track ruleCondition = false;
   @track globalItems;
   @track selectedMergefields = [];
-  @api wherecondition;
+  @api whereCondition ="";
   whereClause = " IsActive__c = true";
   @track isTranslateModalOpen = false;
   @track translatedRecords=[{
@@ -131,11 +131,24 @@ export default class TemplateContentDetails extends NavigationMixin(LightningEle
     this.richtextVal = event.detail.selectedRecord.recordObject.DxCPQ__Body__c;
     this.Recorddetailsnew.Name = event.detail.selectedRecord.recordName;
   }
-/*filter*/
+  /*filter*/
 
   connectedCallback() {
     this.handleRuleWrapperMaking();
+   // this.whereCondition = `DxCPQ__Document_Template__r.DxCPQ__Related_To_Type__c = '${this.selectedObjectName}' AND DxCPQ__Type__c = 'Context'`;
+    this.whereClause = this.whereCondition;
     console.log('sectionrecordid',this.sectionrecordid);
+    getAllUserLanguages()
+      .then(result =>{
+        this.languages = result.map(option => {
+        return { label: option.label, value: option.value };
+        });
+      }).catch(error=>{
+        let errorMessage = error.message || 'Unknown error message';
+        let tempError = error.toString();
+        createLog({ recordId: '', className: 'TemplateContentDetails LWC Component - connectedCallback()', exceptionMessage: errorMessage, logData: tempError, logType: 'Exception' });
+      });
+      console.log('Languages----',this.languages);
   }
    handleFiltering() {
       this.ruleCondition = true;
@@ -465,6 +478,13 @@ export default class TemplateContentDetails extends NavigationMixin(LightningEle
     this.template.querySelector('c-modal').show();
   }
 
+  handlerowlevelmerge(event) {
+    this.selectedRowIndex = event.currentTarget.dataset.index;
+    this.isTranslateModalOpen = false;
+    this.rowlevelmerge = true;
+    this.template.querySelector('c-modal').show();
+  }
+
   getMergeFieldCopy() {
     const mergeField = this.template.querySelector('c-dx-lookup-fields-displaycmp').getMergeField();
     if (mergeField != undefined) {
@@ -485,16 +505,31 @@ export default class TemplateContentDetails extends NavigationMixin(LightningEle
     const mergeField = this.template.querySelector('c-dx-lookup-fields-displaycmp').getMergeField();
     if (mergeField != undefined) {
       this.mergefieldname = '{!' + this.selectedObjectName + '.' + mergeField + '}';
-      this.richtextVal += this.mergefieldname;
+      if(this.rowlevelmerge){
+        //let rowIndex = this.selectedRowIndex;
+            this.isTranslateModalOpen = true;
+            let updatedRecords = [...this.translatedRecords];
+                updatedRecords[this.selectedRowIndex] = {
+                    ...updatedRecords[this.selectedRowIndex],
+                    Name: this.mergefieldname
+                };
+                this.translatedRecords = updatedRecords;
+            //this.translatedRecords[this.selectedRowIndex].Name = this.mergefieldname; // Update the "Field Label" column
+            this.rowlevelmerge = false;
+      }
+      else{
+        this.richtextVal += this.mergefieldname;
+        this.template.querySelector('c-modal').hide();
+      }
       this.selectedMergefields.push(this.mergefieldname);
     }
-    this.template.querySelector('c-modal').hide();
   }
 
   handleRichTextArea(event) {
     this.Recorddetailsnew.DxCPQ__Section_Content__c = event.detail.value;
     if(this.richtextVal != event.detail.value){
-      this.richtextVal = event.detail.value;
+    this.richtextVal = event.detail.value;
+    this.translateEnabled = this.richtextVal != null || this.richtextVal != ''? false: true;
       const saveEvent = new CustomEvent('datasaved', {detail: false });
       this.dispatchEvent(saveEvent);
     }
@@ -534,6 +569,8 @@ export default class TemplateContentDetails extends NavigationMixin(LightningEle
     this.Recorddetailsnew.DxCPQ__Section_Visibility_Rule__c = '';
     this.newpage = false;
     this.isTranslateModalOpen = false;
+    this.rowlevelmerge = false;
+    this.selectedRowIndex;
     this.Recorddetailsnew = {
     Name: '',
     DxCPQ__Section_Content__c: '',
@@ -618,31 +655,32 @@ export default class TemplateContentDetails extends NavigationMixin(LightningEle
 
           if (result.DxCPQ__Section_Content__c != null) {
             this.richtextVal = result.DxCPQ__Section_Content__c;
+            this.translateEnabled = false;
           } else if (result.DxCPQ__Section_Content__c == undefined) {
             this.richtextVal = '';
           }
           if (result.DxCPQ__Section_Visibility_Rule__c != null && result.DxCPQ__Section_Visibility_Rule__c != '') {
-              this.Recorddetailsnew.DxCPQ__Section_Visibility_Rule__c = result.DxCPQ__Section_Visibility_Rule__c;
-              this.ruleExpression = result.DxCPQ__Section_Visibility_Rule__r.DxCPQ__Rule_Expression__c;
-          } else {
-              this.Recorddetailsnew.DxCPQ__Section_Visibility_Rule__c = '';
-          }
+                      this.Recorddetailsnew.DxCPQ__Section_Visibility_Rule__c = result.DxCPQ__Section_Visibility_Rule__c;
+                      this.ruleExpression = result.DxCPQ__Section_Visibility_Rule__r.DxCPQ__Rule_Expression__c;
+                  } else {
+                      this.Recorddetailsnew.DxCPQ__Section_Visibility_Rule__c = '';
+                  }
           if (result.DxCPQ__Section_Visibility_Rule__c != null) {
-              this.ruleIdCreated = result.DxCPQ__Section_Visibility_Rule__c;
-              this.ruleExists = true;
-          } else {
-              this.ruleIdCreated = null;
-              this.listOfExistingConditions = [];
-              this.conditionsArr = [];
-              this.ruleExists = false;
-              this.filteringCondition = '';
-          }
+                      this.ruleIdCreated = result.DxCPQ__Section_Visibility_Rule__c;
+                      this.ruleExists = true;
+                  } else {
+                      this.ruleIdCreated = null;
+                      this.listOfExistingConditions = [];
+                      this.conditionsArr = [];
+                      this.ruleExists = false;
+                      this.filteringCondition = '';
+                  }
 
-          if (this.ruleIdCreated != null && this.ruleIdCreated != '') {
-              this.handleRuleWrapperMaking();
-              let event = new Object();
-              this.getExistingConditions(event);
-              this.ruleExists = true;
+                  if (this.ruleIdCreated != null && this.ruleIdCreated != '') {
+                      this.handleRuleWrapperMaking();
+                      let event = new Object();
+                      this.getExistingConditions(event);
+                      this.ruleExists = true;
           }
           this.template.querySelectorAll('lightning-checkbox-group ').forEach(element => {
             if (result.DxCPQ__New_Page__c == true) {
@@ -688,7 +726,7 @@ export default class TemplateContentDetails extends NavigationMixin(LightningEle
       this.isTranslateModalOpen = true;
       this.template.querySelector('c-modal').show();
 
-      allUserLanguages()
+      /* getAllUserLanguages()
       .then(result =>{
         this.languages = result.map(option => {
         return { label: option.label, value: option.value };
@@ -697,7 +735,7 @@ export default class TemplateContentDetails extends NavigationMixin(LightningEle
         let errorMessage = error.message || 'Unknown error message';
         let tempError = error.toString();
         createLog({ recordId: '', className: 'TemplateContentDetails LWC Component - connectedCallback()', exceptionMessage: errorMessage, logData: tempError, logType: 'Exception' });
-      });
+      }); */
 
       currectUserLang()
       .then(result => {
@@ -705,6 +743,7 @@ export default class TemplateContentDetails extends NavigationMixin(LightningEle
         this.transRecordsRetrive();
       })
       .catch(error => {
+        console.log('Error--',error.message);
         let errorMessage = error.message || 'Unknown error message';
         let tempError = error.toString();
         createLog({ recordId: '', className: 'TemplateContentDetails LWC Component - connectedCallback()', exceptionMessage: errorMessage, logData: tempError, logType: 'Exception' });
@@ -716,24 +755,43 @@ export default class TemplateContentDetails extends NavigationMixin(LightningEle
     return language ? language.value : null;
   }
 
-  extractWords() {
-      const regex = /&lt;&lt;([^>]+?)&gt;&gt;/g;
-      let m;
-      while ((m = regex.exec(this.richtextVal)) !== null) {
-        // This is necessary to avoid infinite loops with zero-width matches
-        if (m.index === regex.lastIndex) {
-          regex.lastIndex++;
-        }
+//   extractWords() {
+//       const regex = /&lt;&lt;([^>]+?)&gt;&gt;/g;
+//       let m;
+//       while ((m = regex.exec(this.richtextVal)) !== null) {
+//         // This is necessary to avoid infinite loops with zero-width matches
+//         if (m.index === regex.lastIndex) {
+//           regex.lastIndex++;
+//         }
         
-        // The result can be accessed through the `m`-variable.
-        m.forEach((match, groupIndex) => {
-          if(groupIndex%2!=0) this.extractedWords.push(match);
-        });
+//         // The result can be accessed through the `m`-variable.
+//         m.forEach((match, groupIndex) => {
+//           if(groupIndex%2!=0) this.extractedWords.push(match);
+//         });
+//       }
+//   }
+
+
+  //code added by Bhavya for extracting the merge fields along with the tokens
+  extractWords(){
+    let decodedRichtextVal = this.richtextVal.replace(/&lt;/g, '<').replace(/&gt;/g, '>');
+    let regex = /<<([^>]+?)>>|({![^}]+?})/g;
+    let m;
+    while ((m = regex.exec(decodedRichtextVal)) !== null) {
+      if (m.index === regex.lastIndex) {
+        regex.lastIndex++;
       }
+      if (m[1]) {
+        this.extractedWords.push(m[1]);
+      } else if (m[2]) {
+        this.extractedWords.push(m[2]);
+      }
+    }
+    console.log('this.extractedWords after extractwords ----> ', this.extractedWords);
   }
 
   transRecordsRetrive(){
-    selectedLangMethod({language : this.selectedLanguage, extractedWords : JSON.stringify(this.extractedWords)})
+    selectedLangMethod({language : this.selectedLanguage, extractedWords : JSON.stringify(this.extractedWords), docTempId : this.documenttemplaterecord.Id })
           .then(result => {
           if (result && result.length > 0) {
             this.translatedRecords = [];
@@ -912,6 +970,7 @@ export default class TemplateContentDetails extends NavigationMixin(LightningEle
       this.template.querySelector('c-modal').hide();
     }
     
+  
   showToast(title, message, variant) {
     const toastEvent = new ShowToastEvent({
         title: title,

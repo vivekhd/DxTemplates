@@ -23,9 +23,63 @@ public with sharing class MergeFieldsClass {
       
      public static List<Document_Template_Section__c> mergefieldsMethod(List<Document_Template_Section__c> selectedTemplateContents, Id recordId,Map<String,Object> replaceData) {   
         try{
+            System.debug('selectedTemplateContents --> '+ selectedTemplateContents);
+            System.debug('recordId --> '+ recordId);
+            System.debug('replaceData --> '+ replaceData);
             Id templateSectionId;
             String objectName = recordId.getSObjectType().getDescribe().getName();
             String mainstr;
+            templateSectionId = selectedTemplateContents[0].Id;
+            Id  docTemplate = [Select id,Document_Template__c from Document_Template_Section__c where Id =: templateSectionId].Document_Template__c;
+            System.debug('docTemplate --> '+ docTemplate);
+            Map<String, String> nameTransValueMap = new map<String, String>();
+            // String userLanguage = [SELECT LanguageLocaleKey FROM User WHERE Id = : UserInfo.getUserId() WITH SECURITY_ENFORCED].LanguageLocaleKey;
+            //getting Document Language from the Custom Metadata
+            String userLanguage = LanguageTranslatorClass.getLanguageSelected(recordId);
+            String language = '';
+            String locale = '';
+            if(userLanguage != null){               
+                Integer underscoreIndex = userLanguage.indexOf('_');
+                if (underscoreIndex != -1) {
+                    language = userLanguage.substring(0, underscoreIndex);
+                    locale = userLanguage.substring(underscoreIndex + 1);
+                    System.debug('language: ' + language);
+                    System.debug('locale: ' + locale);
+                } else {
+                    System.debug('The string does not contain an underscore.');
+                }
+            }
+            else{
+                locale = [SELECT LanguageLocaleKey FROM User WHERE Id = : UserInfo.getUserId() WITH SECURITY_ENFORCED].LanguageLocaleKey;
+                if(locale != null){
+                    locale = 'en_US';
+                }
+            }
+            
+            List<Translator__c> translatorList = [select id, DocumentTemplate__c, Name, DxCPQ__FieldValue__c, Translated_Value__c, Language__c  from Translator__c where Language__c =:locale and DocumentTemplate__c=:docTemplate WITH SECURITY_ENFORCED];
+            System.debug('translatorList --> '+ translatorList);
+            for(Translator__c transRec: translatorList){
+                string value;
+                System.debug('transRec.Translated_Value__c --> '+ transRec.Translated_Value__c);
+                if(transRec.Translated_Value__c != null  && transRec.Translated_Value__c.contains('<') && transRec.Translated_Value__c.contains('>')){
+                   value = transRec.Translated_Value__c.replaceAll('<[^>]+>', ''); 
+                }else{
+                    value = transRec.Translated_Value__c;
+                }
+                nameTransValueMap.put(transRec.DxCPQ__FieldValue__c, value);
+                System.debug('nameTransValueMap 50--> '+ nameTransValueMap);
+            }
+            System.debug('nameTransValueMap 52--> '+ nameTransValueMap);
+            for (Document_Template_Section__c sec : selectedTemplateContents) {
+                String sectionContent = sec.Section_Content__c;
+                for(String str : nameTransValueMap.keySet()){
+                    if(nameTransValueMap.get(str)!=null){
+                        System.debug('sectionContent --> '+ sectionContent);
+                      sectionContent = sectionContent.replace('&lt;&lt;' + str + '&gt;&gt;', nameTransValueMap.get(str));  
+                    }
+                }
+                sec.Section_Content__c = sectionContent;
+            }
             for(Document_Template_Section__c sec: selectedTemplateContents) {
                 if(mainstr==null){
                     mainstr=sec.Section_Content__c;
@@ -68,14 +122,35 @@ public with sharing class MergeFieldsClass {
                 string mainSOQL='Select '+String.escapeSingleQuotes(mainfields)+' from '+String.escapeSingleQuotes(mainObject)+' where Id= \'' + recordId + '\' WITH SECURITY_ENFORCED';
                 sObject qrec=Database.query(mainSOQL);
                 Map<String, Object> mainMap = (Map<String, Object>) JSON.deserializeUntyped(JSON.serialize(qrec));           
-                
+                System.debug('mainMap inside mergefields ---> '+ mainMap);
                 for(Document_Template_Section__c sec: selectedTemplateContents) {
                     for(String str:mainfieldsList)  {
                         str = str.replaceAll('(\\s+)', '');
-                        if(mainMap.containskey(str)) {
-                            string mergefieldsyntax='{!'+mainObject+'.'+str+'}';
-                            sec.Section_Content__c=sec.Section_Content__c.replace(mergefieldsyntax, String.valueOf(mainMap.get(str)));
-                        } else {
+                        system.debug('str--'+str);
+                        if (mainMap.containsKey(str)) {
+                            system.debug('Inside if---');
+                            String mergefieldsyntaxWithBrackets = '&lt;&lt;{!' + mainObject + '.' + str + '}&gt;&gt;';
+                            String mergefieldsyntax = '{!' + mainObject + '.' + str + '}';
+                            system.debug('mergefieldsyntax inside if ---' + mergefieldsyntax);
+                            String nameTransValue = String.valueOf(mainMap.get(str));
+                            system.debug('nameTransValue---' + nameTransValue);
+                            system.debug('nameTransValueMap---' + nameTransValueMap);
+                            
+                            if (sec.Section_Content__c.contains(mergefieldsyntaxWithBrackets)) {
+                                System.debug('inside with brackets' + mergefieldsyntaxWithBrackets);
+                                sec.Section_Content__c = nameTransValueMap.get(nameTransValue) != null ? 
+                                    sec.Section_Content__c.replace(mergefieldsyntaxWithBrackets, String.valueOf(nameTransValueMap.get(nameTransValue))) : 
+                                    sec.Section_Content__c.replace(mergefieldsyntaxWithBrackets, nameTransValue);
+                            } else if (sec.Section_Content__c.contains(mergefieldsyntax)) {
+                                System.debug('inside without brackets' + mergefieldsyntax);
+                                system.debug('nameTransValueMap.get(nameTransValue) ---' + nameTransValueMap.get(nameTransValue));
+                                sec.Section_Content__c = nameTransValueMap.get(nameTransValue) != null ? 
+                                    sec.Section_Content__c.replace(mergefieldsyntax, String.valueOf(nameTransValueMap.get(nameTransValue))) : 
+                                    sec.Section_Content__c.replace(mergefieldsyntax, nameTransValue);
+                            }
+                        }
+                        else {
+                            system.debug('Inside else---');
                             String finalvalue;
                             if(str.contains('.')){
                                 List<String> strList = new List<string>();
@@ -93,37 +168,20 @@ public with sharing class MergeFieldsClass {
                                     }
                                 }
                             }
+                            System.debug('finalvalue ---> '+ finalvalue);
                             if(finalvalue!=null)  {
                                 string mergefieldsyntax='{!'+mainObject+'.'+str+'}';
-                                sec.Section_Content__c=sec.Section_Content__c.replace(mergefieldsyntax, finalvalue); 
+                                sec.Section_Content__c= nameTransValueMap.get(finalvalue) != null ? sec.Section_Content__c.replace(mergefieldsyntax, nameTransValueMap.get(finalvalue)): sec.Section_Content__c.replace(mergefieldsyntax, finalvalue); 
+                            }
+                            else{
+                                string mergefieldsyntax='{!'+mainObject+'.'+str+'}';
+                                sec.Section_Content__c=sec.Section_Content__c.replace(mergefieldsyntax, ''); 
                             }
                         }
                     }
                 }
             }
-            templateSectionId = selectedTemplateContents[0].Id;
-            Id  docTemplate = [Select id,Document_Template__c from Document_Template_Section__c where Id =: templateSectionId].Document_Template__c;
-            Map<String, String> nameTransValueMap = new map<String, String>();
-            String userLanguage = [SELECT LanguageLocaleKey FROM User WHERE Id = : UserInfo.getUserId() WITH SECURITY_ENFORCED].LanguageLocaleKey;
-            List<Translator__c> translatorList = [select id, DocumentTemplate__c, Name, Translated_Value__c, Language__c  from Translator__c where Language__c =:userLanguage and DocumentTemplate__c=:docTemplate WITH SECURITY_ENFORCED];
-            for(Translator__c transRec: translatorList){
-                string value;
-                if(transRec.Translated_Value__c != null  && transRec.Translated_Value__c.contains('<') && transRec.Translated_Value__c.contains('>')){
-                   value = transRec.Translated_Value__c.replaceAll('<[^>]+>', ''); 
-                }else{
-                    value = transRec.Translated_Value__c;
-                }
-                nameTransValueMap.put(transRec.Name, value);
-            }
-            for (Document_Template_Section__c sec : selectedTemplateContents) {
-                String sectionContent = sec.Section_Content__c;
-                for(String str : nameTransValueMap.keySet()){
-                    if(nameTransValueMap.get(str)!=null){
-                      sectionContent = sectionContent.replace('&lt;&lt;' + str + '&gt;&gt;', nameTransValueMap.get(str));  
-                    }
-                }
-                sec.Section_Content__c = sectionContent;
-            }
+            
         } catch(Exception ex) {
             LogHandler.createLog((Id) null,'MergeFieldsClass Error',ex.getLineNumber()+ex.getStackTraceString()+ex.getCause(),ex.getMessage(),'Exception');
         }        
@@ -353,6 +411,8 @@ public with sharing class MergeFieldsClass {
     public static string customLogic(map<string,object> mp,string mainstr) {      
         Integer count=1;
         boolean flag=false;
+        System.debug('mp inside customLogic --> '+ mp);
+        System.debug('mainstr inside customLogic --> '+ mainstr);
         List<string> arr=mainstr.split('%');
         for(Integer i=0;i<arr.size();i++) {
             if(arr[i]=='') {
