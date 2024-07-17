@@ -92,14 +92,40 @@ public class LanguageTranslatorClassTest {
     
     @isTest
     static void testSelectedLangMethod() {
+        DxCPQ__Document_Template__c  docTemplate = new DxCPQ__Document_Template__c (Name = 'Test Template', DxCPQ__Related_To_Type__c = 'Account');
+        insert docTemplate;
+
+        DxCPQ__Translator__c translator1 = new DxCPQ__Translator__c(
+            Name = 'Test Translator 1',
+            DxCPQ__FieldValue__c = 'SomeFieldValue',
+            DxCPQ__Translated_Value__c = 'TranslatedValue1',
+            DxCPQ__Language__c = 'en_US',
+            DxCPQ__DocumentTemplate__c = docTemplate.Id
+        );
+
+        DxCPQ__Translator__c translator2 = new DxCPQ__Translator__c(
+            Name = 'Test Translator 2',
+            DxCPQ__FieldValue__c = 'OtherFieldValue',
+            DxCPQ__Translated_Value__c = 'TranslatedValue2',
+            DxCPQ__Language__c = 'en_US',
+            DxCPQ__DocumentTemplate__c = docTemplate.Id
+        );
+
+        DxCPQ__Translator__c translator3 = new DxCPQ__Translator__c(
+            Name = 'Test Translator 3',
+            DxCPQ__FieldValue__c = '{UnwantedFieldValue}',
+            DxCPQ__Translated_Value__c = 'TranslatedValue3',
+            DxCPQ__Language__c = 'en_US',
+            DxCPQ__DocumentTemplate__c = docTemplate.Id
+        );
+
+        insert new List<DxCPQ__Translator__c> { translator1, translator2, translator3 };
         Test.startTest();
-        List<DxCPQ__Translator__c> translations = LanguageTranslatorClass.selectedLangMethod('zh_TW');
+        List<DxCPQ__Translator__c> results = LanguageTranslatorClass.selectedLangMethod('en_US', docTemplate.Id);
         Test.stopTest();
-        
-        // Assert that the translations list is not null and contains the expected record
-        System.assertNotEquals(null, translations);
-        System.assert(translations.size() > 0);
-        System.assertEquals('Test Field 2', translations[0].DxCPQ__FieldValue__c);
+        System.assertEquals(2, results.size(), 'Expected 2 translators');
+        System.assertEquals('TranslatedValue1', results[0].DxCPQ__Translated_Value__c);
+        System.assertEquals('TranslatedValue2', results[1].DxCPQ__Translated_Value__c);
     }
     
     @isTest

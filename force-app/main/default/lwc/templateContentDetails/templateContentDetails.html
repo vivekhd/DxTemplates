@@ -2,13 +2,18 @@
 	<template if:true={showdetails}>
 		<div class="slds-grid slds-wrap slds-m-bottom_small slds-p-around_small slds-border_bottom"
 			style="border:1px solid #e5e5e5; border-radius:5px; background: rgb(243 243 243);">
-			<div class="slds-col slds-size_1-of-1 slds-medium-size_4-of-12 slds-large-size_4-of-12">
+			<div class="slds-col slds-size_1-of-1 slds-medium-size_4-of-12 slds-large-size_3-of-12"  lwc:if={showclausescreen}>
 				<lightning-input type="text" disabled={isDisabled} variant="standard" name="name" label="Name"
-					value={Recorddetailsnew.Name} onchange={handlename} placeholder="Type Section Name Here..." required>
+					value={Recorddetailsnew.Name} onchange={handlename} placeholder="Type Section Name Here..."  required>
+				</lightning-input>
+			</div>
+			<div class="slds-col slds-size_1-of-1 slds-medium-size_4-of-12 slds-large-size_4-of-12"  lwc:else>
+				<lightning-input type="text" disabled={isDisabled} variant="standard" name="name" label="Name"
+					value={Recorddetailsnew.Name} onchange={handlename} placeholder="Type Section Name Here..."  required>
 				</lightning-input>
 			</div>
 			<template if:true={showclausescreen}>
-				<div class="slds-col slds-size_1-of-1 slds-medium-size_4-of-12 slds-large-size_4-of-12 slds-p-left_small">
+				<div class="slds-col slds-size_1-of-1 slds-medium-size_4-of-12 slds-large-size_3-of-12 slds-p-left_small">
 					<c-multi-lookup-component label-name="*Document Clause" object-api-name="DxCPQ__Document_Clause__c"
 						field-api-names="Id,Name,DxCPQ__Body__c" filter-field-api-name="Name"
 						icon-name="standard:account" onsinglepill={selectItemEventHandler}
@@ -62,6 +67,15 @@
 		<div class="slds-col slds-size_12-of-12">
 			<lightning-input-rich-text value={richtextVal} formats={formats} onchange={handleRichTextArea}
 				aria-placeholder="Enter Text here" disabled={isDisabled}>
+				<lightning-rich-text-toolbar-button-group slot="toolbar" aria-label="Template Button Group"
+					style="order: -9;float: left; display: inline-block;">
+					<!------------Code added by Bhavya to have custom font-family list---------------->
+					<select name="font" id="font" onchange={handleFontFamilySelection} style="width: 130px;border-radius: 4px;padding: 5px;">
+						<template for:each={fontFamilies} for:item="item" for:index="index">
+							<option value={item.value} key={item.label}  >{item.label}</option>
+						</template>
+					</select>
+				</lightning-rich-text-toolbar-button-group>
 				<lightning-rich-text-toolbar-button-group slot="toolbar" aria-label="Template Button Group">
 					<lightning-rich-text-toolbar-button icon-name="utility:merge"
 						icon-alternative-text="Add Merge Field" onclick={handlemergefieldadd} disabled={isDisabled}>

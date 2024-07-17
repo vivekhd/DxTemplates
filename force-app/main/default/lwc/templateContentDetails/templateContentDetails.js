@@ -817,6 +817,21 @@ export default class TemplateContentDetails extends NavigationMixin(LightningEle
                   });
                 }})
               }
+              else{
+                //code for when this.transRecordNameArray & this.extractedwords are of same length
+                this.extractedWords.forEach(word => {
+                  if (!this.transRecordNameArray.includes(word)) 
+                  {
+                    this.transRecordNameArray.push(word);
+                    this.translatedRecords.push({
+                      'Name': word,
+                      'DxCPQ__FieldValue__c': '',
+                      'DxCPQ__Translated_Value__c': '',
+                      'Id':''
+                    });
+                  }
+                  });
+                }
               //this.selectedLanguage = this.translatedRecords[0].DxCPQ__Language__c;
           } else {
             this.translatedRecords = [];
@@ -988,5 +1003,24 @@ export default class TemplateContentDetails extends NavigationMixin(LightningEle
         this.isTranslateModalOpen = false;
       }
       this.template.querySelector('c-modal').hide();
+  }
+
+   //code added by Bhavya for adding Custom Font-family list - compatible with VF PDF generation
+  get fontFamilies() {
+    return [
+        { label: 'Times New Roman', value: 'serif' },
+        { label: 'Arial', value: 'sans-serif' },
+        { label: 'serif', value: 'serif' },
+        { label: 'Courier', value: 'courier' },
+    ];
+  }
+
+  handleFontFamilySelection(event){
+    let applySelectedFormats = {
+        font: event.target.value,
+    };
+    let selection = window.getSelection().toString();
+    let editor = this.template.querySelector('lightning-input-rich-text');
+    editor.setFormat(applySelectedFormats);
   }
 }
