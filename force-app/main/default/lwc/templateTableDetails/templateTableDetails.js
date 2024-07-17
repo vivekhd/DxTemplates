@@ -9,11 +9,7 @@ import getAllPopupMessages from '@salesforce/apex/PopUpMessageSelector.getAllCon
 import gettemplatesectiondata from '@salesforce/apex/SaveDocumentTemplatesection.gettemplatesectiondata';
 import getContentVersions from '@salesforce/apex/FooterClass.getContentVersions';
 import getSearchedContentVersions from '@salesforce/apex/FooterClass.getSearchedContentVersions';
-import getSObjectListFiltering from '@salesforce/apex/RelatedObjectsClass.getSObjectListFiltering';
-import createRuleCondition from '@salesforce/apex/RelatedObjectsClass.createRuleCondition';
-import getConditions from '@salesforce/apex/RelatedObjectsClass.getExistingConditions';
-import { createRuleConditionHierarcy } from 'c/conditionUtil';
-import resetRulesForTemplate from '@salesforce/apex/RelatedObjectsClass.handleTemplateRuleResetCondition';
+
 export default class TemplateTableDetails extends LightningElement {
 
     @track tableOnLoad = true;
@@ -71,9 +67,8 @@ export default class TemplateTableDetails extends LightningElement {
     draggedColumnIndex;
     resizing;
     selectedThValue;
-    resizingColumnIndex;
     initialResizeX;
-    resizingColumn = null;
+    @track resizingColumn = null;
 
     tablehasdata = false;
 
@@ -156,7 +151,6 @@ export default class TemplateTableDetails extends LightningElement {
     @track savedRecordID;
     @api recordidvalueprop;
     selectedTableRow;
-    hasSpecialCharacter;
     disableButton = false;
 
     @track Recorddetailsnew = {
@@ -167,216 +161,23 @@ export default class TemplateTableDetails extends LightningElement {
         DxCPQ__Document_Template__c: '',
         DxCPQ__Sequence__c: 0,
         DxCPQ__Type__c: '',
-        Id: '', DxCPQ__Section_Details__c: '',
-        DxCPQ__Section_Visibility_Rule__c: ''
+        Id: '', DxCPQ__Section_Details__c: ''
     };
 
     isLoaded = false;
-    tableheaders = [];
+    @track tableheaders = [];
     @track tablerows = [];
+    draggedColumnIndex = null;
     tablecolumns = [];
     isDisabled = false;
     @track selectedfontcolor = '#8DC141';
     @track selectedbgcolor = '#003366';
     @api sectionrecordid;
-    @track ruleCondition = false;
-    @track listOfExistingConditions = [];
-    @track fieldWrapper;
-    ruleExpression;
-    ruleConditions = [];
-    ruleExists = false;
-    allConditions = [];
-    conditionExists = false;
-    conditionsArr = [];
-    mapOfRC = new Map();
+
 
     connectedCallback() {
         this.getContentVersionData();
-        this.handleRuleWrapperMaking();
     }
-    /*filter*/
-    handleFiltering() {
-        this.ruleCondition = true;
-        this.template.querySelector('[data-id="filter"]').show();
-    }
-    closePreviewModal() {
-        this.ruleCondition = false;
-        this.template.querySelector('[data-id="filter"]').hide();
-    }
-    handleRuleWrapperMaking() {
-        if (this.selectedObjectName !== undefined) {
-            getSObjectListFiltering({
-                selectedChildObjectLabel: this.selectedObjectName
-            })
-                .then((result) => {
-                    this.fieldWrapper = result;
-                })
-                .catch((error) => {
-                    console.log('error while Filtering the Object -> handleRuleWrapperMaking', error);
-                });
-        }
-    }
-    handleCreateRules(event) {
-        const conditionChild = this.template.querySelector('c-conditioncmp').getConditionDetails();
-        this.ruleExpression = conditionChild.expression;
-        this.createRuleConditionObjects(conditionChild.listOfConditions);
-        let listOfConditions = JSON.stringify(this.ruleConditions);
-        let deleteIds = null;
-        let ruleExp = JSON.stringify(this.ruleExpression);
-        let ruleType = this.visibilityRuleCondition == true? 'Section Visibility Rule': '';
-        createRuleCondition({
-            ruleConditions: listOfConditions,
-            ruleExpression: ruleExp,
-            deleteIds: deleteIds,
-            sectionrecordid: this.sectionrecordid,
-             ruleType: ruleType
-        })
-            .then(result => {
-                this.ruleIdCreated = result;
-                this.ruleExists = true;
-                let event = new Object();
-                this.getExistingConditions(event);
-            })
-            .catch(error => {
-                console.log('Error -> createRuleCondition' + JSON.stringify(error));
-            });
-        this.template.querySelector('c-modal').hide();
-    }
-    createRuleConditionObjects(arrayList) {
-        this.hasSpecialCharacter = false;
-        let regExpr = /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]+/;
-        arrayList.forEach(condition => {
-            let tempObj = {};
-            tempObj.Id = condition.Id;
-            tempObj.conditionName = condition.conditionName;
-            tempObj.dataType = condition.dataType;
-            if (condition.operator == '==') {
-                tempObj.operator = '==';
-            } else {
-                tempObj.operator = condition.operator;
-            }
-            tempObj.selectedObject = condition.selectedObject;
-            tempObj.selectedField = condition.selectedField;
-            tempObj.value = condition.value;
-            if (regExpr.test(tempObj.value)) {
-                this.hasSpecialCharacter = true;
-            }
-            tempObj.conditionIndex = condition._index;
-            this.ruleConditions.push(tempObj);
-            if (condition.children && condition.children.length > 0) {
-                condition.children.forEach(child => {
-                    if (child.group && child.group.length > 0) {
-                        this.createRuleConditionObjects(child.group);
-                    }
-                })
-            }
-        })
-    }
-    handleRuleUpdates(event) {
-        this.ruleConditions = [];
-        const conditionChild = this.template.querySelector('c-conditioncmp').getConditionDetails();
-        this.createRuleConditionObjects(conditionChild.listOfConditions);
-        let listOfConditions = JSON.stringify(this.ruleConditions);
-        let expression = JSON.stringify(conditionChild.expression);
-        let deleteIds = this.removeDeletedConditions(this.ruleConditions, this.conditionsArr);
-        if (!this.hasSpecialCharacter) {
-            createRuleCondition({
-                ruleConditions: listOfConditions,
-                ruleExpression: expression,
-                deleteIds: deleteIds,
-                sectionrecordid: this.sectionrecordid
-            })
-                .then(result => {
-                    this.ruleExists = true;
-                    this.ruleExpression = expression;
-
-                    let event = new Object();
-                    this.getExistingConditions(event);
-                })
-                .catch(error => {
-                    console.log('createRuleCondition error occurred' + JSON.stringify(error));
-                });
-        }
-        this.template.querySelector('c-modal').hide();
-    }
-    getExistingConditions(event) {
-        this.mapOfRC = new Map();
-        this.conditionsArr = [];
-        this.conditionExists = false;
-        this.allConditions = [];
-        this.listOfExistingConditions = [];
-        getConditions({ ruleName: this.ruleIdCreated })
-            .then(result => {
-                if (result.length > 0) {
-                    this.conditionsArr = JSON.parse(JSON.stringify(result));
-                    this.lstofactualConditions = this.conditionsArr;
-                    this.conditionsArr.forEach(con => {
-                        this.mapOfRC.set(con.Name, con);
-                    });
-                    if (this.fieldWrapper !== undefined) {
-                        let conditionResult = createRuleConditionHierarcy(this.ruleExpression, this.mapOfRC, this.fieldWrapper);
-                        this.listOfExistingConditions = conditionResult.listOfConditions;
-                        this.selectedGlobalValue = conditionResult.selectedGlobalValue;
-                        this.conditionExists = true;
-                    }
-                }
-            })
-            .catch(error => {
-                console.log('Apex Call getExistingConditions Erroneous');
-                console.log(error);
-            })
-    }
-    removeDeletedConditions(listOfConditions, receivedConditions) {
-      let existingIds = [];
-      let receivedIds = [];
-      listOfConditions.forEach(con => {
-          if (con.Id) {
-              existingIds.push(con.Id);
-          }
-      })
-      receivedConditions.forEach(con => {
-          receivedIds.push(con.Id);
-      })
-      receivedIds = receivedIds.filter(el => {
-          return !existingIds.includes(el);
-      });
-      return receivedIds;
-  }
-
-     handleFilterRuleReset() {
-
-      resetRulesForTemplate({
-              templateRuleId: this.ruleIdCreated
-          })
-          .then(result => {
-              if (result == 'Success') {
-
-                  this.ruleIdCreated = null;
-
-                  this.listOfExistingConditions = [];
-                  this.conditionsArr = [];
-                  this.ruleExists = false;
-                  this.filteringCondition = '';
-                  this.ruleConditions = [];
-                  this.ruleCondition = false;
-
-                  this.handlesectionsave(null);
-              } else {
-                  const Errormsg = new ShowToastEvent({
-                      title: 'Error',
-                      message: 'Reset didn\'t work',
-                      variant: 'Error'
-                  });
-                  this.dispatchEvent(Errormsg);
-              }
-          })
-          .catch(error => {
-              console.log('reset Rules error occurred' + JSON.stringify(error));
-          });
-      this.ruleCondition = false;
-      this.template.querySelector('c-modal').hide();
-  }
-    /*filter*/
 
     /**
     * Method to get Content version data for Images.
@@ -472,15 +273,19 @@ export default class TemplateTableDetails extends LightningElement {
 
         let parentTh = divElement.closest('th');
         let backgroundColor = parentTh ? parentTh.style.backgroundColor : '';
-        console.log('bg color head ' + backgroundColor);
+
+        let cellColspan = parentTh ? parentTh.colSpan : 1;
+
+        //console.log('bg color head ' + backgroundColor);
+        //console.log('head colspan ' + cellColspan);
 
         if (existingIndex !== -1) {
-            this.divContentArray[existingIndex] = { 'data-id': divElement.dataset.id, 'Content': divContent, 'backgroundColor': backgroundColor };
+            this.divContentArray[existingIndex] = { 'data-id': divElement.dataset.id, 'Content': divContent, 'backgroundColor': backgroundColor, 'cellColspan': cellColspan };
         } else {
-            this.divContentArray.push({ 'data-id': divElement.dataset.id, 'Content': divContent, 'backgroundColor': backgroundColor });
+            this.divContentArray.push({ 'data-id': divElement.dataset.id, 'Content': divContent, 'backgroundColor': backgroundColor, 'cellColspan': cellColspan });
         }
         //this.unsavedChanges();
-        // console.log('div content array in head ' + JSON.stringify(this.divContentArray));
+        //console.log('div content array in head ' + JSON.stringify(this.divContentArray));
     }
 
     /**
@@ -499,12 +304,14 @@ export default class TemplateTableDetails extends LightningElement {
 
         let parentTd = divElement.closest('td');
         let backgroundColor = parentTd ? parentTd.style.backgroundColor : '';
-        console.log('bg color ' + backgroundColor);
+        let cellColspan = parentTd ? parentTd.colSpan : 1;
+        //console.log('bg color ' + backgroundColor);
+        //console.log('cell colspan ' + cellColspan);
 
         if (existingIndex !== -1) {
-            this.divContentArray[existingIndex] = { 'data-id': divElement.dataset.id, 'Content': divContent, 'backgroundColor': backgroundColor };
+            this.divContentArray[existingIndex] = { 'data-id': divElement.dataset.id, 'Content': divContent, 'backgroundColor': backgroundColor, 'cellColspan': cellColspan };
         } else {
-            this.divContentArray.push({ 'data-id': divElement.dataset.id, 'Content': divContent, 'backgroundColor': backgroundColor });
+            this.divContentArray.push({ 'data-id': divElement.dataset.id, 'Content': divContent, 'backgroundColor': backgroundColor, 'cellColspan': cellColspan });
         }
         //console.log('div content array ' + JSON.stringify(this.divContentArray));
     }
@@ -514,6 +321,13 @@ export default class TemplateTableDetails extends LightningElement {
     */
 
     getSelectedTableRowHandler(event) {
+
+        let selectedCell = event.target.closest('lightning-input-rich-text');
+        if (selectedCell) {
+            selectedCell.style.overflowY = "visible";
+            selectedCell.style.overflowX = "visible";
+        }
+
         this.selectedTableRow = (event.target.dataset.id == undefined) ? this.selectedTableRow : event.target.dataset.id;
         this.unsavedChanges();
     }
@@ -523,6 +337,14 @@ export default class TemplateTableDetails extends LightningElement {
     */
 
     getSelectedTableHeader(event) {
+
+
+        let selectedCell = event.target.closest('lightning-input-rich-text');
+        if (selectedCell) {
+            selectedCell.style.overflowY = "visible";
+            selectedCell.style.overflowX = "visible";
+        }
+
         this.selectedHeader = (event.target.dataset.head == undefined) ? this.selectedHeader : event.target.dataset.head;
         this.unsavedChanges();
     }
@@ -589,15 +411,22 @@ export default class TemplateTableDetails extends LightningElement {
             let mergefieldname = '{!' + this.selectedObjectName + '.' + mergeField + '}';
             this.template.querySelector('c-modal').hide();
 
-            if (this.isHeaderMergeField === false) {
+            if (this.isHeaderMergeField == false) {
                 let elm = this.template.querySelector(`[data-id="${this.selectedTableRow}"]`);
+
+                elm.value = (elm.value == undefined) ? '' : elm.value;
                 elm.value += mergefieldname;
+
                 let innerdiv = this.selectedTableRow + 'div';
                 let elm1 = this.template.querySelector(`[data-id="${innerdiv}"]`);
+
+                elm1.value = (elm1.value == undefined) ? '' : elm1.value;
                 elm1.value += mergefieldname;
+
             }
             else {
                 let elm2 = this.template.querySelector(`[data-head="${this.selectedHeader}"]`);
+                elm2.value = (elm2.value == undefined) ? '' : elm2.value;
                 elm2.value += mergefieldname;
             }
         }
@@ -613,8 +442,8 @@ export default class TemplateTableDetails extends LightningElement {
             myObj.rownumber = 'row' + (Number(this.rownumber) + 1);
             let columns = [];
             for (let j = 1; j <= this.colnumber; j++) {
-                columns.push({ id: 'row' + (this.rownumber + 1) + 'col' + j, divid: 'row' + this.rownumber + 'col' + j + 'div' });
-                this.tablecolumns.push({ id: 'row' + this.rownumber + 'col' + j, divid: 'row' + this.rownumber + 'col' + j + 'div' });
+                columns.push({ id: 'row' + (this.rownumber + 1) + 'col' + j, divid: 'row' + this.rownumber + 'col' + j + 'div', isMerged: false, isRemoved: false, backgroundColor: false, colspan: 1 });
+                this.tablecolumns.push({ id: 'row' + this.rownumber + 'col' + j, divid: 'row' + this.rownumber + 'col' + j + 'div', isMerged: false, isRemoved: false, backgroundColor: false, colspan: 1 });
             }
             myObj.columns = columns;
             this.tablerows.push(myObj);
@@ -624,12 +453,7 @@ export default class TemplateTableDetails extends LightningElement {
             setTimeout(function () { parentData.handleBorderStyling(); }, 100);
         }
         else {
-            let errormsg = new ShowToastEvent({
-                title: 'Error',
-                message: 'Number of Rows Cannot be more than 20',
-                variant: 'Error',
-            });
-            this.dispatchEvent(errormsg);
+            this.showErrorToast('Number of Rows Cannot be more than 20');
         }
     }
 
@@ -640,12 +464,21 @@ export default class TemplateTableDetails extends LightningElement {
         if (Number(this.colnumber) < 10) {
             this.colnumber = Number(this.colnumber) + 1;
             let colcount = this.colnumber;
-            this.tableheaders.push('Header ' + this.colnumber);
+            //this.tableheaders.push('Header ' + this.colnumber);
+
+            this.tableheaders.push({
+                id: 'Header ' + this.colnumber,
+                isMerged: false,
+                isRemoved: false,
+                backgroundColor: '',
+                colspan: 1
+            });
+
             this.tablerows.forEach((loopvar, index) => {
                 let rowcolumns = loopvar.columns;
                 for (let j = colcount; j <= colcount; j++) {
-                    rowcolumns.push({ id: 'row' + (index + 1) + 'col' + j, divid: 'row' + index + 'col' + j + 'div' });
-                    this.tablecolumns.push({ id: 'row' + (index + 1) + 'col' + j, divid: 'row' + index + 'col' + j + 'div' });
+                    rowcolumns.push({ id: 'row' + (index + 1) + 'col' + j, divid: 'row' + index + 'col' + j + 'div', isMerged: false, isRemoved: false, backgroundColor: false, colspan: 1 });
+                    this.tablecolumns.push({ id: 'row' + (index + 1) + 'col' + j, divid: 'row' + index + 'col' + j + 'div', isMerged: false, isRemoved: false, backgroundColor: false, colspan: 1 });
                 }
                 loopvar.columns = rowcolumns;
             });
@@ -654,12 +487,7 @@ export default class TemplateTableDetails extends LightningElement {
             setTimeout(function () { parentData.handleBorderStyling(); }, 100);
         }
         else {
-            let errormsg1 = new ShowToastEvent({
-                title: 'Error',
-                message: 'Number of Columns Cannot be more than 10',
-                variant: 'Error',
-            });
-            this.dispatchEvent(errormsg1);
+            this.showErrorToast('Number of Columns Cannot be more than 10');
         }
     }
 
@@ -670,20 +498,10 @@ export default class TemplateTableDetails extends LightningElement {
 
     handletablecreate() {
         if (!(this.rownumber > 0 && this.rownumber < 21)) {
-            let errormsg = new ShowToastEvent({
-                title: 'Error',
-                message: 'Number of Rows Should Be Atleast 1 and Atmost 20',
-                variant: 'Error',
-            });
-            this.dispatchEvent(errormsg);
+            this.showErrorToast('Number of Rows Should Be Atleast 1 and Atmost 20');
         }
         else if (!(this.colnumber > 0 && this.colnumber < 11)) {
-            let errormsg1 = new ShowToastEvent({
-                title: 'Error',
-                message: 'Number of Columns Should Be Atleast 1 and Atmost 10',
-                variant: 'Error',
-            });
-            this.dispatchEvent(errormsg1);
+            this.showErrorToast('Number of Columns Should Be Atleast 1 and Atmost 10');
         }
         else {
             this.tableheaders = [];
@@ -695,7 +513,16 @@ export default class TemplateTableDetails extends LightningElement {
             let colcount = this.colnumber;
 
             for (let i = 0; i < colcount; i++) {
-                this.tableheaders.push('Header ' + (i + 1));
+                // this.tableheaders.push('Header ' + (i + 1));
+
+                this.tableheaders.push({
+                    id: 'Header ' + (i + 1),
+                    isMerged: false,
+                    isRemoved: false,
+                    backgroundColor: '',
+                    colspan: 1
+                });
+
             }
             this.rowcount = this.rownumber;
             for (let i = 1; i <= this.rowcount; i++) {
@@ -704,8 +531,8 @@ export default class TemplateTableDetails extends LightningElement {
                 myObj.rowindex = i;
                 let columns = [];
                 for (let j = 1; j <= colcount; j++) {
-                    columns.push({ id: 'row' + i + 'col' + j, divid: 'row' + i + 'col' + j + 'div', isMerged: false, isRemoved: false, backgroundColor: false });
-                    this.tablecolumns.push({ id: 'row' + i + 'col' + j, divid: 'row' + i + 'col' + j + 'div', isMerged: false, isRemoved: false, backgroundColor: false });
+                    columns.push({ id: 'row' + i + 'col' + j, divid: 'row' + i + 'col' + j + 'div', isMerged: false, isRemoved: false, backgroundColor: false, colspan: 1 });
+                    this.tablecolumns.push({ id: 'row' + i + 'col' + j, divid: 'row' + i + 'col' + j + 'div', isMerged: false, isRemoved: false, backgroundColor: false, colspan: 1 });
                 }
                 myObj.columns = columns;
                 this.tablerows.push(myObj);
@@ -729,12 +556,7 @@ export default class TemplateTableDetails extends LightningElement {
             this.unsavedChanges();
         }
         else {
-            let errormsg = new ShowToastEvent({
-                title: 'Error',
-                message: 'Number of Rows Cannot be less than 1',
-                variant: 'Error',
-            });
-            this.dispatchEvent(errormsg);
+            this.showErrorToast('Number of Rows Cannot be less than 1');
         }
     }
 
@@ -746,39 +568,38 @@ export default class TemplateTableDetails extends LightningElement {
         if (this.colnumber > 1) {
             this.colnumber = Number(this.colnumber) - 1;
             let colcount = this.colnumber;
+            let lastColIndex = colcount;
             this.tableheaders.pop();
-            this.tablerows.forEach((row, index) => {
-                let rowcolumns = row.columns;
-                if (rowcolumns.length > colcount) {
-                    if (rowcolumns[colcount].isRemoved) {
-                        let previousCellIndex = colcount - 1;
-                        while (previousCellIndex >= 0) {
-                            if (rowcolumns[previousCellIndex].isRemoved) {
-                                previousCellIndex--;
-                            } else {
-                                let colspan = this.template.querySelector(`[data-id="${rowcolumns[previousCellIndex].id}"]`).closest('td').getAttribute('colspan') || 1;
-                                if (colspan > 1) {
-                                    this.template.querySelector(`[data-id="${rowcolumns[previousCellIndex].id}"]`).closest('td').setAttribute('colspan', colspan - 1);
+
+                this.tablerows.forEach((row, index) => {
+                    let rowcolumns = row.columns;
+                    if (rowcolumns.length > colcount) {
+                        if (rowcolumns[colcount].isRemoved) {
+                            let previousCellIndex = colcount - 1;
+                            while (previousCellIndex >= 0) {
+                                if (rowcolumns[previousCellIndex].isRemoved) {
+                                    previousCellIndex--;
+                                } else {
+                                    let colspan = this.template.querySelector(`[data-id="${rowcolumns[previousCellIndex].id}"]`).closest('td').getAttribute('colspan') || 1;
+                                    if (colspan > 1) {
+                                        this.template.querySelector(`[data-id="${rowcolumns[previousCellIndex].id}"]`).closest('td').setAttribute('colspan', colspan - 1);
+                                    }
+                                    break;
                                 }
-                                break;
                             }
                         }
+                        if (!rowcolumns[colcount].isRemoved) {
+                            rowcolumns.splice(colcount, 1);
+                            this.tablecolumns.pop();
+                        }
                     }
-                    if (!rowcolumns[colcount].isRemoved) {
-                        rowcolumns.splice(colcount, 1);
-                        this.tablecolumns.pop();
-                    }
-                }
-            });
-            this.unsavedChanges();
-            // console.log('table data after deleting ' + JSON.stringify(this.tablerows))
-        } else {
-            let errormsg1 = new ShowToastEvent({
-                title: 'Error',
-                message: 'Number of Columns Cannot be less than 1',
-                variant: 'Error',
-            });
-            this.dispatchEvent(errormsg1);
+                });
+                this.unsavedChanges();
+                // console.log('table data after deleting ' + JSON.stringify(this.tablerows))
+            } 
+
+        else {
+            this.showErrorToast('Number of Columns Cannot be less than 1');
         }
     }
 
@@ -868,15 +689,10 @@ export default class TemplateTableDetails extends LightningElement {
 
     handlesectionsave(event) {
         if (this.tableOnLoad === true && this.tableDisplayed === false && this.showtablecontent === false) {
-            let showTableClickCheck = new ShowToastEvent({
-                title: 'Error',
-                message: 'Please Click on Show Table button before Saving/Updating Table Section',
-                variant: 'error',
-            });
-            this.dispatchEvent(showTableClickCheck);
+            this.showErrorToast('Please Click on Create Table button before Saving/Updating Table Section');
         }
         else {
-            const saveEvent = new CustomEvent('datasaved', {detail: true });
+            let saveEvent = new CustomEvent('datasaved', { detail: true });
             this.dispatchEvent(saveEvent);
             this.isColResizeCheck = false;
             this.isColSwapCheck = false;
@@ -928,7 +744,6 @@ export default class TemplateTableDetails extends LightningElement {
             this.Recorddetailsnew.DxCPQ__New_Page__c = this.newPage;
             this.Recorddetailsnew.DxCPQ__Sequence__c = this.rowcount;
             this.Recorddetailsnew.DxCPQ__Type__c = this.sectiontype;
-            this.Recorddetailsnew.DxCPQ__Section_Visibility_Rule__c = this.ruleIdCreated;
             let currecid = this.sectionrecordid;
             if (currecid != '' && this.sectionrecordid.indexOf('NotSaved') == -1) {
                 this.Recorddetailsnew.Id = this.sectionrecordid;
@@ -940,6 +755,7 @@ export default class TemplateTableDetails extends LightningElement {
                     .then(result => {
                         if (result != null) {
                             this.savedRecordID = result;
+
                             let event4 = new ShowToastEvent({
                                 title: 'Success',
                                 message: 'Section "' + this.Recorddetailsnew.Name + '"' + ' was Saved',
@@ -953,12 +769,7 @@ export default class TemplateTableDetails extends LightningElement {
                             this.dispatchEvent(firecustomevent);
                         }
                         else {
-                            let resultNullCheck = new ShowToastEvent({
-                                title: 'Error',
-                                message: 'Error Occured. Please Check the Latest Transaction Log',
-                                variant: 'Error',
-                            });
-                            this.dispatchEvent(resultNullCheck);
+                            this.showErrorToast('Error Occured. Please Check the Latest Transaction Log');
                         }
                     })
                     .catch(error => {
@@ -1038,25 +849,20 @@ export default class TemplateTableDetails extends LightningElement {
             DxCPQ__Sequence__c: 0,
             DxCPQ__Type__c: '',
             Id: '',
-            DxCPQ__Section_Visibility_Rule__c:''
         };
-        this.ruleIdCreated = null;
-        this.ruleCondition = false;
-        this.listOfExistingConditions = [];
         this.clauseId = '';
-        this.ruleExpression = '';
-        this.ruleConditions = [];
-        this.ruleExists = false;
-        this.allConditions=[];
-        this.conditionExists=false;
-        this.conditionsArr = [];
-        this.mapOfRC = new Map();
-        this.Recorddetailsnew.DxCPQ__Section_Visibility_Rule__c = '';
         this.template.querySelectorAll('lightning-input-rich-text').forEach(element => {
             if (element.value != null) {
                 element.value = '';
             }
         });
+
+        this.template.querySelectorAll('div[data-id]').forEach(element => {
+            if (element.value != null) {
+                element.value = '';
+            }
+        });
+
         this.template.querySelectorAll('lightning-checkbox-group ').forEach(element => {
             if (element.value != null) {
                 element.value = '';
@@ -1117,6 +923,28 @@ export default class TemplateTableDetails extends LightningElement {
         this.showtablecontent = true;
         this.newPage = false;
 
+        this.template.querySelectorAll('lightning-input-rich-text').forEach(element => {
+            element.value = '';
+            let parentElement = element.closest('td') || element.closest('th');
+            if (parentElement) {
+                parentElement.style.border = "none";
+                parentElement.setAttribute('colspan', 1);
+                parentElement.style.backgroundColor = "";
+                parentElement.style.display = "";
+            }
+        });
+
+        this.template.querySelectorAll('div.hiddencells').forEach(divElement => {
+            divElement.value = '';
+            let parentElement = divElement.closest('td') || divElement.closest('th');
+            if (parentElement) {
+                parentElement.style.border = "none";
+                parentElement.setAttribute('colspan', 1);
+                parentElement.style.backgroundColor = "";
+                parentElement.style.display = "";
+            }
+        });
+
         this.noBordersIcon = '';
         this.allBordersIcon = '';
         this.outsideBordersIcon = '';
@@ -1127,12 +955,12 @@ export default class TemplateTableDetails extends LightningElement {
         this.Recorddetailsnew.Id = recordID;
 
         let parsedContent;
+        this.handletablecreate();
 
         gettemplatesectiondata({ editrecordid: recordID })
             .then(result => {
                 if (result != null) {
                     this.Recorddetailsnew = { ...this.Recorddetailsnew, ...result };
-                    this.Recorddetailsnew.DxCPQ__Section_Visibility_Rule__c = result.DxCPQ__Section_Visibility_Rule__c;
                     let parsedJson = JSON.parse(this.Recorddetailsnew.DxCPQ__Section_Details__c);
 
                     parsedContent = parsedJson.sectionInfo;
@@ -1156,29 +984,7 @@ export default class TemplateTableDetails extends LightningElement {
                     setTimeout(() => {
                         this.template.querySelector('[data-id="newPageTable"]').checked = parsedJson.newPage;
                     });
-                    if (result.DxCPQ__Section_Visibility_Rule__c != null && result.DxCPQ__Section_Visibility_Rule__c != '') {
-                        this.Recorddetailsnew.DxCPQ__Section_Visibility_Rule__c = result.DxCPQ__Section_Visibility_Rule__c;
-                        this.ruleExpression = result.DxCPQ__Section_Visibility_Rule__r.DxCPQ__Rule_Expression__c;
-                    } else {
-                        this.Recorddetailsnew.DxCPQ__Section_Visibility_Rule__c = '';
-                    }
-                    if (result.DxCPQ__Section_Visibility_Rule__c != null) {
-                        this.ruleIdCreated = result.DxCPQ__Section_Visibility_Rule__c;
-                        this.ruleExists = true;
-                    } else {
-                        this.ruleIdCreated = null;
-                        this.listOfExistingConditions = [];
-                        this.conditionsArr = [];
-                        this.ruleExists = false;
-                        this.filteringCondition = '';
-                    }
 
-                    if (this.ruleIdCreated != null && this.ruleIdCreated != '') {
-                        this.handleRuleWrapperMaking();
-                        let event = new Object();
-                        this.getExistingConditions(event);
-                        this.ruleExists = true;
-                    }
                     this.handletablecreate();
                 }
             })
@@ -1200,15 +1006,19 @@ export default class TemplateTableDetails extends LightningElement {
                 }
             })
             .then(() => {
-
-                //console.log('parsed content ' + JSON.stringify(parsedContent));
+               // console.log('parsed content ' + JSON.stringify(parsedContent));
 
                 this.template.querySelectorAll('lightning-input-rich-text').forEach(element => {
+
                     if (parsedContent != null && parsedContent != undefined) {
                         parsedContent.forEach(item => {
                             if (item['data-id'].startsWith(element.dataset.id) || item['data-id'].startsWith(element.dataset.head)) {
+
                                 if (item['Content'] != null && item['Content'] != undefined) {
                                     element.value = item['Content'];
+                                    element.style.wordWrap = "break-word";
+                                    element.style.overflowY = "auto";
+                                    element.style.overflowX = "hidden";
                                 }
                                 if (item['backgroundColor']) {
                                     let parentElement = element.closest('td') || element.closest('th');
@@ -1216,17 +1026,35 @@ export default class TemplateTableDetails extends LightningElement {
                                         parentElement.style.backgroundColor = item['backgroundColor'];
                                     }
                                 }
+
+                                // Fix for merging cells 
+                                if (item['cellColspan'] && item['cellColspan'] > 1) {
+                                    let parentElement = element.closest('td') || element.closest('th');
+                                    if (parentElement) {
+                                        parentElement.setAttribute('colspan', item['cellColspan']);
+
+                                        let sibling = parentElement.nextElementSibling;
+                                        for (let i = 1; i < item['cellColspan']; i++) {
+                                            if (sibling) {
+                                                sibling.style.display = 'none';
+                                                sibling = sibling.nextElementSibling;
+                                            }
+                                        }
+                                    }
+                                }
                             }
                         });
                     }
                 });
 
-                this.template.querySelectorAll('div[data-id]').forEach(divElement => {
+                this.template.querySelectorAll('div.hiddencells').forEach(divElement => {
+
                     if (parsedContent != null && parsedContent != undefined) {
                         parsedContent.forEach(item => {
-                            if (item['data-id'] === divElement.dataset.id) {
+                            if (item['data-id'] == divElement.dataset.id) {
                                 if (item['Content'] != null && item['Content'] != undefined) {
                                     divElement.innerHTML = item['Content'];
+                                    divElement.style.wordWrap = "break-word";
                                 }
                                 if (item['backgroundColor']) {
                                     let parentElement = divElement.closest('td') || divElement.closest('th');
@@ -1249,7 +1077,7 @@ export default class TemplateTableDetails extends LightningElement {
                 });
             })
             .catch(error => {
-                console.error('error caught ', JSON.stringify(error));
+                console.error('error caught ', error);
             })
             .finally(() => {
                 this.isLoaded = false;
@@ -1510,7 +1338,7 @@ export default class TemplateTableDetails extends LightningElement {
     }
 
     /**
-    * Method to clear Table Cells and build again
+    * Method to clear All Table Cells and build again
     */
 
     handleclearTable() {
@@ -1521,6 +1349,22 @@ export default class TemplateTableDetails extends LightningElement {
         this.isHeaderMergeField = false;
         this.isHeaderCellBgColor = false;
         this.isTableColumnSizeChange = false;
+    }
+
+    /**
+    * Method to clear Cell Content
+    */
+    handleclearCell(event) {
+        let selectedCell = event.target.closest('lightning-input-rich-text');
+        if (selectedCell) {
+            if (!selectedCell.value) {
+                this.showErrorToast('The cell is empty and does not contain any data to clear.');
+            } else {
+                selectedCell.value = "";
+                let selectedCellParent = selectedCell.closest('td') || selectedCell.closest('th');
+                selectedCellParent.style.backgroundColor = "";
+            }
+        }
     }
 
     /**
@@ -1566,19 +1410,22 @@ export default class TemplateTableDetails extends LightningElement {
     }
 
     /**
-    * Method to handle merging of table body cells 
+    * Method to handle merging of table body cells
     */
-
     handleMergeRightCell(event) {
         if (this.mergeHeaderCell === true) {
-            //let selectedTh = event.target.closest('th');
-            let selectedTh = this.selectedThValue;
+          //  console.log('selected header ' + JSON.stringify(this.selectedHeader));
+            let selectedDiv = this.template.querySelector(`[data-head="${this.selectedHeader}"]`);
+            let selectedTh = selectedDiv.closest('th');
+
             let columnIndex = Array.from(selectedTh.parentElement.children).indexOf(selectedTh);
+          //  console.log('col index ' + columnIndex);
             let lastColumnIndex = this.tableheaders.length - 1;
+          //  console.log('last col index ' + lastColumnIndex);
 
             if (columnIndex < lastColumnIndex) {
                 let currentTh = selectedTh;
-                let nextTh = currentTh.nextElementSibling;
+                let nextTh = this.getNextVisibleElement(currentTh, 'th');
 
                 if (nextTh && Array.from(nextTh.parentElement.children).indexOf(nextTh) <= lastColumnIndex) {
                     let currentColspan = parseInt(currentTh.getAttribute('colspan')) || 1;
@@ -1590,42 +1437,41 @@ export default class TemplateTableDetails extends LightningElement {
                         let countToRemove = Math.min(nextColspan, lastColumnIndex - columnIndex);
                         let nextSibling = nextTh;
                         while (countToRemove > 0 && nextSibling) {
-                            let nextNextSibling = nextSibling.nextElementSibling;
-                            // nextSibling = nextNextSibling;
-                            nextSibling.remove();
+                            let nextNextSibling = this.getNextVisibleElement(nextSibling, 'th');
+                            nextSibling.style.display = 'none';
+                            nextSibling = nextNextSibling;
                             countToRemove--;
                         }
-                    } else {
-                        let errorDisplay = new ShowToastEvent({
-                            title: 'Error',
-                            message: 'Cannot merge cells beyond column boundary',
-                            variant: 'error',
-                        });
-                        this.dispatchEvent(errorDisplay);
 
-                        console.error("Cannot merge cells beyond column boundary");
+                        // Fix divContentArray
+
+                        let key = selectedDiv.dataset.head;
+                        //console.log('key value ' + key);
+
+                        let existingIndex = this.divContentArray.findIndex(item => item['data-id'] === key);
+                        if (existingIndex !== -1) {
+                            this.divContentArray[existingIndex].cellColspan = newColspan;
+                        } else {
+                            let divElement = this.template.querySelector(`[data-id="${key}"]`);
+                            let divContent = divElement ? divElement.innerHTML : '';
+                            this.divContentArray.push({
+                                'data-id': key,
+                                'Content': divContent,
+                                'backgroundColor': '',
+                                'cellColspan': newColspan
+                            });
+                        }
+                       // console.log('div content head merge ' + JSON.stringify(this.divContentArray));
+                    } else {
+                        this.showErrorToast('Cannot merge cells beyond column boundary');
                     }
                 } else {
-                    let errorDisplay1 = new ShowToastEvent({
-                        title: 'Error',
-                        message: 'Cannot merge cells beyond column boundary',
-                        variant: 'error',
-                    });
-                    this.dispatchEvent(errorDisplay1);
-
-                    console.error("Cannot merge cell in the last column");
+                    this.showErrorToast('Cannot merge cell in the last column');
                 }
             } else {
-                let errorDisplay2 = new ShowToastEvent({
-                    title: 'Error',
-                    message: 'Cannot merge cells beyond column boundary',
-                    variant: 'error',
-                });
-                this.dispatchEvent(errorDisplay2);
-                console.error("Cannot merge cell in the last column");
+                this.showErrorToast('Cannot merge cell in the last column');
             }
-        }
-        else if (this.mergeBodyCell === true) {
+        } else if (this.mergeBodyCell === true) {
             let selectedDiv = this.template.querySelector(`[data-id="${this.selectedTableRow}"]`);
             let rowIndex = parseInt(this.selectedTableRow.match(/row(\d+)/)[1]) - 1;
             let selectedTd = selectedDiv.closest('td');
@@ -1636,12 +1482,11 @@ export default class TemplateTableDetails extends LightningElement {
 
                 if (columnIndex < lastColumnIndex) {
                     let currentTd = selectedTd;
-                    let nextTd = currentTd.nextElementSibling;
+                    let nextTd = this.getNextVisibleElement(currentTd, 'td');
 
                     if (nextTd && Array.from(nextTd.parentElement.children).indexOf(nextTd) <= lastColumnIndex) {
                         let currentColspan = parseInt(currentTd.getAttribute('colspan')) || 1;
                         let nextColspan = parseInt(nextTd.getAttribute('colspan')) || 1;
-
                         let newColspan = currentColspan + nextColspan;
 
                         if (columnIndex + newColspan - 1 <= lastColumnIndex) {
@@ -1649,58 +1494,53 @@ export default class TemplateTableDetails extends LightningElement {
                             let countToRemove = Math.min(nextColspan, lastColumnIndex - columnIndex);
                             let nextSibling = nextTd;
                             while (countToRemove > 0 && nextSibling) {
-                                let nextNextSibling = nextSibling.nextElementSibling;
+                                let nextNextSibling = this.getNextVisibleElement(nextSibling, 'td');
                                 let removedCell = this.tablerows[rowIndex].columns[columnIndex + currentColspan];
                                 if (removedCell) {
-                                    //removedCell.isMerged = false;
                                     removedCell.isRemoved = true;
                                 }
-                                nextSibling.remove();
+                                nextSibling.style.display = 'none';
+                                nextSibling = nextNextSibling;
                                 countToRemove--;
                             }
                             for (let i = columnIndex; i <= columnIndex + currentColspan - 1; i++) {
                                 this.tablerows[rowIndex].columns[i].isMerged = true;
                             }
-                        } else {
-                            let errorDisplay = new ShowToastEvent({
-                                title: 'Error',
-                                message: 'Cannot merge cells beyond column boundary',
-                                variant: 'error',
-                            });
-                            this.dispatchEvent(errorDisplay);
 
-                            console.error("Cannot merge cells beyond column boundary");
+                            // Fix divContentArray
+                            let key = selectedDiv.dataset.id + 'div';
+                            let existingIndex = this.divContentArray.findIndex(item => item['data-id'] === key);
+                            let divElement = this.template.querySelector(`[data-id="${key}"]`);
+                            let divContent = divElement ? divElement.innerHTML : '';
+                            let backgroundColor = currentTd.style.backgroundColor || '';
+                            if (existingIndex !== -1) {
+                                this.divContentArray[existingIndex] = {
+                                    'data-id': key,
+                                    'Content': divContent,
+                                    'backgroundColor': backgroundColor,
+                                    'cellColspan': newColspan
+                                };
+                            } else {
+                                this.divContentArray.push({
+                                    'data-id': key,
+                                    'Content': divContent,
+                                    'backgroundColor': backgroundColor,
+                                    'cellColspan': newColspan
+                                });
+                            }
+                            //console.log('div content array merge right ' + JSON.stringify(this.divContentArray));
+                        } else {
+                            this.showErrorToast('Cannot merge cells beyond column boundary');
                         }
                     } else {
-                        let errorDisplay1 = new ShowToastEvent({
-                            title: 'Error',
-                            message: 'Cannot merge cells beyond column boundary',
-                            variant: 'error',
-                        });
-                        this.dispatchEvent(errorDisplay1);
-
-                        console.error("Cannot merge cell in the last column");
+                        this.showErrorToast('Cannot merge cell in the last column');
                     }
                 } else {
-                    let errorDisplay2 = new ShowToastEvent({
-                        title: 'Error',
-                        message: 'Cannot merge cells beyond column boundary',
-                        variant: 'error',
-                    });
-                    this.dispatchEvent(errorDisplay2);
-                    console.error("Cannot merge cell in the last column");
+                    this.showErrorToast('Cannot merge cell in the last column');
                 }
             } else {
-                let errorDisplay3 = new ShowToastEvent({
-                    title: 'Error',
-                    message: 'Div not found within a td',
-                    variant: 'error',
-                });
-                this.dispatchEvent(errorDisplay3);
-                console.error("Div not found within a td");
+                this.showErrorToast('Cannot merge cell');
             }
-
-            // console.log('table rows after merge right cell ' + JSON.stringify(this.tablerows));
         }
         this.template.querySelector('c-modal').hide();
         this.confirmMergeCell = false;
@@ -1708,32 +1548,56 @@ export default class TemplateTableDetails extends LightningElement {
         this.mergeHeaderCell = false;
     }
 
+
+    getNextVisibleElement(element, tagName) {
+        let sibling = element.nextElementSibling;
+        while (sibling) {
+            if (sibling.style.display !== 'none' && sibling.tagName.toLowerCase() === tagName.toLowerCase()) {
+                return sibling;
+            }
+            sibling = sibling.nextElementSibling;
+        }
+        return null;
+    }
+
+    showErrorToast(message) {
+        let errorDisplay = new ShowToastEvent({
+            title: 'Error',
+            message: message,
+            variant: 'error',
+        });
+        this.dispatchEvent(errorDisplay);
+        console.error(message);
+    }
+
+
     handleMergeCellClick() {
         this.template.querySelector('c-modal').show();
-        this.confirmMergeCell = true;
-        this.mergeBodyCell = true;
         this.mergeHeaderCell = false;
-
         this.showmergefield = false;
         this.showImageModal = false;
         this.isHeaderMergeField = false;
         this.isHeaderCellBgColor = false;
         this.isClearTable = false;
         this.isTableColumnSizeChange = false;
+        this.showCellBgColor = false;
+        this.confirmMergeCell = true;
+        this.mergeBodyCell = true;
     }
 
     handleMergeHeaderCellClick(event) {
         this.template.querySelector('c-modal').show();
-        this.confirmMergeCell = true;
         this.mergeBodyCell = false;
-        this.mergeHeaderCell = true;
-        this.selectedThValue = event.target.closest('th');
+        //this.selectedThValue = event.target.closest('th');
         this.showmergefield = false;
         this.showImageModal = false;
         this.isHeaderMergeField = false;
         this.isHeaderCellBgColor = false;
         this.isClearTable = false;
+        this.showCellBgColor = false;
         this.isTableColumnSizeChange = false;
+        this.confirmMergeCell = true;
+        this.mergeHeaderCell = true;
     }
 
     cancelMergeCell() {
@@ -1744,20 +1608,12 @@ export default class TemplateTableDetails extends LightningElement {
         this.mergeHeaderCell = false;
     }
 
-    // /**
-    // * Method to handle merging of table header cells
-    // */
-
-    // handleHeaderMergeRightCell(event) {
-
-    // }
-
     /**
     * Method to handle column swapping on drag start
     */
 
     handleDragStart(event) {
-        this.draggedColumnIndex = Array.from(event.target.parentNode.children).indexOf(event.target);
+        this.draggedColumnIndex = this.getColumnIndex(event.target);
         event.dataTransfer.setData('text/plain', '');
     }
 
@@ -1772,10 +1628,11 @@ export default class TemplateTableDetails extends LightningElement {
         draggedColumn.style.borderRadius = '5px';
         draggedColumn.style.boxShadow = '0 0 5px 5px silver';
 
-        let columnIndex = Array.from(draggedColumn.parentNode.children).indexOf(draggedColumn);
+        let columnIndex = this.getColumnIndex(draggedColumn);
+        let adjustedIndex = this.isSerialNumberCheck ? columnIndex + 1 : columnIndex;
         let allRows = this.template.querySelectorAll('tbody tr');
         allRows.forEach(row => {
-            let cell = row.querySelectorAll('td')[columnIndex];
+            let cell = row.querySelectorAll('td')[adjustedIndex];
             cell.style.borderLeft = '2px groove silver';
             cell.style.borderRight = '2px groove silver';
             cell.style.boxShadow = '0 5px silver';
@@ -1793,10 +1650,11 @@ export default class TemplateTableDetails extends LightningElement {
         draggedColumn.style.borderRight = '';
         draggedColumn.style.boxShadow = '';
 
-        let columnIndex = Array.from(draggedColumn.parentNode.children).indexOf(draggedColumn);
+        let columnIndex = this.getColumnIndex(draggedColumn);
+        let adjustedIndex = this.isSerialNumberCheck ? columnIndex + 1 : columnIndex;
         let allRows = this.template.querySelectorAll('tbody tr');
         allRows.forEach(row => {
-            let cell = row.querySelectorAll('td')[columnIndex];
+            let cell = row.querySelectorAll('td')[adjustedIndex];
             cell.style.borderLeft = '';
             cell.style.borderRight = '';
             cell.style.boxShadow = '';
@@ -1811,7 +1669,7 @@ export default class TemplateTableDetails extends LightningElement {
         event.preventDefault();
         let oldIndex = this.draggedColumnIndex;
         let newTh = event.target.closest('th');
-        let newIndex = Array.from(newTh.parentNode.children).indexOf(newTh);
+        let newIndex = this.getColumnIndex(newTh);
         this.handleColumnSwap(oldIndex, newIndex);
 
         let allColumns = this.template.querySelectorAll('th,td');
@@ -1846,6 +1704,15 @@ export default class TemplateTableDetails extends LightningElement {
 
         this.tableheaders = headersCopy;
         this.tablerows = rowsCopy;
+    }
+
+    /**
+    * Method to get the correct column index accounting for the serial number column
+    */
+
+    getColumnIndex(element) {
+        let index = Array.from(element.parentNode.children).indexOf(element);
+        return this.isSerialNumberCheck ? index - 1 : index;
     }
 
     /**
@@ -1935,39 +1802,78 @@ export default class TemplateTableDetails extends LightningElement {
     }
 
 
+    /**
+    * Method to insert background color for a cell
+    */
     handleInsertCellBgColor() {
         try {
             if (this.isHeaderCellBgColor === false) {
-                console.log('sel table row ' + this.selectedTableRow);
-                let elm = this.template.querySelector(`[data-id="${this.selectedTableRow}"]`);
-                elm.style.backgroundColor = this.cellBgColor;
                 let innerdiv = this.selectedTableRow + 'div';
                 let elm1 = this.template.querySelector(`[data-id="${innerdiv}"]`);
                 let selectedTd = elm1.closest('td');
                 selectedTd.style.backgroundColor = this.cellBgColor;
-
-
 
                 let colIndex = this.tablecolumns.findIndex(col => col.id === this.selectedTableRow);
                 if (colIndex !== -1) {
                     this.tablecolumns[colIndex].backgroundColor = true;
                 }
 
-                console.log('tabl cols after bg clr true ' + JSON.stringify(this.tablecolumns));
-            }
-            else {
-
+                // Update divContentArray
+                let key = elm1.dataset.id;
+               // console.log('key while inserting ' + key);
+                let divContent = elm1 ? elm1.innerHTML : '';
+                let cellColspan = selectedTd ? selectedTd.colSpan : 1;
+                let existingIndex = this.divContentArray.findIndex(item => item['data-id'] === key);
+                if (existingIndex !== -1) {
+                    this.divContentArray[existingIndex] = {
+                        'data-id': key,
+                        'Content': divContent,
+                        'backgroundColor': this.cellBgColor,
+                        'cellColspan': cellColspan
+                    };
+                } else {
+                    this.divContentArray.push({
+                        'data-id': key,
+                        'Content': divContent,
+                        'backgroundColor': this.cellBgColor,
+                        'cellColspan': cellColspan
+                    });
+                }
+               // console.log('div content array color insert ' + JSON.stringify(this.divContentArray));
+            } else {
                 let elm2 = this.template.querySelector(`[data-head="${this.selectedHeader}"]`);
-                elm2.style.backgroundColor = this.cellBgColor;
                 let selectedHeaderTd = elm2.closest('th');
                 selectedHeaderTd.style.backgroundColor = this.cellBgColor;
+
+                // Update divContentArray
+                let key = elm2.dataset.head;
+                let divContent = elm2 ? elm2.value : '';
+                let cellColspan = selectedHeaderTd ? selectedHeaderTd.colSpan : 1;
+                let existingIndex = this.divContentArray.findIndex(item => item['data-id'] == key);
+                if (existingIndex !== -1) {
+                    this.divContentArray[existingIndex] = {
+                        'data-id': key,
+                        'Content': divContent,
+                        'backgroundColor': this.cellBgColor,
+                        'cellColspan': cellColspan
+                    };
+                } else {
+                    this.divContentArray.push({
+                        'data-id': key,
+                        'Content': divContent,
+                        'backgroundColor': this.cellBgColor,
+                        'cellColspan': cellColspan
+                    });
+                }
+               // console.log('div content array color insert header ' + JSON.stringify(this.divContentArray));
             }
             this.template.querySelector('c-modal').hide();
-        }
-        catch (error) {
+        } catch (error) {
             console.error('Error caught ' + error);
         }
     }
+
+
 
     handleColResize(event) {
         this.isColSwapCheck = false;
@@ -1986,7 +1892,8 @@ export default class TemplateTableDetails extends LightningElement {
     }
 
     unsavedChanges() {
-        const saveEvent = new CustomEvent('datasaved', { detail: false });
+        let saveEvent = new CustomEvent('datasaved', { detail: false });
         this.dispatchEvent(saveEvent);
     }
+
 }
