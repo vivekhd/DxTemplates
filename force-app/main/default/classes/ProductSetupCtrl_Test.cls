@@ -123,7 +123,7 @@ private class ProductSetupCtrl_Test {
             RelatedObjectsClass.cloneRulesFromParentTemplate(docTemplateSections[0].Id);
             String arr = '[{\"Id\":\"a05DH000003AmugYAC\",\"conditionName\":\" Condition1 \",\"dataType\":\"STRING\",\"operator\":\"==\",\"selectedObject\":\"Lead\",\"selectedField\":\"lastname\",\"value\":\"20\",\"conditionIndex\":0},{\"Id\":null,\"conditionName\":\" Condition2 \",\"dataType\":\"BOOLEAN\",\"operator\":\"==\",\"selectedObject\":\"Lead\",\"selectedField\":\"isdeleted\",\"value\":false,\"conditionIndex\":1}]';
             List<Id> noIds = new List<Id> {};
-            RelatedObjectsClass.createRuleCondition(arr,'Condition1 && condition2', noIds, docTemplateSections[0].Id);
+            RelatedObjectsClass.createRuleCondition(arr,'Condition1 && condition2', noIds, docTemplateSections[0].Id,null);
                         
             ApexPages.currentPage().getParameters().put('documentid', String.valueOf(docs.Id));
             DisplayPDFController controller = new DisplayPDFController();
