@@ -4,7 +4,7 @@ public with sharing class SaveDocumentTemplatesection {
     @AuraEnabled
     public static List<Document_Template_Section__c> getAllDocumentTemplateSections(Id docTempId){
         List<Document_Template_Section__c> allSections=new List<Document_Template_Section__c>([select id,Sequence__c,Section_Content__c,Name,DisplaySectionName__c,
-                                                                                               Document_Clause__c,Document_Template__c,IsActive__c,IsEditable__c,New_Page__c,Document_Template__r.Name,
+                                                                                               Document_Clause__c,Document_Template__c,IsActive__c,IsEditable__c,New_Page__c,Document_Template__r.Name,Section_Visibility_Rule__c,
                                                                                                Type__c,Document_Template__r.Related_To_Type__c,Document_Template__r.Parent_Template__c,Document_Template__r.Previously_Active__c,Document_Template__r.IsActive__c,Document_Template__r.Version_Number__c
                                                                                                from Document_Template_Section__c where Document_Template__c=:docTempId WITH SECURITY_ENFORCED
                                                                                                order by Sequence__c asc limit 1000 ]);

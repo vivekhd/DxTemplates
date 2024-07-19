@@ -66,7 +66,13 @@ public with sharing class MergeFieldsClass {
                 }else{
                     value = transRec.Translated_Value__c;
                 }
-                nameTransValueMap.put(transRec.DxCPQ__FieldValue__c, value);
+                if(transRec.DxCPQ__FieldValue__c != null){
+                    nameTransValueMap.put(transRec.DxCPQ__FieldValue__c, value);
+                }
+                else{
+                    nameTransValueMap.put(transRec.Name, value);
+                }
+                //nameTransValueMap.put(transRec.DxCPQ__FieldValue__c, value);
                 System.debug('nameTransValueMap 50--> '+ nameTransValueMap);
             }
             System.debug('nameTransValueMap 52--> '+ nameTransValueMap);

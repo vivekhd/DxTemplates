@@ -733,7 +733,7 @@ export default class TemplateDesignerCMP extends NavigationMixin(LightningElemen
                   }
                 }
                 this.rowCount = val.DxCPQ__Sequence__c;
-                this.optionsList.push({ Id: val.Id, Type: val.DxCPQ__Type__c, rowCount: val.DxCPQ__Sequence__c, sectionNameEntered: val.Name });
+                this.optionsList.push({ Id: val.Id, Type: val.DxCPQ__Type__c, rowCount: val.DxCPQ__Sequence__c, sectionNameEntered: val.Name, visibility: val.DxCPQ__Section_Visibility_Rule__c });
               }
               this.disableEditing = val.DxCPQ__Document_Template__r.DxCPQ__Previously_Active__c;
               this.disableEditingHandler(this.disableEditing);

@@ -19,3 +19,8 @@
   }
 
   .dx-rte_toolbar .slds-color-picker__summary-input { display: none!important; }
+
+  .table-container {
+    max-height: 400px;
+    overflow-y: auto;
+  }

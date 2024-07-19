@@ -933,6 +933,20 @@ export default class TemplateContentDetails extends NavigationMixin(LightningEle
     this.translatedRecords[indexVal].DxCPQ__Translated_Value__c = event.target.value; 
   }
 
+  updateTranslatedValues(list) {
+     list.forEach(function(item) {
+        if (!(item.Name.startsWith('{!') && item.Name.endsWith('}'))) {
+            if (!item.TranslatedValue) {
+                item.TranslatedValue = item.Name;
+            }
+            if (!item.FieldValue) {
+                item.FieldValue = item.Name;
+            }
+        }
+    });
+    return list;
+  }
+
   handleSave() {
     this.translatedRecords.forEach(record => {
       if (record.Name === null || record.Name === '') {
@@ -961,9 +975,11 @@ export default class TemplateContentDetails extends NavigationMixin(LightningEle
           delete record['DxCPQ__Translated_Value__c'];
         }
       });
+      let updatedStrLst = this.updateTranslatedValues(this.translatedRecords);
+      console.log('Updated translatedRecords:', updatedStrLst);
 
       createUpdateMethod({ 
-        jsonStringData: JSON.stringify(this.translatedRecords), 
+        jsonStringData: JSON.stringify(updatedStrLst), 
         language: this.selectedLanguage,
         sectionId: this.sectionrecordid
       })

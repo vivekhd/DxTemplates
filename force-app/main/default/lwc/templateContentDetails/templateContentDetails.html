@@ -54,8 +54,15 @@
 						class="slds-button_icon-help">
 					</lightning-button-icon>
 				</div>
-				<button class="slds-button las la-language" disabled={translateEnabled} onclick={handleTranslate} style="font-size:40px">
+				<div class="slds-grid">
+					<div class="slds-col_bump-left slds-m-top_small">
+							<lightning-button-icon class="" icon-name="utility:filter_criteria_rule"  variant="bare" alternative-text="Settings" title="Apply Filter(s)" label="Apply Filter(s)"  size="large"  onclick={handleFiltering} disabled={isDisabled}></lightning-button-icon>
+					</div>
+					<div >
+						<button class="slds-button las la-language" disabled={translateEnabled} title="Translate" onclick={handleTranslate} style="font-size:40px">
 				</button>
+					</div>
+				</div>
 			</div>
 		</div>
 		<div class="slds-m-horizontal_large">
@@ -170,7 +177,7 @@
 		</c-modal>
 		<c-modal data-id="filter">
 			<template if:true={ruleCondition}>
-				<span slot="header">Apply Filter(s)</span>
+				<span slot="header">Apply Visibility Filter(s)</span>
 				<div class="slds-modal__content slds-p-around_medium" style="min-height: 300px;">
 					<c-conditioncmp list-of-existing-conditions={listOfExistingConditions} field-wrapper={fieldWrapper}
 						existing-global-value={selectedGlobalValue} existing-expression={ruleExpression}

@@ -11,10 +11,29 @@
 		<div class="slds-col slds-size_1-of-1 slds-medium-size_5-of-12 slds-large-size_3-of-12 slds-p-top_x-large slds-p-left_xx-large slds-float_right">
 		  <lightning-input data-id="newPageRO" type="checkbox" label="New Page" name="New Page" class="slds-list_horizontal" onchange={handleNewPage} disabled={isDisabled} title="Displays this section in the next page of the PDF"></lightning-input>
 		</div>
+		<!-- <div>
+			<lightning-button class="slds-p-top_large" icon-name="utility:filter_criteria" label="Apply Filter(s)"
+				title="Apply Visibility Filter(s)" onclick={handleFiltering} disabled={isDisabled}>
+			</lightning-button>
+		</div>
 		<div class="slds-is-relative slds-col_bump-left">
 			<lightning-button-icon icon-name="utility:help_doc_ext" onclick={handlehelp} alternative-text="Need Help?" title="Need Help?" size="medium" variant="bare" class="slds-is-absolute slds-button_icon-help" style="right:0px"></lightning-button-icon>
+		</div> -->
+
+		<div class="slds-col slds-size_1-of-1 slds-medium-size_2-of-12 slds-large-size_2-of-12 slds-p-left_small slds-text-align_right">
+			<div>
+				<lightning-button-icon icon-name="utility:help_doc_ext" onclick={handlehelp}
+					alternative-text="Need Help?" title="Need Help?" size="medium" variant="bare"
+					class="slds-button_icon-help">
+				</lightning-button-icon>
+			</div>
+			<div class="slds-grid">
+				<div class="slds-col_bump-left slds-m-top_small">
+						<lightning-button-icon class="" icon-name="utility:filter_criteria_rule"  variant="bare" alternative-text="Settings" title="Apply Filter(s)" label="Apply Filter(s)"  size="large"  onclick={handleFiltering} disabled={isDisabled}></lightning-button-icon>
+				</div>
+				</div>
+			</div>
 		</div>
-	  </div>
 	  <div class="slds-m-horizontal_large">
 		<div if:true={isLoaded} class="slds-is-relative">
 		  <lightning-spinner alternative-text="Loading..." variant="brand"></lightning-spinner>
@@ -34,6 +53,24 @@
 				<lightning-button class="slds-p-right_x-small" variant="brand" label="Update Rule" title="Update" onclick={handleRuleUpdates}></lightning-button>
 			  </template>
 			  <template if:false={ruleExists}>
+				<lightning-button class="slds-p-right_x-small" variant="brand" label="Create Rule" title="Create" onclick={handleCreateRules}></lightning-button>
+			  </template>
+			</div>
+		  </footer>
+		</template>
+		<template if:true={visibilityRuleCondition}>
+		  <span slot="header">Apply Visibility Filter(s)</span>
+		  <div class="slds-modal__content slds-p-around_medium" style="min-height: 300px;">
+			<c-conditioncmp list-of-existing-conditions={visibilityListOfExistingConditions} field-wrapper={visibilityRuleFieldWrapper} existing-global-value={visibilitySelectedGlobalValue} existing-expression={visibilityRuleExpression} style="width:100%"></c-conditioncmp>
+		  </div>
+		  <footer class="slds-modal__footer">
+			<div class="slds-text-align_right">
+			  <lightning-button class="slds-p-right_x-small" variant="brand" label="Cancel" title="Cancel" onclick={closePreviewModal}></lightning-button>
+			  <template if:true={visibilityRuleExists}>
+				<lightning-button class="slds-p-right_x-small" variant="brand" label="Reset Rule & Save" title="Reset" onclick={handleFilterRuleReset}></lightning-button>
+				<lightning-button class="slds-p-right_x-small" variant="brand" label="Update Rule" title="Update" onclick={handleRuleUpdates}></lightning-button>
+			  </template>
+			  <template if:false={visibilityRuleExists}>
 				<lightning-button class="slds-p-right_x-small" variant="brand" label="Create Rule" title="Create" onclick={handleCreateRules}></lightning-button>
 			  </template>
 			</div>
@@ -105,7 +142,20 @@
 		  <div class="slds-card dx-rte_toolbar slds-no-print">
 			<div class="slds-grid slds-grid_vertical slds-nowrap">
 			  <div role="group" class="slds-grid slds-grid_align-space slds-col slds-rich-text-editor__toolbar slds-shrink-none">
-				<lightning-combobox name="progress" label="Font-Family" value={fontfamily} placeholder="Select Font" title="Font-Family Type" options={fontfamilyoptions} onchange={handlefontfamilyChange} disabled={isDisabled}></lightning-combobox>
+				<!-- <lightning-combobox name="progress" label="Font-Family" value={fontfamily} placeholder="Select Font" title="Font-Family Type" options={fontfamilyoptions} onchange={handlefontfamilyChange} disabled={isDisabled}></lightning-combobox> -->
+				<!------------Code added by Bhavya to have custom font-family list---------------->
+				<div class="slds-grid slds-grid_vertical slds-m-top_xx-small">
+					<div class="slds-col">
+						<label for="font-family">Font Family</label>
+					</div>
+					<div class="slds-col">
+						<select name="font-family" id="font-family" onchange={handleFontFamilySelection} label="Font Family" style="width: 145px;border-radius: 4px;padding: 5px;">
+							<template for:each={fontFamilies} for:item="item" for:index="index">
+								<option value={item.value} key={item.label}  >{item.label}</option>
+							</template>
+						</select>
+					</div>
+				</div>
 				<lightning-combobox name="progress" label="Font-Size" value={fontsize} placeholder="Font Size" title="Font Size" options={fontsizeoptions} onchange={handlefontsizeChange} disabled={isDisabled}></lightning-combobox>
 				<lightning-input type="color" name="input-color" label="H. Font" title="Header Font Color" value={selectedHFontColor} onchange={handleHFontColorChange} disabled={isDisabled}></lightning-input>
 				<lightning-input type="color" name="input-color" label="H. BG" title="Header Background Color" value={selectedHbgColor} onchange={handleHbgColorChange} disabled={isDisabled}></lightning-input>

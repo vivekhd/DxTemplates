@@ -168,8 +168,7 @@ global with sharing class RelatedObjectsClass {
                 condsArr.add(condMap);
             }
             String condString = JSON.serializePretty(condsArr);
-            System.debug(condString);
-            String cloneRule = createRuleCondition(condString, tempRule.Rule_Expression__c, null, null);
+            String cloneRule = createRuleCondition(condString, tempRule.Rule_Expression__c, null, null,null);
             return cloneRule;
         }
         catch (Exception ex) {
@@ -179,7 +178,7 @@ global with sharing class RelatedObjectsClass {
     }
     
     @AuraEnabled
-    public static String createRuleCondition(String ruleConditions, String ruleExpression, List<Id> deleteIds , String sectionrecordid){
+    public static String createRuleCondition(String ruleConditions, String ruleExpression, List<Id> deleteIds , String sectionrecordid,String ruleType){
         try{
             System.debug(deleteIds);
             Id RuleId;
@@ -193,9 +192,9 @@ global with sharing class RelatedObjectsClass {
             ruleExpression = ruleExpression.replaceAll('"','');
 
             if(sectionrecordid!=null &&!sectionrecordid.contains('NotSaved')){
-                Document_Template_Section__c tsobj = [select RuleId__c,Name from Document_Template_Section__c where id=:sectionrecordid WITH SECURITY_ENFORCED];
-                tempruleId = tsobj.RuleId__c;
-                
+                Document_Template_Section__c tsobj = [select Section_Visibility_Rule__c,RuleId__c,Name from Document_Template_Section__c where id=:sectionrecordid WITH SECURITY_ENFORCED];
+                tempruleId = ruleType == 'Section Visibility Rule' ? tsobj.Section_Visibility_Rule__c : tsobj.RuleId__c;
+                //tempruleId = tsobj.RuleId__c;
                 if(tempruleId==null){
                     Rule__c newRule = new Rule__c();
                     newRule.Rule_Expression__c = ruleExpression;

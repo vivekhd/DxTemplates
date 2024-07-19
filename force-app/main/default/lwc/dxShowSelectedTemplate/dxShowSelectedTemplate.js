@@ -62,7 +62,9 @@ export default class DxShowSelectedTemplate extends LightningElement {
         const conditions = expression.split(/\s*(?:\|\||&&)\s*/);
         for (let condition of conditions) {
             const [field, value] = condition.split(/\s*==\s*/);
-            if (record[field.charAt(0).toUpperCase() + field.slice(1)] !== value) {
+            const apiName = Object.keys(record).find(key => key.toLowerCase() === field);
+            //console.log('apiname value',apiName);
+            if (record[apiName] !== value) {
                 return false;
             }
         }
@@ -94,9 +96,9 @@ export default class DxShowSelectedTemplate extends LightningElement {
                     if(rule.DxCPQ__Rule_Conditions__r){
                         let rc = rule.DxCPQ__Rule_Conditions__r;
                         for (let i = 0; i < rc.length; i++) {
-                            let field = rc[i].DxCPQ__Condition_Field__c.replace(/[^a-zA-Z0-9 ]/g, "");
+                            let field = rc[i].DxCPQ__Condition_Field__c.replace(/[^a-zA-Z0-9 _]/g, "");
                             field = field.replace(/\s/g, "").replaceAll("-", "");
-                            let str = field.toLowerCase() + " " + rc[i].DxCPQ__Operator__c + " " + rc[i].DxCPQ__Value__c.replace(/\s/g, "").replaceAll("-", "");
+                             let str = field.toLowerCase() + " " + rc[i].DxCPQ__Operator__c + " " + rc[i].DxCPQ__Value__c;
                             conditionString = conditionString.replace(rc[i].Name, str);
                         }
                     }

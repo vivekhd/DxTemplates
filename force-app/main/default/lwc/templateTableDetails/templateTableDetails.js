@@ -9,8 +9,45 @@ import getAllPopupMessages from '@salesforce/apex/PopUpMessageSelector.getAllCon
 import gettemplatesectiondata from '@salesforce/apex/SaveDocumentTemplatesection.gettemplatesectiondata';
 import getContentVersions from '@salesforce/apex/FooterClass.getContentVersions';
 import getSearchedContentVersions from '@salesforce/apex/FooterClass.getSearchedContentVersions';
+import createUpdateMethod from '@salesforce/apex/LanguageTranslatorClass.createUpdateMethod';
+import deleteMethod from '@salesforce/apex/LanguageTranslatorClass.deleteMethod';
+import selectedLangMethod from '@salesforce/apex/LanguageTranslatorClass.selectedLangMethod';
+import getAllUserLanguages from '@salesforce/apex/LanguageTranslatorClass.getAllUserLanguages';
+import currectUserLang from '@salesforce/apex/LanguageTranslatorClass.currectUserLang';
+import createLog from '@salesforce/apex/LogHandler.createLog';
+import getSObjectListFiltering from '@salesforce/apex/RelatedObjectsClass.getSObjectListFiltering';
+import createRuleCondition from '@salesforce/apex/RelatedObjectsClass.createRuleCondition';
+import getConditions from '@salesforce/apex/RelatedObjectsClass.getExistingConditions';
+import { createRuleConditionHierarcy } from 'c/conditionUtil';
+import resetRulesForTemplate from '@salesforce/apex/RelatedObjectsClass.handleTemplateRuleResetCondition';
 
 export default class TemplateTableDetails extends LightningElement {
+    //variables added by Bhavya for Document Translation starts here
+    @track translateEnabled = true;
+    @track isTranslateModalOpen = false;
+    @track showTranslateMergeFields = false;
+    @track translatedRecords = [{
+        'Name': '',
+        'DxCPQ__FieldValue__c': '',
+        'DxCPQ__Translated_Value__c': '',
+        'Id': ''
+    }];
+    @track languages = [];
+    @track selectedLanguage;
+    uniqueIdentifierVal = 0;
+    get uniqueIdentifier() {
+        this.uniqueIdentifierVal = this.uniqueIdentifierVal + 1;
+        return this.uniqueIdentifierVal;
+    }
+    @track dataArray = [{
+        'Name': '',
+        'DxCPQ__FieldValue__c': '',
+        'DxCPQ__Translated_Value__c': '',
+        'Id': this.uniqueIdentifier
+    }];
+    @track extractedWords = [];
+    transRecordNameArray = [];
+    //variables added by Bhavya for Document Translation ends here
 
     @track tableOnLoad = true;
     @track tableDisplayed = false;
@@ -51,6 +88,7 @@ export default class TemplateTableDetails extends LightningElement {
     imageselected = false;
     selectedimageurl;
     imagesfound = false;
+    hasSpecialCharacter;
 
     @api selectedObjectName;
     showStatement = false;
@@ -161,7 +199,8 @@ export default class TemplateTableDetails extends LightningElement {
         DxCPQ__Document_Template__c: '',
         DxCPQ__Sequence__c: 0,
         DxCPQ__Type__c: '',
-        Id: '', DxCPQ__Section_Details__c: ''
+        Id: '', DxCPQ__Section_Details__c: '',
+        DxCPQ__Section_Visibility_Rule__c: ''
     };
 
     isLoaded = false;
@@ -173,11 +212,232 @@ export default class TemplateTableDetails extends LightningElement {
     @track selectedfontcolor = '#8DC141';
     @track selectedbgcolor = '#003366';
     @api sectionrecordid;
-
+    @track ruleCondition = false;
+    @track listOfExistingConditions = [];
+    @track fieldWrapper;
+    ruleExpression;
+    ruleConditions = [];
+    ruleExists = false;
+    allConditions = [];
+    conditionExists = false;
+    conditionsArr = [];
+    mapOfRC = new Map();
 
     connectedCallback() {
         this.getContentVersionData();
+        this.handleRuleWrapperMaking();
+        getAllUserLanguages()
+            .then(result => {
+                this.languages = result.map(option => {
+                    return { label: option.label, value: option.value };
+                });
+            }).catch(error => {
+                let errorMessage = error.message || 'Unknown error message';
+                let tempError = error.toString();
+                createLog({ recordId: '', className: 'TemplateContentDetails LWC Component - connectedCallback()', exceptionMessage: errorMessage, logData: tempError, logType: 'Exception' });
+            });
+        console.log('Languages----', this.languages);
     }
+    /*filter*/
+
+    handleFiltering() {
+        this.template.querySelector('c-modal').show();
+        this.mergeHeaderCell = false;
+        this.showmergefield = false;
+        this.showImageModal = false;
+        this.isHeaderMergeField = false;
+        this.isHeaderCellBgColor = false;
+        this.isClearTable = false;
+        this.isTableColumnSizeChange = false;
+        this.showCellBgColor = false;
+        this.confirmMergeCell = false;
+        this.mergeBodyCell = false;
+        this.ruleCondition = true;
+        this.showTranslateMergeFields = false;
+    }
+
+    closePreviewModal() {
+        this.ruleCondition = false;
+        this.template.querySelector('c-modal').hide();
+    }
+
+    handleRuleWrapperMaking() {
+        if (this.selectedObjectName !== undefined) {
+            getSObjectListFiltering({
+                selectedChildObjectLabel: this.selectedObjectName
+            })
+                .then((result) => {
+                    this.fieldWrapper = result;
+                })
+                .catch((error) => {
+                    console.log('error while Filtering the Object -> handleRuleWrapperMaking', error);
+                });
+        }
+
+    }
+    handleCreateRules(event) {
+        let conditionChild = this.template.querySelector('c-conditioncmp').getConditionDetails();
+        this.ruleExpression = conditionChild.expression;
+        this.createRuleConditionObjects(conditionChild.listOfConditions);
+        let listOfConditions = JSON.stringify(this.ruleConditions);
+        let deleteIds = null;
+        let ruleExp = JSON.stringify(this.ruleExpression);
+        let ruleType = this.visibilityRuleCondition == true ? 'Section Visibility Rule' : '';
+        createRuleCondition({
+            ruleConditions: listOfConditions,
+            ruleExpression: ruleExp,
+            deleteIds: deleteIds,
+            sectionrecordid: this.sectionrecordid,
+            ruleType: ruleType
+        })
+            .then(result => {
+                this.ruleIdCreated = result;
+                this.ruleExists = true;
+                let event = new Object();
+                this.getExistingConditions(event);
+            })
+            .catch(error => {
+                console.log('Error -> createRuleCondition' + JSON.stringify(error));
+            });
+        this.template.querySelector('c-modal').hide();
+    }
+    createRuleConditionObjects(arrayList) {
+        this.hasSpecialCharacter = false;
+        let regExpr = /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]+/;
+        arrayList.forEach(condition => {
+            let tempObj = {};
+            tempObj.Id = condition.Id;
+            tempObj.conditionName = condition.conditionName;
+            tempObj.dataType = condition.dataType;
+            if (condition.operator == '==') {
+                tempObj.operator = '==';
+            } else {
+                tempObj.operator = condition.operator;
+            }
+            tempObj.selectedObject = condition.selectedObject;
+            tempObj.selectedField = condition.selectedField;
+            tempObj.value = condition.value;
+            if (regExpr.test(tempObj.value)) {
+                this.hasSpecialCharacter = true;
+            }
+            tempObj.conditionIndex = condition._index;
+            this.ruleConditions.push(tempObj);
+            if (condition.children && condition.children.length > 0) {
+                condition.children.forEach(child => {
+                    if (child.group && child.group.length > 0) {
+                        this.createRuleConditionObjects(child.group);
+                    }
+                })
+            }
+        })
+
+    }
+    handleRuleUpdates(event) {
+        this.ruleConditions = [];
+        let conditionChild = this.template.querySelector('c-conditioncmp').getConditionDetails();
+        this.createRuleConditionObjects(conditionChild.listOfConditions);
+        let listOfConditions = JSON.stringify(this.ruleConditions);
+        let expression = JSON.stringify(conditionChild.expression);
+        let deleteIds = this.removeDeletedConditions(this.ruleConditions, this.conditionsArr);
+        if (!this.hasSpecialCharacter) {
+            createRuleCondition({
+                ruleConditions: listOfConditions,
+                ruleExpression: expression,
+                deleteIds: deleteIds,
+                sectionrecordid: this.sectionrecordid
+            })
+                .then(result => {
+                    this.ruleExists = true;
+                    this.ruleExpression = expression;
+                    let event = new Object();
+                    this.getExistingConditions(event);
+
+                })
+                .catch(error => {
+                    console.log('createRuleCondition error occurred' + JSON.stringify(error));
+
+                });
+        }
+        this.template.querySelector('c-modal').hide();
+    }
+
+    getExistingConditions(event) {
+        this.mapOfRC = new Map();
+        this.conditionsArr = [];
+        this.conditionExists = false;
+        this.allConditions = [];
+        this.listOfExistingConditions = [];
+        getConditions({ ruleName: this.ruleIdCreated })
+            .then(result => {
+                if (result.length > 0) {
+                    this.conditionsArr = JSON.parse(JSON.stringify(result));
+                    this.lstofactualConditions = this.conditionsArr;
+                    this.conditionsArr.forEach(con => {
+                        this.mapOfRC.set(con.Name, con);
+                    });
+                    if (this.fieldWrapper !== undefined) {
+                        let conditionResult = createRuleConditionHierarcy(this.ruleExpression, this.mapOfRC, this.fieldWrapper);
+                        this.listOfExistingConditions = conditionResult.listOfConditions;
+                        this.selectedGlobalValue = conditionResult.selectedGlobalValue;
+                        this.conditionExists = true;
+                    }
+
+                }
+
+            })
+            .catch(error => {
+                console.log('Apex Call getExistingConditions Erroneous');
+                console.log(error);
+            })
+    }
+    removeDeletedConditions(listOfConditions, receivedConditions) {
+        let existingIds = [];
+        let receivedIds = [];
+        listOfConditions.forEach(con => {
+            if (con.Id) {
+                existingIds.push(con.Id);
+            }
+        })
+        receivedConditions.forEach(con => {
+            receivedIds.push(con.Id);
+        })
+        receivedIds = receivedIds.filter(el => {
+            return !existingIds.includes(el);
+        });
+        return receivedIds;
+    }
+    handleFilterRuleReset() {
+        resetRulesForTemplate({
+            templateRuleId: this.ruleIdCreated
+        })
+            .then(result => {
+                if (result == 'Success') {
+                    this.ruleIdCreated = null;
+                    this.listOfExistingConditions = [];
+                    this.conditionsArr = [];
+                    this.ruleExists = false;
+                    this.filteringCondition = '';
+                    this.ruleConditions = [];
+                    this.ruleCondition = false;
+                    this.handlesectionsave(null);
+                } else {
+                    let Errormsg = new ShowToastEvent({
+                        title: 'Error',
+                        message: 'Reset didn\'t work',
+                        variant: 'Error'
+                    });
+                    this.dispatchEvent(Errormsg);
+                }
+            })
+            .catch(error => {
+                console.log('reset Rules error occurred' + JSON.stringify(error));
+            });
+
+        this.ruleCondition = false;
+        this.template.querySelector('c-modal').hide();
+    }
+
+    /*filter*/
 
     /**
     * Method to get Content version data for Images.
@@ -369,10 +629,12 @@ export default class TemplateTableDetails extends LightningElement {
         this.template.querySelector('c-modal').show();
         this.showmergefield = true;
         this.showImageModal = false;
+        this.ruleCondition = false;
         this.isHeaderMergeField = false;
         this.isHeaderCellBgColor = false;
         this.isClearTable = false;
         this.isTableColumnSizeChange = false;
+        this.showTranslateMergeFields = false;
     }
 
     /**
@@ -383,10 +645,12 @@ export default class TemplateTableDetails extends LightningElement {
         this.template.querySelector('c-modal').show();
         this.showmergefield = true;
         this.showImageModal = false;
+        this.ruleCondition = false;
         this.isHeaderCellBgColor = false;
         this.isHeaderMergeField = true;
         this.isClearTable = false;
         this.isTableColumnSizeChange = false;
+        this.showTranslateMergeFields = false;
     }
 
     /**
@@ -396,9 +660,11 @@ export default class TemplateTableDetails extends LightningElement {
     handleImageadd() {
         this.template.querySelector('c-modal').show();
         this.showmergefield = false;
+        this.ruleCondition = false;
         this.showImageModal = true;
         this.isClearTable = false;
         this.isTableColumnSizeChange = false;
+        this.showTranslateMergeFields = false;
     }
 
     /**
@@ -571,32 +837,32 @@ export default class TemplateTableDetails extends LightningElement {
             let lastColIndex = colcount;
             this.tableheaders.pop();
 
-                this.tablerows.forEach((row, index) => {
-                    let rowcolumns = row.columns;
-                    if (rowcolumns.length > colcount) {
-                        if (rowcolumns[colcount].isRemoved) {
-                            let previousCellIndex = colcount - 1;
-                            while (previousCellIndex >= 0) {
-                                if (rowcolumns[previousCellIndex].isRemoved) {
-                                    previousCellIndex--;
-                                } else {
-                                    let colspan = this.template.querySelector(`[data-id="${rowcolumns[previousCellIndex].id}"]`).closest('td').getAttribute('colspan') || 1;
-                                    if (colspan > 1) {
-                                        this.template.querySelector(`[data-id="${rowcolumns[previousCellIndex].id}"]`).closest('td').setAttribute('colspan', colspan - 1);
-                                    }
-                                    break;
+            this.tablerows.forEach((row, index) => {
+                let rowcolumns = row.columns;
+                if (rowcolumns.length > colcount) {
+                    if (rowcolumns[colcount].isRemoved) {
+                        let previousCellIndex = colcount - 1;
+                        while (previousCellIndex >= 0) {
+                            if (rowcolumns[previousCellIndex].isRemoved) {
+                                previousCellIndex--;
+                            } else {
+                                let colspan = this.template.querySelector(`[data-id="${rowcolumns[previousCellIndex].id}"]`).closest('td').getAttribute('colspan') || 1;
+                                if (colspan > 1) {
+                                    this.template.querySelector(`[data-id="${rowcolumns[previousCellIndex].id}"]`).closest('td').setAttribute('colspan', colspan - 1);
                                 }
+                                break;
                             }
                         }
-                        if (!rowcolumns[colcount].isRemoved) {
-                            rowcolumns.splice(colcount, 1);
-                            this.tablecolumns.pop();
-                        }
                     }
-                });
-                this.unsavedChanges();
-                // console.log('table data after deleting ' + JSON.stringify(this.tablerows))
-            } 
+                    if (!rowcolumns[colcount].isRemoved) {
+                        rowcolumns.splice(colcount, 1);
+                        this.tablecolumns.pop();
+                    }
+                }
+            });
+            this.unsavedChanges();
+            // console.log('table data after deleting ' + JSON.stringify(this.tablerows))
+        }
 
         else {
             this.showErrorToast('Number of Columns Cannot be less than 1');
@@ -730,11 +996,16 @@ export default class TemplateTableDetails extends LightningElement {
                 row.parentNode.removeChild(row);
             });
 
-            if (this.newpage) {
-                this.Recorddetailsnew.DxCPQ__Section_Content__c = "<div style=\"page-break-before : always;\">" + tableclass.innerHTML.replace(/hidden=""/g, '') + "</div>";
-            } else {
-                this.Recorddetailsnew.DxCPQ__Section_Content__c = tableclass.innerHTML.replace(/hidden=""/g, '');
-            }
+            let cleanedHtmlString = this.getCleanedHTMLString();
+
+            this.Recorddetailsnew.DxCPQ__Section_Content__c = this.newpage ? `<div style="page-break-before: always;">${cleanedHtmlString}</div>` : cleanedHtmlString;
+
+            // if (this.newpage) {
+            //     this.Recorddetailsnew.DxCPQ__Section_Content__c = "<div style=\"page-break-before : always;\">" + tableclass.innerHTML.replace(/hidden=""/g, '') + "</div>";
+            // } else {
+            //     this.Recorddetailsnew.DxCPQ__Section_Content__c = tableclass.innerHTML.replace(/hidden=""/g, '');
+            // }
+
             this.Recorddetailsnew.DxCPQ__New_Page__c = this.newpage;
 
             //this.Recorddetailsnew.DxCPQ__Section_Content__c = tableclass.innerHTML.replace(/hidden=""/g, '');
@@ -744,8 +1015,9 @@ export default class TemplateTableDetails extends LightningElement {
             this.Recorddetailsnew.DxCPQ__New_Page__c = this.newPage;
             this.Recorddetailsnew.DxCPQ__Sequence__c = this.rowcount;
             this.Recorddetailsnew.DxCPQ__Type__c = this.sectiontype;
+            this.Recorddetailsnew.DxCPQ__Section_Visibility_Rule__c = this.ruleIdCreated;
             let currecid = this.sectionrecordid;
-            if (currecid != '' && this.sectionrecordid.indexOf('NotSaved') == -1) {
+            if (currecid != '' && this.sectionrecordid.indexOf('TableNotSaved') == -1) {
                 this.Recorddetailsnew.Id = this.sectionrecordid;
             }
 
@@ -767,6 +1039,7 @@ export default class TemplateTableDetails extends LightningElement {
                                     this.savedRecordID
                             });
                             this.dispatchEvent(firecustomevent);
+                            this.translateEnabled = false;
                         }
                         else {
                             this.showErrorToast('Error Occured. Please Check the Latest Transaction Log');
@@ -777,14 +1050,24 @@ export default class TemplateTableDetails extends LightningElement {
                     })
             }
             else {
-                let Errormsg = new ShowToastEvent({
-                    title: 'Error',
-                    message: this.popUpMessage.TEMPLATETABLE_DETAILS12,
-                    variant: 'Error',
-                });
-                this.dispatchEvent(Errormsg);
+                this.showErrorToast(this.popUpMessage.TEMPLATETABLE_DETAILS12);
             }
         }
+    }
+
+    getCleanedHTMLString() {
+        let tableclass = this.template.querySelector('.tableMainClass');
+        let parser = new DOMParser();
+        let existingHtmlString = tableclass.innerHTML.replace(/hidden=""/g, '');
+        let domConverted = parser.parseFromString(existingHtmlString, 'text/html');
+
+        domConverted.querySelectorAll('th, td').forEach(cell => {
+            if (cell.firstChild && cell.firstChild.tagName === 'LIGHTNING-INPUT-RICH-TEXT') {
+                cell.removeChild(cell.firstChild);
+            }
+        });
+
+        return new XMLSerializer().serializeToString(domConverted.body.firstChild);
     }
 
     /**
@@ -849,15 +1132,27 @@ export default class TemplateTableDetails extends LightningElement {
             DxCPQ__Sequence__c: 0,
             DxCPQ__Type__c: '',
             Id: '',
+            DxCPQ__Section_Visibility_Rule__c: ''
         };
+        this.ruleIdCreated = null;
+        this.ruleCondition = false;
+        this.listOfExistingConditions = [];
         this.clauseId = '';
+        this.ruleExpression = '';
+        this.ruleConditions = [];
+        this.ruleExists = false;
+        this.allConditions = [];
+        this.conditionExists = false;
+        this.conditionsArr = [];
+        this.mapOfRC = new Map();
+        this.Recorddetailsnew.DxCPQ__Section_Visibility_Rule__c = '';
         this.template.querySelectorAll('lightning-input-rich-text').forEach(element => {
             if (element.value != null) {
                 element.value = '';
             }
         });
 
-        this.template.querySelectorAll('div[data-id]').forEach(element => {
+        this.template.querySelectorAll('div.hiddencells').forEach(element => {
             if (element.value != null) {
                 element.value = '';
             }
@@ -882,6 +1177,7 @@ export default class TemplateTableDetails extends LightningElement {
         this.isOutsideBorders = false;
         this.isOutsideThickBorders = false;
         this.isOutsideThickAllBorders = false;
+        this.showTranslateMergeFields = false;
 
         this.noBordersIcon = '';
         this.allBordersIcon = '';
@@ -922,6 +1218,7 @@ export default class TemplateTableDetails extends LightningElement {
         this.tableDisplayed = true;
         this.showtablecontent = true;
         this.newPage = false;
+        this.showTranslateMergeFields = false;
 
         this.template.querySelectorAll('lightning-input-rich-text').forEach(element => {
             element.value = '';
@@ -961,6 +1258,7 @@ export default class TemplateTableDetails extends LightningElement {
             .then(result => {
                 if (result != null) {
                     this.Recorddetailsnew = { ...this.Recorddetailsnew, ...result };
+                    this.Recorddetailsnew.DxCPQ__Section_Visibility_Rule__c = result.DxCPQ__Section_Visibility_Rule__c;
                     let parsedJson = JSON.parse(this.Recorddetailsnew.DxCPQ__Section_Details__c);
 
                     parsedContent = parsedJson.sectionInfo;
@@ -979,12 +1277,33 @@ export default class TemplateTableDetails extends LightningElement {
                     this.isColWidthChangedCheck = parsedJson.colWidthChanged;
                     this.selectedBorderStyle = parsedJson.borderstyle;
                     this.tablehasdata = true;
-
+                    this.translateEnabled = this.tablehasdata ? false : true;
                     this.newPage = parsedJson.newPage;
                     setTimeout(() => {
                         this.template.querySelector('[data-id="newPageTable"]').checked = parsedJson.newPage;
                     });
-
+                    if (result.DxCPQ__Section_Visibility_Rule__c != null && result.DxCPQ__Section_Visibility_Rule__c != '') {
+                        this.Recorddetailsnew.DxCPQ__Section_Visibility_Rule__c = result.DxCPQ__Section_Visibility_Rule__c;
+                        this.ruleExpression = result.DxCPQ__Section_Visibility_Rule__r.DxCPQ__Rule_Expression__c;
+                    } else {
+                        this.Recorddetailsnew.DxCPQ__Section_Visibility_Rule__c = '';
+                    }
+                    if (result.DxCPQ__Section_Visibility_Rule__c != null) {
+                        this.ruleIdCreated = result.DxCPQ__Section_Visibility_Rule__c;
+                        this.ruleExists = true;
+                    } else {
+                        this.ruleIdCreated = null;
+                        this.listOfExistingConditions = [];
+                        this.conditionsArr = [];
+                        this.ruleExists = false;
+                        this.filteringCondition = '';
+                    }
+                    if (this.ruleIdCreated != null && this.ruleIdCreated != '') {
+                        this.handleRuleWrapperMaking();
+                        let event = new Object();
+                        this.getExistingConditions(event);
+                        this.ruleExists = true;
+                    }
                     this.handletablecreate();
                 }
             })
@@ -1006,7 +1325,7 @@ export default class TemplateTableDetails extends LightningElement {
                 }
             })
             .then(() => {
-               // console.log('parsed content ' + JSON.stringify(parsedContent));
+                // console.log('parsed content ' + JSON.stringify(parsedContent));
 
                 this.template.querySelectorAll('lightning-input-rich-text').forEach(element => {
 
@@ -1349,6 +1668,7 @@ export default class TemplateTableDetails extends LightningElement {
         this.isHeaderMergeField = false;
         this.isHeaderCellBgColor = false;
         this.isTableColumnSizeChange = false;
+        this.showTranslateMergeFields = false;
     }
 
     /**
@@ -1397,6 +1717,7 @@ export default class TemplateTableDetails extends LightningElement {
         this.selectedHbgColor = '';
         this.selectedHFontColor = '';
         this.tableDisplayed = false;
+        this.ruleCondition = false;
         this.tableOnLoad = true;
         this.showtablecontent = false;
         this.isSerialNumberCheck = false;
@@ -1407,6 +1728,8 @@ export default class TemplateTableDetails extends LightningElement {
         this.isOutsideBorders = false;
         this.isOutsideThickBorders = false;
         this.isOutsideThickAllBorders = false;
+        this.showTranslateMergeFields = false;
+
     }
 
     /**
@@ -1414,14 +1737,14 @@ export default class TemplateTableDetails extends LightningElement {
     */
     handleMergeRightCell(event) {
         if (this.mergeHeaderCell === true) {
-          //  console.log('selected header ' + JSON.stringify(this.selectedHeader));
+            //  console.log('selected header ' + JSON.stringify(this.selectedHeader));
             let selectedDiv = this.template.querySelector(`[data-head="${this.selectedHeader}"]`);
             let selectedTh = selectedDiv.closest('th');
 
             let columnIndex = Array.from(selectedTh.parentElement.children).indexOf(selectedTh);
-          //  console.log('col index ' + columnIndex);
+            //  console.log('col index ' + columnIndex);
             let lastColumnIndex = this.tableheaders.length - 1;
-          //  console.log('last col index ' + lastColumnIndex);
+            //  console.log('last col index ' + lastColumnIndex);
 
             if (columnIndex < lastColumnIndex) {
                 let currentTh = selectedTh;
@@ -1461,7 +1784,7 @@ export default class TemplateTableDetails extends LightningElement {
                                 'cellColspan': newColspan
                             });
                         }
-                       // console.log('div content head merge ' + JSON.stringify(this.divContentArray));
+                        // console.log('div content head merge ' + JSON.stringify(this.divContentArray));
                     } else {
                         this.showErrorToast('Cannot merge cells beyond column boundary');
                     }
@@ -1543,9 +1866,11 @@ export default class TemplateTableDetails extends LightningElement {
             }
         }
         this.template.querySelector('c-modal').hide();
+        this.ruleCondition = false;
         this.confirmMergeCell = false;
         this.mergeBodyCell = false;
         this.mergeHeaderCell = false;
+        this.showTranslateMergeFields = false;
     }
 
 
@@ -1573,6 +1898,7 @@ export default class TemplateTableDetails extends LightningElement {
 
     handleMergeCellClick() {
         this.template.querySelector('c-modal').show();
+        this.ruleCondition = false;
         this.mergeHeaderCell = false;
         this.showmergefield = false;
         this.showImageModal = false;
@@ -1583,6 +1909,7 @@ export default class TemplateTableDetails extends LightningElement {
         this.showCellBgColor = false;
         this.confirmMergeCell = true;
         this.mergeBodyCell = true;
+        this.showTranslateMergeFields = false;
     }
 
     handleMergeHeaderCellClick(event) {
@@ -1590,6 +1917,7 @@ export default class TemplateTableDetails extends LightningElement {
         this.mergeBodyCell = false;
         //this.selectedThValue = event.target.closest('th');
         this.showmergefield = false;
+        this.ruleCondition = false;
         this.showImageModal = false;
         this.isHeaderMergeField = false;
         this.isHeaderCellBgColor = false;
@@ -1598,6 +1926,7 @@ export default class TemplateTableDetails extends LightningElement {
         this.isTableColumnSizeChange = false;
         this.confirmMergeCell = true;
         this.mergeHeaderCell = true;
+        this.showTranslateMergeFields = false;
     }
 
     cancelMergeCell() {
@@ -1606,6 +1935,8 @@ export default class TemplateTableDetails extends LightningElement {
         this.confirmMergeCell = false;
         this.mergeBodyCell = false;
         this.mergeHeaderCell = false;
+        this.ruleCondition = false;
+        this.showTranslateMergeFields = false;
     }
 
     /**
@@ -1778,6 +2109,7 @@ export default class TemplateTableDetails extends LightningElement {
         this.isHeaderMergeField = false;
         this.isHeaderCellBgColor = false;
         this.isTableColumnSizeChange = false;
+        this.showTranslateMergeFields = false;
     }
 
     handleHeaderCellbgColor(event) {
@@ -1790,6 +2122,7 @@ export default class TemplateTableDetails extends LightningElement {
         this.isHeaderMergeField = false;
         this.isHeaderCellBgColor = true;
         this.isTableColumnSizeChange = false;
+        this.showTranslateMergeFields = false;
     }
 
     handleCellBgColorChange(event) {
@@ -1820,7 +2153,7 @@ export default class TemplateTableDetails extends LightningElement {
 
                 // Update divContentArray
                 let key = elm1.dataset.id;
-               // console.log('key while inserting ' + key);
+                // console.log('key while inserting ' + key);
                 let divContent = elm1 ? elm1.innerHTML : '';
                 let cellColspan = selectedTd ? selectedTd.colSpan : 1;
                 let existingIndex = this.divContentArray.findIndex(item => item['data-id'] === key);
@@ -1839,7 +2172,7 @@ export default class TemplateTableDetails extends LightningElement {
                         'cellColspan': cellColspan
                     });
                 }
-               // console.log('div content array color insert ' + JSON.stringify(this.divContentArray));
+                // console.log('div content array color insert ' + JSON.stringify(this.divContentArray));
             } else {
                 let elm2 = this.template.querySelector(`[data-head="${this.selectedHeader}"]`);
                 let selectedHeaderTd = elm2.closest('th');
@@ -1865,7 +2198,7 @@ export default class TemplateTableDetails extends LightningElement {
                         'cellColspan': cellColspan
                     });
                 }
-               // console.log('div content array color insert header ' + JSON.stringify(this.divContentArray));
+                // console.log('div content array color insert header ' + JSON.stringify(this.divContentArray));
             }
             this.template.querySelector('c-modal').hide();
         } catch (error) {
@@ -1895,5 +2228,323 @@ export default class TemplateTableDetails extends LightningElement {
         let saveEvent = new CustomEvent('datasaved', { detail: false });
         this.dispatchEvent(saveEvent);
     }
+
+
+    //code by Bhavya for document translations
+    closeTranslateModal() {
+        if (this.isTranslateModalOpen) {
+            this.translatedRecords = [];
+            this.transRecordNameArray = [];
+            this.extractedWords = [];
+            this.isTranslateModalOpen = false;
+        }
+        this.template.querySelector('c-modal').hide();
+    }
+
+    extractWordsFromArray(divContentArray) {
+        let extractedWords = [];
+        let regex = /<<([^>]+?)>>|({![^}]+?})/g;
+        divContentArray.forEach(div => {
+            let decodedContent = div.Content.replace(/&lt;/g, '<').replace(/&gt;/g, '>');
+            let m;
+            while ((m = regex.exec(decodedContent)) !== null) {
+                if (m.index === regex.lastIndex) {
+                    regex.lastIndex++;
+                }
+                if (m[1]) {
+                    this.extractedWords.push(m[1]);
+                } else if (m[2]) {
+                    this.extractedWords.push(m[2]);
+                }
+            }
+        });
+        return this.extractedWords;
+    }
+
+    handleTranslate(event) {
+        this.extractedWords = [];
+        console.log('tablerows data --> ', this.tablerows);
+        let extractedWords = this.extractWordsFromArray(this.divContentArray);
+        console.log('Extracted words: ', extractedWords);
+        //this.extractWords();
+        this.isTranslateModalOpen = true;
+
+        this.ruleCondition = false;
+        this.mergeHeaderCell = false;
+        this.showmergefield = false;
+        this.showImageModal = false;
+        this.isHeaderMergeField = false;
+        this.isHeaderCellBgColor = false;
+        this.isClearTable = false;
+        this.isTableColumnSizeChange = false;
+        this.showCellBgColor = false;
+        this.confirmMergeCell = false;
+        this.mergeBodyCell = false;
+        this.showTranslateMergeFields = false;
+
+        this.template.querySelector('c-modal').show();
+        currectUserLang()
+            .then(result => {
+                this.selectedLanguage = this.getLanguageValueByLabel(result);
+                this.transRecordsRetrive();
+            })
+            .catch(error => {
+                console.log('Error--', error.message);
+                let errorMessage = error.message || 'Unknown error message';
+                let tempError = error.toString();
+                createLog({ recordId: '', className: 'TemplateContentDetails LWC Component - connectedCallback()', exceptionMessage: errorMessage, logData: tempError, logType: 'Exception' });
+            });
+    }
+
+    getLanguageValueByLabel(label) {
+        let language = this.languages.find(lang => lang.label === label);
+        return language ? language.value : null;
+    }
+
+    transRecordsRetrive() {
+        selectedLangMethod({ language: this.selectedLanguage, extractedWords: JSON.stringify(this.extractedWords), docTempId: this.documenttemplaterecord.Id })
+            .then(result => {
+                if (result && result.length > 0) {
+                    this.translatedRecords = [];
+                    this.transRecordNameArray = [];
+                    result.forEach(record => {
+                        // Iterate over each record and push it into translatedRecords array
+                        this.transRecordNameArray.push(record.Name);
+                        this.translatedRecords.push({
+                            'Name': record.Name,
+                            'DxCPQ__FieldValue__c': record.DxCPQ__FieldValue__c,
+                            'DxCPQ__Translated_Value__c': record.DxCPQ__Translated_Value__c,
+                            'Id': record.Id
+                        });
+                    });
+                    if (this.transRecordNameArray.length != this.extractedWords.length) {
+                        this.extractedWords.forEach((extraxtElem) => {
+                            if (!this.transRecordNameArray.includes(extraxtElem)) {
+                                this.translatedRecords.push({
+                                    'Name': extraxtElem,
+                                    'DxCPQ__FieldValue__c': '',
+                                    'DxCPQ__Translated_Value__c': '',
+                                    'Id': ''
+                                });
+                            }
+                        })
+                    }
+                    //this.selectedLanguage = this.translatedRecords[0].DxCPQ__Language__c;
+                } else {
+                    this.translatedRecords = [];
+                    if (this.extractedWords.length > 0) {
+                        this.extractedWords.forEach((extraxtElem) => {
+                            this.translatedRecords.push({
+                                'Name': extraxtElem,
+                                'DxCPQ__FieldValue__c': '',
+                                'DxCPQ__Translated_Value__c': '',
+                                'Id': ''
+                            });
+                        })
+                    } else {
+                        this.translatedRecords = this.dataArray;
+                    }
+                }
+                console.log('this.translatedrecords --> ', this.translatedRecords);
+            })
+            .catch(error => {
+                let errorMessage = error.message || 'Unknown error message';
+                let tempError = error.toString();
+                createLog({ recordId: '', className: 'TemplateContentDetails LWC Component - connectedCallback()', exceptionMessage: errorMessage, logData: tempError, logType: 'Exception' });
+            });
+    }
+
+    handleClick() {
+        let newDataArray = {
+            'Name': '',
+            'DxCPQ__FieldValue__c': '',
+            'DxCPQ__Translated_Value__c': '',
+            'Id': this.uniqueIdentifier
+        };
+        this.translatedRecords.push(newDataArray);
+    }
+
+    handleRemoveRow(event) {
+        event.preventDefault();
+        let indexVal = event.target.dataset.index;
+        //let rowDelete= false;
+        /* let deleteData = [{
+            'FieldName': this.translatedRecords[indexVal].Name,
+            'FieldValue': this.translatedRecords[indexVal].DxCPQ__FieldValue__c,
+            'TranslatedValue': this.translatedRecords[indexVal].DxCPQ__Translated_Value__c,
+            'Id': this.translatedRecords[indexVal].Id
+        }]; */
+
+        let id = this.translatedRecords[indexVal].Id;
+        let regex = /^([a-zA-Z0-9_-]){18}$/;
+
+        if (regex.test(id)) {
+            deleteMethod({ deleteRecordId: id })
+                .then(result => {
+                    if (result) {
+                        this.translatedRecords.splice(indexVal, 1);
+                        this.translatedRecords = [...this.translatedRecords];
+                        this.showToast('Success', 'Record deleted successfully', 'success');
+                    } else {
+                        this.showToast('Error', 'Error in deleting records, please check the logs', 'error');
+                    }
+                }).catch(error => {
+                    this.showToast('Error', 'An error occurred while deliting the record', 'error');
+                    let errorMessage = error.message || 'Unknown error message';
+                    let tempError = error.toString();
+                    createLog({ recordId: '', className: 'TemplateContentDetails LWC Component - connectedCallback()', exceptionMessage: errorMessage, logData: tempError, logType: 'Exception' });
+                });
+        } else {
+            this.translatedRecords.splice(indexVal, 1);
+            this.translatedRecords = [...this.translatedRecords];
+        }
+    }
+
+    handleLanguageChange(event) {
+        this.selectedLanguage = event.detail.value;
+        this.transRecordsRetrive();
+    }
+
+    handleCellOneInputChange(event) {
+        let indexVal = parseInt(event.target.dataset.index);
+        // Check if indexVal is valid
+        if (isNaN(indexVal) || indexVal < 0 || indexVal >= this.translatedRecords.length) {
+            console.error('Invalid index:', indexVal);
+            return;
+        }
+        this.translatedRecords[indexVal].Name = event.target.value;
+    }
+
+    handleCellTwoInputChange(event) {
+        let indexVal = parseInt(event.target.dataset.index);
+        if (isNaN(indexVal) || indexVal < 0 || indexVal >= this.translatedRecords.length) {
+            console.error('Invalid index:', indexVal);
+            return;
+        }
+        this.translatedRecords[indexVal].DxCPQ__FieldValue__c = event.target.value;
+    }
+
+    handleCellThreeInputChange(event) {
+        let indexVal = parseInt(event.target.dataset.index);
+        if (isNaN(indexVal) || indexVal < 0 || indexVal >= this.translatedRecords.length) {
+            console.error('Invalid index:', indexVal);
+        }
+        this.translatedRecords[indexVal].DxCPQ__Translated_Value__c = event.target.value;
+    }
+
+    handleSave() {
+        this.translatedRecords.forEach(record => {
+            if (record.Name === null || record.Name === '') {
+                this.showToast('Error', 'Some of the row(s) Name has no values', 'error');
+            }
+        });
+
+        let fieldNameRequire = true;
+        this.translatedRecords.forEach(record => {
+            if (!record.Name) {
+                fieldNameRequire = false;
+            }
+        });
+
+        if (fieldNameRequire) {
+            this.translatedRecords.forEach(record => {
+                // Rename DxCPQ__FieldValue__c to FieldValue
+                if (record.hasOwnProperty('DxCPQ__FieldValue__c')) {
+                    record.FieldValue = record['DxCPQ__FieldValue__c'];
+                    delete record['DxCPQ__FieldValue__c'];
+                }
+
+                // Rename DxCPQ__Translated_Value__c to TranslatedValue
+                if (record.hasOwnProperty('DxCPQ__Translated_Value__c')) {
+                    record.TranslatedValue = record['DxCPQ__Translated_Value__c'];
+                    delete record['DxCPQ__Translated_Value__c'];
+                }
+            });
+
+            createUpdateMethod({
+                jsonStringData: JSON.stringify(this.translatedRecords),
+                language: this.selectedLanguage,
+                sectionId: this.sectionrecordid
+            })
+                .then(result => {
+                    this.showToast('Success', 'Record saved successfully', 'success');
+                    this.isTranslateModalOpen = false;
+                    this.translatedRecords = [];
+                })
+                .catch(error => {
+                    this.showToast('Error', 'An error occurred while saving the record', 'error');
+                    let errorMessage = error.message || 'Unknown error message';
+                    let tempError = error.toString();
+                    createLog({ recordId: '', className: 'TemplateContentDetails LWC Component - connectedCallback()', exceptionMessage: errorMessage, logData: tempError, logType: 'Exception' });
+                });
+        }
+
+        /* else{
+          this.showToast('Error', 'Please fill Field Names in all rows', 'error');
+        } */
+        this.template.querySelector('c-modal').hide();
+    }
+
+
+    showToast(title, message, variant) {
+        let toastEvent = new ShowToastEvent({
+            title: title,
+            message: message,
+            variant: variant
+        });
+        this.dispatchEvent(toastEvent);
+    }
+
+    handlerowlevelmerge(event) {
+        this.selectedRowIndex = event.currentTarget.dataset.index;
+        this.isTranslateModalOpen = false;
+        this.rowlevelmerge = true;
+        this.showTranslateMergeFields = true;
+        this.template.querySelector('c-modal').show();
+    }
+
+    // get showTranslateMergeFields(){
+    //     return (this.isTranslateModalOpen === false && this.transalationMergeField === true)
+    // }
+
+    getMergeFieldTranslate() {
+        let mergeField = this.template.querySelector('c-dx-lookup-fields-displaycmp').getMergeField();
+        if (mergeField != undefined) {
+        this.mergefieldname = '{!' + this.selectedObjectName + '.' + mergeField + '}';
+        if(this.rowlevelmerge){
+            //let rowIndex = this.selectedRowIndex;
+                this.isTranslateModalOpen = true;
+                let updatedRecords = [...this.translatedRecords];
+                    updatedRecords[this.selectedRowIndex] = {
+                        ...updatedRecords[this.selectedRowIndex],
+                        Name: this.mergefieldname
+                    };
+                    this.translatedRecords = updatedRecords;
+                //this.translatedRecords[this.selectedRowIndex].Name = this.mergefieldname; // Update the "Field Label" column
+                this.rowlevelmerge = false;
+        }
+        else{
+            this.richtextVal += this.mergefieldname;
+            this.template.querySelector('c-modal').hide();
+        }
+        this.selectedMergefields.push(this.mergefieldname);
+        }
+    }
+
+  getMergeFieldCopy() {
+    let mergeField = this.template.querySelector('c-dx-lookup-fields-displaycmp').getMergeField();
+    if (mergeField != undefined) {
+      this.mergefieldname = '{!' + this.selectedObjectName + '.' + mergeField + '}';
+      let tag = document.createElement('textarea');
+      tag.setAttribute('id', 'input_test_id');
+      tag.value = this.mergefieldname;
+      document.getElementsByTagName('body')[0].appendChild(tag);
+      document.getElementById('input_test_id').select();
+      document.execCommand('copy');
+      document.getElementById('input_test_id').remove();
+      this.selectedMergefields.push(this.mergefieldname);
+    }
+    this.template.querySelector('c-modal').hide();
+  }
 
 }

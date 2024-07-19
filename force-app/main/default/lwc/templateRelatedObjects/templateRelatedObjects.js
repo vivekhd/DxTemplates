@@ -46,9 +46,11 @@ export default class TemplateRelatedObjects extends NavigationMixin(LightningEle
       DxCPQ__Type__c: '',
       Id: '',
       DxCPQ__RuleId__c: '',
+      DxCPQ__Section_Visibility_Rule__c:''
   };
 
   ruleCondition = false;
+  visibilityRuleCondition = false;
   selectedTableRow;
   childobjects;
   changedHeaders = [];
@@ -75,12 +77,19 @@ export default class TemplateRelatedObjects extends NavigationMixin(LightningEle
   @track renderedData = false;
 
   // Filtering params
+   ruleModalLabel='';
   listOfExistingConditions = [];
+  visibilityListOfExistingConditions = [];
   conditionsArr;
+   visibilityConditionsArr;
   selectedGlobalValue;
+  visibilitySelectedGlobalValue;
   ruleExpression;
+  visibilityRuleExpression;
   ruleConditions = [];
+  visibilityRuleConditions = [];
   mapOfRC;
+  visibilityLstofactualConditions;
   conditionsArr;
   lstofactualConditions;
   conditionExists = false;
@@ -88,6 +97,7 @@ export default class TemplateRelatedObjects extends NavigationMixin(LightningEle
   listOfExistingConditions = [];
   ruleIdCreated = '';
   ruleExists = false;
+  visibilityRuleExists = false;
   hasSpecialCharacter = false;
   relationName = new Map();
   @track formats = ['font'];
@@ -583,12 +593,17 @@ export default class TemplateRelatedObjects extends NavigationMixin(LightningEle
       this.filteringCondition = '';
       this.mapOfRC = new Map();
       this.conditionsArr = [];
+      this.visibilityConditionsArr = [];
       this.conditionExists = false;
+      this.visibilityConditionExists = false;
       this.allConditions = [];
       this.listOfExistingConditions = [];
+      this.visibilityListOfExistingConditions = [];
       this.ruleIdCreated = '';
+      this.visibilityRuleIdCreated = '';
       this.hasSpecialCharacter = false;
       this.ruleExists = false;
+      this.visibilityRuleExists = false;
 
       // reset values for styles
       this.selectedHFontColor = '';
@@ -642,6 +657,7 @@ export default class TemplateRelatedObjects extends NavigationMixin(LightningEle
       this.getGroupingValues = [];
       this.newPage = false;
       this.ruleExists = false;
+      this.visibilityRuleExists = false;
       this.changedHeaders = [];
 
       gettemplatesectiondata({
@@ -657,12 +673,19 @@ export default class TemplateRelatedObjects extends NavigationMixin(LightningEle
                   this.Recorddetailsnew.DxCPQ__New_Page__c = result.DxCPQ__New_Page__c;
                   this.Recorddetailsnew.DxCPQ__DisplaySectionName__c = result.DxCPQ__DisplaySectionName__c;
                   this.Recorddetailsnew.DxCPQ__Section_Content__c = result.DxCPQ__Section_Content__c;
+                  this.Recorddetailsnew.DxCPQ__Section_Visibility_Rule__c = result.DxCPQ__Section_Visibility_Rule__c;
 
                   if (result.DxCPQ__RuleId__c != null && result.DxCPQ__RuleId__c != '') {
                       this.Recorddetailsnew.DxCPQ__RuleId__c = result.DxCPQ__RuleId__r.Id;
                       this.ruleExpression = result.DxCPQ__RuleId__r.DxCPQ__Rule_Expression__c;
                   } else {
                       this.Recorddetailsnew.DxCPQ__RuleId__c = '';
+                  }
+                  if (result.DxCPQ__Section_Visibility_Rule__c != null && result.DxCPQ__Section_Visibility_Rule__c != '') {
+                      this.Recorddetailsnew.DxCPQ__Section_Visibility_Rule__c = result.DxCPQ__Section_Visibility_Rule__c;
+                      this.visibilityRuleExpression = result.DxCPQ__Section_Visibility_Rule__r.DxCPQ__Rule_Expression__c;
+                  } else {
+                      this.Recorddetailsnew.DxCPQ__Section_Visibility_Rule__c = '';
                   }
                   this.sectiontype = result.DxCPQ__Type__c;
 
@@ -684,6 +707,24 @@ export default class TemplateRelatedObjects extends NavigationMixin(LightningEle
                       this.getExistingConditions(event);
                       this.ruleExists = true;
                   }
+                  if (result.DxCPQ__Section_Visibility_Rule__c != null) {
+                      this.visibilityRuleIdCreated = result.DxCPQ__Section_Visibility_Rule__c;
+                      this.visibilityRuleExists = true;
+                  } else {
+                      this.visibilityRuleIdCreated = null;
+                      this.visibilityListOfExistingConditions = [];
+                      this.visibilityConditionsArr = [];
+                      this.visibilityRuleExists = false;
+                      this.visibilityFilteringCondition = '';
+                  }
+
+                  if (this.visibilityRuleIdCreated != null && this.visibilityRuleIdCreated != '') {
+                      this.handleRuleWrapperMaking();
+                      let event = new Object();
+                      this.getExistingConditions(event);
+                      this.visibilityRuleExists = true;
+                  }
+
                   this.newPage = result.DxCPQ__New_Page__c;
 
                   if (result.DxCPQ__Section_Content__c != null && result.DxCPQ__Section_Content__c != undefined) {
@@ -836,6 +877,9 @@ export default class TemplateRelatedObjects extends NavigationMixin(LightningEle
                       // Filtering Conditions On Load
                       if (this.ruleIdCreated != '') {
                           this.filteringCondition = parsedJson.whereClause.substring(1, parsedJson.whereClause.length - 1);
+                      }
+                       if (this.visibilityRuleIdCreated != '') {
+                          this.visibilityFilteringCondition = parsedJson.whereClause.substring(1, parsedJson.whereClause.length - 1);
                       }
 
                       // Serial Number On Load
@@ -1098,11 +1142,20 @@ export default class TemplateRelatedObjects extends NavigationMixin(LightningEle
           var obj = {};
 
           if (this.ruleIdCreated != '' && this.ruleIdCreated != null) {
+              this.ruleCondition = true;
               this.getExistingConditions(obj);
               this.filteringCondition = this.handleFilterClauseMaking(this.ruleExpression, this.lstofactualConditions);
           } else {
               this.filteringCondition = '';
           }
+           if (this.visibilityRuleIdCreated != '' && this.visibilityRuleIdCreated != null) {
+              this.visibilityRuleCondition = true;
+              this.getExistingConditions(obj);
+              this.visibilityFilteringCondition = this.handleFilterClauseMaking(this.visibilityRuleExpression, this.visibilityLstofactualConditions);
+          } else {
+              this.visibilityFilteringCondition = '';
+          }
+          this.ruleCondition = this.visibilityRuleCondition = false;
 
           if (this.selChildObjName != undefined) {
               if (this.childobjects.hasOwnProperty(this.selChildObjName)) {
@@ -1180,6 +1233,7 @@ export default class TemplateRelatedObjects extends NavigationMixin(LightningEle
 
           // Filtering Conditions
           this.Recorddetailsnew.DxCPQ__RuleId__c = this.ruleIdCreated;
+          this.Recorddetailsnew.DxCPQ__Section_Visibility_Rule__c = this.visibilityRuleIdCreated;
 
           if (this.Recorddetailsnew.Name != '' && this.Recorddetailsnew.Name != null) {
               saveDocumentTemplateSectionDetails({
@@ -1817,12 +1871,15 @@ export default class TemplateRelatedObjects extends NavigationMixin(LightningEle
   /*Closeing the modal box for filter rules creation*/
   closePreviewModal() {
       this.ruleCondition = false;
+      this.visibilityRuleCondition = false;
       this.template.querySelector('c-modal').hide();
   }
 
   /* this is to show the rules popup window on selecting the fileter label */
   handleFiltering(event) {
-      this.ruleCondition = true;
+      this.ruleCondition = event.target.title == 'Apply Filter(s)' ? true: false;;
+      this.visibilityRuleCondition = event.target.title == 'Apply Visibility Filter(s)' ? true: false;
+      this.ruleModalLabel = event.target.title;
       this.template.querySelector('c-modal').show();
       this.unsavedChanges();
   }
@@ -1840,6 +1897,20 @@ export default class TemplateRelatedObjects extends NavigationMixin(LightningEle
           console.log('error while Filtering the Object -> handleRuleWrapperMaking', error);
       });
     }
+    if (this.selectedObjectName != undefined){
+        getSObjectListFiltering({
+        selectedChildObjectLabel: this.selectedObjectName
+        })
+      .then((result) => {
+          //this.visibilityRuleFieldWrapper = this.visibilityRuleCondition==true? result:this.visibilityRuleFieldWrapper;
+          //this.fieldWrapper = this.ruleCondition ? result: this.fieldWrapper;
+          this.visibilityRuleFieldWrapper = result;
+          //this.fieldWrapper = result;
+      })
+      .catch((error) => {
+          console.log('error while Filtering the Object -> handleRuleWrapperMaking for visibility- ', error);
+      });
+    }
   }
 
   /*
@@ -1847,23 +1918,31 @@ export default class TemplateRelatedObjects extends NavigationMixin(LightningEle
   */
   handleCreateRules(event) {
       const conditionChild = this.template.querySelector('c-conditioncmp').getConditionDetails();
-      this.ruleExpression = conditionChild.expression;
+      this.ruleExpression = this.ruleCondition == true?  conditionChild.expression: this.ruleExpression;
+      this.visibilityRuleExpression = this.visibilityRuleCondition== true? conditionChild.expression: this.visibilityRuleExpression;
 
       this.createRuleConditionObjects(conditionChild.listOfConditions);
-      let listOfConditions = JSON.stringify(this.ruleConditions);
+      let listOfConditions = this.ruleCondition == true? JSON.stringify(this.ruleConditions): JSON.stringify(this.visibilityRuleConditions);
 
       let deleteIds = null;
-      let ruleExp = JSON.stringify(this.ruleExpression);
+      let ruleExp = this.ruleCondition == true? JSON.stringify(this.ruleExpression): JSON.stringify(this.visibilityRuleExpression);
+      let ruleType = this.visibilityRuleCondition == true? 'Section Visibility Rule': '';
       createRuleCondition({
               ruleConditions: listOfConditions,
               ruleExpression: ruleExp,
               deleteIds: deleteIds,
-              sectionrecordid: this.sectionrecordid
+              sectionrecordid: this.sectionrecordid,
+              ruleType: ruleType
           })
           .then(result => {
-              this.ruleIdCreated = result;
-              this.ruleExists = true;
-
+               if (this.ruleCondition){
+                  this.ruleIdCreated = result;
+                  this.ruleExists = true;
+              }
+              else if (this.visibilityRuleCondition){
+                  this.visibilityRuleIdCreated = result;
+                  this.visibilityRuleExists = true;
+              }
               let event = new Object();
               this.getExistingConditions(event);
           })
@@ -1920,7 +1999,13 @@ export default class TemplateRelatedObjects extends NavigationMixin(LightningEle
               this.hasSpecialCharacter = true;
           }
           tempObj.conditionIndex = condition._index;
-          this.ruleConditions.push(tempObj);
+          if (this.ruleCondition){
+              this.ruleConditions.push(tempObj);
+          }
+          else if (this.visibilityRuleCondition){
+              this.visibilityRuleConditions.push(tempObj);
+          }
+          
           if (condition.children && condition.children.length > 0) {
               condition.children.forEach(child => {
                   if (child.group && child.group.length > 0) {
@@ -1932,21 +2017,27 @@ export default class TemplateRelatedObjects extends NavigationMixin(LightningEle
   }
 
   handleFilterRuleReset() {
-
+let ruleIdtoReset = this.ruleCondition == true ? this.ruleIdCreated: this.visibilityRuleIdCreated;
       resetRulesForTemplate({
-              templateRuleId: this.ruleIdCreated
+              templateRuleId: ruleIdtoReset
           })
           .then(result => {
               if (result == 'Success') {
 
-                  this.ruleIdCreated = null;
+                   this.ruleIdCreated = this.ruleCondition == true ? null: this.ruleIdCreated;
+                  this.visibilityRuleIdCreated = this.visibilityRuleCondition == true ? null: this.visibilityRuleIdCreated;
 
-                  this.listOfExistingConditions = [];
+                 this.listOfExistingConditions = this.ruleCondition == true ? [] : this.listOfExistingConditions;
+                  this.visibilityListOfExistingConditions = this.visibilityRuleCondition == true ? [] : this.visibilityListOfExistingConditions;
                   this.conditionsArr = [];
-                  this.ruleExists = false;
-                  this.filteringCondition = '';
+                   this.visibilityConditionsArr = this.visibilityConditionsArr;
+                  this.ruleExists = this.ruleCondition == true ? false: this.ruleExists;
+                  this.visibilityRuleExists = this.visibilityRuleCondition == true ? false: this.visibilityRuleExists;
+                  this.filteringCondition = this.ruleCondition == true ? '': this.filteringCondition;
+                  this.visibilityFilteringCondition = this.visibilityRuleCondition == true ? '': this.visibilityFilteringCondition;
                   this.ruleConditions = [];
                   this.ruleCondition = false;
+                  this.visibilityRuleCondition = false;
 
                   this.handlesectionsave(null);
               } else {
@@ -1962,6 +2053,7 @@ export default class TemplateRelatedObjects extends NavigationMixin(LightningEle
               console.log('reset Rules error occurred' + JSON.stringify(error));
           });
       this.ruleCondition = false;
+      this.visibilityRuleCondition = false;
       this.template.querySelector('c-modal').hide();
   }
 
@@ -1970,22 +2062,33 @@ export default class TemplateRelatedObjects extends NavigationMixin(LightningEle
   (As condition1 && condition2 || condition3)
   */
   handleRuleUpdates(event) {
-      this.ruleConditions = [];
+      this.ruleConditions = this.ruleCondition == true? []: this.ruleConditions;
+      this.visibilityRuleConditions = this.visibilityRuleCondition == true? [] : this.visibilityRuleConditions;
       const conditionChild = this.template.querySelector('c-conditioncmp').getConditionDetails();
       this.createRuleConditionObjects(conditionChild.listOfConditions);
-      let listOfConditions = JSON.stringify(this.ruleConditions);
+     let listOfConditions = this.ruleCondition == true? JSON.stringify(this.ruleConditions): JSON.stringify(this.visibilityRuleConditions);
       let expression = JSON.stringify(conditionChild.expression);
-      let deleteIds = this.removeDeletedConditions(this.ruleConditions, this.conditionsArr);
+     let deleteIds;
+      let ruleType = this.visibilityRuleCondition == true? 'Section Visibility Rule': '';
+      if (this.ruleCondition){
+        deleteIds = this.removeDeletedConditions(this.ruleConditions, this.conditionsArr);
+      }
+      else if (this.visibilityRuleCondition){
+        deleteIds = this.removeDeletedConditions(this.visibilityRuleConditions, this.visibilityConditionsArr);
+      }
       if (!this.hasSpecialCharacter) {
           createRuleCondition({
                   ruleConditions: listOfConditions,
                   ruleExpression: expression,
                   deleteIds: deleteIds,
-                  sectionrecordid: this.sectionrecordid
+                  sectionrecordid: this.sectionrecordid,
+                  ruleType: ruleType
               })
               .then(result => {
-                  this.ruleExists = true;
-                  this.ruleExpression = expression;
+                  this.ruleExists = this.ruleCondition == true? true:this.ruleExists;
+                  this.visibilityRuleExists = this.visibilityRuleCondition == true? true : this.visibilityRuleExists;
+                  this.ruleExpression = this.ruleCondition == true? expression:this.ruleExpression;
+                  this.visibilityRuleExpression = this.visibilityRuleCondition == true? expression : this.visibilityRuleExpression;
 
                   let event = new Object();
                   this.getExistingConditions(event);
@@ -2001,6 +2104,7 @@ export default class TemplateRelatedObjects extends NavigationMixin(LightningEle
     The piece of code is to get the conditions of templates in onload
   */
   getExistingConditions(event) {
+      if (this.ruleCondition){
       this.mapOfRC = new Map();
       this.conditionsArr = [];
       this.conditionExists = false;
@@ -2028,6 +2132,36 @@ export default class TemplateRelatedObjects extends NavigationMixin(LightningEle
             console.log('Apex Call getExistingConditions Erroneous');
             console.log(error);
         })
+      }
+      if (this.visibilityRuleCondition){
+          this.mapOfRC = new Map();
+          this.visibilityConditionsArr = [];
+          this.visibilityConditionExists = false;
+          this.allConditions = [];
+          this.visibilityListOfExistingConditions = [];
+          getConditions({ ruleName: this.visibilityRuleIdCreated})
+            .then(result => {
+                if (result.length > 0) {
+                    this.visibilityConditionsArr = JSON.parse(JSON.stringify(result));
+                    this.visibilityLstofactualConditions = this.visibilityConditionsArr;
+
+                    this.visibilityConditionsArr.forEach(con => {
+                        this.mapOfRC.set(con.Name, con);
+                    });
+
+                    if (this.visibilityRuleFieldWrapper !== undefined) {
+                        let conditionResult = createRuleConditionHierarcy(this.visibilityRuleExpression, this.mapOfRC, this.visibilityRuleFieldWrapper);
+                        this.visibilityListOfExistingConditions = conditionResult.listOfConditions;
+                        this.visibilitySelectedGlobalValue = conditionResult.selectedGlobalValue;
+                        this.visibilityConditionExists = true;
+                    }
+                }
+            })
+            .catch(error => {
+                console.log('Apex Call getExistingConditions Erroneous');
+                console.log(error);
+            })
+      }  
   }
 
   /*
@@ -2078,5 +2212,27 @@ export default class TemplateRelatedObjects extends NavigationMixin(LightningEle
     unsavedChanges(){
         const saveEvent = new CustomEvent('datasaved', {detail: false });
         this.dispatchEvent(saveEvent);
+    }
+
+    //code added by Bhavya for adding Custom Font-family list - compatible with VF PDF generation
+    get fontFamilies() {
+        return [
+            { label: 'Times New Roman', value: 'serif' },
+            { label: 'Arial', value: 'sans-serif' },
+            { label: 'serif', value: 'serif' },
+            { label: 'Courier', value: 'courier' },
+        ];
+    }
+
+    handleFontFamilySelection(event){
+        const selectedFontFamily = event.target.value;
+        const table = this.template.querySelector('.tableMainClass');
+        if (table) {
+            table.style.fontFamily = selectedFontFamily;
+        }
+        this.fontfamily = event.target.value.replace('&quot;', '');
+        this.template.querySelectorAll('.mytable')[0].style.fontFamily = this.fontfamily;
+        this.catStyle = "background-color :" + this.selectedBBgcolor + "; color:" + this.selectedBFontColor + ';font-size:' + this.fontsize + ';font-family:' + this.fontfamily + ';';
+        this.unsavedChanges();
     }
 }

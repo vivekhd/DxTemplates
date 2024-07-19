@@ -9,14 +9,23 @@
 					onchange={handlename} disabled=true>
 				</lightning-input>
 			</div>
-			<div class="slds-col slds-text-align_right slds-p-top_x-small">
+			<div class="slds-col slds-size_1-of-1 slds-medium-size_5-of-12 slds-large-size_5-of-12 slds-text-align_right slds-m-top_large slds-text-align_right">
                 <lightning-input class="green-checkbox checkboxlabel dx-chk-h" type="checkbox" disabled={isDisabled} data-id="uniqueheader" name="Unique First Page Header" label="Unique First Page Header" value={showfirstpageheader} onchange={handleDiffHeader}>
                 </lightning-input>
             </div>
-			<div class="slds-is-relative slds-col_bump-left">
-				<lightning-button-icon icon-name="utility:help_doc_ext" onclick={handlehelp}
-					alternative-text="Need Help?" title="Need Help?" size="medium" variant="bare"
-					class="slds-is-absolute slds-button_icon-help" style="right:0px"></lightning-button-icon>
+			<div class="slds-col slds-size_1-of-1 slds-medium-size_2-of-12 slds-large-size_2-of-12 slds-p-left_small slds-text-align_right">
+				<div>
+					<lightning-button-icon icon-name="utility:help_doc_ext" onclick={handlehelp}
+						alternative-text="Need Help?" title="Need Help?" size="medium" variant="bare"
+						class="slds-button_icon-help">
+					</lightning-button-icon>
+				</div>
+				<div class="slds-grid">
+					<div class="slds-col_bump-left">
+							<button class="slds-button las la-language" disabled={translateEnabled} title="Translate" onclick={handleTranslate} style="font-size:40px">
+				</button>
+					</div>
+				</div>
 			</div>
 			<!-- <div class="slds-col slds-size_1-of-1 slds-medium-size_2-of-12 slds-large-size_2-of-12 slds-p-left_small">
 
@@ -93,48 +102,83 @@
 				</div>
 			</template>
 		</div>
-		<!-- <img if:true={imageselec  ted} src={selectedimageurl} alt="User Image"
-    height="100px"
-    width="100px"/>
-    <lightning-button   variant="brand" label={imagebuttonlabel}
-     onclick={handleImage}></lightning-button>
-
-    <lightning-input-rich-text value={richtextVal} onchange={handleRichTextArea}
-    aria-placeholder="Enter Text here">
-</lightning-input-rich-text></br></br> -->
-
-		<!-- <template if:true={isModalOpen}>
-        <section role="dialog" tabindex="-1" aria-labelledby="modal-heading-01" aria-modal="true"
-            aria-describedby="modal-content-id-1" class="slds-modal slds-fade-in-open">
-            <div class="slds-modal__container">
-
-                <button class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse"
-                    title="Close" onclick={closeModal} disabled={isDisabled}>
-                    <lightning-icon icon-name="utility:close" alternative-text="close" variant="inverse"
-                        size="small"></lightning-icon>
-                    <span class="slds-assistive-text">Close</span>
-                </button>
-
-
-                <div class="slds-modal__content slds-p-around_medium" id="modal-content-id-1">
-                    <p><b></b></p>
-                    <template if:true={showimages}>
-                        <template for:each={imageUrls} for:item="image" for:index="index">
-                            <img key={image.Id} src={image.URL} alt="User Image"
-                            height="100px"
-                            width="100px"/>
-                            <lightning-formatted-text value={image.title} key={image.Id}></lightning-formatted-text>
-
-                            <lightning-button key={image.Id} data-id={image.Id} variant="brand" label="Select"
-                             onclick={handleselectedImage} disabled={isDisabled}>
-                        </lightning-button><br key={image.Id}/><br key={image.Id}/>
-                </template>
-                </template>
-                </div>
-            </div>
-        </section>
-        <div class="slds-backdrop slds-backdrop_open"></div>
-    </template> -->
+        <c-modal onclosedialog ={closeTranslateModal}>
+			<template lwc:if={isTranslateModalOpen}>
+				<span slot="header">Translate</span>
+				<div class="slds-modal__content slds-p-around_x-small">						
+					<template if:true={translatedRecords}>	
+						<div class="slds-grid slds-gutters slds-p-around_x-small">
+							<div class="slds-col slds-large-size_4-of-12 slds-medium-size_4-of-12 slds-size_4-of-12 slds-p-top_x-small">
+								<lightning-combobox label="Select Translation Output Language" value={selectedLanguage}
+									options={languages} onchange={handleLanguageChange}>
+								</lightning-combobox>
+							</div>
+						</div>
+						<div class="table-container ">
+								<table class="slds-table slds-table_bordered slds-table_cell-buffer">
+								<thead>
+									<tr class="slds-line-height_reset">
+										<th class="slds-text-title_caps">Field Name</th>
+										<th class="slds-text-title_caps">Field Value</th>
+										<th class="slds-text-title_caps">Translated Value</th>
+										<th class="slds-text-title_caps"></th>
+									</tr>
+								</thead>
+								<tbody>
+									<template for:each={translatedRecords} for:item="row" for:index="index">
+										<tr key={row.id}>
+											<td>
+												<div>
+													<lightning-input type="text" onchange={handleCellOneInputChange} data-index={index} class = "field-input" value ={row.Name}></lightning-input>
+												</div>
+											</td>
+											<td>
+												<div>
+													<lightning-input type="text" onchange={handleCellTwoInputChange} data-index={index} class = "field-value" value ={row.DxCPQ__FieldValue__c}></lightning-input>
+												</div>
+											</td>
+											<td>
+												<div>
+													<lightning-textarea onchange={handleCellThreeInputChange} data-index={index} class = "trans-value" value ={row.DxCPQ__Translated_Value__c}></lightning-textarea>
+												</div>
+											</td>
+											<td>
+												<div>
+													<lightning-button-icon icon-name="utility:delete" alternative-text="Delete" onclick={handleRemoveRow} data-index={index} class="slds-m-left_xx-small" title="Delete"></lightning-button-icon>
+													<lightning-button-icon icon-name="utility:new" alternative-text="New" onclick={handleClick} class="slds-m-left_xx-small" title="New"></lightning-button-icon>
+													<lightning-rich-text-toolbar-button icon-name="utility:merge" data-index={index}
+													icon-alternative-text="Add Merge Field" onclick={handlerowlevelmerge} disabled={isDisabled}>
+													</lightning-rich-text-toolbar-button>
+												</div>
+											</td>
+										</tr>
+									</template>
+								</tbody>
+							</table>
+						</div>
+						<footer class="slds-modal__footer">
+							<div class="slds-text-align_right">
+								<lightning-button variant="brand" label="Save" title="Save" onclick={handleSave}></lightning-button>
+							</div>
+						</footer>								    
+					</template>						
+				</div>
+			</template>
+			<template lwc:else>
+				<span slot="header">Merge Field(s)</span>
+				<div class="slds-modal__content slds-p-around_medium" style="min-height: 240px;">
+					<c-dx-lookup-fields-displaycmp selection-object={selectedObjectName}></c-dx-lookup-fields-displaycmp>
+				</div>
+				<footer class="slds-modal__footer">
+					<div class="slds-text-align_right">
+						<lightning-button variant="brand" label="insert" title="insert" onclick={getMergeField}>
+						</lightning-button>
+						<lightning-button variant="brand" label="CopyToClipboard" title="insert"
+							onclick={getMergeFieldCopy}></lightning-button>
+					</div>
+				</footer>
+			</template>
+		</c-modal>
 
 
 		<div class="slds-col slds-size_12-of-12 slds-text-align_right slds-p-top_small">
