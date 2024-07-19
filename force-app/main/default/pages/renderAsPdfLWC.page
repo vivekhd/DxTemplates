@@ -485,7 +485,7 @@
             <div style="position:relative; width:100%; overflow:hidden;height: 70px;">
                 <div style="position:absolute; width:100%; overflow:hidden;height: 70px;">
                     <apex:outputText value="{!leftfootertext}" escape="false" />
-                    <apex:outputPanel rendered="{!displaypagesequence}" style="color:#999999;font-size:11px;position:absolute; right:20px; top:10px; font:Arial">
+                    <apex:outputPanel rendered="{!displaypagesequence}" style="color:#999999;font-size:11px;position:absolute; right:20px; top:10px;">
                         Page <span class="pagenumber"/> of <span class="pagecount"/>
                     </apex:outputPanel>
                 </div>
@@ -505,7 +505,7 @@
             <div style="position:relative; width:100%; overflow:hidden;height: 70px;">
                 <div style="position:absolute; width:100%; overflow:hidden;height: 70px;">
                     <apex:outputText value="{!centerfootertext}" escape="false" />
-                    <apex:outputPanel rendered="{!displaypagesequence}" style="color:#999999;font-size:11px;position:absolute; right:20px; top:10px; font:Arial">
+                    <apex:outputPanel rendered="{!displaypagesequence}" style="color:#999999;font-size:11px;position:absolute; right:20px; top:10px;">
                         Page <span class="pagenumber"/> of <span class="pagecount"/>
                     </apex:outputPanel>
                 </div>
@@ -532,7 +532,7 @@
             <div style="position:relative; width:100%;overflow:hidden;height: 70px;">
                 <apex:outputPanel >
                     <apex:outputText value="{!rightfootertext}" escape="false" />
-                    <apex:outputPanel rendered="{!displaypagesequence}" style="color:#999999;font-size:11px;position:absolute; right:20px; top:10px; font:Arial">
+                    <apex:outputPanel rendered="{!displaypagesequence}" style="color:#999999;font-size:11px;position:absolute; right:20px; top:10px;">
                         Page <span class="pagenumber"/> of <span class="pagecount"/>
                     </apex:outputPanel>
                 </apex:outputPanel>
