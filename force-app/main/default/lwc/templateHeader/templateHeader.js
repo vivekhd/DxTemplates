@@ -10,36 +10,68 @@ import getAllUserLanguages from '@salesforce/apex/LanguageTranslatorClass.getAll
 import createLog from '@salesforce/apex/LogHandler.createLog';
 import currectUserLang from '@salesforce/apex/LanguageTranslatorClass.currectUserLang';
 import { NavigationMixin } from 'lightning/navigation';
+import insertTranslatedRecords from '@salesforce/apex/LanguageTranslatorClass.insertTranslatedRecords';
+import getAllTranslations from '@salesforce/apex/LanguageTranslatorClass.getAllTranslations';
 
 export default class TemplateHeader extends NavigationMixin(LightningElement) {
+  //variables added by Bhavya for Import Translations
+  @track showTranslations = false;
+  @track showExportTranslations = false;
+  @track disableCreate = true;
+  @track columns = [];
+  @track data = [];
+  @track exportData = [];
+  @track showLoadingSpinner = false;
+  @track errorMessages = [];
+  originalData = [];
+  languageMap = {
+    'English': 'en_US',
+    'German': 'de',
+    'Spanish': 'es',
+    'French': 'fr',
+    'Italian': 'it',
+    'Japanese': 'ja',
+    'Swedish': 'sv',
+    'Korean': 'ko',
+    'Chinese (Traditional)': 'zh_TW',
+    'Chinese (Simplified)': 'zh_CN',
+    'Portuguese (Brazil)': 'pt_BR',
+    'Dutch': 'nl_NL',
+    'Danish': 'da',
+    'Thai': 'th',
+    'Finnish': 'fi',
+    'Russian': 'ru',
+    'Spanish (Mexico)': 'es_MX',
+    'Norwegian': 'no'
+  };
 
   //variables added by Bhavya for Document Translation starts here
 
   @track isTranslateModalOpen = false;
-  @track translatedRecords=[{
-        'Name': '',
-        'DxCPQ__FieldValue__c': '',
-        'DxCPQ__Translated_Value__c': '',
-        'Id': ''
-    }]; 
+  @track translatedRecords = [{
+    'Name': '',
+    'DxCPQ__FieldValue__c': '',
+    'DxCPQ__Translated_Value__c': '',
+    'Id': ''
+  }];
   @track languages = [];
-  @track selectedLanguage; 
+  @track selectedLanguage;
   uniqueIdentifierVal = 0;
   get uniqueIdentifier() {
-        this.uniqueIdentifierVal = this.uniqueIdentifierVal + 1;
-        return this.uniqueIdentifierVal;
+    this.uniqueIdentifierVal = this.uniqueIdentifierVal + 1;
+    return this.uniqueIdentifierVal;
   }
   @track dataArray = [{
-              'Name': '',
-              'DxCPQ__FieldValue__c': '',
-              'DxCPQ__Translated_Value__c': '',
-              'Id': this.uniqueIdentifier
-          }]; 
+    'Name': '',
+    'DxCPQ__FieldValue__c': '',
+    'DxCPQ__Translated_Value__c': '',
+    'Id': this.uniqueIdentifier
+  }];
   @track extractedWords = [];
   transRecordNameArray = [];
   translateEnabled = true;
 
-   //variables added by Bhavya for Document Translation ends here
+  //variables added by Bhavya for Document Translation ends here
 
   columnvalue;
   columnfirstvalue;
@@ -47,22 +79,22 @@ export default class TemplateHeader extends NavigationMixin(LightningElement) {
   @api rowcount;
   @api sectiontype;
   columnvalueList = [];
-  columnfirstvalueList=[];
+  columnfirstvalueList = [];
   @api selectedObjectName;
   @api sectionrecordid;
   @api isDisabled = false;
-  headerMap =[];
+  headerMap = [];
   headerSectionsMap = [];
-  headerFirstSectionsMap=[];
+  headerFirstSectionsMap = [];
   @api documenttemplaterecord;
   @api showheaderdetails = false;
   classvar = 'slds-col slds-size_1-of-3';
   classfirstvar = 'slds-col slds-size_1-of-3';
-  showfirstpageheader=false;
+  showfirstpageheader = false;
   popUpMessage;
   oldHeaderColumnList = {};
-  oldHeaderFirstColumnList={};
-  whereCondition ="";
+  oldHeaderFirstColumnList = {};
+  whereCondition = "";
   whereClause = " IsActive__c = true";
 
   Recorddetailsnew = {
@@ -87,27 +119,27 @@ export default class TemplateHeader extends NavigationMixin(LightningElement) {
   }
 
   connectedCallback() {
-    this.whereCondition ="DxCPQ__Document_Template__r.DxCPQ__Related_To_Type__c = " +"\'"+this.selectedObjectName+"\'"+" AND DxCPQ__Type__c = "+"\'"+this.sectiontype+"\'";
+    this.whereCondition = "DxCPQ__Document_Template__r.DxCPQ__Related_To_Type__c = " + "\'" + this.selectedObjectName + "\'" + " AND DxCPQ__Type__c = " + "\'" + this.sectiontype + "\'";
     this.whereClause = this.whereCondition;
     getAllUserLanguages()
-    .then(result =>{
-      this.languages = result.map(option => {
-      return { label: option.label, value: option.value };
+      .then(result => {
+        this.languages = result.map(option => {
+          return { label: option.label, value: option.value };
+        });
+      }).catch(error => {
+        let errorMessage = error.message || 'Unknown error message';
+        let tempError = error.toString();
+        createLog({ recordId: '', className: 'TemplateContentDetails LWC Component - connectedCallback()', exceptionMessage: errorMessage, logData: tempError, logType: 'Exception' });
       });
-    }).catch(error=>{
-      let errorMessage = error.message || 'Unknown error message';
-      let tempError = error.toString();
-      createLog({ recordId: '', className: 'TemplateContentDetails LWC Component - connectedCallback()', exceptionMessage: errorMessage, logData: tempError, logType: 'Exception' });
-    });
-    console.log('Languages----',this.languages);
- 
+    console.log('Languages----', this.languages);
+
   }
 
-  handleDiffHeader(event){
+  handleDiffHeader(event) {
     this.showfirstpageheader = event.detail.checked;
   }
 
-  handlefirstcolumncomboChange(event){
+  handlefirstcolumncomboChange(event) {
     this.columnfirstvalueList = [];
     this.columnfirstvalue = event.detail.value;
     this.handlefirstcolumnsClass(this.columnfirstvalue);
@@ -119,7 +151,7 @@ export default class TemplateHeader extends NavigationMixin(LightningElement) {
           }
           else {
             this.columnfirstvalueList.push(i);
-            this.headerFirstSectionsMap.push({ "value": "", "indexvar": i+3, "columnFirstCount":this.columnfirstvalue, "key": (new Date()).getTime() + ":" + i, "headerVal": "" })
+            this.headerFirstSectionsMap.push({ "value": "", "indexvar": i + 3, "columnFirstCount": this.columnfirstvalue, "key": (new Date()).getTime() + ":" + i, "headerVal": "" })
             //this.headerSectionsMap.push({ "value": "", "indexvar": i+3,  "key": (new Date()).getTime() + ":" + i })
           }
         }
@@ -131,21 +163,21 @@ export default class TemplateHeader extends NavigationMixin(LightningElement) {
     else {
       for (var i = 0; i < this.columnfirstvalue; i++) {
         this.columnfirstvalueList.push(i);
-        this.headerFirstSectionsMap.push({ "value": "", "indexvar": i+3, "columnFirstCount":this.columnfirstvalue, "key": (new Date()).getTime() + ":" + i, "headerVal": "" })
+        this.headerFirstSectionsMap.push({ "value": "", "indexvar": i + 3, "columnFirstCount": this.columnfirstvalue, "key": (new Date()).getTime() + ":" + i, "headerVal": "" })
         //this.headerSectionsMap.push({ "value": "", "indexvar": i+3, "key": (new Date()).getTime() + ":" + i })
       }
-    } 
+    }
     //this.headerSectionsMap.push (this.headerFirstSectionsMap) 
     let refData = {
-      "0":{"0":""},
-      "1":{"0":"Left", "1":"Right"},
-      "2":{"0":"Left", "1":"Center", "2":"Right"}
+      "0": { "0": "" },
+      "1": { "0": "Left", "1": "Right" },
+      "2": { "0": "Left", "1": "Center", "2": "Right" }
     }
     this.headerFirstSectionsMap.forEach(item => {
-        item.columnFirstCount = this.columnfirstvalue;
-        item.headerVal = refData[this.columnfirstvalue - 1][item.indexvar-3];
+      item.columnFirstCount = this.columnfirstvalue;
+      item.headerVal = refData[this.columnfirstvalue - 1][item.indexvar - 3];
     });
-    const saveEvent = new CustomEvent('datasaved', {detail: false });
+    const saveEvent = new CustomEvent('datasaved', { detail: false });
     this.dispatchEvent(saveEvent);
   }
 
@@ -158,7 +190,7 @@ export default class TemplateHeader extends NavigationMixin(LightningElement) {
   }
 
   handlecolumncomboChange(event) {
-    this.columnvalueList = [];    
+    this.columnvalueList = [];
     this.columnvalue = event.detail.value;
     this.handlecolumnsClass(this.columnvalue);
     if (this.headerSectionsMap.length > 0) {
@@ -168,8 +200,8 @@ export default class TemplateHeader extends NavigationMixin(LightningElement) {
             this.headerSectionsMap.push(this.oldHeaderColumnList[i]);
           }
           else {
-            this.columnvalueList.push(i);          
-            this.headerSectionsMap.push({ "value": "", "indexvar": i, "key": (new Date()).getTime() + ":" + i , "columnCount": this.columnvalue, "headerVal": ''})
+            this.columnvalueList.push(i);
+            this.headerSectionsMap.push({ "value": "", "indexvar": i, "key": (new Date()).getTime() + ":" + i, "columnCount": this.columnvalue, "headerVal": '' })
           }
         }
       }
@@ -179,21 +211,21 @@ export default class TemplateHeader extends NavigationMixin(LightningElement) {
     }
     else {
       for (var i = 0; i < this.columnvalue; i++) {
-        this.columnvalueList.push(i);     
-        this.headerSectionsMap.push({ "value": "", "indexvar": i, "key": (new Date()).getTime() + ":" + i , "columnCount": this.columnvalue, "headerVal": '' })
+        this.columnvalueList.push(i);
+        this.headerSectionsMap.push({ "value": "", "indexvar": i, "key": (new Date()).getTime() + ":" + i, "columnCount": this.columnvalue, "headerVal": '' })
       }
     }
     //adding headval in headerSectionsMap
     let refData = {
-      "0":{"0":""},
-      "1":{"0":"Left", "1":"Right"},
-      "2":{"0":"Left", "1":"Center", "2":"Right"}
+      "0": { "0": "" },
+      "1": { "0": "Left", "1": "Right" },
+      "2": { "0": "Left", "1": "Center", "2": "Right" }
     }
     this.headerSectionsMap.forEach(item => {
-        item.columnCount = this.columnvalue;
-        item.headerVal = refData[this.columnvalue - 1][item.indexvar];
+      item.columnCount = this.columnvalue;
+      item.headerVal = refData[this.columnvalue - 1][item.indexvar];
     });
-    const saveEvent = new CustomEvent('datasaved', {detail: false });
+    const saveEvent = new CustomEvent('datasaved', { detail: false });
     this.dispatchEvent(saveEvent);
     //console.log('columnvalueList ---> ', this.columnvalueList);
     console.log('headerSectionsMap after column value changed ---> ', this.headerSectionsMap);
@@ -202,9 +234,9 @@ export default class TemplateHeader extends NavigationMixin(LightningElement) {
   /* Header Changes Start*/
   handleColumnRemoval() {
     let headerColumnsList = {};
-    let headerFirstColumnsList ={};
+    let headerFirstColumnsList = {};
     let size = 0;
-    const tempColumnfirstValue = +this.columnfirstvalue+3;
+    const tempColumnfirstValue = +this.columnfirstvalue + 3;
 
     for (let i = 0; i < this.headerFirstSectionsMap.length; i++) {
       let tempColumnDetail = this.headerFirstSectionsMap[i];
@@ -212,14 +244,14 @@ export default class TemplateHeader extends NavigationMixin(LightningElement) {
       //   headerColumnsList[tempColumnDetail.indexvar] = tempColumnDetail;
       //   size += 1;
       // }
-      if(tempColumnDetail.indexvar < tempColumnfirstValue){
+      if (tempColumnDetail.indexvar < tempColumnfirstValue) {
         //headerColumnsList[tempColumnDetail.indexvar] = tempColumnDetail;
-        let tempindexvar = +tempColumnDetail.indexvar-3;
+        let tempindexvar = +tempColumnDetail.indexvar - 3;
         headerFirstColumnsList[tempindexvar] = tempColumnDetail;
         size += 1;
       }
       else {
-        let tempindexvar = +tempColumnDetail.indexvar-3;
+        let tempindexvar = +tempColumnDetail.indexvar - 3;
         this.oldHeaderFirstColumnList[tempindexvar] = tempColumnDetail;
       }
     }
@@ -234,31 +266,31 @@ export default class TemplateHeader extends NavigationMixin(LightningElement) {
         this.oldHeaderColumnList[tempColumnDetail.indexvar] = tempColumnDetail;
       }
     }
-    
+
     this.headerSectionsMap = [];
     this.headerFirstSectionsMap = [];
     for (let i = 0; i < 6; i++) {
       if (headerColumnsList[i]) {
         this.headerSectionsMap.push(headerColumnsList[i]);
       }
-      if (headerFirstColumnsList[i]){
+      if (headerFirstColumnsList[i]) {
         //this.headerSectionsMap.push(headerColumnsList[i]);
         this.headerFirstSectionsMap.push(headerFirstColumnsList[i]);
       }
     }
-    let headerVal='';
+    let headerVal = '';
     let refData = {
-      "0":{"0":""},
-      "1":{"0":"Left", "1":"Right"},
-      "2":{"0":"Left", "1":"Center", "2":"Right"}
+      "0": { "0": "" },
+      "1": { "0": "Left", "1": "Right" },
+      "2": { "0": "Left", "1": "Center", "2": "Right" }
     }
     this.headerSectionsMap.forEach(item => {
-        item.columnCount = this.columnvalue;
-        item.headerVal = refData[this.columnvalue - 1][item.indexvar];
+      item.columnCount = this.columnvalue;
+      item.headerVal = refData[this.columnvalue - 1][item.indexvar];
     });
     this.headerFirstSectionsMap.forEach(item => {
-        item.columnFirstCount = this.columnfirstvalue;
-        item.headerVal = refData[this.columnfirstvalue - 1][item.indexvar];
+      item.columnFirstCount = this.columnfirstvalue;
+      item.headerVal = refData[this.columnfirstvalue - 1][item.indexvar];
     });
   }
   /* Header Changes End by Rahul */
@@ -283,7 +315,7 @@ export default class TemplateHeader extends NavigationMixin(LightningElement) {
         this.headerFirstSectionsMap.push(data);
       }
     });
-    const saveEvent = new CustomEvent('datasaved', {detail: false });
+    const saveEvent = new CustomEvent('datasaved', { detail: false });
     this.dispatchEvent(saveEvent);
   }
 
@@ -309,7 +341,7 @@ export default class TemplateHeader extends NavigationMixin(LightningElement) {
   }
 
   @api loadsectionvaluesforedit(recordID) {
-    const saveEvent = new CustomEvent('datasaved', {detail: true});
+    const saveEvent = new CustomEvent('datasaved', { detail: true });
     this.dispatchEvent(saveEvent);
     this.showheaderdetails = true;
     this.headerSectionsMap = [];
@@ -320,42 +352,42 @@ export default class TemplateHeader extends NavigationMixin(LightningElement) {
         if (result != null) {
           var sectioncontent = JSON.parse(result.DxCPQ__Section_Content__c);
           this.columnvalue = sectioncontent.sectionsCount;
-          this.translateEnabled = this.columnvalue > 0? false: true;
+          this.translateEnabled = this.columnvalue > 0 ? false : true;
           this.columnfirstvalue = sectioncontent.sectionsFirstCount;
-          if (sectioncontent.sectionsFirstCount>0){
+          if (sectioncontent.sectionsFirstCount > 0) {
             this.showfirstpageheader = true;
           }
           //this.showfirstpageheader = true;
-          setTimeout(() => { 
-            try{
-              this.template.querySelector('[data-id="uniqueheader"]').checked = this.showfirstpageheader; 
+          setTimeout(() => {
+            try {
+              this.template.querySelector('[data-id="uniqueheader"]').checked = this.showfirstpageheader;
               // this.columnfirstvalue = sectioncontent.sectionsFirstContent;
               // this.template.querySelector('[data-id="firstcombobox"]').value = this.columnfirstvalue;
               //this.columnfirstvalue = sectioncontent.sectionsFirstContent;
               this.handlefirstcolumnsClass(this.columnfirstvalue);
             }
-            catch(error){
+            catch (error) {
               console.log('error in setTimeout for checked error >> ', error.message);
             }
           });
 
-           /* Fix for Header Onload Alignment by Rahul*/
+          /* Fix for Header Onload Alignment by Rahul*/
           let sectionsMapTemp = sectioncontent.sectionsContent;
           sectionsMapTemp.sort((a, b) => {
             return a.indexvar - b.indexvar;
           });
-          let firstSectionsMap =[];
-          let sectionsMap=[];
-          sectionsMapTemp.forEach((sectionmap)=>{
-            if (sectionmap.indexvar>2){
+          let firstSectionsMap = [];
+          let sectionsMap = [];
+          sectionsMapTemp.forEach((sectionmap) => {
+            if (sectionmap.indexvar > 2) {
               firstSectionsMap.push(sectionmap)
             }
             else sectionsMap.push(sectionmap)
           })
-          this.headerFirstSectionsMap= firstSectionsMap;
-          this.headerSectionsMap = sectionsMap; 
+          this.headerFirstSectionsMap = firstSectionsMap;
+          this.headerSectionsMap = sectionsMap;
           //this.headerSectionsMap = sectionsMapTemp;
-           /* Fix for Header Onload Alignment by Rahul*/
+          /* Fix for Header Onload Alignment by Rahul*/
           this.handlecolumnsClass(this.columnvalue);
           //this.handlefirstcolumnsClass(this.columnfirstvalue);
         }
@@ -366,10 +398,10 @@ export default class TemplateHeader extends NavigationMixin(LightningElement) {
   }
 
   //code added by Bhavya to check if the style attribute is present in the Img tag
-  identifyStyleTag(str){
+  identifyStyleTag(str) {
     const regex = /<img\b[^>]*\bstyle\s*=\s*["'][^"']*["']/i;
     return regex.test(str);
-    
+
   }
 
   handlesectionsave(event) {
@@ -383,10 +415,10 @@ export default class TemplateHeader extends NavigationMixin(LightningElement) {
         if (sectionval.includes('img') && !this.identifyStyleTag(sectionval)) {
           const styleTag = 'style="max-height:100%; max-width:100%; width:80%; margin:0 50px 0 0;"';
           sectionval = sectionval.replace(/(<img\b[^>]*)(style\s*=\s*["'][^"']*["'])?([^>]*>)/i, (match, p1, p2, p3) => {
-              if (p2) {
-                  return `${p1}${p2.slice(0, -1)}; ${styleTag.slice(7)}`;
-              }
-              return `${p1} ${styleTag}${p3}`;
+            if (p2) {
+              return `${p1}${p2.slice(0, -1)}; ${styleTag.slice(7)}`;
+            }
+            return `${p1} ${styleTag}${p3}`;
           });
 
           console.log('Updated sectionVal:', sectionval);
@@ -422,7 +454,7 @@ export default class TemplateHeader extends NavigationMixin(LightningElement) {
             });
 
             this.dispatchEvent(event4);
-            const saveEvent = new CustomEvent('datasaved', {detail: true });
+            const saveEvent = new CustomEvent('datasaved', { detail: true });
             this.dispatchEvent(saveEvent);
             var firecustomevent = new CustomEvent('savesectiondata', { detail: this.savedRecordID });
             this.dispatchEvent(firecustomevent);
@@ -436,32 +468,32 @@ export default class TemplateHeader extends NavigationMixin(LightningElement) {
     //this.template.querySelector('c-template-designer-cmp').showPreview = true;
   }
 
-  handlehelp(){
+  handlehelp() {
     let relatedObjectsMap = this.pdfLinks.find(item => item.MasterLabel === 'Header');
     let pdfUrl = relatedObjectsMap ? relatedObjectsMap.DxCPQ__Section_PDF_URL__c : null;
     const config = {
       type: 'standard__webPage',
       attributes: {
-          url: pdfUrl
-        }
+        url: pdfUrl
+      }
     };
     this[NavigationMixin.Navigate](config);
   }
 
   // code added by Bhavya for Document translation
-    handleTranslate(event) {
-      this.extractedWords = [];
-      this.extractWords();
-      this.isTranslateModalOpen = true;
-      this.template.querySelector('c-modal').show();
+  handleTranslate(event) {
+    this.extractedWords = [];
+    this.extractWords();
+    this.isTranslateModalOpen = true;
+    this.template.querySelector('c-modal').show();
 
-      currectUserLang()
+    currectUserLang()
       .then(result => {
         this.selectedLanguage = this.getLanguageValueByLabel(result); // Set the default value to English
         this.transRecordsRetrive();
       })
       .catch(error => {
-        console.log('Error--',error.message);
+        console.log('Error--', error.message);
         let errorMessage = error.message || 'Unknown error message';
         let tempError = error.toString();
         createLog({ recordId: '', className: 'TemplateContentDetails LWC Component - connectedCallback()', exceptionMessage: errorMessage, logData: tempError, logType: 'Exception' });
@@ -474,135 +506,136 @@ export default class TemplateHeader extends NavigationMixin(LightningElement) {
   }
 
   //code added by Bhavya for extracting the merge fields along with the tokens
-  extractWords(){
+  extractWords() {
     let regex = /<<([^>]+?)>>|({![^}]+?})/g;
 
     this.headerSectionsMap.forEach(section => {
-        let decodedValue = section.value.replace(/&lt;/g, '<').replace(/&gt;/g, '>');
-        let m;
-        while ((m = regex.exec(decodedValue)) !== null) {
-            if (m.index === regex.lastIndex) {
-                regex.lastIndex++;
-            }
-            if (m[1]) {
-                this.extractedWords.push(m[1]);
-            } else if (m[2]) {
-                this.extractedWords.push(m[2]);
-            }
+      let decodedValue = section.value.replace(/&lt;/g, '<').replace(/&gt;/g, '>');
+      let m;
+      while ((m = regex.exec(decodedValue)) !== null) {
+        if (m.index === regex.lastIndex) {
+          regex.lastIndex++;
         }
+        if (m[1]) {
+          this.extractedWords.push(m[1]);
+        } else if (m[2]) {
+          this.extractedWords.push(m[2]);
+        }
+      }
     });
     console.log('this.extractedWords after extractwords ----> ', this.extractedWords);
   }
 
-  transRecordsRetrive(){
-    selectedLangMethod({language : this.selectedLanguage, extractedWords : JSON.stringify(this.extractedWords), docTempId : this.documenttemplaterecord.Id })
-          .then(result => {
-          if (result && result.length > 0) {
-            this.translatedRecords = [];
-            this.transRecordNameArray = [];
-              result.forEach(record => {
-                  // Iterate over each record and push it into translatedRecords array
-                  this.transRecordNameArray.push(record.Name);
-                  this.translatedRecords.push({
-                      'Name': record.Name,
-                      'DxCPQ__FieldValue__c': record.DxCPQ__FieldValue__c,
-                      'DxCPQ__Translated_Value__c': record.DxCPQ__Translated_Value__c,
-                      'Id': record.Id
-                  });
-              });
-              if(this.transRecordNameArray.length != this.extractedWords.length){
-                this.extractedWords.forEach((extraxtElem) => {
-                if(!this.transRecordNameArray.includes(extraxtElem)){
-                  this.translatedRecords.push({
-                    'Name': extraxtElem,
-                    'DxCPQ__FieldValue__c': '',
-                    'DxCPQ__Translated_Value__c': '',
-                    'Id':''
-                  });
-                }})
+  transRecordsRetrive() {
+    selectedLangMethod({ language: this.selectedLanguage, extractedWords: JSON.stringify(this.extractedWords), docTempId: this.documenttemplaterecord.Id })
+      .then(result => {
+        if (result && result.length > 0) {
+          this.translatedRecords = [];
+          this.transRecordNameArray = [];
+          result.forEach(record => {
+            // Iterate over each record and push it into translatedRecords array
+            this.transRecordNameArray.push(record.Name);
+            this.translatedRecords.push({
+              'Name': record.Name,
+              'DxCPQ__FieldValue__c': record.DxCPQ__FieldValue__c,
+              'DxCPQ__Translated_Value__c': record.DxCPQ__Translated_Value__c,
+              'Id': record.Id
+            });
+          });
+          if (this.transRecordNameArray.length != this.extractedWords.length) {
+            this.extractedWords.forEach((extraxtElem) => {
+              if (!this.transRecordNameArray.includes(extraxtElem)) {
+                this.translatedRecords.push({
+                  'Name': extraxtElem,
+                  'DxCPQ__FieldValue__c': '',
+                  'DxCPQ__Translated_Value__c': '',
+                  'Id': ''
+                });
               }
-              else{
-                //code for when this.transRecordNameArray & this.extractedwords are of same length
-                this.extractedWords.forEach(word => {
-                  if (!this.transRecordNameArray.includes(word)) 
-                  {
-                    this.transRecordNameArray.push(word);
-                    this.translatedRecords.push({
-                      'Name': word,
-                      'DxCPQ__FieldValue__c': '',
-                      'DxCPQ__Translated_Value__c': '',
-                      'Id':''
-                    });
-                  }
-                  });
-                }
-              //this.selectedLanguage = this.translatedRecords[0].DxCPQ__Language__c;
-          } else {
-            this.translatedRecords = [];
-            if(this.extractedWords.length>0){
-              this.extractedWords.forEach((extraxtElem) => {
+            })
+          }
+          else {
+            //code for when this.transRecordNameArray & this.extractedwords are of same length
+            this.extractedWords.forEach(word => {
+              if (!this.transRecordNameArray.includes(word)) {
+                this.transRecordNameArray.push(word);
+                this.translatedRecords.push({
+                  'Name': word,
+                  'DxCPQ__FieldValue__c': '',
+                  'DxCPQ__Translated_Value__c': '',
+                  'Id': ''
+                });
+              }
+            });
+          }
+          //this.selectedLanguage = this.translatedRecords[0].DxCPQ__Language__c;
+        } else {
+          this.translatedRecords = [];
+          if (this.extractedWords.length > 0) {
+            this.extractedWords.forEach((extraxtElem) => {
               this.translatedRecords.push({
                 'Name': extraxtElem,
                 'DxCPQ__FieldValue__c': '',
                 'DxCPQ__Translated_Value__c': '',
                 'Id': ''
-                });
-              })
-            } else {
-              this.translatedRecords = this.dataArray;
-            }
-          }})
-          .catch(error => {
-            let errorMessage = error.message || 'Unknown error message';
-            let tempError = error.toString();
-            createLog({ recordId: '', className: 'TemplateContentDetails LWC Component - connectedCallback()', exceptionMessage: errorMessage, logData: tempError, logType: 'Exception' });
-          });
+              });
+            })
+          } else {
+            this.translatedRecords = this.dataArray;
+          }
+        }
+      })
+      .catch(error => {
+        let errorMessage = error.message || 'Unknown error message';
+        let tempError = error.toString();
+        createLog({ recordId: '', className: 'TemplateContentDetails LWC Component - connectedCallback()', exceptionMessage: errorMessage, logData: tempError, logType: 'Exception' });
+      });
   }
 
   handleClick() {
-  const newDataArray = {
-          'Name': '',
-          'DxCPQ__FieldValue__c': '',
-          'DxCPQ__Translated_Value__c': '',
-          'Id' : this.uniqueIdentifier
-      };
-      this.translatedRecords.push(newDataArray);
+    const newDataArray = {
+      'Name': '',
+      'DxCPQ__FieldValue__c': '',
+      'DxCPQ__Translated_Value__c': '',
+      'Id': this.uniqueIdentifier
+    };
+    this.translatedRecords.push(newDataArray);
   }
 
   handleRemoveRow(event) {
-      event.preventDefault();
-      const indexVal = event.target.dataset.index;
-      //let rowDelete= false;
-      /* const deleteData = [{
-          'FieldName': this.translatedRecords[indexVal].Name,
-          'FieldValue': this.translatedRecords[indexVal].DxCPQ__FieldValue__c,
-          'TranslatedValue': this.translatedRecords[indexVal].DxCPQ__Translated_Value__c,
-          'Id': this.translatedRecords[indexVal].Id
-      }]; */
+    event.preventDefault();
+    const indexVal = event.target.dataset.index;
+    //let rowDelete= false;
+    /* const deleteData = [{
+        'FieldName': this.translatedRecords[indexVal].Name,
+        'FieldValue': this.translatedRecords[indexVal].DxCPQ__FieldValue__c,
+        'TranslatedValue': this.translatedRecords[indexVal].DxCPQ__Translated_Value__c,
+        'Id': this.translatedRecords[indexVal].Id
+    }]; */
 
-      var id = this.translatedRecords[indexVal].Id;
-      var regex = /^([a-zA-Z0-9_-]){18}$/;
+    var id = this.translatedRecords[indexVal].Id;
+    var regex = /^([a-zA-Z0-9_-]){18}$/;
 
-      if(regex.test(id)){
-          deleteMethod({deleteRecordId : id })
-          .then(result => {
-            if(result){
-              this.translatedRecords.splice(indexVal, 1);
-              this.translatedRecords = [...this.translatedRecords];
-              this.showToast('Success', 'Record deleted successfully', 'success'); 
-            }else{
-              this.showToast('Error', 'Error in deleting records, please check the logs', 'error');
-            }    
-          }).catch(error => {
-            this.showToast('Error', 'An error occurred while deliting the record', 'error');   
-            let errorMessage = error.message || 'Unknown error message';
-            let tempError = error.toString();
-            createLog({ recordId: '', className: 'TemplateContentDetails LWC Component - connectedCallback()', exceptionMessage: errorMessage, logData: tempError, logType: 'Exception' });
-          });
-      }else{
-          this.translatedRecords.splice(indexVal, 1);
-          this.translatedRecords = [...this.translatedRecords];
-      }
+    if (regex.test(id)) {
+      deleteMethod({ deleteRecordId: id })
+        .then(result => {
+          if (result) {
+            this.translatedRecords.splice(indexVal, 1);
+            this.translatedRecords = [...this.translatedRecords];
+            this.showToast('Success', 'Record deleted successfully', 'success');
+          } else {
+            this.showToast('Error', 'Error in deleting records, please check the logs', 'error');
+          }
+        }).catch(error => {
+          this.showToast('Error', 'An error occurred while deliting the record', 'error');
+          let errorMessage = error.message || 'Unknown error message';
+          let tempError = error.toString();
+          createLog({ recordId: '', className: 'TemplateContentDetails LWC Component - connectedCallback()', exceptionMessage: errorMessage, logData: tempError, logType: 'Exception' });
+        });
+    } else {
+      this.translatedRecords.splice(indexVal, 1);
+      this.translatedRecords = [...this.translatedRecords];
+    }
   }
 
   handleLanguageChange(event) {
@@ -616,31 +649,31 @@ export default class TemplateHeader extends NavigationMixin(LightningElement) {
     if (isNaN(indexVal) || indexVal < 0 || indexVal >= this.translatedRecords.length) {
       console.error('Invalid index:', indexVal);
       return;
-    } 
-    this.translatedRecords[indexVal].Name = event.target.value; 
+    }
+    this.translatedRecords[indexVal].Name = event.target.value;
   }
 
   handleCellTwoInputChange(event) {
     const indexVal = parseInt(event.target.dataset.index);
-    if(isNaN(indexVal) || indexVal<0 || indexVal >= this.translatedRecords.length){
+    if (isNaN(indexVal) || indexVal < 0 || indexVal >= this.translatedRecords.length) {
       console.error('Invalid index:', indexVal);
       return;
     }
-    this.translatedRecords[indexVal].DxCPQ__FieldValue__c = event.target.value; 
+    this.translatedRecords[indexVal].DxCPQ__FieldValue__c = event.target.value;
   }
 
   handleCellThreeInputChange(event) {
     const indexVal = parseInt(event.target.dataset.index);
-    if(isNaN(indexVal) || indexVal<0 || indexVal >= this.translatedRecords.length){
+    if (isNaN(indexVal) || indexVal < 0 || indexVal >= this.translatedRecords.length) {
       console.error('Invalid index:', indexVal);
     }
-    this.translatedRecords[indexVal].DxCPQ__Translated_Value__c = event.target.value; 
+    this.translatedRecords[indexVal].DxCPQ__Translated_Value__c = event.target.value;
   }
 
   handleSave() {
     this.translatedRecords.forEach(record => {
       if (record.Name === null || record.Name === '') {
-        this.showToast('Error','Some of the row(s) Name has no values','error');
+        this.showToast('Error', 'Some of the row(s) Name has no values', 'error');
       }
     });
 
@@ -651,14 +684,14 @@ export default class TemplateHeader extends NavigationMixin(LightningElement) {
       }
     });
 
-    if(fieldNameRequire){
+    if (fieldNameRequire) {
       this.translatedRecords.forEach(record => {
         // Rename DxCPQ__FieldValue__c to FieldValue
         if (record.hasOwnProperty('DxCPQ__FieldValue__c')) {
           record.FieldValue = record['DxCPQ__FieldValue__c'];
           delete record['DxCPQ__FieldValue__c'];
         }
-        
+
         // Rename DxCPQ__Translated_Value__c to TranslatedValue
         if (record.hasOwnProperty('DxCPQ__Translated_Value__c')) {
           record.TranslatedValue = record['DxCPQ__Translated_Value__c'];
@@ -666,47 +699,48 @@ export default class TemplateHeader extends NavigationMixin(LightningElement) {
         }
       });
 
-      createUpdateMethod({ 
-        jsonStringData: JSON.stringify(this.translatedRecords), 
+      createUpdateMethod({
+        jsonStringData: JSON.stringify(this.translatedRecords),
         language: this.selectedLanguage,
         sectionId: this.sectionrecordid
       })
-      .then(result => {
-        this.showToast('Success', 'Record saved successfully', 'success'); 
-        this.isTranslateModalOpen = false;
-        this.translatedRecords = [];
-      })
-      .catch(error => {
-        this.showToast('Error', 'An error occurred while saving the record', 'error');
-        let errorMessage = error.message || 'Unknown error message';
-        let tempError = error.toString();
-        createLog({ recordId: '', className: 'TemplateContentDetails LWC Component - connectedCallback()', exceptionMessage: errorMessage, logData: tempError, logType: 'Exception' });});
-      }
-
-      /* else{
-        this.showToast('Error', 'Please fill Field Names in all rows', 'error');
-      } */
-      this.template.querySelector('c-modal').hide();
+        .then(result => {
+          this.showToast('Success', 'Record saved successfully', 'success');
+          this.isTranslateModalOpen = false;
+          this.translatedRecords = [];
+        })
+        .catch(error => {
+          this.showToast('Error', 'An error occurred while saving the record', 'error');
+          let errorMessage = error.message || 'Unknown error message';
+          let tempError = error.toString();
+          createLog({ recordId: '', className: 'TemplateContentDetails LWC Component - connectedCallback()', exceptionMessage: errorMessage, logData: tempError, logType: 'Exception' });
+        });
     }
-    
-  
+
+    /* else{
+      this.showToast('Error', 'Please fill Field Names in all rows', 'error');
+    } */
+    this.template.querySelector('c-modal').hide();
+  }
+
+
   showToast(title, message, variant) {
     const toastEvent = new ShowToastEvent({
-        title: title,
-        message: message,
-        variant: variant
+      title: title,
+      message: message,
+      variant: variant
     });
     this.dispatchEvent(toastEvent);
   }
 
   closeTranslateModal() {
-      if(this.isTranslateModalOpen){
-        this.translatedRecords = [];
-        this.transRecordNameArray = [];
-        this.extractedWords = [];
-        this.isTranslateModalOpen = false;
-      }
-      this.template.querySelector('c-modal').hide();
+    if (this.isTranslateModalOpen) {
+      this.translatedRecords = [];
+      this.transRecordNameArray = [];
+      this.extractedWords = [];
+      this.isTranslateModalOpen = false;
+    }
+    this.template.querySelector('c-modal').hide();
   }
 
   handlerowlevelmerge(event) {
@@ -720,19 +754,19 @@ export default class TemplateHeader extends NavigationMixin(LightningElement) {
     const mergeField = this.template.querySelector('c-dx-lookup-fields-displaycmp').getMergeField();
     if (mergeField != undefined) {
       this.mergefieldname = '{!' + this.selectedObjectName + '.' + mergeField + '}';
-      if(this.rowlevelmerge){
+      if (this.rowlevelmerge) {
         //let rowIndex = this.selectedRowIndex;
-            this.isTranslateModalOpen = true;
-            let updatedRecords = [...this.translatedRecords];
-                updatedRecords[this.selectedRowIndex] = {
-                    ...updatedRecords[this.selectedRowIndex],
-                    Name: this.mergefieldname
-                };
-                this.translatedRecords = updatedRecords;
-            //this.translatedRecords[this.selectedRowIndex].Name = this.mergefieldname; // Update the "Field Label" column
-            this.rowlevelmerge = false;
+        this.isTranslateModalOpen = true;
+        let updatedRecords = [...this.translatedRecords];
+        updatedRecords[this.selectedRowIndex] = {
+          ...updatedRecords[this.selectedRowIndex],
+          Name: this.mergefieldname
+        };
+        this.translatedRecords = updatedRecords;
+        //this.translatedRecords[this.selectedRowIndex].Name = this.mergefieldname; // Update the "Field Label" column
+        this.rowlevelmerge = false;
       }
-      else{
+      else {
         this.richtextVal += this.mergefieldname;
         this.template.querySelector('c-modal').hide();
       }
@@ -755,4 +789,166 @@ export default class TemplateHeader extends NavigationMixin(LightningElement) {
     }
     this.template.querySelector('c-modal').hide();
   }
+
+  showToastMsg(title, msg, variant) {
+    const event4 = new ShowToastEvent({
+      title: title,
+      message: msg,
+      variant: variant,
+    });
+    this.dispatchEvent(event4);
+  }
+
+  //code added by Bhavya for Import Translations
+  handleImportTranslation(event){
+    this.template.querySelector('c-modal').hide();
+    this.template.querySelector('c-modal[data-id="translation"]').hide();
+    this.showTranslations = true;
+    this.template.querySelector('c-modal[data-id="importTranslation"]').show();
+  }
+
+  get acceptedFormats() {
+    return ['.csv', '.xlsx'];
+  }
+
+  handleCreateTranslations() {
+    console.log('handleCreateTranslations clicked --> ');
+    if (this.translatedRecords.length === 0) {
+      console.error('No records to insert');
+      return;
+    }
+    this.showLoadingSpinner = true
+    insertTranslatedRecords({ translatedRecords: this.translatedRecords })
+      .then(result => {
+        if (result) {
+          console.log('Records inserted successfully');
+          this.showToastMsg('Success', 'Translations saved successfully!', 'success');
+          this.template.querySelector('c-modal[data-id="importTranslation"]').hide();
+          this.template.querySelector('c-modal[data-id="translation"]').show();
+          this.showTranslations = false;
+          this.showLoadingSpinner = false;
+          this.data = [];
+        } else {
+          console.error('Failed to insert records');
+          this.showToastMsg('Error', 'Error saving translations. Please Contact Administrator.', 'Error');
+          this.showLoadingSpinner = false;
+        }
+      })
+      .catch(error => {
+        console.error('Error inserting records:', error);
+        this.showToastMsg('Error', 'Error saving translations. Please Contact Administrator.', 'Error');
+        this.showLoadingSpinner = false;
+      });
+  }
+
+  handleCloseImportTranslations() {
+    this.template.querySelector('c-modal[data-id="importTranslation"]').hide();
+    this.template.querySelector('c-modal[data-id="translation"]').show();
+    this.showTranslations = false;
+    this.data = [];
+  }
+
+  handleFileUpload(event) {
+    let file = event.target.files[0];
+    if (file && file.type === 'text/csv') {
+      let reader = new FileReader();
+
+      reader.onload = (e) => {
+        try {
+          let csv = e.target.result;
+          this.parseCSV(csv);
+          this.createTranslatedRecords();
+        } catch (error) {
+          console.error('Error parsing CSV:', error);
+          this.showToastMsg('Error', 'CSV file is broken. Cannot view it.', 'Error');
+        }
+      };
+
+      reader.onerror = (error) => {
+        console.error('Error reading file:', error);
+        this.showToastMsg('Error', 'Failed to read the file. Please try again.', 'Error');
+      };
+
+      reader.readAsText(file);
+    } else {
+      console.error('Please upload a valid CSV file.');
+      this.showToastMsg('Error', 'Please upload a valid CSV file.', 'Error');
+    }
+  }
+
+  parseCSV(csv) {
+    const lines = csv.split('\n');
+    if (lines.length > 0) {
+      this.columns = lines[0].split(',');
+      this.data = lines.slice(1).map(line => line.split(','));
+      let emptyNameRows = [];
+      let translatedValueWithoutLanguageRows = [];
+      this.data.forEach((row, index) => {
+        const rowNumber = index + 2;
+        if (!row[0]) {
+          emptyNameRows.push(rowNumber);
+        }
+        if (row[3] && !row[2]) {
+          translatedValueWithoutLanguageRows.push(rowNumber);
+        }
+      });
+      this.errorMessages = [];
+
+      if (emptyNameRows.length > 0) {
+        this.errorMessages.push(`Rows ${emptyNameRows.join(', ')}: Name is empty. Please check the CSV file and re-upload.`);
+      }
+
+      if (translatedValueWithoutLanguageRows.length > 0) {
+        this.errorMessages.push(`Rows ${translatedValueWithoutLanguageRows.join(', ')}: Translated Value is present without Language. Please check the CSV file and re-upload.`);
+      }
+      if (this.errorMessages.length > 0) {
+        this.disableCreate = true;
+        this.showToastMsg('Error', this.errorMessages.join(' '), 'Error');
+        this.data = [];
+      }
+      else {
+        this.disableCreate = false;
+        this.data = this.data.filter(item => item.length > 1 && item[0] !== "");
+        console.log('this.data in parseCSV  ---> ', this.data);
+      }
+    }
+  }
+
+
+
+  createTranslatedRecords() {
+    this.translatedRecords = this.data.map(row => {
+      return {
+        'Name': row[0] ? row[0].trim() : '',
+        'DxCPQ__FieldValue__c': row[1] ? row[1].trim() : '',
+        'DxCPQ__Translated_Value__c': row[3] ? row[3].trim() : '',
+        'DxCPQ__Language__c': row[2] ? this.getLanguageCode(row[2].trim()) : '',
+        'DxCPQ__DocumentTemplate__c': this.documenttemplaterecord.Id
+      };
+    });
+    console.log('this.translatedRecords list inside createTranslatedRecords fn ---> ', this.translatedRecords);
+  }
+
+  getLanguageCode(language) {
+    return this.languageMap[language] || '';
+  }
+
+  handleTranslationsSearch(event) {
+    let searchTerm = event.target.value.toLowerCase();
+    if (searchTerm) {
+      this.translatedRecords = this.originalData.filter(record => {
+        return Object.values(record).some(value =>
+          value && value.toLowerCase().includes(searchTerm)
+        );
+      });
+    } else {
+      this.translatedRecords = [...this.originalData];
+    }
+    console.log('this.data inside handleImportTranslationsSearch --> ', this.data);
+  }
+
+  handleClickCancel(){
+    this.template.querySelector('c-modal').hide();
+  }
+
 }

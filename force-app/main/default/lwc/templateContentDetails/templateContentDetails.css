@@ -5,6 +5,6 @@
     display: inline-block;
 }
 .table-container {
-    max-height: 400px; /* Adjust the height as needed */
+    max-height: 360px;
     overflow-y: auto;
 }

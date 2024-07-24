@@ -29,7 +29,7 @@
 			</div>
 			<div class="slds-grid">
 				<div class="slds-col_bump-left slds-m-top_small">
-						<lightning-button-icon class="" icon-name="utility:filter_criteria_rule"  variant="bare" alternative-text="Settings" title="Apply Filter(s)" label="Apply Filter(s)"  size="large"  onclick={handleFiltering} disabled={isDisabled}></lightning-button-icon>
+						<lightning-button-icon class="" icon-name="utility:filter_criteria_rule"  variant="bare" alternative-text="Settings" title="Apply Filter(s)" label="Apply Filter(s)"  size="large"  onclick={handleFiltering}></lightning-button-icon>
 				</div>
 				</div>
 			</div>
@@ -43,17 +43,17 @@
 		<template if:true={ruleCondition}>
 		  <span slot="header">Apply Filter(s)</span>
 		  <div class="slds-modal__content slds-p-around_medium" style="min-height: 300px;">
-			<c-conditioncmp list-of-existing-conditions={listOfExistingConditions} field-wrapper={fieldWrapper} existing-global-value={selectedGlobalValue} existing-expression={ruleExpression} style="width:100%"></c-conditioncmp>
+			<c-conditioncmp list-of-existing-conditions={listOfExistingConditions} field-wrapper={fieldWrapper} existing-global-value={selectedGlobalValue} existing-expression={ruleExpression} style="width:100%" read-only={isDisabled}></c-conditioncmp>
 		  </div>
 		  <footer class="slds-modal__footer">
 			<div class="slds-text-align_right">
 			  <lightning-button class="slds-p-right_x-small" variant="brand" label="Cancel" title="Cancel" onclick={closePreviewModal}></lightning-button>
 			  <template if:true={ruleExists}>
-				<lightning-button class="slds-p-right_x-small" variant="brand" label="Reset Rule & Save" title="Reset" onclick={handleFilterRuleReset}></lightning-button>
-				<lightning-button class="slds-p-right_x-small" variant="brand" label="Update Rule" title="Update" onclick={handleRuleUpdates}></lightning-button>
+				<lightning-button class="slds-p-right_x-small" variant="brand" label="Reset Rule & Save" title="Reset" onclick={handleFilterRuleReset} disabled={isDisabled}></lightning-button>
+				<lightning-button class="slds-p-right_x-small" variant="brand" label="Update Rule" title="Update" onclick={handleRuleUpdates} disabled={isDisabled}></lightning-button>
 			  </template>
 			  <template if:false={ruleExists}>
-				<lightning-button class="slds-p-right_x-small" variant="brand" label="Create Rule" title="Create" onclick={handleCreateRules}></lightning-button>
+				<lightning-button class="slds-p-right_x-small" variant="brand" label="Create Rule" title="Create" onclick={handleCreateRules} disabled={isDisabled}></lightning-button>
 			  </template>
 			</div>
 		  </footer>

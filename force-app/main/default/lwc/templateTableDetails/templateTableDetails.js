@@ -20,8 +20,38 @@ import createRuleCondition from '@salesforce/apex/RelatedObjectsClass.createRule
 import getConditions from '@salesforce/apex/RelatedObjectsClass.getExistingConditions';
 import { createRuleConditionHierarcy } from 'c/conditionUtil';
 import resetRulesForTemplate from '@salesforce/apex/RelatedObjectsClass.handleTemplateRuleResetCondition';
+import insertTranslatedRecords from '@salesforce/apex/LanguageTranslatorClass.insertTranslatedRecords';
 
 export default class TemplateTableDetails extends LightningElement {
+    //variables added by Bhavya for Import Translations
+    @track showTranslations = false;
+    @track disableCreate = true;
+    @track columns = [];
+    @track data = [];
+    @track showLoadingSpinner = false;
+    @track errorMessages = [];
+    originalData = [];
+    languageMap = {
+        'English': 'en_US',
+        'German': 'de',
+        'Spanish': 'es',
+        'French': 'fr',
+        'Italian': 'it',
+        'Japanese': 'ja',
+        'Swedish': 'sv',
+        'Korean': 'ko',
+        'Chinese (Traditional)': 'zh_TW',
+        'Chinese (Simplified)': 'zh_CN',
+        'Portuguese (Brazil)': 'pt_BR',
+        'Dutch': 'nl_NL',
+        'Danish': 'da',
+        'Thai': 'th',
+        'Finnish': 'fi',
+        'Russian': 'ru',
+        'Spanish (Mexico)': 'es_MX',
+        'Norwegian': 'no'
+    };
+
     //variables added by Bhavya for Document Translation starts here
     @track translateEnabled = true;
     @track isTranslateModalOpen = false;
@@ -2510,41 +2540,324 @@ export default class TemplateTableDetails extends LightningElement {
     getMergeFieldTranslate() {
         let mergeField = this.template.querySelector('c-dx-lookup-fields-displaycmp').getMergeField();
         if (mergeField != undefined) {
-        this.mergefieldname = '{!' + this.selectedObjectName + '.' + mergeField + '}';
-        if(this.rowlevelmerge){
-            //let rowIndex = this.selectedRowIndex;
+            this.mergefieldname = '{!' + this.selectedObjectName + '.' + mergeField + '}';
+            if (this.rowlevelmerge) {
+                //let rowIndex = this.selectedRowIndex;
                 this.isTranslateModalOpen = true;
                 let updatedRecords = [...this.translatedRecords];
-                    updatedRecords[this.selectedRowIndex] = {
-                        ...updatedRecords[this.selectedRowIndex],
-                        Name: this.mergefieldname
-                    };
-                    this.translatedRecords = updatedRecords;
+                updatedRecords[this.selectedRowIndex] = {
+                    ...updatedRecords[this.selectedRowIndex],
+                    Name: this.mergefieldname
+                };
+                this.translatedRecords = updatedRecords;
                 //this.translatedRecords[this.selectedRowIndex].Name = this.mergefieldname; // Update the "Field Label" column
                 this.rowlevelmerge = false;
-        }
-        else{
-            this.richtextVal += this.mergefieldname;
-            this.template.querySelector('c-modal').hide();
-        }
-        this.selectedMergefields.push(this.mergefieldname);
+            }
+            else {
+                this.richtextVal += this.mergefieldname;
+                this.template.querySelector('c-modal').hide();
+            }
+            this.selectedMergefields.push(this.mergefieldname);
         }
     }
 
-  getMergeFieldCopy() {
-    let mergeField = this.template.querySelector('c-dx-lookup-fields-displaycmp').getMergeField();
-    if (mergeField != undefined) {
-      this.mergefieldname = '{!' + this.selectedObjectName + '.' + mergeField + '}';
-      let tag = document.createElement('textarea');
-      tag.setAttribute('id', 'input_test_id');
-      tag.value = this.mergefieldname;
-      document.getElementsByTagName('body')[0].appendChild(tag);
-      document.getElementById('input_test_id').select();
-      document.execCommand('copy');
-      document.getElementById('input_test_id').remove();
-      this.selectedMergefields.push(this.mergefieldname);
+    getMergeFieldCopy() {
+        let mergeField = this.template.querySelector('c-dx-lookup-fields-displaycmp').getMergeField();
+        if (mergeField != undefined) {
+            this.mergefieldname = '{!' + this.selectedObjectName + '.' + mergeField + '}';
+            let tag = document.createElement('textarea');
+            tag.setAttribute('id', 'input_test_id');
+            tag.value = this.mergefieldname;
+            document.getElementsByTagName('body')[0].appendChild(tag);
+            document.getElementById('input_test_id').select();
+            document.execCommand('copy');
+            document.getElementById('input_test_id').remove();
+            this.selectedMergefields.push(this.mergefieldname);
+        }
+        this.template.querySelector('c-modal').hide();
     }
-    this.template.querySelector('c-modal').hide();
-  }
+
+
+    // handleCopyRowStyles(event) {
+    //     let selectedCell = event.target.closest('td') || event.target.closest('th');
+    //     if (selectedCell) {
+    //         let selectedRichText = selectedCell.querySelector('lightning-input-rich-text');
+    //         let cellStyles = window.getComputedStyle(selectedRichText);
+
+    //         console.log('cell styles string ' + JSON.stringify(cellStyles));
+
+    //         let row = selectedCell.parentElement;
+
+    //         row.querySelectorAll('td, th').forEach(cell => {
+    //             if (cell !== selectedCell) {
+    //                 let targetRichText = cell.querySelector('lightning-input-rich-text');
+    //                 if (targetRichText) {
+    //                     targetRichText.style.fontWeight = cellStyles.fontWeight;
+    //                     targetRichText.style.fontStyle = cellStyles.fontStyle;
+    //                     targetRichText.style.textDecoration = cellStyles.textDecoration;
+    //                     targetRichText.style.textAlign = cellStyles.textAlign;
+    //                     targetRichText.style.color = cellStyles.color;
+    //                     targetRichText.style.backgroundColor = cellStyles.backgroundColor;
+
+    //                     let divElement = targetRichText.nextElementSibling;
+    //                     let existingIndex = this.divContentArray.findIndex(item => item['data-id'] === divElement.dataset.id);
+    //                     if (existingIndex !== -1) {
+    //                         this.divContentArray[existingIndex] = {
+    //                             ...this.divContentArray[existingIndex],
+    //                             fontWeight: cellStyles.fontWeight,
+    //                             fontStyle: cellStyles.fontStyle,
+    //                             textDecoration: cellStyles.textDecoration,
+    //                             textAlign: cellStyles.textAlign,
+    //                             color: cellStyles.color,
+    //                             backgroundColor: cellStyles.backgroundColor
+    //                         };
+    //                     } else {
+    //                         this.divContentArray.push({
+    //                             'data-id': divElement.dataset.id,
+    //                             fontWeight: cellStyles.fontWeight,
+    //                             fontStyle: cellStyles.fontStyle,
+    //                             textDecoration: cellStyles.textDecoration,
+    //                             textAlign: cellStyles.textAlign,
+    //                             color: cellStyles.color,
+    //                             backgroundColor: cellStyles.backgroundColor
+    //                         });
+    //                     }
+    //                     console.log('div Content Array update row styles  ' + JSON.stringify(this.divContentArray));
+    //                 }
+    //             }
+    //         });
+    //     }
+    // }
+
+    // handleCopyColStyles(event) {
+    //     let selectedCell = event.target.closest('td') || event.target.closest('th');
+    //     if (selectedCell) {
+    //         let selectedRichText = selectedCell.querySelector('lightning-input-rich-text');
+    //         let cellStyles = window.getComputedStyle(selectedRichText);
+
+    //         let columnIndex = [...selectedCell.parentElement.children].indexOf(selectedCell);
+
+    //         this.template.querySelectorAll('tbody tr').forEach(row => {
+    //             let cell = row.children[columnIndex];
+    //             if (cell !== selectedCell) {
+    //                 let targetRichText = cell.querySelector('lightning-input-rich-text');
+    //                 if (targetRichText) {
+    //                     targetRichText.style.fontWeight = cellStyles.fontWeight;
+    //                     targetRichText.style.fontStyle = cellStyles.fontStyle;
+    //                     targetRichText.style.textDecoration = cellStyles.textDecoration;
+    //                     targetRichText.style.textAlign = cellStyles.textAlign;
+    //                     targetRichText.style.color = cellStyles.color;
+    //                     targetRichText.style.backgroundColor = cellStyles.backgroundColor;
+
+    //                     let divElement = targetRichText.nextElementSibling;
+    //                     let existingIndex = this.divContentArray.findIndex(item => item['data-id'] === divElement.dataset.id);
+    //                     if (existingIndex !== -1) {
+    //                         this.divContentArray[existingIndex] = {
+    //                             ...this.divContentArray[existingIndex],
+    //                             fontWeight: cellStyles.fontWeight,
+    //                             fontStyle: cellStyles.fontStyle,
+    //                             textDecoration: cellStyles.textDecoration,
+    //                             textAlign: cellStyles.textAlign,
+    //                             color: cellStyles.color,
+    //                             backgroundColor: cellStyles.backgroundColor
+    //                         };
+    //                     } else {
+    //                         this.divContentArray.push({
+    //                             'data-id': divElement.dataset.id,
+    //                             fontWeight: cellStyles.fontWeight,
+    //                             fontStyle: cellStyles.fontStyle,
+    //                             textDecoration: cellStyles.textDecoration,
+    //                             textAlign: cellStyles.textAlign,
+    //                             color: cellStyles.color,
+    //                             backgroundColor: cellStyles.backgroundColor
+    //                         });
+    //                     }
+    //                     console.log('div Content Array update col styles  ' + JSON.stringify(this.divContentArray));
+    //                 }
+    //             }
+    //         });
+    //     }
+    // }
+
+    showToastMsg(title, msg, variant) {
+        const event4 = new ShowToastEvent({
+            title: title,
+            message: msg,
+            variant: variant,
+        });
+        this.dispatchEvent(event4);
+    }
+
+    //code added by Bhavya for Import Translations
+    handleImportTranslation(event) {
+        this.template.querySelector('c-modal').hide();
+        this.isTranslateModalOpen = false;
+        this.showTranslations = true;
+        this.showTranslateMergeFields = false;
+        this.ruleCondition = false;
+        this.confirmMergeCell = false;
+        this.showCellBgColor = false;
+        this.isClearTable = false;
+        this.isTableColumnSizeChange = false;
+        this.showImageModal = false;
+        this.showmergefield = false;
+        this.template.querySelector('c-modal[data-id="importTranslation"]').show();
+    }
+
+    get acceptedFormats() {
+        return ['.csv', '.xlsx'];
+    }
+
+    handleCreateTranslations() {
+        console.log('handleCreateTranslations clicked --> ');
+        if (this.translatedRecords.length === 0) {
+            console.error('No records to insert');
+            return;
+        }
+        this.showLoadingSpinner = true
+        insertTranslatedRecords({ translatedRecords: this.translatedRecords })
+            .then(result => {
+                if (result) {
+                    console.log('Records inserted successfully');
+                    this.showToastMsg('Success', 'Translations saved successfully!', 'success');
+                    this.template.querySelector('c-modal[data-id="importTranslation"]').hide();
+                    this.template.querySelector('c-modal[data-id="translation"]').show();
+                    this.showTranslations = false;
+                    this.showLoadingSpinner = false;
+                    this.data = [];
+                } else {
+                    console.error('Failed to insert records');
+                    this.showToastMsg('Error', 'Error saving translations. Please Contact Administrator.', 'Error');
+                    this.showLoadingSpinner = false;
+                }
+            })
+            .catch(error => {
+                console.error('Error inserting records:', error);
+                this.showToastMsg('Error', 'Error saving translations. Please Contact Administrator.', 'Error');
+                this.showLoadingSpinner = false;
+            });
+    }
+
+    handleCloseImportTranslations() {
+        this.template.querySelector('c-modal[data-id="importTranslation"]').hide();
+        this.template.querySelector('c-modal').show();
+        this.isTranslateModalOpen = true;
+        this.showTranslations = false;
+        this.showTranslations = true;
+        this.showTranslateMergeFields = false;
+        this.ruleCondition = false;
+        this.confirmMergeCell = false;
+        this.showCellBgColor = false;
+        this.isClearTable = false;
+        this.isTableColumnSizeChange = false;
+        this.showImageModal = false;
+        this.showmergefield = false;
+        this.data = [];
+    }
+
+    handleFileUpload(event) {
+        let file = event.target.files[0];
+        if (file && file.type === 'text/csv') {
+            let reader = new FileReader();
+
+            reader.onload = (e) => {
+                try {
+                    let csv = e.target.result;
+                    this.parseCSV(csv);
+                    this.createTranslatedRecords();
+                } catch (error) {
+                    console.error('Error parsing CSV:', error);
+                    this.showToastMsg('Error', 'CSV file is broken. Cannot view it.', 'Error');
+                }
+            };
+
+            reader.onerror = (error) => {
+                console.error('Error reading file:', error);
+                this.showToastMsg('Error', 'Failed to read the file. Please try again.', 'Error');
+            };
+
+            reader.readAsText(file);
+        } else {
+            console.error('Please upload a valid CSV file.');
+            this.showToastMsg('Error', 'Please upload a valid CSV file.', 'Error');
+        }
+    }
+
+    parseCSV(csv) {
+        const lines = csv.split('\n');
+        if (lines.length > 0) {
+            this.columns = lines[0].split(',');
+            this.data = lines.slice(1).map(line => line.split(','));
+            let emptyNameRows = [];
+            let translatedValueWithoutLanguageRows = [];
+            this.data.forEach((row, index) => {
+                const rowNumber = index + 2;
+                if (!row[0]) {
+                    emptyNameRows.push(rowNumber);
+                }
+                if (row[3] && !row[2]) {
+                    translatedValueWithoutLanguageRows.push(rowNumber);
+                }
+            });
+            this.errorMessages = [];
+
+            if (emptyNameRows.length > 0) {
+                this.errorMessages.push(`Rows ${emptyNameRows.join(', ')}: Name is empty. Please check the CSV file and re-upload.`);
+            }
+
+            if (translatedValueWithoutLanguageRows.length > 0) {
+                this.errorMessages.push(`Rows ${translatedValueWithoutLanguageRows.join(', ')}: Translated Value is present without Language. Please check the CSV file and re-upload.`);
+            }
+            if (this.errorMessages.length > 0) {
+                this.disableCreate = true;
+                this.showToastMsg('Error', this.errorMessages.join(' '), 'Error');
+                this.data = [];
+            }
+            else {
+                this.disableCreate = false;
+                this.data = this.data.filter(item => item.length > 1 && item[0] !== "");
+                console.log('this.data in parseCSV  ---> ', this.data);
+            }
+        }
+    }
+
+
+
+    createTranslatedRecords() {
+        this.translatedRecords = this.data.map(row => {
+            return {
+                'Name': row[0] ? row[0].trim() : '',
+                'DxCPQ__FieldValue__c': row[1] ? row[1].trim() : '',
+                'DxCPQ__Translated_Value__c': row[3] ? row[3].trim() : '',
+                'DxCPQ__Language__c': row[2] ? this.getLanguageCode(row[2].trim()) : '',
+                'DxCPQ__DocumentTemplate__c': this.documenttemplaterecord.Id
+            };
+        });
+        console.log('this.translatedRecords list inside createTranslatedRecords fn ---> ', this.translatedRecords);
+    }
+
+    getLanguageCode(language) {
+        return this.languageMap[language] || '';
+    }
+
+    handleTranslationsSearch(event) {
+        let searchTerm = event.target.value.toLowerCase();
+        if (searchTerm) {
+            this.translatedRecords = this.originalData.filter(record => {
+                return Object.values(record).some(value =>
+                    value && value.toLowerCase().includes(searchTerm)
+                );
+            });
+        } else {
+            this.translatedRecords = [...this.originalData];
+        }
+        console.log('this.data inside handleImportTranslationsSearch --> ', this.data);
+    }
+
+    handleClickCancel() {
+        this.template.querySelector('c-modal').hide();
+    }
+
+
 
 }

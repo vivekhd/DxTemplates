@@ -186,4 +186,60 @@ public with sharing class LanguageTranslatorClass {
         return null;
     }
     
+    @AuraEnabled
+    public static Boolean insertTranslatedRecords(List<Map<String, Object>> translatedRecords) {
+        Boolean insertSuccess = false;
+        List<Translator__c > recordsToInsert = new List<Translator__c >();
+        
+        if (translatedRecords == null || translatedRecords.isEmpty()) {
+            return insertSuccess;
+        }
+
+        try {
+            for (Map<String, Object> recordMap : translatedRecords) {
+                Translator__c  newRecord = new Translator__c ();
+                if (recordMap.containsKey('Name')) {
+                    newRecord.Name = (String) recordMap.get('Name');
+                }
+                if (recordMap.containsKey('DxCPQ__FieldValue__c')) {
+                    newRecord.DxCPQ__FieldValue__c = (String) recordMap.get('DxCPQ__FieldValue__c');
+                }
+                if (recordMap.containsKey('DxCPQ__Translated_Value__c')) {
+                    newRecord.DxCPQ__Translated_Value__c = (String) recordMap.get('DxCPQ__Translated_Value__c');
+                }
+                if (recordMap.containsKey('DxCPQ__Language__c')) {
+                    newRecord.DxCPQ__Language__c = (String) recordMap.get('DxCPQ__Language__c');
+                }
+                if (recordMap.containsKey('DxCPQ__DocumentTemplate__c')) {
+                    newRecord.DxCPQ__DocumentTemplate__c = (String) recordMap.get('DxCPQ__DocumentTemplate__c');
+                }
+                
+                recordsToInsert.add(newRecord);
+            }
+
+            if (!recordsToInsert.isEmpty()) {
+                List<Database.SaveResult> saveResults = Database.insert(recordsToInsert, false);
+                insertSuccess = true;
+                for (Database.SaveResult result : saveResults) {
+                    if (!result.isSuccess()) {
+                        insertSuccess = false;
+                        break;
+                    }
+                }
+            }
+        } catch (Exception ex) {
+            LogHandler.createLog(null, 'LanguageTranslatorClass insertTranslatedRecords method Error', ex.getLineNumber() + ex.getStackTraceString() + ex.getCause(), ex.getMessage(), 'Exception');
+        }
+        
+        return insertSuccess;
+    }
+    
+    @AuraEnabled
+    public static List<Translator__c> getAllTranslations(String docTempId) {
+        System.debug('docTempId -->> '+ docTempId);
+        List<Translator__c> transLst = [ SELECT Id, Name, DxCPQ__FieldValue__c, DxCPQ__Translated_Value__c, DxCPQ__Language__c, DxCPQ__DocumentTemplate__c FROM DxCPQ__Translator__c where DxCPQ__DocumentTemplate__c =:docTempId WITH USER_MODE ];
+    	System.debug('transLst --> '+ transLst);
+        return transLst;
+    }
+    
 }

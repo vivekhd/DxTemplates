@@ -292,44 +292,53 @@
 						<lightning-record-edit-form record-id={documenttemplaterecordid}
 							object-api-name="DxCPQ__Document_Template__c" onsuccess={handleEditSuccess}>
 							<lightning-input-field field-name="Name" disabled ={readonlyVal}> </lightning-input-field>
-							<lightning-output-field field-name="DxCPQ__Related_To_Type__c"> </lightning-output-field>
+							<div class="slds-grid">
+								<lightning-output-field field-name="DxCPQ__Related_To_Type__c" class = "slds col slds-size_1-of-1 slds-medium-size_2-of-12"> </lightning-output-field>
+								<lightning-output-field field-name="DxCPQ__Version_Number__c" class = "slds col slds-size_1-of-1 slds-medium-size_2-of-12"> </lightning-output-field>
+							</div>
 							<lightning-input-field field-name="DxCPQ__Description__c" disabled ={readonlyVal}> </lightning-input-field>
-							<lightning-output-field field-name="DxCPQ__Version_Number__c"> </lightning-output-field>
 							<!-- Changes by Reethika - selecting apex classes and auto launched flows -->
-							<div class="slds-col slds-size_1-of-1 slds-medium-size_6-of-12">
-								<label class="slds-checkbox_toggle slds-grid">
-									<label class="slds-form-element__label slds-no-flex">PROCESS TYPE</label>
-									<input type="checkbox" class="slds-p-top_x-large" name="checkbox-toggle-16"
-										onchange={handleRelationshipType} checked={isBundled}
-										aria-describedby="checkbox-toggle-16" />
-									<span id="checkbox-toggle-16" class="slds-checkbox_faux_container" aria-live="assertive">
-										<span class="slds-checkbox_faux"></span>
-										<span class="slds-checkbox_on">APEX CLASS</span>
-										<span class="slds-checkbox_off">FLOW</span>
-									</span>
-								</label>
+							<div class="slds-grid slds-wrap">
+								<div class="slds-col slds-size_1-of-1 slds-medium-size_2-of-12">
+									<label class="slds-checkbox_toggle slds-grid">
+										<label class="slds-form-element__label slds-no-flex">PROCESS TYPE</label>
+										<input type="checkbox" class="slds-p-top_x-large" name="checkbox-toggle-16"
+											onchange={handleRelationshipType} checked={isBundled}
+											aria-describedby="checkbox-toggle-16" />
+										<span id="checkbox-toggle-16" class="slds-checkbox_faux_container" aria-live="assertive">
+											<span class="slds-checkbox_faux"></span>
+											<span class="slds-checkbox_on">APEX CLASS</span>
+											<span class="slds-checkbox_off">FLOW</span>
+										</span>
+									</label>
+								</div>
+								<div class="slds-col slds-size_1-of-1 slds-medium-size_10-of-12">
+									<template if:true={isBundled}>
+										<c-search-category has-multi-select="false" data-id="search" options={classTypeOptions}
+										label="Select the class name" searchtext="Select the class name"
+										onselectedcategoryvalues={handleClassselection} disabled={isDisabled}></c-search-category>
+									</template>
+									<template if:false={isBundled}>
+										<c-search-category has-multi-select="false" data-id="object" options={flowTypeOptions}
+										label="Select the flow name" data-search searchtext="Select the flow name"
+										onselectedcategoryvalues={handleFlowselection} disabled={isDisabled}></c-search-category>
+									</template>
+								</div>
+								<div class="slds-col slds-size_1-of-1 slds-medium-size_6-of-12 slds-m-top_large slds-text-align_left">
+									<lightning-button class="slds-m-top_small" type="submit" label="Watermark Settings"
+										variant="brand" onclick={handleWatermarkSettings}></lightning-button>
+										<lightning-button-icon icon-name="utility:help_doc_ext" onclick={handlehelp} alternative-text="Need Help?" title="Need Help?" class="slds-button_icon-help slds-m-right_small" size="medium" variant="bare" style="margin-top: 3px;" data-val="Watermark Settings">
+										</lightning-button-icon>
+								</div>
+								<div class="slds-col slds-size_1-of-1 slds-medium-size_6-of-12 slds-m-top_large slds-text-align_right">
+									<lightning-button class="slds-m-top_small" type="submit" label="Save" variant="brand" if:false={readonlyVal}>
+									</lightning-button>
+								</div>
 							</div>
-							<template if:true={isBundled}>
-								<c-search-category has-multi-select="false" data-id="search" options={classTypeOptions}
-								label="Select the class name" searchtext="Select the class name"
-								onselectedcategoryvalues={handleClassselection} disabled={isDisabled}></c-search-category>
-							</template>
-							<template if:false={isBundled}>
-								<c-search-category has-multi-select="false" data-id="object" options={flowTypeOptions}
-								label="Select the flow name" data-search searchtext="Select the flow name"
-								onselectedcategoryvalues={handleFlowselection} disabled={isDisabled}></c-search-category>
-							</template>
-							<div class="slds-text-align_right">
-								<lightning-button class="slds-m-top_small" type="submit" label="Save" variant="brand" if:false={readonlyVal}>
-								</lightning-button>
-							</div>
+							
+							
 						</lightning-record-edit-form>
-						<div class="slds-text-align_left">
-							<lightning-button class="slds-m-top_small" type="submit" label="Watermark Settings"
-								variant="brand" onclick={handleWatermarkSettings}></lightning-button>
-								<lightning-button-icon icon-name="utility:help_doc_ext" onclick={handlehelp} alternative-text="Need Help?" title="Need Help?" class="slds-button_icon-help slds-m-right_small" size="medium" variant="bare" style="margin-top: 3px;" data-val="Watermark Settings"></lightning-button-icon>
 						
-						</div>
 
 					</div>
 					<footer class="slds-modal__footer"></footer>

@@ -16,7 +16,39 @@ import createRuleCondition from '@salesforce/apex/RelatedObjectsClass.createRule
 import getConditions from '@salesforce/apex/RelatedObjectsClass.getExistingConditions';
 import { createRuleConditionHierarcy } from 'c/conditionUtil';
 import resetRulesForTemplate from '@salesforce/apex/RelatedObjectsClass.handleTemplateRuleResetCondition';
+import getContentVersions from '@salesforce/apex/FooterClass.getContentVersions';
+import getDomainUrl from '@salesforce/apex/PdfDisplay.getDomainUrl';
+import insertTranslatedRecords from '@salesforce/apex/LanguageTranslatorClass.insertTranslatedRecords';
 export default class TemplateContentDetails extends NavigationMixin(LightningElement) {
+    //variables added by Bhavya for Import Translations
+    @track showTranslations = false;
+    @track disableCreate = true;
+    @track columns = [];
+    @track data = [];
+    @track showLoadingSpinner = false;
+    @track errorMessages = [];
+    originalData = [];
+    languageMap = {
+        'English': 'en_US',
+        'German': 'de',
+        'Spanish': 'es',
+        'French': 'fr',
+        'Italian': 'it',
+        'Japanese': 'ja',
+        'Swedish': 'sv',
+        'Korean': 'ko',
+        'Chinese (Traditional)': 'zh_TW',
+        'Chinese (Simplified)': 'zh_CN',
+        'Portuguese (Brazil)': 'pt_BR',
+        'Dutch': 'nl_NL',
+        'Danish': 'da',
+        'Thai': 'th',
+        'Finnish': 'fi',
+        'Russian': 'ru',
+        'Spanish (Mexico)': 'es_MX',
+        'Norwegian': 'no'
+    };
+  
   isLoaded = false;
   showMergeFields = false;
   newpage = false;
@@ -374,6 +406,12 @@ export default class TemplateContentDetails extends NavigationMixin(LightningEle
     this.richtextVal = '';
     this.Recorddetailsnew.Name = '';
   }
+
+  //code added by Bhavya to preserve the spaces in Context section
+  handleWhiteSpacesinText(str){
+    str = str.replace(/  /g, '&nbsp;&nbsp;');
+    return str;
+  }  
 
   handlesectionsave(event) {
     var richtextvalvar = this.richtextVal;
@@ -847,7 +885,10 @@ export default class TemplateContentDetails extends NavigationMixin(LightningEle
             } else {
               this.translatedRecords = this.dataArray;
             }
-          }})
+          }
+          this.originalData = JSON.parse(JSON.stringify(this.translatedRecords));
+          console.log('this.originalData 1017--? ', this.originalData);
+          })
           .catch(error => {
             let errorMessage = error.message || 'Unknown error message';
             let tempError = error.toString();
@@ -899,6 +940,8 @@ export default class TemplateContentDetails extends NavigationMixin(LightningEle
           this.translatedRecords.splice(indexVal, 1);
           this.translatedRecords = [...this.translatedRecords];
       }
+      this.originalData = JSON.parse(JSON.stringify(this.translatedRecords));
+      console.log('this.originalData 1071--? ', this.originalData);
   }
 
   handleLanguageChange(event) {
@@ -914,6 +957,8 @@ export default class TemplateContentDetails extends NavigationMixin(LightningEle
       return;
     } 
     this.translatedRecords[indexVal].Name = event.target.value; 
+    this.originalData = JSON.parse(JSON.stringify(this.translatedRecords));
+    console.log('this.originalData 1088--? ', this.originalData);
   }
 
   handleCellTwoInputChange(event) {
@@ -923,6 +968,8 @@ export default class TemplateContentDetails extends NavigationMixin(LightningEle
       return;
     }
     this.translatedRecords[indexVal].DxCPQ__FieldValue__c = event.target.value; 
+    this.originalData = JSON.parse(JSON.stringify(this.translatedRecords));
+    console.log('this.originalData 1099--? ', this.originalData);
   }
 
   handleCellThreeInputChange(event) {
@@ -931,6 +978,8 @@ export default class TemplateContentDetails extends NavigationMixin(LightningEle
       console.error('Invalid index:', indexVal);
     }
     this.translatedRecords[indexVal].DxCPQ__Translated_Value__c = event.target.value; 
+    this.originalData = JSON.parse(JSON.stringify(this.translatedRecords));
+    console.log('this.originalData 1109--? ', this.originalData);
   }
 
   updateTranslatedValues(list) {
@@ -945,6 +994,10 @@ export default class TemplateContentDetails extends NavigationMixin(LightningEle
         }
     });
     return list;
+  }
+
+  handleClickCancel(){
+    this.template.querySelector('c-modal').hide();
   }
 
   handleSave() {
@@ -1038,5 +1091,162 @@ export default class TemplateContentDetails extends NavigationMixin(LightningEle
     let selection = window.getSelection().toString();
     let editor = this.template.querySelector('lightning-input-rich-text');
     editor.setFormat(applySelectedFormats);
+  }
+  showToastMsg(title, msg, variant){
+    const event4 = new ShowToastEvent({
+      title: title,
+      message: msg,
+      variant: variant,
+    });
+    this.dispatchEvent(event4);
+  }
+
+  //code added by Bhavya for Import Translations
+  handleImportTranslation(event){
+    this.template.querySelector('c-modal').hide();
+    this.template.querySelector('c-modal[data-id="filter"]').hide();
+    this.template.querySelector('c-modal[data-id="translation"]').hide();
+    this.showTranslations = true;
+    this.template.querySelector('c-modal[data-id="importTranslation"]').show();
+  }
+
+  get acceptedFormats() {
+    return ['.csv','.xlsx'];
+  }
+
+  handleCreateTranslations(){
+    console.log('handleCreateTranslations clicked --> ');
+    if (this.translatedRecords.length === 0) {
+      console.error('No records to insert');
+      return;
+    }
+    this.showLoadingSpinner = true
+    insertTranslatedRecords({ translatedRecords: this.translatedRecords })
+    .then(result => {
+        if (result) {
+          console.log('Records inserted successfully');
+          this.showToastMsg('Success', 'Translations saved successfully!', 'success');
+          this.template.querySelector('c-modal[data-id="importTranslation"]').hide();
+          this.template.querySelector('c-modal[data-id="translation"]').show();
+          this.showTranslations = false;
+          this.showLoadingSpinner = false;
+          this.data = [];
+        } else {
+          console.error('Failed to insert records');
+          this.showToastMsg('Error', 'Error saving translations. Please Contact Administrator.', 'Error');
+          this.showLoadingSpinner = false;
+        }
+    })
+    .catch(error => {
+        console.error('Error inserting records:', error);
+        this.showToastMsg('Error', 'Error saving translations. Please Contact Administrator.', 'Error');
+        this.showLoadingSpinner = false;
+    });
+  }
+
+  handleCloseImportTranslations(){
+    this.template.querySelector('c-modal[data-id="importTranslation"]').hide();
+    this.template.querySelector('c-modal[data-id="translation"]').show();
+    this.showTranslations = false;
+    this.data = [];
+  }
+
+  handleFileUpload(event) {
+    let file = event.target.files[0];
+    if (file && file.type === 'text/csv') {
+        let reader = new FileReader();
+        
+        reader.onload = (e) => {
+            try {
+                let csv = e.target.result;
+                this.parseCSV(csv);
+                this.createTranslatedRecords();
+            } catch (error) {
+                console.error('Error parsing CSV:', error);
+                this.showToastMsg('Error', 'CSV file is broken. Cannot view it.', 'Error');
+            }
+        };
+        
+        reader.onerror = (error) => {
+            console.error('Error reading file:', error);
+            this.showToastMsg('Error', 'Failed to read the file. Please try again.', 'Error');
+        };
+        
+        reader.readAsText(file);
+    } else {
+        console.error('Please upload a valid CSV file.');
+        this.showToastMsg('Error', 'Please upload a valid CSV file.', 'Error');
+    }
+  }
+
+parseCSV(csv) {
+    const lines = csv.split('\n');
+    if (lines.length > 0) {
+        this.columns = lines[0].split(',');
+        this.data = lines.slice(1).map(line => line.split(','));
+        let emptyNameRows = [];
+        let translatedValueWithoutLanguageRows = [];
+        this.data.forEach((row, index) => {
+            const rowNumber = index + 2;
+            if (!row[0]) {
+                emptyNameRows.push(rowNumber);
+            }
+            if (row[3] && !row[2]) {
+                translatedValueWithoutLanguageRows.push(rowNumber);
+            }
+        });
+        this.errorMessages = [];
+
+        if (emptyNameRows.length > 0) {
+            this.errorMessages.push(`Rows ${emptyNameRows.join(', ')}: Name is empty. Please check the CSV file and re-upload.`);
+        }
+
+        if (translatedValueWithoutLanguageRows.length > 0) {
+            this.errorMessages.push(`Rows ${translatedValueWithoutLanguageRows.join(', ')}: Translated Value is present without Language. Please check the CSV file and re-upload.`);
+        }
+        if (this.errorMessages.length > 0) {
+          this.disableCreate = true;
+          this.showToastMsg('Error', this.errorMessages.join(' '), 'Error');
+          this.data = [];
+        } 
+        else{
+          this.disableCreate = false;
+          this.data = this.data.filter(item => item.length > 1 && item[0] !== "");
+          console.log('this.data in parseCSV  ---> ', this.data);
+        } 
+    }
+}
+
+
+
+  createTranslatedRecords() {
+    this.translatedRecords = this.data.map(row => {
+        return {
+            'Name': row[0] ? row[0].trim() : '',
+            'DxCPQ__FieldValue__c': row[1] ? row[1].trim() : '',
+            'DxCPQ__Translated_Value__c': row[3] ? row[3].trim() : '',
+            'DxCPQ__Language__c': row[2] ? this.getLanguageCode(row[2].trim()) : '',
+            'DxCPQ__DocumentTemplate__c': this.documenttemplaterecord.Id
+        };
+    });
+    console.log('this.translatedRecords list inside createTranslatedRecords fn ---> ', this.translatedRecords);
+  }
+
+  getLanguageCode(language) {
+    return this.languageMap[language] || '';
+  }
+
+  handleTranslationsSearch(event){
+    let searchTerm = event.target.value.toLowerCase();
+    if (searchTerm) {
+      this.translatedRecords = this.originalData.filter(record => {
+          return Object.values(record).some(value =>
+              value && value.toLowerCase().includes(searchTerm)
+          );
+      });
+    } else {
+      this.translatedRecords = [...this.originalData];
+    }
+    console.log('this.data inside handleImportTranslationsSearch --> ', this.data);
   }
 }

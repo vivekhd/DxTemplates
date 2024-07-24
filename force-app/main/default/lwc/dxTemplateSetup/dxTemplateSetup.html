@@ -6,8 +6,8 @@
 					<div class="slds-col sidenavleft">
 						<!-- Changes by Kapil - fix for SObj Filters -->
 						<lightning-button-group class="slds-float_right" style="padding-top:40px; margin: 2px 10px 0px 0px;">
-							<lightning-button-icon onclick={handleAllButtonsClicked} data-id="import" variant="border-filled" icon-name="utility:upload" style="z-index:1;"></lightning-button-icon>
-							<lightning-button-icon onclick={handleAllButtonsClicked} data-id="export" variant="border-filled" icon-name="utility:download" style="z-index:1;"></lightning-button-icon>
+							<lightning-button-icon onclick={handleAllButtonsClicked} data-id="import" title="Import templates" variant="border-filled" icon-name="utility:upload" style="z-index:1;"></lightning-button-icon>
+							<lightning-button-icon onclick={handleAllButtonsClicked} data-id="export" title="Export templates" variant="border-filled" icon-name="utility:download" style="z-index:1;"></lightning-button-icon>
 						</lightning-button-group>
 						<c-menu-setup if:true={documentsExist} grid-data={docGridData} is-template='true' template-value={templateRelatedTo}
 							placeholder-text="Search..." onactive={handleTemplateSelection} related-type-option-data={relatedTypeOptions} 
@@ -147,15 +147,20 @@
 						     label="Select the class name" searchtext="Select the class name"
 						     onselectedcategoryvalues={handleClassselection} disabled={isDisabled}></c-search-category>
 								</template>
-							</div>
-							
-							<div class="slds-col slds-size_1-of-1 slds-medium-size_6-of-12">
-									<template if:false={isBundled}>
+								<template if:false={isBundled}>
 								 	<c-search-category has-multi-select="false" data-id="object" options={flowTypeOptions}
 						     label="Select the flow name" searchtext="Select the flow name"
 						     onselectedcategoryvalues={handleFlowselection} disabled={isDisabled}></c-search-category>
 									</template>
 							</div>
+							
+							<!-- <div class="slds-col slds-size_1-of-1 slds-medium-size_6-of-12">
+									<template if:false={isBundled}>
+								 	<c-search-category has-multi-select="false" data-id="object" options={flowTypeOptions}
+						     label="Select the flow name" searchtext="Select the flow name"
+						     onselectedcategoryvalues={handleFlowselection} disabled={isDisabled}></c-search-category>
+									</template>
+							</div> -->
 						</div>
 
 						<div class="slds-text-align_right">
