@@ -5,50 +5,14 @@ import deletetemplate from '@salesforce/apex/SaveDocumentTemplatesection.deletet
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 import { NavigationMixin } from 'lightning/navigation';
 import gettemplatesectiondata from '@salesforce/apex/SaveDocumentTemplatesection.gettemplatesectiondata';
-import createUpdateMethod from '@salesforce/apex/LanguageTranslatorClass.createUpdateMethod';
-import deleteMethod from '@salesforce/apex/LanguageTranslatorClass.deleteMethod';
-import selectedLangMethod from '@salesforce/apex/LanguageTranslatorClass.selectedLangMethod';
-import getAllUserLanguages from '@salesforce/apex/LanguageTranslatorClass.getAllUserLanguages';
-import currectUserLang from '@salesforce/apex/LanguageTranslatorClass.currectUserLang';
 import createLog from '@salesforce/apex/LogHandler.createLog';
 import getSObjectListFiltering from '@salesforce/apex/RelatedObjectsClass.getSObjectListFiltering';
 import createRuleCondition from '@salesforce/apex/RelatedObjectsClass.createRuleCondition';
 import getConditions from '@salesforce/apex/RelatedObjectsClass.getExistingConditions';
 import { createRuleConditionHierarcy } from 'c/conditionUtil';
 import resetRulesForTemplate from '@salesforce/apex/RelatedObjectsClass.handleTemplateRuleResetCondition';
-import getContentVersions from '@salesforce/apex/FooterClass.getContentVersions';
-import getDomainUrl from '@salesforce/apex/PdfDisplay.getDomainUrl';
-import insertTranslatedRecords from '@salesforce/apex/LanguageTranslatorClass.insertTranslatedRecords';
 export default class TemplateContentDetails extends NavigationMixin(LightningElement) {
-    //variables added by Bhavya for Import Translations
-    @track showTranslations = false;
-    @track disableCreate = true;
-    @track columns = [];
-    @track data = [];
-    @track showLoadingSpinner = false;
-    @track errorMessages = [];
-    originalData = [];
-    languageMap = {
-        'English': 'en_US',
-        'German': 'de',
-        'Spanish': 'es',
-        'French': 'fr',
-        'Italian': 'it',
-        'Japanese': 'ja',
-        'Swedish': 'sv',
-        'Korean': 'ko',
-        'Chinese (Traditional)': 'zh_TW',
-        'Chinese (Simplified)': 'zh_CN',
-        'Portuguese (Brazil)': 'pt_BR',
-        'Dutch': 'nl_NL',
-        'Danish': 'da',
-        'Thai': 'th',
-        'Finnish': 'fi',
-        'Russian': 'ru',
-        'Spanish (Mexico)': 'es_MX',
-        'Norwegian': 'no'
-    };
-  
+ 
   isLoaded = false;
   showMergeFields = false;
   newpage = false;
@@ -78,29 +42,7 @@ export default class TemplateContentDetails extends NavigationMixin(LightningEle
   @track selectedMergefields = [];
   @api whereCondition ="";
   whereClause = " IsActive__c = true";
-  @track isTranslateModalOpen = false;
-  @track translatedRecords=[{
-        'Name': '',
-        'DxCPQ__FieldValue__c': '',
-        'DxCPQ__Translated_Value__c': '',
-        'Id': ''
-    }]; 
-  @track languages = [];
-  @track selectedLanguage; 
-  uniqueIdentifierVal = 0;
-  get uniqueIdentifier() {
-        this.uniqueIdentifierVal = this.uniqueIdentifierVal + 1;
-        return this.uniqueIdentifierVal;
-  }
-  @track dataArray = [{
-              'Name': '',
-              'DxCPQ__FieldValue__c': '',
-              'DxCPQ__Translated_Value__c': '',
-              'Id': this.uniqueIdentifier
-          }]; 
-  @track extractedWords = [];
-  transRecordNameArray = [];
-  translateEnabled = true;
+
   @api isSaved;
   @track Recorddetailsnew = {
     Name: '',
@@ -170,17 +112,6 @@ export default class TemplateContentDetails extends NavigationMixin(LightningEle
    // this.whereCondition = `DxCPQ__Document_Template__r.DxCPQ__Related_To_Type__c = '${this.selectedObjectName}' AND DxCPQ__Type__c = 'Context'`;
     this.whereClause = this.whereCondition;
     console.log('sectionrecordid',this.sectionrecordid);
-    getAllUserLanguages()
-      .then(result =>{
-        this.languages = result.map(option => {
-        return { label: option.label, value: option.value };
-        });
-      }).catch(error=>{
-        let errorMessage = error.message || 'Unknown error message';
-        let tempError = error.toString();
-        createLog({ recordId: '', className: 'TemplateContentDetails LWC Component - connectedCallback()', exceptionMessage: errorMessage, logData: tempError, logType: 'Exception' });
-      });
-      console.log('Languages----',this.languages);
   }
    handleFiltering() {
       this.ruleCondition = true;
@@ -387,6 +318,7 @@ export default class TemplateContentDetails extends NavigationMixin(LightningEle
 
   @api handleObjectNameSelection(objName) {
     this.selectedObjectName = objName;
+    this.handleRuleWrapperMaking();
   }
 
   @api handleActivateTemplate(isActive, objName) {
@@ -394,6 +326,7 @@ export default class TemplateContentDetails extends NavigationMixin(LightningEle
     this.isDisabled = isActive;
     this.disableButton = isActive;
     this.disabledeleteButton = isActive;
+    this.handleRuleWrapperMaking();
   }
 
   handlechange(event) {
@@ -758,328 +691,13 @@ export default class TemplateContentDetails extends NavigationMixin(LightningEle
     this[NavigationMixin.Navigate](config);
   }
 
-  handleTranslate(event) {
-      this.extractedWords = [];
-      this.extractWords();
-      this.isTranslateModalOpen = true;
-      this.template.querySelector('c-modal').show();
-
-      /* getAllUserLanguages()
-      .then(result =>{
-        this.languages = result.map(option => {
-        return { label: option.label, value: option.value };
-        });
-      }).catch(error=>{
-        let errorMessage = error.message || 'Unknown error message';
-        let tempError = error.toString();
-        createLog({ recordId: '', className: 'TemplateContentDetails LWC Component - connectedCallback()', exceptionMessage: errorMessage, logData: tempError, logType: 'Exception' });
-      }); */
-
-      currectUserLang()
-      .then(result => {
-        this.selectedLanguage = this.getLanguageValueByLabel(result); // Set the default value to English
-        this.transRecordsRetrive();
-      })
-      .catch(error => {
-        console.log('Error--',error.message);
-        let errorMessage = error.message || 'Unknown error message';
-        let tempError = error.toString();
-        createLog({ recordId: '', className: 'TemplateContentDetails LWC Component - connectedCallback()', exceptionMessage: errorMessage, logData: tempError, logType: 'Exception' });
-      });
-  }
-
-  getLanguageValueByLabel(label) {
-    const language = this.languages.find(lang => lang.label === label);
-    return language ? language.value : null;
-  }
-
-//   extractWords() {
-//       const regex = /&lt;&lt;([^>]+?)&gt;&gt;/g;
-//       let m;
-//       while ((m = regex.exec(this.richtextVal)) !== null) {
-//         // This is necessary to avoid infinite loops with zero-width matches
-//         if (m.index === regex.lastIndex) {
-//           regex.lastIndex++;
-//         }
-        
-//         // The result can be accessed through the `m`-variable.
-//         m.forEach((match, groupIndex) => {
-//           if(groupIndex%2!=0) this.extractedWords.push(match);
-//         });
-//       }
-//   }
-
-
-  //code added by Bhavya for extracting the merge fields along with the tokens
-  extractWords(){
-    let decodedRichtextVal = this.richtextVal.replace(/&lt;/g, '<').replace(/&gt;/g, '>');
-    let regex = /<<([^>]+?)>>|({![^}]+?})/g;
-    let m;
-    while ((m = regex.exec(decodedRichtextVal)) !== null) {
-      if (m.index === regex.lastIndex) {
-        regex.lastIndex++;
-      }
-      if (m[1]) {
-        this.extractedWords.push(m[1]);
-      } else if (m[2]) {
-        this.extractedWords.push(m[2]);
-      }
-    }
-    console.log('this.extractedWords after extractwords ----> ', this.extractedWords);
-  }
-
-  transRecordsRetrive(){
-    selectedLangMethod({language : this.selectedLanguage, extractedWords : JSON.stringify(this.extractedWords), docTempId : this.documenttemplaterecord.Id })
-          .then(result => {
-          if (result && result.length > 0) {
-            this.translatedRecords = [];
-            this.transRecordNameArray = [];
-              result.forEach(record => {
-                  // Iterate over each record and push it into translatedRecords array
-                  this.transRecordNameArray.push(record.Name);
-                  this.translatedRecords.push({
-                      'Name': record.Name,
-                      'DxCPQ__FieldValue__c': record.DxCPQ__FieldValue__c,
-                      'DxCPQ__Translated_Value__c': record.DxCPQ__Translated_Value__c,
-                      'Id': record.Id
-                  });
-              });
-              if(this.transRecordNameArray.length != this.extractedWords.length){
-                this.extractedWords.forEach((extraxtElem) => {
-                if(!this.transRecordNameArray.includes(extraxtElem)){
-                  this.translatedRecords.push({
-                    'Name': extraxtElem,
-                    'DxCPQ__FieldValue__c': '',
-                    'DxCPQ__Translated_Value__c': '',
-                    'Id':''
-                  });
-                }})
-              }
-              else{
-                //code for when this.transRecordNameArray & this.extractedwords are of same length
-                this.extractedWords.forEach(word => {
-                  if (!this.transRecordNameArray.includes(word)) 
-                  {
-                    this.transRecordNameArray.push(word);
-                    this.translatedRecords.push({
-                      'Name': word,
-                      'DxCPQ__FieldValue__c': '',
-                      'DxCPQ__Translated_Value__c': '',
-                      'Id':''
-                    });
-                  }
-                  });
-                }
-              //this.selectedLanguage = this.translatedRecords[0].DxCPQ__Language__c;
-          } else {
-            this.translatedRecords = [];
-            if(this.extractedWords.length>0){
-              this.extractedWords.forEach((extraxtElem) => {
-              this.translatedRecords.push({
-                'Name': extraxtElem,
-                'DxCPQ__FieldValue__c': '',
-                'DxCPQ__Translated_Value__c': '',
-                'Id': ''
-                });
-              })
-            } else {
-              this.translatedRecords = this.dataArray;
-            }
-          }
-          this.originalData = JSON.parse(JSON.stringify(this.translatedRecords));
-          console.log('this.originalData 1017--? ', this.originalData);
-          })
-          .catch(error => {
-            let errorMessage = error.message || 'Unknown error message';
-            let tempError = error.toString();
-            createLog({ recordId: '', className: 'TemplateContentDetails LWC Component - connectedCallback()', exceptionMessage: errorMessage, logData: tempError, logType: 'Exception' });
-          });
-  }
-
-  handleClick() {
-  const newDataArray = {
-          'Name': '',
-          'DxCPQ__FieldValue__c': '',
-          'DxCPQ__Translated_Value__c': '',
-          'Id' : this.uniqueIdentifier
-      };
-      this.translatedRecords.push(newDataArray);
-  }
-
-  handleRemoveRow(event) {
-      event.preventDefault();
-      const indexVal = event.target.dataset.index;
-      //let rowDelete= false;
-      /* const deleteData = [{
-          'FieldName': this.translatedRecords[indexVal].Name,
-          'FieldValue': this.translatedRecords[indexVal].DxCPQ__FieldValue__c,
-          'TranslatedValue': this.translatedRecords[indexVal].DxCPQ__Translated_Value__c,
-          'Id': this.translatedRecords[indexVal].Id
-      }]; */
-
-      var id = this.translatedRecords[indexVal].Id;
-      var regex = /^([a-zA-Z0-9_-]){18}$/;
-
-      if(regex.test(id)){
-          deleteMethod({deleteRecordId : id })
-          .then(result => {
-            if(result){
-              this.translatedRecords.splice(indexVal, 1);
-              this.translatedRecords = [...this.translatedRecords];
-              this.showToast('Success', 'Record deleted successfully', 'success'); 
-            }else{
-              this.showToast('Error', 'Error in deleting records, please check the logs', 'error');
-            }    
-          }).catch(error => {
-            this.showToast('Error', 'An error occurred while deliting the record', 'error');   
-            let errorMessage = error.message || 'Unknown error message';
-            let tempError = error.toString();
-            createLog({ recordId: '', className: 'TemplateContentDetails LWC Component - connectedCallback()', exceptionMessage: errorMessage, logData: tempError, logType: 'Exception' });
-          });
-      }else{
-          this.translatedRecords.splice(indexVal, 1);
-          this.translatedRecords = [...this.translatedRecords];
-      }
-      this.originalData = JSON.parse(JSON.stringify(this.translatedRecords));
-      console.log('this.originalData 1071--? ', this.originalData);
-  }
-
-  handleLanguageChange(event) {
-    this.selectedLanguage = event.detail.value;
-    this.transRecordsRetrive();
-  }
-
-  handleCellOneInputChange(event) {
-    const indexVal = parseInt(event.target.dataset.index);
-    // Check if indexVal is valid
-    if (isNaN(indexVal) || indexVal < 0 || indexVal >= this.translatedRecords.length) {
-      console.error('Invalid index:', indexVal);
-      return;
-    } 
-    this.translatedRecords[indexVal].Name = event.target.value; 
-    this.originalData = JSON.parse(JSON.stringify(this.translatedRecords));
-    console.log('this.originalData 1088--? ', this.originalData);
-  }
-
-  handleCellTwoInputChange(event) {
-    const indexVal = parseInt(event.target.dataset.index);
-    if(isNaN(indexVal) || indexVal<0 || indexVal >= this.translatedRecords.length){
-      console.error('Invalid index:', indexVal);
-      return;
-    }
-    this.translatedRecords[indexVal].DxCPQ__FieldValue__c = event.target.value; 
-    this.originalData = JSON.parse(JSON.stringify(this.translatedRecords));
-    console.log('this.originalData 1099--? ', this.originalData);
-  }
-
-  handleCellThreeInputChange(event) {
-    const indexVal = parseInt(event.target.dataset.index);
-    if(isNaN(indexVal) || indexVal<0 || indexVal >= this.translatedRecords.length){
-      console.error('Invalid index:', indexVal);
-    }
-    this.translatedRecords[indexVal].DxCPQ__Translated_Value__c = event.target.value; 
-    this.originalData = JSON.parse(JSON.stringify(this.translatedRecords));
-    console.log('this.originalData 1109--? ', this.originalData);
-  }
-
-  updateTranslatedValues(list) {
-     list.forEach(function(item) {
-        if (!(item.Name.startsWith('{!') && item.Name.endsWith('}'))) {
-            if (!item.TranslatedValue) {
-                item.TranslatedValue = item.Name;
-            }
-            if (!item.FieldValue) {
-                item.FieldValue = item.Name;
-            }
-        }
-    });
-    return list;
-  }
-
-  handleClickCancel(){
-    this.template.querySelector('c-modal').hide();
-  }
-
-  handleSave() {
-    this.translatedRecords.forEach(record => {
-      if (record.Name === null || record.Name === '') {
-        this.showToast('Error','Some of the row(s) Name has no values','error');
-      }
-    });
-
-    let fieldNameRequire = true;
-    this.translatedRecords.forEach(record => {
-      if (!record.Name) {
-        fieldNameRequire = false;
-      }
-    });
-
-    if(fieldNameRequire){
-      this.translatedRecords.forEach(record => {
-        // Rename DxCPQ__FieldValue__c to FieldValue
-        if (record.hasOwnProperty('DxCPQ__FieldValue__c')) {
-          record.FieldValue = record['DxCPQ__FieldValue__c'];
-          delete record['DxCPQ__FieldValue__c'];
-        }
-        
-        // Rename DxCPQ__Translated_Value__c to TranslatedValue
-        if (record.hasOwnProperty('DxCPQ__Translated_Value__c')) {
-          record.TranslatedValue = record['DxCPQ__Translated_Value__c'];
-          delete record['DxCPQ__Translated_Value__c'];
-        }
-      });
-      let updatedStrLst = this.updateTranslatedValues(this.translatedRecords);
-      console.log('Updated translatedRecords:', updatedStrLst);
-
-      createUpdateMethod({ 
-        jsonStringData: JSON.stringify(updatedStrLst), 
-        language: this.selectedLanguage,
-        sectionId: this.sectionrecordid
-      })
-      .then(result => {
-        this.showToast('Success', 'Record saved successfully', 'success'); 
-        this.isTranslateModalOpen = false;
-        this.translatedRecords = [];
-      })
-      .catch(error => {
-        this.showToast('Error', 'An error occurred while saving the record', 'error');
-        let errorMessage = error.message || 'Unknown error message';
-        let tempError = error.toString();
-        createLog({ recordId: '', className: 'TemplateContentDetails LWC Component - connectedCallback()', exceptionMessage: errorMessage, logData: tempError, logType: 'Exception' });});
-      }
-
-      /* else{
-        this.showToast('Error', 'Please fill Field Names in all rows', 'error');
-      } */
-      this.template.querySelector('c-modal').hide();
-    }
-    
   
-  showToast(title, message, variant) {
-    const toastEvent = new ShowToastEvent({
-        title: title,
-        message: message,
-        variant: variant
-    });
-    this.dispatchEvent(toastEvent);
-  }
-
-  closeTranslateModal() {
-      if(this.isTranslateModalOpen){
-        this.translatedRecords = [];
-        this.transRecordNameArray = [];
-        this.extractedWords = [];
-        this.isTranslateModalOpen = false;
-      }
-      this.template.querySelector('c-modal').hide();
-  }
-
-   //code added by Bhavya for adding Custom Font-family list - compatible with VF PDF generation
+  //code added by Bhavya for adding Custom Font-family list - compatible with VF PDF generation
   get fontFamilies() {
     return [
         { label: 'Times New Roman', value: 'serif' },
         { label: 'Arial', value: 'sans-serif' },
-        { label: 'serif', value: 'serif' },
+        { label: 'Serif', value: 'serif' },
         { label: 'Courier', value: 'courier' },
     ];
   }
@@ -1092,161 +710,5 @@ export default class TemplateContentDetails extends NavigationMixin(LightningEle
     let editor = this.template.querySelector('lightning-input-rich-text');
     editor.setFormat(applySelectedFormats);
   }
-  showToastMsg(title, msg, variant){
-    const event4 = new ShowToastEvent({
-      title: title,
-      message: msg,
-      variant: variant,
-    });
-    this.dispatchEvent(event4);
-  }
 
-  //code added by Bhavya for Import Translations
-  handleImportTranslation(event){
-    this.template.querySelector('c-modal').hide();
-    this.template.querySelector('c-modal[data-id="filter"]').hide();
-    this.template.querySelector('c-modal[data-id="translation"]').hide();
-    this.showTranslations = true;
-    this.template.querySelector('c-modal[data-id="importTranslation"]').show();
-  }
-
-  get acceptedFormats() {
-    return ['.csv','.xlsx'];
-  }
-
-  handleCreateTranslations(){
-    console.log('handleCreateTranslations clicked --> ');
-    if (this.translatedRecords.length === 0) {
-      console.error('No records to insert');
-      return;
-    }
-    this.showLoadingSpinner = true
-    insertTranslatedRecords({ translatedRecords: this.translatedRecords })
-    .then(result => {
-        if (result) {
-          console.log('Records inserted successfully');
-          this.showToastMsg('Success', 'Translations saved successfully!', 'success');
-          this.template.querySelector('c-modal[data-id="importTranslation"]').hide();
-          this.template.querySelector('c-modal[data-id="translation"]').show();
-          this.showTranslations = false;
-          this.showLoadingSpinner = false;
-          this.data = [];
-        } else {
-          console.error('Failed to insert records');
-          this.showToastMsg('Error', 'Error saving translations. Please Contact Administrator.', 'Error');
-          this.showLoadingSpinner = false;
-        }
-    })
-    .catch(error => {
-        console.error('Error inserting records:', error);
-        this.showToastMsg('Error', 'Error saving translations. Please Contact Administrator.', 'Error');
-        this.showLoadingSpinner = false;
-    });
-  }
-
-  handleCloseImportTranslations(){
-    this.template.querySelector('c-modal[data-id="importTranslation"]').hide();
-    this.template.querySelector('c-modal[data-id="translation"]').show();
-    this.showTranslations = false;
-    this.data = [];
-  }
-
-  handleFileUpload(event) {
-    let file = event.target.files[0];
-    if (file && file.type === 'text/csv') {
-        let reader = new FileReader();
-        
-        reader.onload = (e) => {
-            try {
-                let csv = e.target.result;
-                this.parseCSV(csv);
-                this.createTranslatedRecords();
-            } catch (error) {
-                console.error('Error parsing CSV:', error);
-                this.showToastMsg('Error', 'CSV file is broken. Cannot view it.', 'Error');
-            }
-        };
-        
-        reader.onerror = (error) => {
-            console.error('Error reading file:', error);
-            this.showToastMsg('Error', 'Failed to read the file. Please try again.', 'Error');
-        };
-        
-        reader.readAsText(file);
-    } else {
-        console.error('Please upload a valid CSV file.');
-        this.showToastMsg('Error', 'Please upload a valid CSV file.', 'Error');
-    }
-  }
-
-parseCSV(csv) {
-    const lines = csv.split('\n');
-    if (lines.length > 0) {
-        this.columns = lines[0].split(',');
-        this.data = lines.slice(1).map(line => line.split(','));
-        let emptyNameRows = [];
-        let translatedValueWithoutLanguageRows = [];
-        this.data.forEach((row, index) => {
-            const rowNumber = index + 2;
-            if (!row[0]) {
-                emptyNameRows.push(rowNumber);
-            }
-            if (row[3] && !row[2]) {
-                translatedValueWithoutLanguageRows.push(rowNumber);
-            }
-        });
-        this.errorMessages = [];
-
-        if (emptyNameRows.length > 0) {
-            this.errorMessages.push(`Rows ${emptyNameRows.join(', ')}: Name is empty. Please check the CSV file and re-upload.`);
-        }
-
-        if (translatedValueWithoutLanguageRows.length > 0) {
-            this.errorMessages.push(`Rows ${translatedValueWithoutLanguageRows.join(', ')}: Translated Value is present without Language. Please check the CSV file and re-upload.`);
-        }
-        if (this.errorMessages.length > 0) {
-          this.disableCreate = true;
-          this.showToastMsg('Error', this.errorMessages.join(' '), 'Error');
-          this.data = [];
-        } 
-        else{
-          this.disableCreate = false;
-          this.data = this.data.filter(item => item.length > 1 && item[0] !== "");
-          console.log('this.data in parseCSV  ---> ', this.data);
-        } 
-    }
-}
-
-
-
-  createTranslatedRecords() {
-    this.translatedRecords = this.data.map(row => {
-        return {
-            'Name': row[0] ? row[0].trim() : '',
-            'DxCPQ__FieldValue__c': row[1] ? row[1].trim() : '',
-            'DxCPQ__Translated_Value__c': row[3] ? row[3].trim() : '',
-            'DxCPQ__Language__c': row[2] ? this.getLanguageCode(row[2].trim()) : '',
-            'DxCPQ__DocumentTemplate__c': this.documenttemplaterecord.Id
-        };
-    });
-    console.log('this.translatedRecords list inside createTranslatedRecords fn ---> ', this.translatedRecords);
-  }
-
-  getLanguageCode(language) {
-    return this.languageMap[language] || '';
-  }
-
-  handleTranslationsSearch(event){
-    let searchTerm = event.target.value.toLowerCase();
-    if (searchTerm) {
-      this.translatedRecords = this.originalData.filter(record => {
-          return Object.values(record).some(value =>
-              value && value.toLowerCase().includes(searchTerm)
-          );
-      });
-    } else {
-      this.translatedRecords = [...this.originalData];
-    }
-    console.log('this.data inside handleImportTranslationsSearch --> ', this.data);
-  }
 }

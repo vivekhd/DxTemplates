@@ -99,3 +99,8 @@
   transition: all 0.2s ease-out;
 }
 .dxt .slds-slider__value{visibility: hidden!important;}
+
+.table-container {
+    max-height: 360px;
+    overflow-y: auto;
+}

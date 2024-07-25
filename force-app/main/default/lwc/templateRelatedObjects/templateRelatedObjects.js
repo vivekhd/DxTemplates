@@ -2219,7 +2219,7 @@ let ruleIdtoReset = this.ruleCondition == true ? this.ruleIdCreated: this.visibi
         return [
             { label: 'Times New Roman', value: 'serif' },
             { label: 'Arial', value: 'sans-serif' },
-            { label: 'serif', value: 'serif' },
+            { label: 'Serif', value: 'serif' },
             { label: 'Courier', value: 'courier' },
         ];
     }

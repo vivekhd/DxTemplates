@@ -143,7 +143,7 @@ public class LanguageTranslatorClassTest {
     @isTest
     static void testCreateUpdateMethod() {
         String jsonStringData = '[{"Id": "","Name": "Test Translation 3","FieldValue": "Test Field 3","TranslatedValue": "Translated Test Field 3"}]';
-        Id sectionId = [SELECT Id FROM DxCPQ__Document_Template_Section__c WHERE Name = 'Test Section' LIMIT 1].Id;
+        Id sectionId = [SELECT Id, Document_Template__c FROM Document_Template_Section__c WHERE Name = 'Test Section' LIMIT 1].Document_Template__c;
         
         Test.startTest();
         Boolean result = LanguageTranslatorClass.createUpdateMethod(jsonStringData, 'es_ES', sectionId);

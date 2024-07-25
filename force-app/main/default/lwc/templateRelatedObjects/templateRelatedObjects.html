@@ -22,18 +22,16 @@
 
 		<div class="slds-col slds-size_1-of-1 slds-medium-size_2-of-12 slds-large-size_2-of-12 slds-p-left_small slds-text-align_right">
 			<div>
-				<lightning-button-icon icon-name="utility:help_doc_ext" onclick={handlehelp}
-					alternative-text="Need Help?" title="Need Help?" size="medium" variant="bare"
-					class="slds-button_icon-help">
-				</lightning-button-icon>
-			</div>
-			<div class="slds-grid">
-				<div class="slds-col_bump-left slds-m-top_small">
-						<lightning-button-icon class="" icon-name="utility:filter_criteria_rule"  variant="bare" alternative-text="Settings" title="Apply Filter(s)" label="Apply Filter(s)"  size="large"  onclick={handleFiltering}></lightning-button-icon>
-				</div>
-				</div>
+				<lightning-button-group>
+					<lightning-button-icon class="" icon-name="utility:filter_criteria_rule"  alternative-text="Settings" title="Apply Visibility Filter(s)" label="Apply Visibility Filter(s)"  size="large"  onclick={handleFiltering}></lightning-button-icon>
+					<lightning-button-icon icon-name="utility:help_doc_ext" onclick={handlehelp}
+						alternative-text="Need Help?" title="Need Help?" size="medium" 
+						class="slds-button_icon-help">
+					</lightning-button-icon>
+				</lightning-button-group>
 			</div>
 		</div>
+	</div>
 	  <div class="slds-m-horizontal_large">
 		<div if:true={isLoaded} class="slds-is-relative">
 		  <lightning-spinner alternative-text="Loading..." variant="brand"></lightning-spinner>
@@ -61,7 +59,7 @@
 		<template if:true={visibilityRuleCondition}>
 		  <span slot="header">Apply Visibility Filter(s)</span>
 		  <div class="slds-modal__content slds-p-around_medium" style="min-height: 300px;">
-			<c-conditioncmp list-of-existing-conditions={visibilityListOfExistingConditions} field-wrapper={visibilityRuleFieldWrapper} existing-global-value={visibilitySelectedGlobalValue} existing-expression={visibilityRuleExpression} style="width:100%"></c-conditioncmp>
+			<c-conditioncmp list-of-existing-conditions={visibilityListOfExistingConditions} field-wrapper={visibilityRuleFieldWrapper} existing-global-value={visibilitySelectedGlobalValue} existing-expression={visibilityRuleExpression} style="width:100%" read-only={isDisabled}></c-conditioncmp>
 		  </div>
 		  <footer class="slds-modal__footer">
 			<div class="slds-text-align_right">

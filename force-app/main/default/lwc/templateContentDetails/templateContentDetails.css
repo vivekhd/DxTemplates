@@ -4,7 +4,3 @@
 .dx-chk-h .slds-form-element__control .slds-checkbox {
     display: inline-block;
 }
-.table-container {
-    max-height: 360px;
-    overflow-y: auto;
-}
