@@ -14,22 +14,22 @@ export default class TemplateHeader extends NavigationMixin(LightningElement) {
   @api rowcount;
   @api sectiontype;
   columnvalueList = [];
-  columnfirstvalueList = [];
+  columnfirstvalueList=[];
   @api selectedObjectName;
   @api sectionrecordid;
   @api isDisabled = false;
-  headerMap = [];
+  headerMap =[];
   headerSectionsMap = [];
-  headerFirstSectionsMap = [];
+  headerFirstSectionsMap=[];
   @api documenttemplaterecord;
   @api showheaderdetails = false;
   classvar = 'slds-col slds-size_1-of-3';
   classfirstvar = 'slds-col slds-size_1-of-3';
-  showfirstpageheader = false;
+  showfirstpageheader=false;
   popUpMessage;
   oldHeaderColumnList = {};
-  oldHeaderFirstColumnList = {};
-  whereCondition = "";
+  oldHeaderFirstColumnList={};
+  whereCondition ="";
   whereClause = " IsActive__c = true";
 
   Recorddetailsnew = {
@@ -58,11 +58,13 @@ export default class TemplateHeader extends NavigationMixin(LightningElement) {
     this.whereClause = this.whereCondition;
   }
 
-  handleDiffHeader(event) {
+  handleDiffHeader(event){
     this.showfirstpageheader = event.detail.checked;
+    const firstHeaderEvent = new CustomEvent('firstheader', {detail: event.detail.checked });
+    this.dispatchEvent(firstHeaderEvent);
   }
 
-  handlefirstcolumncomboChange(event) {
+  handlefirstcolumncomboChange(event){
     this.columnfirstvalueList = [];
     this.columnfirstvalue = event.detail.value;
     this.handlefirstcolumnsClass(this.columnfirstvalue);
@@ -74,7 +76,7 @@ export default class TemplateHeader extends NavigationMixin(LightningElement) {
           }
           else {
             this.columnfirstvalueList.push(i);
-            this.headerFirstSectionsMap.push({ "value": "", "indexvar": i + 3, "columnFirstCount": this.columnfirstvalue, "key": (new Date()).getTime() + ":" + i, "headerVal": "" })
+            this.headerFirstSectionsMap.push({ "value": "", "indexvar": i+3, "columnFirstCount":this.columnfirstvalue, "key": (new Date()).getTime() + ":" + i, "headerVal": "" })
             //this.headerSectionsMap.push({ "value": "", "indexvar": i+3,  "key": (new Date()).getTime() + ":" + i })
           }
         }
@@ -86,21 +88,21 @@ export default class TemplateHeader extends NavigationMixin(LightningElement) {
     else {
       for (var i = 0; i < this.columnfirstvalue; i++) {
         this.columnfirstvalueList.push(i);
-        this.headerFirstSectionsMap.push({ "value": "", "indexvar": i + 3, "columnFirstCount": this.columnfirstvalue, "key": (new Date()).getTime() + ":" + i, "headerVal": "" })
+        this.headerFirstSectionsMap.push({ "value": "", "indexvar": i+3, "columnFirstCount":this.columnfirstvalue, "key": (new Date()).getTime() + ":" + i, "headerVal": "" })
         //this.headerSectionsMap.push({ "value": "", "indexvar": i+3, "key": (new Date()).getTime() + ":" + i })
       }
-    }
+    } 
     //this.headerSectionsMap.push (this.headerFirstSectionsMap) 
     let refData = {
-      "0": { "0": "" },
-      "1": { "0": "Left", "1": "Right" },
-      "2": { "0": "Left", "1": "Center", "2": "Right" }
+      "0":{"0":""},
+      "1":{"0":"Left", "1":"Right"},
+      "2":{"0":"Left", "1":"Center", "2":"Right"}
     }
     this.headerFirstSectionsMap.forEach(item => {
-      item.columnFirstCount = this.columnfirstvalue;
-      item.headerVal = refData[this.columnfirstvalue - 1][item.indexvar - 3];
+        item.columnFirstCount = this.columnfirstvalue;
+        item.headerVal = refData[this.columnfirstvalue - 1][item.indexvar-3];
     });
-    const saveEvent = new CustomEvent('datasaved', { detail: false });
+    const saveEvent = new CustomEvent('datasaved', {detail: false });
     this.dispatchEvent(saveEvent);
   }
 
@@ -113,7 +115,7 @@ export default class TemplateHeader extends NavigationMixin(LightningElement) {
   }
 
   handlecolumncomboChange(event) {
-    this.columnvalueList = [];
+    this.columnvalueList = [];    
     this.columnvalue = event.detail.value;
     this.handlecolumnsClass(this.columnvalue);
     if (this.headerSectionsMap.length > 0) {
@@ -123,8 +125,8 @@ export default class TemplateHeader extends NavigationMixin(LightningElement) {
             this.headerSectionsMap.push(this.oldHeaderColumnList[i]);
           }
           else {
-            this.columnvalueList.push(i);
-            this.headerSectionsMap.push({ "value": "", "indexvar": i, "key": (new Date()).getTime() + ":" + i, "columnCount": this.columnvalue, "headerVal": '' })
+            this.columnvalueList.push(i);          
+            this.headerSectionsMap.push({ "value": "", "indexvar": i, "key": (new Date()).getTime() + ":" + i , "columnCount": this.columnvalue, "headerVal": ''})
           }
         }
       }
@@ -134,21 +136,21 @@ export default class TemplateHeader extends NavigationMixin(LightningElement) {
     }
     else {
       for (var i = 0; i < this.columnvalue; i++) {
-        this.columnvalueList.push(i);
-        this.headerSectionsMap.push({ "value": "", "indexvar": i, "key": (new Date()).getTime() + ":" + i, "columnCount": this.columnvalue, "headerVal": '' })
+        this.columnvalueList.push(i);     
+        this.headerSectionsMap.push({ "value": "", "indexvar": i, "key": (new Date()).getTime() + ":" + i , "columnCount": this.columnvalue, "headerVal": '' })
       }
     }
     //adding headval in headerSectionsMap
     let refData = {
-      "0": { "0": "" },
-      "1": { "0": "Left", "1": "Right" },
-      "2": { "0": "Left", "1": "Center", "2": "Right" }
+      "0":{"0":""},
+      "1":{"0":"Left", "1":"Right"},
+      "2":{"0":"Left", "1":"Center", "2":"Right"}
     }
     this.headerSectionsMap.forEach(item => {
-      item.columnCount = this.columnvalue;
-      item.headerVal = refData[this.columnvalue - 1][item.indexvar];
+        item.columnCount = this.columnvalue;
+        item.headerVal = refData[this.columnvalue - 1][item.indexvar];
     });
-    const saveEvent = new CustomEvent('datasaved', { detail: false });
+    const saveEvent = new CustomEvent('datasaved', {detail: false });
     this.dispatchEvent(saveEvent);
     //console.log('columnvalueList ---> ', this.columnvalueList);
     console.log('headerSectionsMap after column value changed ---> ', this.headerSectionsMap);
@@ -157,9 +159,9 @@ export default class TemplateHeader extends NavigationMixin(LightningElement) {
   /* Header Changes Start*/
   handleColumnRemoval() {
     let headerColumnsList = {};
-    let headerFirstColumnsList = {};
+    let headerFirstColumnsList ={};
     let size = 0;
-    const tempColumnfirstValue = +this.columnfirstvalue + 3;
+    const tempColumnfirstValue = +this.columnfirstvalue+3;
 
     for (let i = 0; i < this.headerFirstSectionsMap.length; i++) {
       let tempColumnDetail = this.headerFirstSectionsMap[i];
@@ -167,14 +169,14 @@ export default class TemplateHeader extends NavigationMixin(LightningElement) {
       //   headerColumnsList[tempColumnDetail.indexvar] = tempColumnDetail;
       //   size += 1;
       // }
-      if (tempColumnDetail.indexvar < tempColumnfirstValue) {
+      if(tempColumnDetail.indexvar < tempColumnfirstValue){
         //headerColumnsList[tempColumnDetail.indexvar] = tempColumnDetail;
-        let tempindexvar = +tempColumnDetail.indexvar - 3;
+        let tempindexvar = +tempColumnDetail.indexvar-3;
         headerFirstColumnsList[tempindexvar] = tempColumnDetail;
         size += 1;
       }
       else {
-        let tempindexvar = +tempColumnDetail.indexvar - 3;
+        let tempindexvar = +tempColumnDetail.indexvar-3;
         this.oldHeaderFirstColumnList[tempindexvar] = tempColumnDetail;
       }
     }
@@ -189,31 +191,31 @@ export default class TemplateHeader extends NavigationMixin(LightningElement) {
         this.oldHeaderColumnList[tempColumnDetail.indexvar] = tempColumnDetail;
       }
     }
-
+    
     this.headerSectionsMap = [];
     this.headerFirstSectionsMap = [];
     for (let i = 0; i < 6; i++) {
       if (headerColumnsList[i]) {
         this.headerSectionsMap.push(headerColumnsList[i]);
       }
-      if (headerFirstColumnsList[i]) {
+      if (headerFirstColumnsList[i]){
         //this.headerSectionsMap.push(headerColumnsList[i]);
         this.headerFirstSectionsMap.push(headerFirstColumnsList[i]);
       }
     }
-    let headerVal = '';
+    let headerVal='';
     let refData = {
-      "0": { "0": "" },
-      "1": { "0": "Left", "1": "Right" },
-      "2": { "0": "Left", "1": "Center", "2": "Right" }
+      "0":{"0":""},
+      "1":{"0":"Left", "1":"Right"},
+      "2":{"0":"Left", "1":"Center", "2":"Right"}
     }
     this.headerSectionsMap.forEach(item => {
-      item.columnCount = this.columnvalue;
-      item.headerVal = refData[this.columnvalue - 1][item.indexvar];
+        item.columnCount = this.columnvalue;
+        item.headerVal = refData[this.columnvalue - 1][item.indexvar];
     });
     this.headerFirstSectionsMap.forEach(item => {
-      item.columnFirstCount = this.columnfirstvalue;
-      item.headerVal = refData[this.columnfirstvalue - 1][item.indexvar];
+        item.columnFirstCount = this.columnfirstvalue;
+        item.headerVal = refData[this.columnfirstvalue - 1][item.indexvar];
     });
   }
   /* Header Changes End by Rahul */
@@ -238,7 +240,7 @@ export default class TemplateHeader extends NavigationMixin(LightningElement) {
         this.headerFirstSectionsMap.push(data);
       }
     });
-    const saveEvent = new CustomEvent('datasaved', { detail: false });
+    const saveEvent = new CustomEvent('datasaved', {detail: false });
     this.dispatchEvent(saveEvent);
   }
 
@@ -264,7 +266,7 @@ export default class TemplateHeader extends NavigationMixin(LightningElement) {
   }
 
   @api loadsectionvaluesforedit(recordID) {
-    const saveEvent = new CustomEvent('datasaved', { detail: true });
+    const saveEvent = new CustomEvent('datasaved', {detail: true});
     this.dispatchEvent(saveEvent);
     this.showheaderdetails = true;
     this.headerSectionsMap = [];
@@ -275,41 +277,42 @@ export default class TemplateHeader extends NavigationMixin(LightningElement) {
         if (result != null) {
           var sectioncontent = JSON.parse(result.DxCPQ__Section_Content__c);
           this.columnvalue = sectioncontent.sectionsCount;
+          this.translateEnabled = this.columnvalue > 0? false: true;
           this.columnfirstvalue = sectioncontent.sectionsFirstCount;
-          if (sectioncontent.sectionsFirstCount > 0) {
+          if (sectioncontent.sectionsFirstCount>0){
             this.showfirstpageheader = true;
           }
           //this.showfirstpageheader = true;
-          setTimeout(() => {
-            try {
-              this.template.querySelector('[data-id="uniqueheader"]').checked = this.showfirstpageheader;
+          setTimeout(() => { 
+            try{
+              this.template.querySelector('[data-id="uniqueheader"]').checked = this.showfirstpageheader; 
               // this.columnfirstvalue = sectioncontent.sectionsFirstContent;
               // this.template.querySelector('[data-id="firstcombobox"]').value = this.columnfirstvalue;
               //this.columnfirstvalue = sectioncontent.sectionsFirstContent;
               this.handlefirstcolumnsClass(this.columnfirstvalue);
             }
-            catch (error) {
+            catch(error){
               console.log('error in setTimeout for checked error >> ', error.message);
             }
           });
 
-          /* Fix for Header Onload Alignment by Rahul*/
+           /* Fix for Header Onload Alignment by Rahul*/
           let sectionsMapTemp = sectioncontent.sectionsContent;
           sectionsMapTemp.sort((a, b) => {
             return a.indexvar - b.indexvar;
           });
-          let firstSectionsMap = [];
-          let sectionsMap = [];
-          sectionsMapTemp.forEach((sectionmap) => {
-            if (sectionmap.indexvar > 2) {
+          let firstSectionsMap =[];
+          let sectionsMap=[];
+          sectionsMapTemp.forEach((sectionmap)=>{
+            if (sectionmap.indexvar>2){
               firstSectionsMap.push(sectionmap)
             }
             else sectionsMap.push(sectionmap)
           })
-          this.headerFirstSectionsMap = firstSectionsMap;
-          this.headerSectionsMap = sectionsMap;
+          this.headerFirstSectionsMap= firstSectionsMap;
+          this.headerSectionsMap = sectionsMap; 
           //this.headerSectionsMap = sectionsMapTemp;
-          /* Fix for Header Onload Alignment by Rahul*/
+           /* Fix for Header Onload Alignment by Rahul*/
           this.handlecolumnsClass(this.columnvalue);
           //this.handlefirstcolumnsClass(this.columnfirstvalue);
         }
@@ -320,10 +323,10 @@ export default class TemplateHeader extends NavigationMixin(LightningElement) {
   }
 
   //code added by Bhavya to check if the style attribute is present in the Img tag
-  identifyStyleTag(str) {
+  identifyStyleTag(str){
     const regex = /<img\b[^>]*\bstyle\s*=\s*["'][^"']*["']/i;
     return regex.test(str);
-
+    
   }
 
   handlesectionsave(event) {
@@ -337,10 +340,10 @@ export default class TemplateHeader extends NavigationMixin(LightningElement) {
         if (sectionval.includes('img') && !this.identifyStyleTag(sectionval)) {
           const styleTag = 'style="max-height:100%; max-width:100%; width:80%; margin:0 50px 0 0;"';
           sectionval = sectionval.replace(/(<img\b[^>]*)(style\s*=\s*["'][^"']*["'])?([^>]*>)/i, (match, p1, p2, p3) => {
-            if (p2) {
-              return `${p1}${p2.slice(0, -1)}; ${styleTag.slice(7)}`;
-            }
-            return `${p1} ${styleTag}${p3}`;
+              if (p2) {
+                  return `${p1}${p2.slice(0, -1)}; ${styleTag.slice(7)}`;
+              }
+              return `${p1} ${styleTag}${p3}`;
           });
 
           console.log('Updated sectionVal:', sectionval);
@@ -376,10 +379,11 @@ export default class TemplateHeader extends NavigationMixin(LightningElement) {
             });
 
             this.dispatchEvent(event4);
-            const saveEvent = new CustomEvent('datasaved', { detail: true });
+            const saveEvent = new CustomEvent('datasaved', {detail: true });
             this.dispatchEvent(saveEvent);
             var firecustomevent = new CustomEvent('savesectiondata', { detail: this.savedRecordID });
             this.dispatchEvent(firecustomevent);
+            this.translateEnabled = false;
           }
         })
         .catch(error => {
@@ -389,14 +393,14 @@ export default class TemplateHeader extends NavigationMixin(LightningElement) {
     //this.template.querySelector('c-template-designer-cmp').showPreview = true;
   }
 
-  handlehelp() {
+  handlehelp(){
     let relatedObjectsMap = this.pdfLinks.find(item => item.MasterLabel === 'Header');
     let pdfUrl = relatedObjectsMap ? relatedObjectsMap.DxCPQ__Section_PDF_URL__c : null;
     const config = {
       type: 'standard__webPage',
       attributes: {
-        url: pdfUrl
-      }
+          url: pdfUrl
+        }
     };
     this[NavigationMixin.Navigate](config);
   }

@@ -21,7 +21,9 @@ global with sharing class DisplayPDFController
     public static Safely safe = new Safely();
     
      public String sampleStyle {get; set;}
-     public Map<String,String> styleList {get; set;} 
+     public String marginHeightValue {get; set;}
+     public String marginFirstHeightValue {get; set;}
+     
     /**
      * @description URL of the image to be displayed.
      */
@@ -122,13 +124,19 @@ global with sharing class DisplayPDFController
      */
 	private static final String[] html_ENCODED  = new String[]{ '&amp;', '&lt;', '&gt;', '&quot;', '&#39;' };
     
-      public static String selectedPageSize {get;set;}
-      public static String selectedSize {get;set;}
-      public static String selectedPageOrientation {get;set;}
+    public static String selectedPageSize {get;set;}
+    public static String selectedSize {get;set;}
+    public static String selectedPageOrientation {get;set;}
     public static Boolean isLandscape {get;set;}
     public static Boolean isNoHeader {get;set;}
     public static String headerRelative {get;set;}
+    public static String headerFirstRelative {get;set;}
     public static String headerAbsolute {get;set;}
+    public static String headerFirstAbsolute {get;set;}
+    public Map<String,String> styleList {get; set;} 
+    public Map<String,String> sanitizedHeaderJSON {get; set;}
+    public Map<String,String> marPadList {get; set;}
+    
 
     /**
     * @description Constructor for the DisplayPDFController class.
@@ -137,32 +145,51 @@ global with sharing class DisplayPDFController
     public DisplayPDFController() {
         try {
             styleList = new Map<String,String>();
-            //sampleStyle = '@page { size: A4;  margin-left: 0px;  margin-right: 0px; margin-top: 90px;  margin-bottom: 80px; <apex:outputText rendered="{!if(headersectionsCount== 1,true,false)}"> @top-left { content:element(header_left);  width:100%;} </apex:outputText> <apex:outputText rendered="{!if(headersectionsCount== 2,true,false)}"> @top-left { content:element(header_left);width:50%;} @top-right { content:element(header_center);width:50%;} </apex:outputText> <apex:outputText rendered="{!if(headersectionsCount== 3,true,false)}"> @top-left { content:element(header_left);} @top-center { content:element(header_center);} @top-right { content:element(header_right);} </apex:outputText> <apex:outputText rendered="{!if(footersectionsCount== 1,true,false)}"> @bottom-left { content:element(footer_left); width:100%; } </apex:outputText> <apex:outputText rendered="{!if(footersectionsCount== 2,true,false)}"> @bottom-left { content:element(footer_left); width:50%;} @bottom-right { content:element(footer_center);width:50%; } </apex:outputText> <apex:outputText rendered="{!if(footersectionsCount== 3,true,false)}"> @bottom-left { content:element(footer_left);} @bottom-center { content:element(footer_center);}@bottom-right { content:element(footer_right);}</apex:outputText>}';
             showAllPages =  'All Pages';
             displaypagesequence = false;
             String inputparam = ApexPages.currentPage().getParameters().get('documentid');
             inputparam = String.escapeSingleQuotes(inputparam);
-            Document__c docrec = [SELECT Id, Document_Body__c, Document_Content__c, Document_Template__r.Watermark_Data__c  
+            Document__c docrec = [SELECT Id, Document_Body__c, Document_Content__c, Document_Template__r.Watermark_Data__c, Document_Template__r.PDF_Page_Properties__c      
                                   FROM Document__c 
                                   WHERE Id = :inputparam WITH SECURITY_ENFORCED];
-            	selectedPageSize = ApexPages.currentPage().getParameters().get('selectedPageSize');
-     			selectedPageOrientation = ApexPages.currentPage().getParameters().get('selectedPageOrientation');
-                selectedSize= ApexPages.currentPage().getParameters().get('selectedPageSize') +' ' +ApexPages.currentPage().getParameters().get('selectedPageOrientation');
-  				isLandscape = selectedPageOrientation=='Landscape' ? true : false;
-            if(isLandscape == true) {
-                headerRelative = 'position:relative; width:100%;overflow:hidden;height: 0px;';
-                headerAbsolute = 'position:absolute; width:100%;overflow:hidden;height: 0px;';
-            }
-            else {
-                headerRelative = 'position:relative; width:100%;overflow:hidden;height: 150px;';
-                headerAbsolute = 'position:absolute; width:100%;overflow:hidden;height: 150px;';
-            }
+            //System.debug('docrec -->'+ docrec);
+            Map<String, Object> m =  (Map<String, Object>) JSON.deserializeUntyped(docrec.Document_Template__r.PDF_Page_Properties__c);
+            Map<String,Object> m1 = (Map<String,Object>) JSON.deserializeUntyped(JSON.serialize(m.get('pagePropCSS')));
+            Map<String,Object> pageProperries = (Map<String,Object>) JSON.deserializeUntyped(JSON.serialize(m.get('pageMargins'))); 
+            Map<String,Object> footerMapJSON = (Map<String,Object>) JSON.deserializeUntyped(JSON.serialize(m.get('footerJSONVal')));
+            Map<String,Object> headerMapJSON = (Map<String,Object>) JSON.deserializeUntyped(JSON.serialize(m.get('headerJSONVal')));
+            Map<String,Object> headerPropertiesLst = (Map<String,Object>) JSON.deserializeUntyped(JSON.serialize(m.get('headerProperties')));
+            Map<String, Object> normalHeaders = (Map<String, Object>) headerPropertiesLst.get('normalHeaders');
+            Map<String, Object> firstPageHeaders = (Map<String, Object>) headerPropertiesLst.get('firstPageHeaders');
+            Map<String,Object> footerPropertiesLst = (Map<String,Object>) JSON.deserializeUntyped(JSON.serialize(m.get('footerProperties')));
+            String height = (String) normalHeaders.get('height');
+            String firstPageHeight = (String) firstPageHeaders.get('height');
+
+            Map<String, String> headerPropertiesMap = new Map<String, String>();
+            styleList.put('header_left',  (String)headerMapJSON.get('header_left'));
+            styleList.put('header_center',  (String)headerMapJSON.get('header_center'));
+            styleList.put('header_right',  (String)headerMapJSON.get('header_right'));
+            styleList.put('first_header_left',  (String)headerMapJSON.get('first_header_left'));
+            styleList.put('first_header_center',  (String)headerMapJSON.get('first_header_center'));
+            styleList.put('first_header_right',  (String)headerMapJSON.get('first_header_right'));
+            styleList.put('header_right_landscape',  (String)headerMapJSON.get('header_left_landscape'));
+            styleList.put('header_center_landscape',  (String)headerMapJSON.get('header_center_landscape'));
+            styleList.put('header_left_landscape',  (String)headerMapJSON.get('header_right_landscape'));
+            styleList.put('first_header_left_landscape',  (String)headerMapJSON.get('first_header_left_landscape'));
+            styleList.put('first_header_center_landscape',  (String)headerMapJSON.get('first_header_center_landscape'));
+            styleList.put('first_header_right_landscape',  (String)headerMapJSON.get('first_header_right_landscape'));
+            styleList.put('footer_right',  (String)footerMapJSON.get('footer_right'));
+            styleList.put('footer_center',  (String)footerMapJSON.get('footer_center'));
+            styleList.put('footer_left',  (String)footerMapJSON.get('footer_left'));
+            
+            sanitizedHeaderJSON = DisplayPDFController.getSanitizedHeaderJSON(styleList);
+            selectedPageSize = ApexPages.currentPage().getParameters().get('selectedPageSize');
+            selectedPageOrientation = ApexPages.currentPage().getParameters().get('selectedPageOrientation');
+            selectedSize= ApexPages.currentPage().getParameters().get('selectedPageSize') +' ' +ApexPages.currentPage().getParameters().get('selectedPageOrientation');
+            isLandscape = selectedPageOrientation=='Landscape' ? true : false;
+
             DxTemplates_VF_Style__mdt[] stylesLst = [select Id, Label, MasterLabel,DeveloperName,  CSS_Style_List__c from DxTemplates_VF_Style__mdt with USER_MODE];
-            //System.debug('stylesLst ---> '+ stylesLst);
             for(DxTemplates_VF_Style__mdt style: stylesLst){
-                //System.debug('style.label ---> '+ style.label);
-                //System.debug('style.CSS_Style_List__c ---> '+ style.CSS_Style_List__c);
-                //System.debug('styleList variable ---> '+ styleList);
                 styleList.put(style.label, style.CSS_Style_List__c);
             }
             if (docrec.Document_Template__r.Watermark_Data__c != null) {
@@ -180,7 +207,6 @@ global with sharing class DisplayPDFController
                         pageOption = pageOption.substring(0, pageOption.indexOf(' - '));
                     }
                 }
-                System.debug('pageOption >> '+ pageOption);
 				showAllPages = pageOption;
                 deFaultCSS = false;
                 imageURL = PdfDisplay.getDomainUrl() + '/sfc/servlet.shepherd/version/renditionDownload?rendition=ORIGINAL_Png&versionId=' + contentVersionID; 
@@ -251,7 +277,55 @@ global with sharing class DisplayPDFController
             } else {
                 displayText = 'ID not found';
             }
-            //displayText = '<div dxcpq-dxshowselectedtemplate_dxshowselectedtemplate="" class="my-content"></div><div dxcpq-dxshowselectedtemplate_dxshowselectedtemplate="" class="my-contents"></div><div dxcpq-dxshowselectedtemplate_dxshowselectedtemplate="" data-id="0"><table data-id="Arrowtabledata" style="border:3px solid red;width: 100%; word-break: break-all;" border="1" cellspacing="0"class="tableMainClass" dxcpq-dxshowselectedtemplate_dxshowselectedtemplate=""><thead dxcpq-dxshowselectedtemplate_dxshowselectedtemplate=""><tr dxcpq-dxshowselectedtemplate_dxshowselectedtemplate=""><th scope="col" style="width:10px; border: 1px solid black ; background-color: ; color:; font-size:10px; font-family:Verdana; text-align: center;" dxcpq-dxshowselectedtemplate_dxshowselectedtemplate=""><div title="Opportunity ID.Name" dxcpq-dxshowselectedtemplate_dxshowselectedtemplate="">Opportunity ID.Name</div></th><th scope="col" style="width:10px; border: 1px solid black ; background-color: ; color:; font-size:10px; font-family:Verdana; text-align: center;" dxcpq-dxshowselectedtemplate_dxshowselectedtemplate=""><div title="Opportunity ID.Opportunity ID" dxcpq-dxshowselectedtemplate_dxshowselectedtemplate="">Opportunity ID.Opportunity ID</div></th><th scope="col" style="width:10px; border: 1px solid black ; background-color: ; color:; font-size:10px; font-family:Verdana; text-align: center;" dxcpq-dxshowselectedtemplate_dxshowselectedtemplate=""><div title="Opportunity ID.Description" dxcpq-dxshowselectedtemplate_dxshowselectedtemplate="">Opportunity ID.Description</div></th></tr></thead><tbody dxcpq-dxshowselectedtemplate_dxshowselectedtemplate=""><tr dxcpq-dxshowselectedtemplate_dxshowselectedtemplate=""><td scope="col" style="border: none; text-align: center; background-color:transparent;" dxcpq-dxshowselectedtemplate_dxshowselectedtemplate="">Pioneer Works</td><td scope="col" style="border: none; text-align: center; background-color:transparent;" dxcpq-dxshowselectedtemplate_dxshowselectedtemplate="">006O4000008AeCTIA0</td><td scope="col" style="border: none; text-align: center; background-color:transparent;" dxcpq-dxshowselectedtemplate_dxshowselectedtemplate="">Pioneer Flour Mills was initially founded as the C.H. Guenther Mill by Carl Hilmar Guenther, a millwright who immigrated to the United States from Germany in the late 1840s. Guenther built his first mill in 1851 in Fredericksburg and later relocated it one mile south of San Antonio in 1859.</td></tr><tr dxcpq-dxshowselectedtemplate_dxshowselectedtemplate=""><td scope="col" style="border: none; text-align: center; background-color:transparent;" dxcpq-dxshowselectedtemplate_dxshowselectedtemplate="">Pioneer Works</td><td scope="col" style="border: none; text-align: center; background-color:transparent;" dxcpq-dxshowselectedtemplate_dxshowselectedtemplate="">006O4000008AeCTIA0</td><td scope="col" style="border: none; text-align: center; background-color:transparent;" dxcpq-dxshowselectedtemplate_dxshowselectedtemplate="">Pioneer Flour Mills was initially founded as the C.H. Guenther Mill by Carl Hilmar Guenther, a millwright who immigrated to the United States from Germany in the late 1840s. Guenther built his first mill in 1851 in Fredericksburg and later relocated it one mile south of San Antonio in 1859.</td></tr></tbody></table><br dxcpq-dxshowselectedtemplate_dxshowselectedtemplate=""></div><c-display-related-objects-data dxcpq-dxshowselectedtemplate_dxshowselectedtemplate=""></c-display-related-objects-data><div dxcpq-dxshowselectedtemplate_dxshowselectedtemplate="" class="clause"></div>';
+            Integer heightVal = Integer.valueOf(height.replace('px', ''));
+            if(isLandscape == true) {
+                //values for firstPage Header
+                if(headerfirstsectionsCount != null){
+                    headerFirstRelative = 'position:relative; width:100%;overflow:hidden;height:' + firstPageHeight +';';
+                    headerFirstAbsolute = 'position:absolute; width:100%;overflow:hidden;height: '+ firstPageHeight+';';
+                }
+                //values for normal Headers
+                //headerRelative = 'position:relative; width:100%;overflow:hidden;height:' +  (Integer.valueOf(height.replace('px', '')) + 80) + 'px;';
+                //headerAbsolute = 'position:absolute; width:100%;overflow:hidden; height : '+  (Integer.valueOf(height.replace('px', '')) + 80) + 'px;';
+
+                headerRelative = 'position:relative; width:100%;overflow:hidden; height:' + height + ';';
+                headerAbsolute = 'position:absolute; width:100%;overflow:hidden; height: '+ height + ';';
+
+                //marginHeightValue = (Integer.valueOf(height.replace('px', '')) + 80) + 'px';
+                //marginFirstHeightValue = (Integer.valueOf(firstPageHeight.replace('px', '')) + 80) + 'px';
+
+                marginHeightValue =  (Integer.valueOf(height.replace('px', '')) + 35) + 'px';
+            }
+            else {
+                 //values for firstPage Header
+                if(headerfirstsectionsCount != null){
+                    headerFirstRelative = 'position:relative; width:100%;overflow:hidden;height:' + firstPageHeight +';';
+                    headerFirstAbsolute = 'position:absolute; width:100%;overflow:hidden;height: '+ firstPageHeight+';';
+                }
+                //headerRelative = 'position:relative; width:100%;overflow:hidden;height: '+ (Integer.valueOf(height.replace('px', '')) + 30) + 'px;';
+                //headerAbsolute = 'position:absolute; width:100%;overflow:hidden;height: '+ (Integer.valueOf(height.replace('px', '')) + 30) + 'px;';
+
+                headerRelative = 'position:relative; width:100%;overflow:hidden;height:' + height + ';';
+                headerAbsolute = 'position:absolute; width:100%;overflow:hidden; height : '+ height + ';';
+
+                //marginHeightValue =  (Integer.valueOf(height.replace('px', '')) + 60) + 'px';
+                //marginFirstHeightValue = (Integer.valueOf(firstPageHeight.replace('px', '')) + 40) + 'px';
+
+                marginHeightValue =  (Integer.valueOf(height.replace('px', '')) + 30) + 'px'; //height;
+            }
+            //marginHeightValue =  (Integer.valueOf(height.replace('px', '')) + 10) + 'px';
+            marginFirstHeightValue = firstPageHeight ; //(Integer.valueOf(firstPageHeight.replace('px', '')) + 40) + 'px';
+            if (marPadList == null) {
+                marPadList = new Map<String, String>();
+            }
+            marPadList.put('Margin-top', (String)pageProperries.get('margin-top'));
+            marPadList.put('Margin-bottom', (String)pageProperries.get('margin-bottom'));
+            marPadList.put('Margin-left', (String)pageProperries.get('margin-left'));
+            marPadList.put('Margin-right', (String)pageProperries.get('margin-right'));
+            marPadList.put('First-Page-Margin-top', (String)pageProperries.get('margin-top'));
+            marPadList.put('First-Page-Margin-bottom', (String)pageProperries.get('margin-bottom'));
+            marPadList.put('First-Page-Margin-left', (String)pageProperries.get('margin-left'));
+            marPadList.put('First-Page-Margin-right', (String)pageProperries.get('margin-right'));
         } catch(Exception ex) {
              //LogHandler.createLog((Id) null,'DisplayPDFController.DisplayPDFController() - Constructor','Template Id-  '+ex.getLineNumber()+ex.getStackTraceString()+ex.getCause(),ex.getMessage(),'Exception');
             throw new AuraHandledException(ex.getMessage());
@@ -732,5 +806,19 @@ global with sharing class DisplayPDFController
             LogHandler.createLog((Id) null,'DisplayPDFController.getDocumentTemplateData()','Template Id- '+templateId+' '+ex.getLineNumber()+ex.getStackTraceString()+ex.getCause(),ex.getMessage(),'Exception');
             return null;
         }
+    }
+    
+    public static String sanitizeCss(String cssString) {
+        cssString = cssString.replaceAll('\\s+', ' ');
+        cssString = cssString.replaceAll('[\\n\\r]+', '');
+        return cssString.trim();
+    }
+    
+    public static Map<String, String> getSanitizedHeaderJSON(Map<String, String> headerProperties) {
+        Map<String, String> sanitizedHeaderJSON = new Map<String, String>();
+        for (String key : headerProperties.keySet()) {
+            sanitizedHeaderJSON.put(key, sanitizeCss(headerProperties.get(key)));
+        }
+        return sanitizedHeaderJSON;
     }
 }

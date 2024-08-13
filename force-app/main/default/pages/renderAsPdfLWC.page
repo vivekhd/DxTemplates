@@ -4,26 +4,32 @@
     <head>
         <meta http-equiv="Content-Type" content="text/html;charset=UTF-8" />
         <style type="text/css" media="print">
-            {!styleList['P_Line_Height']}
+            p{margin: 0 0 0 0;}
+
             <apex:outputText rendered="{!if(isLandscape== false,true,false)}">
-                {!styleList['Div Header Left Style']}
-                {!styleList['Div Header Center Style']}
-                {!styleList['Div Header Right Style']}
-                {!styleList['Div First Header Left Style']}
-                {!styleList['Div First Header Center Style']}
-                {!styleList['Div First Header Right Style']}
+				{!sanitizedHeaderJSON['header_left']}
+                {!sanitizedHeaderJSON['header_center']}
+                {!sanitizedHeaderJSON['header_right']}
+
+                {!sanitizedHeaderJSON['first_header_left']}
+                {!sanitizedHeaderJSON['first_header_center']}
+                {!sanitizedHeaderJSON['first_header_right']}
+
             </apex:outputText>
             <apex:outputText rendered="{!if(isLandscape== true,true,false)}">
-                {!styleList['Div Header Left Style Landscape']}
-                {!styleList['Div Header Center Style Landscape']}
-                {!styleList['Div Header Right Style Landscape']}
-                {!styleList['Div First Header Left Style Landscape']}
-                {!styleList['Div First Header Center Style Landscape']}
-                {!styleList['Div First Header Right Style Landscape']}
+                {!sanitizedHeaderJSON['header_left_landscape']}                
+                {!sanitizedHeaderJSON['header_center_landscape']}
+                {!sanitizedHeaderJSON['header_right_landscape']}
+
+                {!sanitizedHeaderJSON['first_header_left_landscape']}
+                {!sanitizedHeaderJSON['first_header_center_landscape']}
+                {!sanitizedHeaderJSON['first_header_right_landscape']}
+
             </apex:outputText>
-            {!styleList['Div Footer Left Style']}
-            {!styleList['Div Footer Center Style']}
-            {!styleList['Div Footer Right Style']}
+            {!sanitizedHeaderJSON['footer_left']}
+            {!sanitizedHeaderJSON['footer_center']}
+            {!sanitizedHeaderJSON['footer_right']}
+            
             
             .pagenumber:before {
             content: counter(page);
@@ -40,109 +46,30 @@
             tr{ page-break-inside:avoid; page-break-after:auto; }
             <apex:outputText rendered="{!if(defaultCSS== true,true,false)}">
                 @page {
-                <apex:outputText rendered="{!if(isNoHeader == true,true,false)}">
-                    size: {!selectedSize};
-                    margin-left: 0px;
-                    margin-right: 0px;
-                    margin-top: 0px;
-                    margin-bottom: 80px;  
-                </apex:outputText>
-                <apex:outputText rendered="{!if(isNoHeader == false,true,false)}">
-                    size: {!selectedSize};
-                    margin-left: 0px;
-                    margin-right: 0px;
-                    margin-top: 140px;
-                    margin-bottom: 80px;
-                </apex:outputText>
-                margin-bottom:10px;
-                <apex:outputText rendered="{!if(headersectionsCount== 1,true,false)}">
-                    @top-left { content:element(header_left); width:100%;}
-                </apex:outputText>
-                <apex:outputText rendered="{!if(headersectionsCount== 2,true,false)}">
-                    @top-left { content:element(header_left);width:50%;}
-                    @top-right { content:element(header_center);width:50%;}
-                </apex:outputText>
-                <apex:outputText rendered="{!if(headersectionsCount== 3,true,false)}">
-                    @top-left { content:element(header_left);}
-                    @top-center { content:element(header_center);}
-                    @top-right { content:element(header_right);}
-                </apex:outputText>
-                
-                <!--------Code for Footer------------>
-                <apex:outputText rendered="{!if(footersectionsCount== 1,true,false)}">
-                    @bottom-left { content:element(footer_left); width:100%; }
-                </apex:outputText>
-                <apex:outputText rendered="{!if(footersectionsCount== 2,true,false)}">
-                    @bottom-left { content:element(footer_left); width:50%;}
-                    @bottom-right { content:element(footer_center);width:50%; }
-                </apex:outputText>
-                <apex:outputText rendered="{!if(footersectionsCount== 3,true,false)}">
-                    @bottom-left { content:element(footer_left);}
-                    @bottom-center { content:element(footer_center);}
-                    @bottom-right { content:element(footer_right);}
-                </apex:outputText>
-                }
-                
-                @page :first{
-                <apex:outputText rendered="{!if(isNoHeader == true,true,false)}">
-                    size: {!selectedSize};
-                    margin-left: 0px;
-                    margin-right: 0px;
-                    margin-top: 0px;
-                    margin-bottom: 80px;  
-                </apex:outputText>
-                <apex:outputText rendered="{!if(isNoHeader == false,true,false)}">
-                    size: {!selectedSize};
-                    margin-left: 0px;
-                    margin-right: 0px;
-                    margin-top: 120px;
-                    margin-bottom: 80px;
-                </apex:outputText>
-                margin-bottom: 10px;
-                <apex:outputText rendered="{!if(headerfirstsectionsCount== 1,true,false)}">
-                    @top-left { content:element(first_header_left); width:100%;}
-                </apex:outputText>
-                <apex:outputText rendered="{!if(headerfirstsectionsCount== 2,true,false)}">
-                    @top-left { content:element(first_header_left);width:50%;}
-                    @top-right { content:element(first_header_center);width:50%;}
-                </apex:outputText>
-                <apex:outputText rendered="{!if(headerfirstsectionsCount== 3,true,false)}">
-                    @top-left { content:element(first_header_left);}
-                    @top-center { content:element(first_header_center);}
-                    @top-right { content:element(first_header_right);}
-                </apex:outputText>
-                
-                <!--------Code for Footer------------>
-                <apex:outputText rendered="{!if(footersectionsCount== 1,true,false)}">
-                    @bottom-left { content:element(footer_left); width:100%; }
-                </apex:outputText>
-                <apex:outputText rendered="{!if(footersectionsCount== 2,true,false)}">
-                    @bottom-left { content:element(footer_left); width:50%;}
-                    @bottom-right { content:element(footer_center);width:50%; }
-                </apex:outputText>
-                <apex:outputText rendered="{!if(footersectionsCount== 3,true,false)}">
-                    @bottom-left { content:element(footer_left);}
-                    @bottom-center { content:element(footer_center);}
-                    @bottom-right { content:element(footer_right);}
-                </apex:outputText>
-                }
-                
-            </apex:outputText>
-            
-            <apex:outputText rendered="{!if(defaultCSS== false,true,false)}">
-                <apex:outputText rendered="{!if(showAllPages== 'All Pages',true,false)}">
-                    @page {
-                    size: {!selectedSize};
-                    margin-left: 0px;
-                    margin-right: 0px;
-                    margin-top: 90px;
-                    margin-bottom: 80px;  
-                    background-image:url({!imageURL});
-                    background-repeat: no-repeat;
-                    background-origin: padding-box;
-                    background-size: 100px 100px;
-                    background-position: center;
-                    
+                    <apex:outputText rendered="{!if(isNoHeader == true,true,false)}">
+                        size: {!selectedSize};
+                        /*margin-left: 0px;
+                        margin-right: 0px;
+                        margin-top: 0px;
+                        margin-bottom: 80px; */
+
+                        margin-top: 0px;
+                        margin-right: {!marPadList['Margin-right']};
+                        margin-left: {!marPadList['Margin-left']};
+                        margin-bottom: {!marPadList['Margin-bottom']};
+                    </apex:outputText>
+                    <apex:outputText rendered="{!if(isNoHeader == false,true,false)}">
+                        size: {!selectedSize};
+                        /*margin-left: 0px;
+                        margin-right: 0px;
+                        margin-top: {!marginHeightValue};
+                        margin-bottom: 80px;*/
+
+                        margin-top: {!marginHeightValue};
+                        margin-right: {!marPadList['Margin-right']};
+                        margin-left: {!marPadList['Margin-left']};
+                        margin-bottom: {!marPadList['Margin-bottom']};
+                    </apex:outputText>
                     <apex:outputText rendered="{!if(headersectionsCount== 1,true,false)}">
                         @top-left { content:element(header_left); width:100%;}
                     </apex:outputText>
@@ -151,9 +78,9 @@
                         @top-right { content:element(header_center);width:50%;}
                     </apex:outputText>
                     <apex:outputText rendered="{!if(headersectionsCount== 3,true,false)}">
-                        @top-left { content:element(header_left);}
-                        @top-center { content:element(header_center);}
-                        @top-right { content:element(header_right);}
+                        @top-left { content:element(header_left);width:33%;}
+                        @top-center { content:element(header_center);width:33%;}
+                        @top-right { content:element(header_right);width:33%;}
                     </apex:outputText>
                     
                     <!--------Code for Footer------------>
@@ -165,18 +92,135 @@
                         @bottom-right { content:element(footer_center);width:50%; }
                     </apex:outputText>
                     <apex:outputText rendered="{!if(footersectionsCount== 3,true,false)}">
-                        @bottom-left { content:element(footer_left);}
-                        @bottom-center { content:element(footer_center);}
-                        @bottom-right { content:element(footer_right);}
+                        @bottom-left { content:element(footer_left);width:33%;}
+                        @bottom-center { content:element(footer_center);width:33%;}
+                        @bottom-right { content:element(footer_right);width:33%;}
                     </apex:outputText>
+                }
+                
+                @page :first{
+                <apex:outputText rendered="{!if(isNoHeader == true,true,false)}">
+                    size: {!selectedSize};
+                    margin-top: 0px;
+                    margin-right: {!marPadList['Margin-right']};
+                    margin-left: {!marPadList['Margin-left']};
+                    margin-bottom: {!marPadList['Margin-bottom']};
+
+                </apex:outputText>
+                <apex:outputText rendered="{!if(isNoHeader == false,true,false)}">
+                    size: {!selectedSize};
+                    margin-top: {!marginFirstHeightValue};
+                    margin-right: {!marPadList['Margin-right']};
+                    margin-left: {!marPadList['Margin-left']};
+                    margin-bottom: {!marPadList['Margin-bottom']};
+                </apex:outputText>
+                <apex:outputText rendered="{!if(headerfirstsectionsCount== 1,true,false)}">
+                    @top-left { content:element(first_header_left); width:100%;}
+                </apex:outputText>
+                <apex:outputText rendered="{!if(headerfirstsectionsCount== 2,true,false)}">
+                    @top-left { content:element(first_header_left);width:50%;}
+                    @top-right { content:element(first_header_center);width:50%;}
+                </apex:outputText>
+                <apex:outputText rendered="{!if(headerfirstsectionsCount== 3,true,false)}">
+                    @top-left { content:element(first_header_left);width:33%;}
+                    @top-center { content:element(first_header_center);width:33%;}
+                    @top-right { content:element(first_header_right);width:33%;}
+                </apex:outputText>
+                
+                <!--------Code for Footer------------>
+                <apex:outputText rendered="{!if(footersectionsCount== 1,true,false)}">
+                    @bottom-left { content:element(footer_left); width:100%; }
+                </apex:outputText>
+                <apex:outputText rendered="{!if(footersectionsCount== 2,true,false)}">
+                    @bottom-left { content:element(footer_left); width:50%;}
+                    @bottom-right { content:element(footer_center);width:50%; }
+                </apex:outputText>
+                <apex:outputText rendered="{!if(footersectionsCount== 3,true,false)}">
+                    @bottom-left { content:element(footer_left);width:33%;}
+                    @bottom-center { content:element(footer_center);width:33%;}
+                    @bottom-right { content:element(footer_right);width:33%;}
+                </apex:outputText>
+                }
+                
+            </apex:outputText>
+            
+            <apex:outputText rendered="{!if(defaultCSS== false,true,false)}">
+                <apex:outputText rendered="{!if(showAllPages== 'All Pages',true,false)}">
+                    @page {
+                       /* size: {!selectedSize}; 
+                        background-image:url({!imageURL});
+                        background-repeat: no-repeat;
+                        background-origin: padding-box;
+                        background-size: 100px 100px;
+                        background-position: center;
+                        margin-top: 0px;
+                        margin-right: {!marPadList['Margin-right']};
+                        margin-left: {!marPadList['Margin-left']};
+                        margin-bottom: {!marPadList['Margin-bottom']};*/
+
+                        <apex:outputText rendered="{!if(isNoHeader == true,true,false)}">
+                            margin-top: 0px;
+                            margin-right: {!marPadList['Margin-right']};
+                            margin-left: {!marPadList['Margin-left']};
+                            margin-bottom: {!marPadList['Margin-bottom']};
+                        </apex:outputText>
+                        <apex:outputText rendered="{!if(isNoHeader == false,true,false)}">
+                            margin-top: {!marginHeightValue};
+                            margin-right: {!marPadList['Margin-right']};
+                            margin-left: {!marPadList['Margin-left']};
+                            margin-bottom: {!marPadList['Margin-bottom']};
+                        </apex:outputText>
+
+                        size: {!selectedSize};
+                        background-image:url({!imageURL});
+                        background-repeat: no-repeat;
+                        background-origin: padding-box;
+                        background-size: 100px 100px;
+                        background-position: center;
+
+                        <apex:outputText rendered="{!if(headersectionsCount== 1,true,false)}">
+                            @top-left { content:element(header_left); width:100%;}
+                        </apex:outputText>
+                        <apex:outputText rendered="{!if(headersectionsCount== 2,true,false)}">
+                            @top-left { content:element(header_left);width:50%;}
+                            @top-right { content:element(header_center);width:50%;}
+                        </apex:outputText>
+                        <apex:outputText rendered="{!if(headersectionsCount== 3,true,false)}">
+                            @top-left { content:element(header_left);}
+                            @top-center { content:element(header_center);}
+                            @top-right { content:element(header_right);}
+                        </apex:outputText>
+                        
+                        <!--------Code for Footer------------>
+                        <apex:outputText rendered="{!if(footersectionsCount== 1,true,false)}">
+                            @bottom-left { content:element(footer_left); width:100%; }
+                        </apex:outputText>
+                        <apex:outputText rendered="{!if(footersectionsCount== 2,true,false)}">
+                            @bottom-left { content:element(footer_left); width:50%;}
+                            @bottom-right { content:element(footer_center);width:50%; }
+                        </apex:outputText>
+                        <apex:outputText rendered="{!if(footersectionsCount== 3,true,false)}">
+                            @bottom-left { content:element(footer_left);}
+                            @bottom-center { content:element(footer_center);}
+                            @bottom-right { content:element(footer_right);}
+                        </apex:outputText>
                     }
                     
                     @page:first{
+                    <apex:outputText rendered="{!if(isNoHeader == true,true,false)}">
+                        margin-top: 0px;
+                        margin-right: {!marPadList['Margin-right']};
+                        margin-left: {!marPadList['Margin-left']};
+                        margin-bottom: {!marPadList['Margin-bottom']};
+                    </apex:outputText>
+                    <apex:outputText rendered="{!if(isNoHeader == false,true,false)}">
+                        margin-top: {!marginFirstHeightValue};
+                        margin-right: {!marPadList['Margin-right']};
+                        margin-left: {!marPadList['Margin-left']};
+                        margin-bottom: {!marPadList['Margin-bottom']};
+                    </apex:outputText>
+
                     size: {!selectedSize};
-                    margin-left: 0px;
-                    margin-right: 0px;
-                    margin-top: 90px;
-                    margin-bottom: 80px;  
                     background-image:url({!imageURL});
                     background-repeat: no-repeat;
                     background-origin: padding-box;
@@ -213,56 +257,75 @@
                 </apex:outputText>
                 <apex:outputText rendered="{!if(showAllPages== 'All Pages Except First Page',true,false)}">
                     @page {
-                    size: {!selectedSize};
-                    margin-left: 0px;
-                    margin-right: 0px;
-                    margin-top: 90px;
-                    margin-bottom: 80px;  
-                    background-image:url({!imageURL});
-                    background-repeat: no-repeat;
-                    background-origin: padding-box;
-                    background-size: 100px 100px;
-                    background-position: center;
-                    
-                    <apex:outputText rendered="{!if(headersectionsCount== 1,true,false)}">
-                        @top-left { content:element(header_left); width:100%;}
-                    </apex:outputText>
-                    <apex:outputText rendered="{!if(headersectionsCount== 2,true,false)}">
-                        @top-left { content:element(header_left);width:50%;}
-                        @top-right { content:element(header_center);width:50%;}
-                    </apex:outputText>
-                    <apex:outputText rendered="{!if(headersectionsCount== 3,true,false)}">
-                        @top-left { content:element(header_left);}
-                        @top-center { content:element(header_center);}
-                        @top-right { content:element(header_right);}
-                    </apex:outputText>
-                    
-                    <!--------Code for Footer------------>
-                    <apex:outputText rendered="{!if(footersectionsCount== 1,true,false)}">
-                        @bottom-left { content:element(footer_left); width:100%; }
-                    </apex:outputText>
-                    <apex:outputText rendered="{!if(footersectionsCount== 2,true,false)}">
-                        @bottom-left { content:element(footer_left); width:50%;}
-                        @bottom-right { content:element(footer_center);width:50%; }
-                    </apex:outputText>
-                    <apex:outputText rendered="{!if(footersectionsCount== 3,true,false)}">
-                        @bottom-left { content:element(footer_left);}
-                        @bottom-center { content:element(footer_center);}
-                        @bottom-right { content:element(footer_right);}
-                    </apex:outputText>
+                        size: {!selectedSize};
+                        background-image:url({!imageURL});
+                        background-repeat: no-repeat;
+                        background-origin: padding-box;
+                        background-size: 100px 100px;
+                        background-position: center;
+
+
+                        <apex:outputText rendered="{!if(isNoHeader == true,true,false)}">
+                            margin-top: 0px;
+                            margin-right: {!marPadList['Margin-right']};
+                            margin-left: {!marPadList['Margin-left']};
+                            margin-bottom: {!marPadList['Margin-bottom']};
+                        </apex:outputText>
+                        <apex:outputText rendered="{!if(isNoHeader == false,true,false)}">
+                            margin-top: {!marginHeightValue};
+                            margin-right: {!marPadList['Margin-right']};
+                            margin-left: {!marPadList['Margin-left']};
+                            margin-bottom: {!marPadList['Margin-bottom']};
+                        </apex:outputText>
+                        
+                        <apex:outputText rendered="{!if(headersectionsCount== 1,true,false)}">
+                            @top-left { content:element(header_left); width:100%;}
+                        </apex:outputText>
+                        <apex:outputText rendered="{!if(headersectionsCount== 2,true,false)}">
+                            @top-left { content:element(header_left);width:50%;}
+                            @top-right { content:element(header_center);width:50%;}
+                        </apex:outputText>
+                        <apex:outputText rendered="{!if(headersectionsCount== 3,true,false)}">
+                            @top-left { content:element(header_left);}
+                            @top-center { content:element(header_center);}
+                            @top-right { content:element(header_right);}
+                        </apex:outputText>
+                        
+                        <!--------Code for Footer------------>
+                        <apex:outputText rendered="{!if(footersectionsCount== 1,true,false)}">
+                            @bottom-left { content:element(footer_left); width:100%; }
+                        </apex:outputText>
+                        <apex:outputText rendered="{!if(footersectionsCount== 2,true,false)}">
+                            @bottom-left { content:element(footer_left); width:50%;}
+                            @bottom-right { content:element(footer_center);width:50%; }
+                        </apex:outputText>
+                        <apex:outputText rendered="{!if(footersectionsCount== 3,true,false)}">
+                            @bottom-left { content:element(footer_left);}
+                            @bottom-center { content:element(footer_center);}
+                            @bottom-right { content:element(footer_right);}
+                        </apex:outputText>
                     }
                     
                     @page :first {
                     size: {!selectedSize};
-                    margin-left: 0px;
-                    margin-right: 0px;
-                    margin-top: 90px;
-                    margin-bottom: 80px;  
                     background-image:none;
                     background-repeat: no-repeat;
                     background-origin: padding-box;
                     background-size: 100px 100px;
                     background-position: center;
+
+                    <apex:outputText rendered="{!if(isNoHeader == true,true,false)}">
+                        margin-top: 0px;
+                        margin-right: {!marPadList['Margin-right']};
+                        margin-left: {!marPadList['Margin-left']};
+                        margin-bottom: {!marPadList['Margin-bottom']};
+                    </apex:outputText>
+                    <apex:outputText rendered="{!if(isNoHeader == false,true,false)}">
+                        margin-top: {!marginFirstHeightValue};
+                        margin-right: {!marPadList['Margin-right']};
+                        margin-left: {!marPadList['Margin-left']};
+                        margin-bottom: {!marPadList['Margin-bottom']};
+                    </apex:outputText>
                     
                     <apex:outputText rendered="{!if(headerfirstsectionsCount== 1,true,false)}">
                         @top-left { content:element(first_header_left); width:100%;}
@@ -294,84 +357,101 @@
                 </apex:outputText>
                 <apex:outputText rendered="{!if(showAllPages== 'Only First Page',true,false)}">
                     @page {
-                    size: {!selectedSize};
-                    margin-left: 0px;
-                    margin-right: 0px;
-                    margin-top: 90px;
-                    margin-bottom: 80px;  
-                    
-                    background-image:none;
-                    background-repeat: no-repeat;
-                    background-origin: padding-box;
-                    background-size: 100px 100px;
-                    background-position: center;
-                    
-                    <apex:outputText rendered="{!if(headersectionsCount== 1,true,false)}">
-                        @top-left { content:element(header_left); width:100%;}
-                    </apex:outputText>
-                    <apex:outputText rendered="{!if(headersectionsCount== 2,true,false)}">
-                        @top-left { content:element(header_left);width:50%;}
-                        @top-right { content:element(header_center);width:50%;}
-                    </apex:outputText>
-                    <apex:outputText rendered="{!if(headersectionsCount== 3,true,false)}">
-                        @top-left { content:element(header_left);}
-                        @top-center { content:element(header_center);}
-                        @top-right { content:element(header_right);}
-                    </apex:outputText>
-                    
-                    <!--------Code for Footer------------>
-                    <apex:outputText rendered="{!if(footersectionsCount== 1,true,false)}">
-                        @bottom-left { content:element(footer_left); width:100%; }
-                    </apex:outputText>
-                    <apex:outputText rendered="{!if(footersectionsCount== 2,true,false)}">
-                        @bottom-left { content:element(footer_left); width:50%;}
-                        @bottom-right { content:element(footer_center);width:50%; }
-                    </apex:outputText>
-                    <apex:outputText rendered="{!if(footersectionsCount== 3,true,false)}">
-                        @bottom-left { content:element(footer_left);}
-                        @bottom-center { content:element(footer_center);}
-                        @bottom-right { content:element(footer_right);}
-                    </apex:outputText>
+                        size: {!selectedSize};                    
+                        background-image:none;
+                        background-repeat: no-repeat;
+                        background-origin: padding-box;
+                        background-size: 100px 100px;
+                        background-position: center;
+
+                        <apex:outputText rendered="{!if(isNoHeader == true,true,false)}">
+                                margin-top: 0px;
+                                margin-right: {!marPadList['Margin-right']};
+                                margin-left: {!marPadList['Margin-left']};
+                                margin-bottom: {!marPadList['Margin-bottom']};
+                            </apex:outputText>
+                            <apex:outputText rendered="{!if(isNoHeader == false,true,false)}">
+                                margin-top: {!marginHeightValue};
+                                margin-right: {!marPadList['Margin-right']};
+                                margin-left: {!marPadList['Margin-left']};
+                                margin-bottom: {!marPadList['Margin-bottom']};
+                            </apex:outputText>
+                        
+                        <apex:outputText rendered="{!if(headersectionsCount== 1,true,false)}">
+                            @top-left { content:element(header_left); width:100%;}
+                        </apex:outputText>
+                        <apex:outputText rendered="{!if(headersectionsCount== 2,true,false)}">
+                            @top-left { content:element(header_left);width:50%;}
+                            @top-right { content:element(header_center);width:50%;}
+                        </apex:outputText>
+                        <apex:outputText rendered="{!if(headersectionsCount== 3,true,false)}">
+                            @top-left { content:element(header_left);}
+                            @top-center { content:element(header_center);}
+                            @top-right { content:element(header_right);}
+                        </apex:outputText>
+                        
+                        <!--------Code for Footer------------>
+                        <apex:outputText rendered="{!if(footersectionsCount== 1,true,false)}">
+                            @bottom-left { content:element(footer_left); width:100%; }
+                        </apex:outputText>
+                        <apex:outputText rendered="{!if(footersectionsCount== 2,true,false)}">
+                            @bottom-left { content:element(footer_left); width:50%;}
+                            @bottom-right { content:element(footer_center);width:50%; }
+                        </apex:outputText>
+                        <apex:outputText rendered="{!if(footersectionsCount== 3,true,false)}">
+                            @bottom-left { content:element(footer_left);}
+                            @bottom-center { content:element(footer_center);}
+                            @bottom-right { content:element(footer_right);}
+                        </apex:outputText>
                     }
                     
                     @page :first {
-                    size: {!selectedSize};
-                    margin-left: 0px;
-                    margin-right: 0px;
-                    margin-top: 90px;
-                    margin-bottom: 80px;  
-                    background-image:url({!imageURL});
-                    background-repeat: no-repeat;
-                    background-origin: padding-box;
-                    background-size: 100px 100px;
-                    background-position: center;
-                    
-                    <apex:outputText rendered="{!if(headerfirstsectionsCount== 1,true,false)}">
-                        @top-left { content:element(first_header_left); width:100%;}
-                    </apex:outputText>
-                    <apex:outputText rendered="{!if(headerfirstsectionsCount== 2,true,false)}">
-                        @top-left { content:element(first_header_left);width:50%;}
-                        @top-right { content:element(first_header_center);width:50%;}
-                    </apex:outputText>
-                    <apex:outputText rendered="{!if(headerfirstsectionsCount== 3,true,false)}">
-                        @top-left { content:element(first_header_left);}
-                        @top-center { content:element(first_header_center);}
-                        @top-right { content:element(first_header_right);}
-                    </apex:outputText>
-                    
-                    <!--------Code for Footer------------>
-                    <apex:outputText rendered="{!if(footersectionsCount== 1,true,false)}">
-                        @bottom-left { content:element(footer_left); width:100%; }
-                    </apex:outputText>
-                    <apex:outputText rendered="{!if(footersectionsCount== 2,true,false)}">
-                        @bottom-left { content:element(footer_left); width:50%;}
-                        @bottom-right { content:element(footer_center);width:50%; }
-                    </apex:outputText>
-                    <apex:outputText rendered="{!if(footersectionsCount== 3,true,false)}">
-                        @bottom-left { content:element(footer_left);}
-                        @bottom-center { content:element(footer_center);}
-                        @bottom-right { content:element(footer_right);}
-                    </apex:outputText>
+                        size: {!selectedSize};
+                        background-image:url({!imageURL});
+                        background-repeat: no-repeat;
+                        background-origin: padding-box;
+                        background-size: 100px 100px;
+                        background-position: center;
+
+                        <apex:outputText rendered="{!if(isNoHeader == true,true,false)}">
+                            margin-top: 0px;
+                            margin-right: {!marPadList['Margin-right']};
+                            margin-left: {!marPadList['Margin-left']};
+                            margin-bottom: {!marPadList['Margin-bottom']};
+                        </apex:outputText>
+                        <apex:outputText rendered="{!if(isNoHeader == false,true,false)}">
+                            margin-top: {!marginFirstHeightValue};
+                            margin-right: {!marPadList['Margin-right']};
+                            margin-left: {!marPadList['Margin-left']};
+                            margin-bottom: {!marPadList['Margin-bottom']};
+                        </apex:outputText>
+                        
+                        <apex:outputText rendered="{!if(headerfirstsectionsCount== 1,true,false)}">
+                            @top-left { content:element(first_header_left); width:100%;}
+                        </apex:outputText>
+                        <apex:outputText rendered="{!if(headerfirstsectionsCount== 2,true,false)}">
+                            @top-left { content:element(first_header_left);width:50%;}
+                            @top-right { content:element(first_header_center);width:50%;}
+                        </apex:outputText>
+                        <apex:outputText rendered="{!if(headerfirstsectionsCount== 3,true,false)}">
+                            @top-left { content:element(first_header_left);}
+                            @top-center { content:element(first_header_center);}
+                            @top-right { content:element(first_header_right);}
+                        </apex:outputText>
+                        
+                        <!--------Code for Footer------------>
+                        <apex:outputText rendered="{!if(footersectionsCount== 1,true,false)}">
+                            @bottom-left { content:element(footer_left); width:100%; }
+                        </apex:outputText>
+                        <apex:outputText rendered="{!if(footersectionsCount== 2,true,false)}">
+                            @bottom-left { content:element(footer_left); width:50%;}
+                            @bottom-right { content:element(footer_center);width:50%; }
+                        </apex:outputText>
+                        <apex:outputText rendered="{!if(footersectionsCount== 3,true,false)}">
+                            @bottom-left { content:element(footer_left);}
+                            @bottom-center { content:element(footer_center);}
+                            @bottom-right { content:element(footer_right);}
+                        </apex:outputText>
                     }
                 </apex:outputText>
             </apex:outputText>
@@ -380,8 +460,8 @@
     
     <apex:outputText rendered="{!if(headerfirstsectionsCount== 1,true,false)}">
         <div class="first_header_left">
-            <div style="{!headerRelative}">
-                <div style="{!headerAbsolute}">
+            <div style="{!headerFirstRelative}">
+                <div style="{!headerFirstAbsolute}">
                     <apex:outputText value="{!leftfirstheadertext}" escape="false" />
                 </div>
             </div>
@@ -390,15 +470,15 @@
     
     <apex:outputText rendered="{!if(headerfirstsectionsCount== 2,true,false)}">
         <div class="first_header_left">
-            <div style="{!headerRelative}">
-                <div style="{!headerAbsolute}">
+            <div style="{!headerFirstRelative}">
+                <div style="{!headerFirstAbsolute}">
                     <apex:outputText value="{!leftfirstheadertext}" escape="false" />
                 </div>
             </div>
         </div>
         <div class="first_header_center">
-            <div style="{!headerRelative}">
-                <div style="{!headerAbsolute}">
+            <div style="{!headerFirstRelative}">
+                <div style="{!headerFirstAbsolute}">
                     <apex:outputText value="{!centerfirstheadertext}" escape="false" />
                 </div>
             </div>
@@ -407,22 +487,22 @@
     
     <apex:outputText rendered="{!if(headerfirstsectionsCount== 3,true,false)}">	
         <div class="first_header_left">
-            <div style="{!headerRelative}">
-                <div style="{!headerAbsolute}">
+            <div style="{!headerFirstRelative}">
+                <div style="{!headerFirstAbsolute}">
                     <apex:outputText value="{!leftfirstheadertext}" escape="false" />
                 </div>
             </div>
         </div>
         <div class="first_header_center">
-            <div style="{!headerRelative}">
-                <div style="{!headerAbsolute}">
+            <div style="{!headerFirstRelative}">
+                <div style="{!headerFirstAbsolute}">
                     <apex:outputText value="{!centerfirstheadertext}" escape="false" />
                 </div>
             </div>
         </div>
         <div class="first_header_right">
-            <div style="{!headerRelative}">
-                <div style="{!headerAbsolute}">
+            <div style="{!headerFirstRelative}">
+                <div style="{!headerFirstAbsolute}">
                     <apex:outputText value="{!rightfirstheadertext}" escape="false" />
                 </div>
             </div>

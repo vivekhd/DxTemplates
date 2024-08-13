@@ -24,6 +24,7 @@
 				<div class="slds-col slds-text-align_right">
 					<lightning-layout class="slds-grid slds-grid_align-end">
 						<div data-id='section menu' class="slds-col slds-grid_align-end"></div>
+						<lightning-button-icon icon-name="utility:setup" onclick={handlePageProperties} alternative-text="Configure Page properties" title="Configure Page properties" class="slds-button_icon-help slds-m-right_small" size="medium" variant="bare" data-val="DxTemplates" style="padding-top:5px;"></lightning-button-icon>
 						<button class="slds-button las la-language slds-m-top_xxx-small" disabled={translateEnabled} title="Translate" onclick={handleTranslate} style="font-size: 30px;margin-top: -7px;color: rgb(116, 116, 116);padding-left: 5px;padding-right: 5px;padding-bottom: 0px;">
 						</button>
 						<lightning-button-icon icon-name="utility:help_doc_ext" onclick={handlehelp} alternative-text="Need Help?" title="Need Help?" class="slds-button_icon-help slds-m-right_small" size="medium" variant="bare" data-val="DxTemplates" style="padding-top:5px;"></lightning-button-icon>
@@ -65,7 +66,7 @@
 								rowcount={header.rowCount} sectiontype={header.Type}
 								ondeletesectiondata={handledeletesectiondata} onsavesectiondata={handlesavedheaderdata}
 								recordidtoedit={recordidtoedit} sectionrecordid={header.Id}
-								documenttemplaterecord={doctemplatedetails} pdf-links ={pdfLinksData} ondatasaved={handleDataSaved}>
+								documenttemplaterecord={doctemplatedetails} pdf-links ={pdfLinksData} ondatasaved={handleDataSaved} onfirstheader = {handleFirstUniqueHeader}>
 							</c-template-header>
 
 							<c-template-content-details showdetails={showcontextdetails}
@@ -327,7 +328,7 @@
 									</template>
 								</div>
 								<div class="slds-col slds-size_1-of-1 slds-medium-size_6-of-12 slds-m-top_large slds-text-align_left">
-									<lightning-button class="slds-m-top_small" type="submit" label="Watermark Settings"
+									<lightning-button class="slds-m-top_small" type="button" label="Watermark Settings"
 										variant="brand" onclick={handleWatermarkSettings}></lightning-button>
 										<lightning-button-icon icon-name="utility:help_doc_ext" onclick={handlehelp} alternative-text="Need Help?" title="Need Help?" class="slds-button_icon-help slds-m-right_small" size="medium" variant="bare" style="margin-top: 3px;" data-val="Watermark Settings">
 										</lightning-button-icon>
@@ -484,132 +485,848 @@
 						<button class="slds-button slds-button_brand" onclick={handleWaterMarkSave} if:false={readonlyVal}>Save</button>
 					</div>
 				</template>
-			</c-modal>
-			<c-modal data-id="translation" onclosedialog={closeTranslateModal}>
-			<template lwc:if={isTranslateModalOpen}>
-				<span slot="header">Translate</span>
-				<div class="slds-modal__content slds-p-around_x-small">
-					<template if:true={translatedRecords}>
-						<div class="slds-grid slds-gutters slds-p-around_x-small">
-							<div class="slds-col slds-large-size_4-of-12 slds-medium-size_4-of-12 slds-size_4-of-12 slds-p-top_x-small">
-								<lightning-combobox label="Select Translation Output Language" value={selectedLanguage} options={languages} onchange={handleLanguageChange}></lightning-combobox>
-							</div>
-							<div
-								class="slds-col slds-large-size_4-of-12 slds-medium-size_4-of-12 slds-size_8-of-12">
-								<lightning-input label="Search" class="slds-col slds-m-top_x-small" onchange={handleTranslationsSearch}></lightning-input>
-							</div>
-							<div class="slds-col slds-large-size_2-of-12 slds-medium-size_2-of-12 slds-size_4-of-12 slds-m-top_x-small">
-								<label class="slds-form-element__label">Import Translation(s)</label>
-								<lightning-button-icon onclick={handleImportTranslation} data-id="importTranslation" variant="border-filled" icon-name="utility:upload" disabled={isDisabled} title="Bulk Import Translation(s)"></lightning-button-icon>
-							</div>
-							<div class="slds-col slds-large-size_2-of-12 slds-medium-size_2-of-12 slds-size_4-of-12 slds-m-top_x-small">
-								<label class="slds-form-element__label">Translate</label>
-								<lightning-button-icon icon-name="utility:display_rich_text" size="medium"
-									alternative-text="Language Translator" title="Translate using Google Translator API"
-									onclick={handleTextListTranslateLanguage}>
-								</lightning-button-icon>
-							</div>
-						</div>
-						<div class="table-container ">
-								<table class="slds-table slds-table_bordered slds-table_cell-buffer">
-								<thead>
-									<tr class="slds-line-height_reset">
-										<th class="slds-text-title_caps">Field Name</th>
-										<th class="slds-text-title_caps">Field Value</th>
-										<th class="slds-text-title_caps">Translated Value</th>
-										<th class="slds-text-title_caps"></th>
-									</tr>
-								</thead>
-								<tbody>
-									<template for:each={translatedRecords} for:item="row" for:index="index">
-										<tr key={row.id}>
-											<td>
-												<div>
-													<lightning-input type="text" onchange={handleCellOneInputChange} read-only={isDisabled}
-														data-index={index} class="field-input" value={row.Name}>
+
+				<!--Code added by Bhavya for selecting Page properties starts here -->
+				<template if:true={showPageProperties}>
+					<span slot="header">Configure Page Properties</span>
+					<div class="slds-modal__content slds-p-around_medium pageSettings" id="modal-content-id-3">
+						 <lightning-tabset variant="vertical" class="slds-vertical-tabs">
+							<!-- Page Properties Tab -->
+							<lightning-tab label="Page Properties" id="page-properties">
+								<div class="slds-grid slds-wrap slds-gutters">
+									<div class="slds-col slds-size_1-of-1 slds-text-align_center">
+										<label>Page Margins</label>
+									</div>
+									<div class="slds-col slds-size_1-of-2">
+										<div class="slds-grid">
+											<div class="">
+												<lightning-input label="Left Margin" type="number" value={pageMargins.leftMargin.value} onchange={handleUserInputChange} data-id="leftMarginVal" class="slds-m-top_xx-small"></lightning-input>
+											</div>
+											<div class="">
+												<lightning-combobox name="unit" value={pageMargins.leftMargin.unit} options={unitOptions} data-id="leftMarginUnit" onchange={handleUserInputChange} class="slds-m-top_large slds-m-left_xx-small"></lightning-combobox>
+											</div>
+										</div>
+									</div>
+									<div class="slds-col slds-size_1-of-2">
+										<div class="slds-grid">
+											<div class="">
+												<lightning-input label="Right Margin" type="number" value={pageMargins.rightMargin.value} onchange={handleUserInputChange} data-id="rightMarginVal"  class="slds-m-top_xx-small"></lightning-input>
+											</div>
+											<div class="">
+											<lightning-combobox name="unit" value={pageMargins.rightMargin.unit} options={unitOptions} data-id="rightMarginUnit" onchange={handleUserInputChange} class="slds-m-top_large slds-m-left_xx-small"></lightning-combobox>
+											</div>
+										</div>
+									</div>
+									<div class="slds-col slds-size_1-of-2">
+										<div class="slds-grid">
+											<div class="">
+												<lightning-input label="Top Margin" type="number" value={pageMargins.topMargin.value} onchange={handleUserInputChange} data-id="topMarginVal"  class="slds-m-top_xx-small"></lightning-input>
+											</div>
+											<div class="">
+												<lightning-combobox name="unit" value={pageMargins.topMargin.unit} options={unitOptions} data-id="topMarginUnit" onchange={handleUserInputChange} class="slds-m-top_large slds-m-left_xx-small"></lightning-combobox>
+											</div>
+										</div>
+									</div>
+									<div class="slds-col slds-size_1-of-2">
+										<div class="slds-grid">
+											<div class="">
+												<lightning-input label="Bottom Margin" type="number" value={pageMargins.bottomMargin.value} onchange={handleUserInputChange} data-id="bottomMarginVal"  class="slds-m-top_xx-small"></lightning-input>
+											</div>
+											<div class="">
+												<lightning-combobox name="unit" value={pageMargins.bottomMargin.unit} options={unitOptions} data-id="bottomMarginUnit" onchange={handleUserInputChange} class="slds-m-top_large slds-m-left_xx-small"></lightning-combobox>
+											</div>
+										</div>
+									</div>
+									<div class="slds-col slds-size_1-of-2">
+										<div class="slds-grid">
+											<div class="">
+												<lightning-input label="Line Height" type="number" value={pageMargins.lineheight.value} onchange={handleUserInputChange} data-id="lineheightVal"  class="slds-m-top_xx-small"></lightning-input>
+											</div>
+										</div>
+									</div>
+
+								</div>
+							</lightning-tab>
+
+							<!-- Header Properties Tab -->
+							<lightning-tab label="Header Properties" id="header-properties">
+								<!--Accordion section for Headers & First Page Headers respectively-->
+								<!--Second Page Header Values-->
+								<lightning-accordion allow-multiple-sections active-section-name="secondHeader">
+									<template if:true={showFirstHeaderProperties}>
+										<lightning-accordion-section name="firstHeader" label="First Page Header Properties">
+											<div class="slds-grid slds-wrap slds-gutters">
+												<div class="slds-col slds-size_1-of-2">
+													<div class="slds-grid">
+														<div class="">
+															<lightning-input label="Header Height" type="number" name="value"
+																value={firstHeaderProperties.height.value} 
+																data-id="height" 
+																onchange={handleFirstHeaderPropertiesChange} 
+																class="slds-m-top_xx-small">
+															</lightning-input>
+														</div>
+														<div class="">
+															<lightning-combobox name="unit" 
+																value={firstHeaderProperties.height.unit} 
+																options={unitOptions} 
+																data-id="heightUnit" 
+																onchange={handleFirstHeaderPropertiesChange} 
+																class="slds-m-top_large slds-m-left_xx-small">
+															</lightning-combobox>
+														</div>
+													</div>
+												</div>
+												<div class="slds-col slds-size_1-of-2">
+													<div class="slds-grid">
+														<div class="">
+															<lightning-input label="Line Height" name="value" type="number" 
+																value={firstHeaderProperties.lineHeight.value} 
+																data-id="lineHeight" 
+																onchange={handleFirstHeaderPropertiesChange} 
+																class="slds-m-top_xx-small">
+															</lightning-input>
+														</div>
+													</div>
+												</div>
+												<div class="slds-col slds-size_1-of-2">
+													<lightning-input label="Background Color" type="color" 
+														value={firstHeaderProperties.bgColor.value} 
+														data-id="bgColor" 
+														onchange={handleFirstHeaderPropertiesChange}>
 													</lightning-input>
 												</div>
-											</td>
-											<td>
-												<div>
-													<lightning-input type="text" onchange={handleCellTwoInputChange} read-only={isDisabled}
-														data-index={index} class="field-value"
-														value={row.DxCPQ__FieldValue__c}></lightning-input>
+												<div class="slds-col slds-size_1-of-1 slds-text-align_center slds-m-vertical_small slds-p-vertical_small" style="border: 1px solid #333333;">
+													<label>Border Configurations</label>
+													<div class="slds-grid slds-wrap slds-gutters">
+														<div class="slds-col slds-size_1-of-2">
+															<lightning-input label="Border Color" type="color" 
+																value={firstHeaderProperties.borderColor.value} 
+																data-id="borderColorVal" 
+																onchange={handleFirstHeaderPropertiesChange}>
+															</lightning-input>
+														</div>
+														<div class="slds-col slds-size_1-of-2">
+															<lightning-input label="Border Opacity" type="number" 
+																value={firstHeaderProperties.borderOpacity} 
+																data-id="borderOpacity" 
+																onchange={handleFirstHeaderPropertiesChange}>
+															</lightning-input>
+														</div>
+														<div class="slds-col slds-size_1-of-2">
+															<div class="slds-grid">
+																<div class="">
+																	<lightning-input label="Border Weight" type="number" name="value"
+																		value={firstHeaderProperties.borderWeight.value} 
+																		data-id="borderWeightVal" 
+																		onchange={handleFirstHeaderPropertiesChange} 
+																		class="slds-m-top_xx-small" >
+																	</lightning-input>
+																</div>
+																<div class="">
+																	<lightning-combobox name="unit" 
+																		value={firstHeaderProperties.borderWeight.unit} 
+																		options={unitOptions} 
+																		data-id="borderWeightUnit" 
+																		onchange={handleFirstHeaderPropertiesChange} 
+																		class="slds-m-top_large slds-m-left_xx-small" disabled>
+																	</lightning-combobox>
+																</div>
+															</div>
+														</div>
+													</div>
 												</div>
-											</td>
-											<td>
-												<div>
-													<lightning-textarea onchange={handleCellThreeInputChange} read-only={isDisabled}
-														data-index={index} class="trans-value"
-														value={row.DxCPQ__Translated_Value__c}></lightning-textarea>
+												
+												<div class="slds-col slds-size_1-of-1 slds-text-align_center slds-m-vertical_small slds-p-vertical_small" style="border: 1px solid #333333;">
+													<label>Header Margins</label>
+													<div class="slds-grid slds-wrap slds-gutters">
+														<div class="slds-col slds-size_1-of-2">
+															<div class="slds-grid">
+																<div class="">
+																	<lightning-input label="Left Margin" type="number" 
+																		value={firstHeaderProperties.margins.leftMargin.value} name="value"
+																		data-id="leftMarginVal" 
+																		onchange={handleFirstHeaderPropertiesChange} 
+																		class="slds-m-top_xx-small">
+																	</lightning-input>
+																</div>
+																<div class="">
+																	<lightning-combobox name="unit" 
+																		value={firstHeaderProperties.margins.leftMargin.unit} 
+																		options={unitOptions} 
+																		data-id="leftMarginUnit" 
+																		onchange={handleFirstHeaderPropertiesChange} 
+																		class="slds-m-top_large slds-m-left_xx-small">
+																	</lightning-combobox>
+																</div>
+															</div>
+														</div>
+														<div class="slds-col slds-size_1-of-2">
+															<div class="slds-grid">
+																<div class="">
+																	<lightning-input label="Right Margin" type="number" 
+																		value={firstHeaderProperties.margins.rightMargin.value} name="value"
+																		data-id="rightMarginVal" 
+																		onchange={handleFirstHeaderPropertiesChange} 
+																		class="slds-m-top_xx-small">
+																	</lightning-input>
+																</div>
+																<div class="">
+																	<lightning-combobox name="unit" 
+																		value={firstHeaderProperties.margins.rightMargin.unit} 
+																		options={unitOptions} 
+																		data-id="rightMarginUnit" 
+																		onchange={handleFirstHeaderPropertiesChange} 
+																		class="slds-m-top_large slds-m-left_xx-small">
+																	</lightning-combobox>
+																</div>
+															</div>
+														</div>
+														<div class="slds-col slds-size_1-of-2">
+															<div class="slds-grid">
+																<div class="">
+																	<lightning-input label="Top Margin" type="number" 
+																		value={firstHeaderProperties.margins.topMargin.value} name="value"
+																		data-id="topMarginVal" 
+																		onchange={handleFirstHeaderPropertiesChange} 
+																		class="slds-m-top_xx-small">
+																	</lightning-input>
+																</div>
+																<div class="">
+																	<lightning-combobox name="unit" 
+																		value={firstHeaderProperties.margins.topMargin.unit} 
+																		options={unitOptions} 
+																		data-id="toptMarginUnit" 
+																		onchange={handleFirstHeaderPropertiesChange} 
+																		class="slds-m-top_large slds-m-left_xx-small">
+																	</lightning-combobox>
+																</div>
+															</div>
+														</div>
+														<div class="slds-col slds-size_1-of-2">
+															<div class="slds-grid">
+																<div class="">
+																	<lightning-input label="Bottom Margin" type="number" name="value"
+																		value={firstHeaderProperties.margins.bottomMargin.value} 
+																		data-id="bottomMarginVal" 
+																		onchange={handleFirstHeaderPropertiesChange} 
+																		class="slds-m-top_xx-small">
+																	</lightning-input>
+																</div>
+																<div class="">
+																	<lightning-combobox name="unit" 
+																		value={firstHeaderProperties.margins.bottomMargin.unit} 
+																		options={unitOptions} 
+																		data-id="bottomMarginUnit" 
+																		onchange={handleFirstHeaderPropertiesChange} 
+																		class="slds-m-top_large slds-m-left_xx-small">
+																	</lightning-combobox>
+																</div>
+															</div>
+														</div>
+													</div>
 												</div>
-											</td>
-											<td>
-												<div>
-													<lightning-button-icon icon-name="utility:delete"
-														alternative-text="Delete" onclick={handleRemoveRow} disabled={isDisabled}
-														data-index={index} class="slds-m-left_x-small" title="Delete">
-													</lightning-button-icon>
+												
 
-													<lightning-button-icon icon-name="utility:new"
-														alternative-text="New" onclick={handleClick} disabled={isDisabled}
-														class="slds-m-left_x-small" title="New">
-													</lightning-button-icon>
-
-													<lightning-rich-text-toolbar-button icon-name="utility:merge"
-														data-index={index} icon-alternative-text="Add Merge Field" class="slds-m-left_x-small"
-														onclick={handlerowlevelmerge} disabled={isDisabled}>
-													</lightning-rich-text-toolbar-button>
-
-													<lightning-rich-text-toolbar-button icon-name="utility:display_rich_text"
-														data-index={index} icon-alternative-text="Translate using Google Translator API" class="slds-m-left_x-small"
-														onclick={handleTextTranslateLanguage} disabled={isDisabled}>
-													</lightning-rich-text-toolbar-button>
+												<!--Header Paddings-->
+												<div class="slds-col slds-size_1-of-1 slds-text-align_center slds-m-vertical_small slds-p-vertical_small" style="border: 1px solid #333333;">
+													<label>Header Paddings</label>
+													<div class="slds-grid slds-wrap slds-gutters">
+														<div class="slds-col slds-size_1-of-2">
+															<div class="slds-grid">
+																<div class="">
+																	<lightning-input label="Left Padding" type="number" 
+																		value={firstHeaderProperties.paddings.leftPadding.value} name="value"
+																		data-id="leftPaddingVal" 
+																		onchange={handleFirstHeaderPropertiesChange} 
+																		class="slds-m-top_xx-small">
+																	</lightning-input>
+																</div>
+																<div class="">
+																	<lightning-combobox name="unit" 
+																		value={firstHeaderProperties.paddings.leftPadding.unit} 
+																		options={unitOptions} 
+																		data-id="leftPaddingUnit" 
+																		onchange={handleFirstHeaderPropertiesChange} 
+																		class="slds-m-top_large slds-m-left_xx-small">
+																	</lightning-combobox>
+																</div>
+															</div>
+														</div>
+														<div class="slds-col slds-size_1-of-2">
+															<div class="slds-grid">
+																<div class="">
+																	<lightning-input label="Right Padding" type="number" 
+																		value={firstHeaderProperties.paddings.rightPadding.value} name="value"
+																		data-id="rightPaddingVal" 
+																		onchange={handleFirstHeaderPropertiesChange} 
+																		class="slds-m-top_xx-small">
+																	</lightning-input>
+																</div>
+																<div class="">
+																	<lightning-combobox name="unit" 
+																		value={firstHeaderProperties.paddings.rightPadding.unit} 
+																		options={unitOptions} 
+																		data-id="rightPaddingUnit" 
+																		onchange={handleFirstHeaderPropertiesChange} 
+																		class="slds-m-top_large slds-m-left_xx-small">
+																	</lightning-combobox>
+																</div>
+															</div>
+														</div>
+														<div class="slds-col slds-size_1-of-2">
+															<div class="slds-grid">
+																<div class="">
+																	<lightning-input label="Top Padding" type="number" 
+																		value={firstHeaderProperties.paddings.topPadding.value} name="value"
+																		data-id="topPaddingVal" 
+																		onchange={handleFirstHeaderPropertiesChange} 
+																		class="slds-m-top_xx-small">
+																	</lightning-input>
+																</div>
+																<div class="">
+																	<lightning-combobox name="unit" 
+																		value={firstHeaderProperties.paddings.topPadding.unit} 
+																		options={unitOptions} 
+																		data-id="toptPaddingUnit" 
+																		onchange={handleFirstHeaderPropertiesChange} 
+																		class="slds-m-top_large slds-m-left_xx-small">
+																	</lightning-combobox>
+																</div>
+															</div>
+														</div>
+														<div class="slds-col slds-size_1-of-2">
+															<div class="slds-grid">
+																<div class="">
+																	<lightning-input label="Bottom Padding" type="number" name="value"
+																		value={firstHeaderProperties.paddings.bottomPadding.value} 
+																		data-id="bottomPaddingVal" 
+																		onchange={handleFirstHeaderPropertiesChange} 
+																		class="slds-m-top_xx-small">
+																	</lightning-input>
+																</div>
+																<div class="">
+																	<lightning-combobox name="unit" 
+																		value={firstHeaderProperties.paddings.bottomPadding.unit} 
+																		options={unitOptions} 
+																		data-id="bottomPaddingUnit" 
+																		onchange={handleFirstHeaderPropertiesChange} 
+																		class="slds-m-top_large slds-m-left_xx-small">
+																	</lightning-combobox>
+																</div>
+															</div>
+														</div>
+													</div>
 												</div>
-											</td>
-										</tr>
+												
+												
+											</div>
+										</lightning-accordion-section>
 									</template>
-								</tbody>
-							</table>
-						</div>
-						<footer class="slds-modal__footer">
-							<div class="slds-text-align_right">
-								<lightning-button variant="brand" label="Cancel" title="Cancel" class="slds-m-right_xx-small" onclick={handleClickCancel}> </lightning-button>
-								<lightning-button variant="brand" label="Save" title="Save" onclick={handleSave} disabled={isDisabled}>
-								</lightning-button>
-							</div>
-						</footer>								    
-					</template>						
-				</div>
-			</template>
-			<template lwc:else>
-				<span slot="header">Merge Field(s)</span>
-				<div class="slds-modal__content slds-p-around_medium" style="min-height: 240px;">
-					<c-dx-lookup-fields-displaycmp selection-object={selectedObjectName}></c-dx-lookup-fields-displaycmp>
-				</div>
-				<footer class="slds-modal__footer">
-					<div class="slds-text-align_right">
-						<lightning-button variant="brand" label="insert" title="insert" onclick={getMergeField}>
-						</lightning-button>
-						<lightning-button variant="brand" label="CopyToClipboard" title="insert"
-							onclick={getMergeFieldCopy}></lightning-button>
+									<!--Second Page Header Values-->
+									<lightning-accordion-section name="secondHeader" label="Header Properties">
+										<div class="slds-grid slds-wrap slds-gutters">
+											<div class="slds-col slds-size_1-of-2">
+												<div class="slds-grid">
+													<div class="">
+														<lightning-input label="Header Height" type="number" name="value"
+															value={secondHeaderProperties.height.value} 
+															data-id="height" 
+															onchange={handleSecondHeaderPropertiesChange} 
+															class="slds-m-top_xx-small">
+														</lightning-input>
+													</div>
+													<div class="">
+														<lightning-combobox name="unit" 
+															value={secondHeaderProperties.height.unit} 
+															options={unitOptions} 
+															data-id="heightUnit" 
+															onchange={handleSecondHeaderPropertiesChange} 
+															class="slds-m-top_large slds-m-left_xx-small">
+														</lightning-combobox>
+													</div>
+												</div>
+											</div>
+											<div class="slds-col slds-size_1-of-2">
+												<lightning-input label="Background Color" type="color" 
+													value={secondHeaderProperties.bgColor.value} 
+													data-id="bgColor" 
+													onchange={handleSecondHeaderPropertiesChange}>
+												</lightning-input>
+											</div>
+											<div class="slds-col slds-size_1-of-2">
+												<div class="slds-grid">
+													<div class="">
+														<lightning-input label="Line Height" type="number" 
+															value={secondHeaderProperties.lineHeight.value} 
+															data-id="lineHeight" name="value"
+															onchange={handleSecondHeaderPropertiesChange} 
+															class="slds-m-top_xx-small">
+														</lightning-input>
+													</div>
+												</div>
+											</div>
+											<div class="slds-col slds-size_1-of-1 slds-text-align_center slds-m-vertical_small slds-p-vertical_small" style="border: 1px solid #333333;">
+												<label>Border Configurations</label>
+												<div class="slds-grid slds-wrap slds-gutters">
+													<div class="slds-col slds-size_1-of-2">
+														<lightning-input label="Border Color" type="color" 
+															value={secondHeaderProperties.borderColor.value} 
+															data-id="borderColor" 
+															onchange={handleSecondHeaderPropertiesChange}>
+														</lightning-input>
+													</div>
+													<div class="slds-col slds-size_1-of-2">
+														<lightning-input label="Border Opacity" type="number" 
+															value={secondHeaderProperties.borderOpacity} 
+															data-id="borderOpacity" 
+															onchange={handleSecondHeaderPropertiesChange}>
+														</lightning-input>
+													</div>
+													<div class="slds-col slds-size_1-of-2">
+														<div class="slds-grid">
+															<div class="">
+																<lightning-input label="Border Weight" type="number" name="value"
+																	value={secondHeaderProperties.borderWeight.value} 
+																	data-id="borderWeightVal" 
+																	onchange={handleSecondHeaderPropertiesChange} 
+																	class="slds-m-top_xx-small" >
+																</lightning-input>
+															</div>
+															<div class="">
+																<lightning-combobox name="unit" 
+																	value={secondHeaderProperties.borderWeight.unit} 
+																	options={unitOptions} 
+																	data-id="borderWeightUnit" 
+																	onchange={handleSecondHeaderPropertiesChange} 
+																	class="slds-m-top_large slds-m-left_xx-small" disabled>
+																</lightning-combobox>
+															</div>
+														</div>
+													</div>
+												</div>
+											</div>
+											
+											<div class="slds-col slds-size_1-of-1 slds-text-align_center slds-m-vertical_small slds-p-vertical_small" style="border: 1px solid #333333;">
+												<label>Header Margins</label>
+												<div class="slds-grid slds-wrap slds-gutters">
+													<div class="slds-col slds-size_1-of-2">
+														<div class="slds-grid">
+															<div class="">
+																<lightning-input label="Left Margin" type="number" 
+																	value={secondHeaderProperties.margins.leftMargin.value} name="value"
+																	data-id="leftMarginVal" 
+																	onchange={handleSecondHeaderPropertiesChange} 
+																	class="slds-m-top_xx-small">
+																</lightning-input>
+															</div>
+															<div class="">
+																<lightning-combobox name="unit" 
+																	value={secondHeaderProperties.margins.leftMargin.unit} 
+																	options={unitOptions} 
+																	data-id="leftMarginUnit" 
+																	onchange={handleSecondHeaderPropertiesChange} 
+																	class="slds-m-top_large slds-m-left_xx-small">
+																</lightning-combobox>
+															</div>
+														</div>
+													</div>
+													<div class="slds-col slds-size_1-of-2">
+														<div class="slds-grid">
+															<div class="">
+																<lightning-input label="Right Margin" type="number" 
+																	value={secondHeaderProperties.margins.rightMargin.value} name="value"
+																	data-id="rightMarginVal" 
+																	onchange={handleSecondHeaderPropertiesChange} 
+																	class="slds-m-top_xx-small">
+																</lightning-input>
+															</div>
+															<div class="">
+																<lightning-combobox name="unit" 
+																	value={secondHeaderProperties.margins.rightMargin.unit} 
+																	options={unitOptions} 
+																	data-id="rightMarginUnit" 
+																	onchange={handleSecondHeaderPropertiesChange} 
+																	class="slds-m-top_large slds-m-left_xx-small">
+																</lightning-combobox>
+															</div>
+														</div>
+													</div>
+													<div class="slds-col slds-size_1-of-2">
+														<div class="slds-grid">
+															<div class="">
+																<lightning-input label="Top Margin" type="number" 
+																	value={secondHeaderProperties.margins.topMargin.value} name="value"
+																	data-id="topMarginVal" 
+																	onchange={handleSecondHeaderPropertiesChange} 
+																	class="slds-m-top_xx-small">
+																</lightning-input>
+															</div>
+															<div class="">
+																<lightning-combobox name="unit" 
+																	value={secondHeaderProperties.margins.topMargin.unit} 
+																	options={unitOptions} 
+																	data-id="topMarginUnit" 
+																	onchange={handleSecondHeaderPropertiesChange} 
+																	class="slds-m-top_large slds-m-left_xx-small">
+																</lightning-combobox>
+															</div>
+														</div>
+													</div>
+													<div class="slds-col slds-size_1-of-2">
+														<div class="slds-grid">
+															<div class="">
+																<lightning-input label="Bottom Margin" type="number" name="value"
+																	value={secondHeaderProperties.margins.bottomMargin.value} 
+																	data-id="bottomMarginVal" 
+																	onchange={handleSecondHeaderPropertiesChange} 
+																	class="slds-m-top_xx-small">
+																</lightning-input>
+															</div>
+															<div class="">
+																<lightning-combobox name="unit" 
+																	value={secondHeaderProperties.margins.bottomMargin.unit} 
+																	options={unitOptions} 
+																	data-id="bottomMarginUnit" 
+																	onchange={handleSecondHeaderPropertiesChange} 
+																	class="slds-m-top_large slds-m-left_xx-small">
+																</lightning-combobox>
+															</div>
+														</div>
+													</div>
+												</div>
+											</div>
+											
+											<!--Header Padings-->
+											<div class="slds-col slds-size_1-of-1 slds-text-align_center slds-m-vertical_small slds-p-vertical_small" style="border: 1px solid #333333;">
+												<label>Header Paddings</label>
+												<div class="slds-grid slds-wrap slds-gutters">
+													<div class="slds-col slds-size_1-of-2">
+														<div class="slds-grid">
+															<div class="">
+																<lightning-input label="Left Padding" type="number" 
+																	value={secondHeaderProperties.paddings.leftPadding.value} name="value"
+																	data-id="leftPaddingVal" 
+																	onchange={handleSecondHeaderPropertiesChange} 
+																	class="slds-m-top_xx-small">
+																</lightning-input>
+															</div>
+															<div class="">
+																<lightning-combobox name="unit" 
+																	value={secondHeaderProperties.paddings.leftPadding.unit} 
+																	options={unitOptions} 
+																	data-id="leftPaddingUnit" 
+																	onchange={handleSecondHeaderPropertiesChange} 
+																	class="slds-m-top_large slds-m-left_xx-small">
+																</lightning-combobox>
+															</div>
+														</div>
+													</div>
+													<div class="slds-col slds-size_1-of-2">
+														<div class="slds-grid">
+															<div class="">
+																<lightning-input label="Right Padding" type="number" 
+																	value={secondHeaderProperties.paddings.rightPadding.value} name="value"
+																	data-id="rightPaddingVal" 
+																	onchange={handleSecondHeaderPropertiesChange} 
+																	class="slds-m-top_xx-small">
+																</lightning-input>
+															</div>
+															<div class="">
+																<lightning-combobox name="unit" 
+																	value={secondHeaderProperties.paddings.rightPadding.unit} 
+																	options={unitOptions} 
+																	data-id="rightPaddingUnit" 
+																	onchange={handleSecondHeaderPropertiesChange} 
+																	class="slds-m-top_large slds-m-left_xx-small">
+																</lightning-combobox>
+															</div>
+														</div>
+													</div>
+													<div class="slds-col slds-size_1-of-2">
+														<div class="slds-grid">
+															<div class="">
+																<lightning-input label="Top Padding" type="number" 
+																	value={secondHeaderProperties.paddings.topPadding.value} name="value"
+																	data-id="topPaddingVal" 
+																	onchange={handleSecondHeaderPropertiesChange} 
+																	class="slds-m-top_xx-small">
+																</lightning-input>
+															</div>
+															<div class="">
+																<lightning-combobox name="unit" 
+																	value={secondHeaderProperties.paddings.topPadding.unit} 
+																	options={unitOptions} 
+																	data-id="topPaddingUnit" 
+																	onchange={handleSecondHeaderPropertiesChange} 
+																	class="slds-m-top_large slds-m-left_xx-small">
+																</lightning-combobox>
+															</div>
+														</div>
+													</div>
+													<div class="slds-col slds-size_1-of-2">
+														<div class="slds-grid">
+															<div class="">
+																<lightning-input label="Bottom Padding" type="number" name="value"
+																	value={secondHeaderProperties.paddings.bottomPadding.value} 
+																	data-id="bottomPaddingVal" 
+																	onchange={handleSecondHeaderPropertiesChange} 
+																	class="slds-m-top_xx-small">
+																</lightning-input>
+															</div>
+															<div class="">
+																<lightning-combobox name="unit" 
+																	value={secondHeaderProperties.paddings.bottomPadding.unit} 
+																	options={unitOptions} 
+																	data-id="bottomPaddingUnit" 
+																	onchange={handleSecondHeaderPropertiesChange} 
+																	class="slds-m-top_large slds-m-left_xx-small">
+																</lightning-combobox>
+															</div>
+														</div>
+													</div>
+												</div>
+											</div>
+											
+										</div>
+									</lightning-accordion-section>
+								</lightning-accordion>
+							</lightning-tab>
+
+							<!-- Footer Properties Tab -->
+							<lightning-tab label="Footer Properties" id="footer-properties">
+								<div class="slds-grid slds-wrap slds-gutters">
+									<div class="slds-col slds-size_1-of-2">
+										<div class="slds-grid">
+											<div class="">
+												<lightning-input label="Footer Height" type="number" value={footerProperties.height.value} onchange={handleFooterInputChange} data-id="heightVal"  class="slds-m-top_xx-small"></lightning-input>
+											</div>
+											<div class="">
+												<lightning-combobox name="unit" value={footerProperties.height.unit} options={unitOptions} data-id="heightUnit" onchange={handleFooterInputChange} class="slds-m-top_large slds-m-left_xx-small"></lightning-combobox>
+											</div>
+										</div>
+									</div>
+									<div class="slds-col slds-size_1-of-2">
+										<div class="slds-grid">
+											<div class="">
+												<lightning-input label="Line Height" type="number" value={footerProperties.margins.lineHeight.value} onchange={handleFooterInputChange} data-id="lineHeightVal" step="0.01" class="slds-m-top_xx-small"></lightning-input>
+											</div>
+										</div>
+									</div>
+									
+									<div class="slds-col slds-size_1-of-1  slds-m-vertical_small slds-p-vertical_small" style="border: 1px solid #333333;">
+										<label class="slds-text-align_center">Border Configurations</label>
+										<div class="slds-grid slds-wrap slds-gutters">
+											<div class="slds-col slds-size_1-of-2">
+												<lightning-input label="Border Color" type="color" value={footerProperties.borderColor.value} onchange={handleFooterInputChange} data-id="borderColor"></lightning-input>
+											</div>
+											<div class="slds-col slds-size_1-of-2">
+												<lightning-input label="Border Opacity" type="number" value={footerProperties.borderOpacity} onchange={handleFooterInputChange} data-id="borderOpacity"></lightning-input>
+											</div>
+											<div class="slds-col slds-size_1-of-2">
+												<div class="slds-grid">
+													<div class="">
+														<lightning-input label="Border Weight" type="number" value={footerProperties.borderWeight.value} onchange={handleFooterInputChange} data-id="borderWeightVal"  name="value" class="slds-m-top_xx-small"></lightning-input>
+													</div>
+													<div class="">
+														<lightning-combobox name="unit" value={footerProperties.borderWeight.unit} options={unitOptions} data-id="borderWeightUnit" onchange={handleFooterInputChange} class="slds-m-top_large slds-m-left_xx-small"></lightning-combobox>
+													</div>
+												</div>
+											</div>
+										</div>
+									</div>
+									<div class="slds-col slds-size_1-of-1 slds-text-align_center slds-m-vertical_small slds-p-vertical_small" style="border: 1px solid #333333;">
+										<label>Footer Margins</label>
+										<div class="slds-grid slds-wrap slds-gutters">
+											<div class="slds-col slds-size_1-of-2">
+												<div class="slds-grid">
+													<div class="">
+														<lightning-input label="Left Margin" type="number" value={footerProperties.margins.leftMargin.value} onchange={handleFooterInputChange} data-id="leftMarginVal"  class="slds-m-top_xx-small"></lightning-input>
+													</div>
+													<div class="">
+														<lightning-combobox name="unit" value={footerProperties.margins.leftMargin.unit} options={unitOptions} data-id="leftMarginUnit" onchange={handleFooterInputChange} class="slds-m-top_large slds-m-left_xx-small"></lightning-combobox>
+													</div>
+												</div>
+											</div>
+											<div class="slds-col slds-size_1-of-2">
+												<div class="slds-grid">
+													<div class="">
+														<lightning-input label="Right Margin" type="number" value={footerProperties.margins.rightMargin.value} onchange={handleFooterInputChange} data-id="rightMarginVal"  class="slds-m-top_xx-small"></lightning-input>
+													</div>
+													<div class="">
+														<lightning-combobox name="unit" value={footerProperties.margins.rightMargin.unit} options={unitOptions} data-id="rightMarginUnit" onchange={handleFooterInputChange} class="slds-m-top_large slds-m-left_xx-small"></lightning-combobox>
+													</div>
+												</div>
+											</div>
+											<div class="slds-col slds-size_1-of-2">
+												<div class="slds-grid">
+													<div class="">
+														<lightning-input label="Top Margin" type="number" value={footerProperties.margins.topMargin.value} onchange={handleFooterInputChange} data-id="topMarginVal"  class="slds-m-top_xx-small"></lightning-input>
+													</div>
+													<div class="">
+														<lightning-combobox name="unit" value={footerProperties.margins.topMargin.unit} options={unitOptions} data-id="topMarginUnit" onchange={handleFooterInputChange} class="slds-m-top_large slds-m-left_xx-small"></lightning-combobox>
+													</div>
+												</div>
+									</div>
+									<div class="slds-col slds-size_1-of-2">
+										<div class="slds-grid">
+											<div class="">
+												<lightning-input label="Bottom Margin" type="number" value={footerProperties.margins.bottomMargin.value} onchange={handleFooterInputChange} data-id="bottomMarginVal"  class="slds-m-top_xx-small"></lightning-input>
+											</div>
+											<div class="">
+												<lightning-combobox name="unit" value={footerProperties.margins.bottomMargin.unit} options={unitOptions} data-id="bottomMarginVal" onchange={handleFooterInputChange} class="slds-m-top_large slds-m-left_xx-small"></lightning-combobox>
+											</div>
+										</div>
+									</div>
+										</div>
+									</div>
+									
+									
+									<!-- <div class="slds-col slds-size_1-of-1">
+										<lightning-checkbox-group label="Separate Borders" options={borderOptions} value={footerProperties.separateBorders} onchange={handleFooterInputChange}></lightning-checkbox-group>
+									</div> -->
+								</div>
+							</lightning-tab>
+						</lightning-tabset>
+						
+
 					</div>
-				</footer>
-			</template>
+					<div class="slds-modal__footer">
+						<button class="slds-button slds-button_neutral" aria-label="Cancel and close" onclick={handleCancelPageSettings} >Cancel</button>
+						<lightning-button label="Save" class="slds-m-top_medium slds-m-left_x-small" onclick={handleSavePageProperties} variant="brand"></lightning-button>
+					</div>
+				</template>
+				<!--Code added by Bhavya for selecting Page properties ends here -->
 			</c-modal>
 
-			<!-------Code added by Bhavya for Import Translations--------->
+	
+		<!---Code added by Bhavya for Translations-->
+		<c-modal data-id="translation" onclosedialog={closeTranslateModal}>
+		<template lwc:if={isTranslateModalOpen}>
+			<span slot="header">Translate</span>
+			<div class="slds-modal__content slds-p-around_x-small">
+				<template if:true={translatedRecords}>
+					<div class="slds-grid slds-gutters slds-p-around_x-small">
+						<div class="slds-col slds-large-size_4-of-12 slds-medium-size_4-of-12 slds-size_4-of-12 slds-p-top_x-small">
+							<lightning-combobox label="Select Translation Output Language" value={selectedLanguage} options={languages} onchange={handleLanguageChange}></lightning-combobox>
+						</div>
+						<div
+							class="slds-col slds-large-size_4-of-12 slds-medium-size_4-of-12 slds-size_8-of-12">
+							<lightning-input label="Search" class="slds-col slds-m-top_x-small" onchange={handleTranslationsSearch}></lightning-input>
+						</div>
+						<div
+							class="slds-col slds-large-size_2-of-12 slds-medium-size_2-of-12 slds-size_4-of-12 slds-m-top_large">
+							<lightning-button-icon onclick={handleImportTranslation} data-id="importTranslation" variant="border-filled" icon-name="utility:upload" disabled={isDisabled}></lightning-button-icon>
+						</div>
+						<div
+							class="slds-col slds-large-size_2-of-12 slds-medium-size_2-of-12 slds-size_4-of-12">
+							<label class="slds-form-element__label">Translate</label>
+							<lightning-button-icon icon-name="utility:display_rich_text" size="medium"
+								alternative-text="Language Translator" title="Translate using Google Translator API"
+								onclick={handleTextListTranslateLanguage}>
+							</lightning-button-icon>
+						</div>
+					</div>
+					<div class="table-container ">
+							<table class="slds-table slds-table_bordered slds-table_cell-buffer">
+							<thead>
+								<tr class="slds-line-height_reset">
+									<th class="slds-text-title_caps">Field Name</th>
+									<th class="slds-text-title_caps">Field Value</th>
+									<th class="slds-text-title_caps">Translated Value</th>
+									<th class="slds-text-title_caps"></th>
+								</tr>
+							</thead>
+							<tbody>
+								<template for:each={translatedRecords} for:item="row" for:index="index">
+									<tr key={row.id}>
+										<td>
+											<div>
+												<lightning-input type="text" onchange={handleCellOneInputChange} read-only={isDisabled}
+													data-index={index} class="field-input" value={row.Name}>
+												</lightning-input>
+											</div>
+										</td>
+										<td>
+											<div>
+												<lightning-input type="text" onchange={handleCellTwoInputChange} read-only={isDisabled}
+													data-index={index} class="field-value"
+													value={row.DxCPQ__FieldValue__c}></lightning-input>
+											</div>
+										</td>
+										<td>
+											<div>
+												<lightning-textarea onchange={handleCellThreeInputChange} read-only={isDisabled}
+													data-index={index} class="trans-value"
+													value={row.DxCPQ__Translated_Value__c}></lightning-textarea>
+											</div>
+										</td>
+										<td>
+											<div>
+												<lightning-button-icon icon-name="utility:delete"
+													alternative-text="Delete" onclick={handleRemoveRow} disabled={isDisabled}
+													data-index={index} class="slds-m-left_x-small" title="Delete">
+												</lightning-button-icon>
+
+												<lightning-button-icon icon-name="utility:new"
+													alternative-text="New" onclick={handleClick} disabled={isDisabled}
+													class="slds-m-left_x-small" title="New">
+												</lightning-button-icon>
+
+												<lightning-rich-text-toolbar-button icon-name="utility:merge"
+													data-index={index} icon-alternative-text="Add Merge Field" class="slds-m-left_x-small"
+													onclick={handlerowlevelmerge} disabled={isDisabled}>
+												</lightning-rich-text-toolbar-button>
+
+												<lightning-rich-text-toolbar-button icon-name="utility:display_rich_text"
+													data-index={index} icon-alternative-text="Translate using Google Translator API" class="slds-m-left_x-small"
+													onclick={handleTextTranslateLanguage} disabled={isDisabled}>
+												</lightning-rich-text-toolbar-button>
+											</div>
+										</td>
+									</tr>
+								</template>
+							</tbody>
+						</table>
+					</div>
+					<footer class="slds-modal__footer">
+						<div class="slds-text-align_right">
+							<lightning-button variant="brand" label="Cancel" title="Cancel" class="slds-m-right_xx-small" onclick={handleClickCancel}> </lightning-button>
+							<lightning-button variant="brand" label="Save" title="Save" onclick={handleSave} disabled={isDisabled}>
+							</lightning-button>
+						</div>
+					</footer>								    
+				</template>						
+			</div>
+		</template>
+		<template lwc:else>
+			<span slot="header">Merge Field(s)</span>
+			<div class="slds-modal__content slds-p-around_medium" style="min-height: 240px;">
+				<c-dx-lookup-fields-displaycmp selection-object={selectedObjectName}></c-dx-lookup-fields-displaycmp>
+			</div>
+			<footer class="slds-modal__footer">
+				<div class="slds-text-align_right">
+					<lightning-button variant="brand" label="insert" title="insert" onclick={getMergeField}>
+					</lightning-button>
+					<lightning-button variant="brand" label="CopyToClipboard" title="insert"
+						onclick={getMergeFieldCopy}></lightning-button>
+				</div>
+			</footer>
+		</template>
+		</c-modal>
+
+		<!---Code added by Bhavya for Import Translations-->
 		<c-modal data-id="importTranslation">
 			<template if:true={showTranslations}>
 				<span slot="header">Import Translation(s)</span>
 				<div class="slds-modal__content slds-p-around_medium" style="min-height: 300px;">
-						<!-----Grid to have file upload and the table ---->
+						<!---Grid to have file upload and the table -->
 						<div class="slds-grid slds-grid_vertical">
 							<div class="slds-col">
 								 <lightning-input type="file" label="Upload Translations File" accept=".csv" onchange={handleFileUpload}></lightning-input>
 							</div>
 							<div class="slds-col">
-								<!------Table to show translations----->
+								<!---Table to show translations-->
 								<div class="table-container slds-m-top_x-large">
 									 <template if:true={data.length}>
 										<table class="slds-table slds-table_cell-buffer slds-table_bordered">

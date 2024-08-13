@@ -32,36 +32,41 @@ import getTranslatedText from '@salesforce/apex/LanguageTranslatorClass.translat
 import translateTextBatchList from '@salesforce/apex/LanguageTranslatorClass.translateTextBatchList';
 import currectUserLang from '@salesforce/apex/LanguageTranslatorClass.currectUserLang';
 
-export default class TemplateDesignerCMP extends NavigationMixin(LightningElement) {
+import { savingPageProperties , updatePropertiesFromJSON} from "./templateDesignerCMPUtils";
 
-      //variables added by Bhavya for Import Translations
-    @track showTranslations = false;
-    @track disableCreate = true;
-    @track columns = [];
-    @track data = [];
-    @track showLoadingSpinner = false;
-    @track errorMessages = [];
-    originalData = [];
-    languageMap = {
-        'English': 'en_US',
-        'German': 'de',
-        'Spanish': 'es',
-        'French': 'fr',
-        'Italian': 'it',
-        'Japanese': 'ja',
-        'Swedish': 'sv',
-        'Korean': 'ko',
-        'Chinese (Traditional)': 'zh_TW',
-        'Chinese (Simplified)': 'zh_CN',
-        'Portuguese (Brazil)': 'pt_BR',
-        'Dutch': 'nl_NL',
-        'Danish': 'da',
-        'Thai': 'th',
-        'Finnish': 'fi',
-        'Russian': 'ru',
-        'Spanish (Mexico)': 'es_MX',
-        'Norwegian': 'no'
-    };
+
+export default class TemplateDesignerCMP extends NavigationMixin(LightningElement) {
+  //variables added by Bhavya for page properties configuration
+  @track showPageProperties = false;
+  @track showFirstHeaderProperties = false;
+  //variables added by Bhavya for Import Translations
+  @track showTranslations = false;
+  @track disableCreate = true;
+  @track columns = [];
+  @track data = [];
+  @track showLoadingSpinner = false;
+  @track errorMessages = [];
+  originalData = [];
+  languageMap = {
+      'English': 'en_US',
+      'German': 'de',
+      'Spanish': 'es',
+      'French': 'fr',
+      'Italian': 'it',
+      'Japanese': 'ja',
+      'Swedish': 'sv',
+      'Korean': 'ko',
+      'Chinese (Traditional)': 'zh_TW',
+      'Chinese (Simplified)': 'zh_CN',
+      'Portuguese (Brazil)': 'pt_BR',
+      'Dutch': 'nl_NL',
+      'Danish': 'da',
+      'Thai': 'th',
+      'Finnish': 'fi',
+      'Russian': 'ru',
+      'Spanish (Mexico)': 'es_MX',
+      'Norwegian': 'no'
+  };
   @track isTranslateModalOpen = false;
   @track translatedRecords=[{
         'Name': '',
@@ -779,6 +784,14 @@ export default class TemplateDesignerCMP extends NavigationMixin(LightningElemen
                 this.header.Type = val.DxCPQ__Type__c;
                 this.header.rowCount = val.DxCPQ__Sequence__c;
                 this.header.sectionNameEntered = val.Name;
+                try {
+                  let sectionContentObject = JSON.parse(val.DxCPQ__Section_Content__c);
+                  let sectionsFirstCount = sectionContentObject.sectionsFirstCount;
+                  console.log('sectionsFirstCount in connectedCallback:', sectionsFirstCount);
+                  this.showFirstHeaderProperties = sectionsFirstCount !== null ? true : false;
+                } catch (error) {
+                    console.error('Error parsing JSON:', error);
+                }
               }
               else if (val.DxCPQ__Type__c == 'Footer') {
                 this.footer.Id = val.Id;
@@ -2330,57 +2343,7 @@ this.resetImageWatermarkFields();
     }
   }
 
-// parseCSV(csv) {
-//     const lines = csv.split('\n');
-//     if (lines.length > 0) {
-//         // Extract headers and create a map of header to index
-//         const headers = lines[0].split(',');
-//         const headerMap = {};
-//         headers.forEach((header, index) => {
-//             headerMap[header.trim()] = index;
-//         });
-//         console.log('headers --> ', headers);
-//         this.columns = headers;
-//         console.log('columns --> ', this.columns);
-//         this.data = lines.slice(1).map(line => line.split(','));
-//         console.log('this.data --> ', this.data);
-//         let emptyNameRows = [];
-//         let translatedValueWithoutLanguageRows = [];
-
-//         this.data.forEach((row, index) => {
-//             const rowNumber = index + 2;
-//             const nameIndex = headerMap['Name'];
-//             const languageIndex = headerMap['DxCPQ__Language__c'];
-//             const translatedValueIndex = headerMap['DxCPQ__Translated_Value__c'];
-
-//             if (!row[nameIndex]) {
-//                 emptyNameRows.push(rowNumber);
-//             }
-//         });
-
-//         this.errorMessages = [];
-
-//         if (emptyNameRows.length > 0) {
-//             this.errorMessages.push(`Rows ${emptyNameRows.join(', ')}: Name is empty. Please check the CSV file and re-upload.`);
-//         }
-
-//         if (translatedValueWithoutLanguageRows.length > 0) {
-//             this.errorMessages.push(`Rows ${translatedValueWithoutLanguageRows.join(', ')}: Translated Value is present without Language. Please check the CSV file and re-upload.`);
-//         }
-
-//         if (this.errorMessages.length > 0) {
-//             this.disableCreate = true;
-//             this.showToastMsg('Error', this.errorMessages.join(' '), 'Error');
-//             this.data = [];
-//         } else {
-//             this.disableCreate = false;
-//             this.data = this.data.filter(row => row.length > 1 && row[headerMap['Name']] !== "");
-//         }
-//         console.log('this.data in parseCSV  ---> ', this.data);
-//     }
-// }
-
-  parseCSV(csv) {
+parseCSV(csv) {
     const lines = csv.split('\n');
 
     const parseLine = (line) => {
@@ -2448,10 +2411,11 @@ this.resetImageWatermarkFields();
         } else {
             this.disableCreate = false;
             this.data = this.data.filter(row => row.length > 1 && row[headerMap['Name']] !== "");
-            console.log('this.data in parseCSV  ---> ', this.data);
         }
+        console.log('this.data in parseCSV  ---> ', this.data);
     }
 }
+
 
 
 createTranslatedRecords() {
@@ -2541,7 +2505,6 @@ createTranslatedRecords() {
 
 
   handleTextListTranslateLanguage(event) {
-
     let textsToTranslate = [];
     this.translatedRecords.forEach(record => {
       if (record.DxCPQ__FieldValue__c) {
@@ -2553,7 +2516,7 @@ createTranslatedRecords() {
 
     //console.log('texts to translate ' + textsToTranslate);
 
-      if (textsToTranslate.length > 0) {
+    if (textsToTranslate.length > 0) {
 
         translateTextBatchList({
           textsToTranslate: textsToTranslate,
@@ -2564,14 +2527,375 @@ createTranslatedRecords() {
             this.showToast('Success', 'Translation is in progress. Please check back after some time', 'success');
             this.template.querySelector('c-modal').hide();
 
-          })
-          .catch(error => {
-            this.showToast('Error', 'An error occurred', 'error');
-            let errorMessage = error.message || 'Unknown error message';
-            let tempError = error.toString();
-            createLog({ recordId: '', className: 'TemplateDesignerDetails LWC ', exceptionMessage: errorMessage, logData: tempError, logType: 'Exception' });
-          });
+        })
+        .catch(error => {
+          this.showToast('Error', 'An error occurred', 'error');
+          let errorMessage = error.message || 'Unknown error message';
+          let tempError = error.toString();
+          createLog({ recordId: '', className: 'TemplateDesignerDetails LWC ', exceptionMessage: errorMessage, logData: tempError, logType: 'Exception' });
+        });
+    }
+  }
+
+  //code added by Bhavya for taking inputs from user for page, header & header properties
+
+  handlePageProperties(event){
+    console.log('handlePageProperties clicked');
+    this.showPageProperties = true;
+    this.previewModal =  false;
+    this.showTemplate = false;
+    this.showCloneTemplate = false;
+    this.showDeleteTemplate = false;
+    this.editTemplate = false;
+    this.showwatermarkbtn = false;
+    updatePropertiesFromJSON(this, this.sectionsData[0].DxCPQ__Document_Template__r.DxCPQ__PDF_Page_Properties__c);
+    this.template.querySelector('c-modal').show();
+  }
+
+  // Page Properties
+    @track pageType = 'A4';
+    @track pageOrientation = 'Portrait';
+    @track pageMargins = {
+        leftMargin: { value: 10, unit: 'px' },
+        rightMargin: { value: 10, unit: 'px' },
+        topMargin: { value: 10, unit: 'px' },
+        bottomMargin: { value: 10, unit: 'px' },
+        lineheight: {value: 1.2, unit: 'px' }
+    };
+
+    // Header Properties
+    @track headerProperties = {
+        height: { value: 50, unit: 'mm' },
+        margins: {
+            left: { value: 10, unit: 'mm' },
+            right: { value: 10, unit: 'mm' },
+            top: { value: 10, unit: 'mm' },
+            bottom: { value: 10, unit: 'mm' }
+        },
+        lineHeight: { value: 10, unit: 'px' },
+        borderColor: '#000000',
+        // borderRadius: { value: 0, unit: 'mm' },
+        borderOpacity: 1,
+        borderWeight: { value: 1, unit: 'px' },
+        separateBorders: []
+    };
+
+    // Footer Properties
+    @track footerProperties = {
+        height: { value: 80, unit: 'px' },
+        margins: {
+            leftMargin: { value: 10, unit: 'px' },
+            rightMargin: { value: 10, unit: 'px' },
+            topMargin: { value: 10, unit: 'px' },
+            bottomMargin: { value: 10, unit: 'px' },
+            lineHeight: {value: 1.2}
+        },
+        paddings:{
+          topPadding:{value: 10, unit: 'px'},
+          bottomPadding:{value: 10, unit: 'px'},
+          leftPadding:{value: 10, unit: 'px'},
+          rightPadding:{value: 10, unit: 'px'}
+       },
+        lineHeight: { value: 15, unit: 'px' },
+        borderColor:  { value: '#000000' },
+        // borderRadius: { value: 0, unit: 'px' },
+        borderOpacity: 1,
+        borderWeight: { value: 1, unit: 'px' },
+        separateBorders: []
+    };
+
+    // Options
+    get pageTypeOptions() {
+      return [
+        { label: 'A4', value: 'A4' },
+        { label: 'Letter', value: 'Letter' },
+        { label: 'Legal', value: 'Legal' }
+      ];
+    }
+
+    get pageOrientationOptions() {
+      return [
+        { label: 'Portrait', value: 'Portrait' },
+        { label: 'Landscape', value: 'Landscape' }
+      ];
+    }
+
+    get unitOptions() {
+      return [
+        { label: 'px', value: 'px' },
+        { label: 'mm', value: 'mm' },
+        { label: 'cm', value: 'cm' },
+        { label: 'inch', value: 'inch' },
+        { label: '%', value: '%' }
+      ];
+    }
+
+    get borderOptions() {
+      return [
+        { label: 'Top', value: 'top' },
+        { label: 'Right', value: 'right' },
+        { label: 'Bottom', value: 'bottom' },
+        { label: 'Left', value: 'left' }
+      ];
+    }
+
+    //JS code to store data of Page Settings
+
+    handleUserInputChange(event) {
+      const field = event.target.dataset.id;
+      const value = event.target.value;
+      const isUnitChange = field.includes('Unit');
+      const marginType = field.replace('Unit', '').replace('Val', '');
+      if (isUnitChange) {
+          this.pageMargins[marginType].unit = value;
+      } else {
+          this.pageMargins[marginType].value = parseFloat(value);
       }
+      console.log('pageMargins map after val changing --> ', this.pageMargins);
+    }
+
+    handleFooterInputChange(event) {
+      const { value, dataset, name, type } = event.target;
+      const propertyType = dataset.id || dataset.footer;
+      let propName;
+      let targetObject;
+
+      if (propertyType.includes('Margin') || propertyType.includes('height') || propertyType === 'lineHeightVal' || propertyType.includes('borderWeight')) {
+          if (propertyType.includes('Margin')) {
+              propName = propertyType.replace('Val', '').replace('Unit', '');
+              targetObject = this.footerProperties.margins[propName];
+          } else if (propertyType === 'lineHeightVal') {
+              targetObject = this.footerProperties.margins.lineHeight;
+          } else {
+              propName = propertyType.replace('Val', '').replace('Unit', '').toLowerCase();
+              targetObject = this.footerProperties[propName];
+          }
+      } else if (propertyType === 'borderColor') {
+          this.footerProperties.borderColor.value = value;
+          return;
+      } else if (propertyType === 'borderOpacity') {
+          this.footerProperties.borderOpacity = parseFloat(value);
+          return;
+      }
+       else if (propertyType === 'borderWeight') {
+          this.footerProperties.borderWeight = parseFloat(value);
+          return;
+      }
+      if (targetObject) {
+          if (name === 'unit') {
+              targetObject.unit = value;
+          } else {
+              targetObject.value = type === 'number' ? parseFloat(value) : value;
+          }
+      }
+      console.log('footerProperties --> ', this.footerProperties);
+  }
+
+    @track firstHeaderProperties = {
+        height: { value: '80', unit: 'px' },
+        margins: { 
+            leftMargin: { value: '10', unit: 'px' }, 
+            rightMargin: { value: '10', unit: 'px' }, 
+            topMargin: { value: '10', unit: 'px' }, 
+            bottomMargin: { value: '10', unit: 'px' } 
+        },
+        paddings:{
+           topPadding:{value: 10, unit: 'px'},
+           bottomPadding:{value: 10, unit: 'px'},
+           leftPadding:{value: 10, unit: 'px'},
+           rightPadding:{value: 10, unit: 'px'}
+        },
+        lineHeight: { value: '1' },
+        borderColor:  { value: '#000000' },
+        bgColor:  { value: '#000000' },
+        // borderRadius: { value: '0', unit: 'px' },
+        borderOpacity: '1',
+        borderWeight: { value: '1', unit: 'px' },
+        separateBorders: []
+    };
+
+    @track secondHeaderProperties = {
+        height: { value: '80', unit: 'px' },
+        margins: { 
+            leftMargin: { value: '10', unit: 'px' }, 
+            rightMargin: { value: '10', unit: 'px' }, 
+            topMargin: { value: '10', unit: 'px' }, 
+            bottomMargin: { value: '10', unit: 'px' } 
+        },
+        paddings:{
+          topPadding:{value: 10, unit: 'px'},
+          bottomPadding:{value: 10, unit: 'px'},
+          leftPadding:{value: 10, unit: 'px'},
+          rightPadding:{value: 10, unit: 'px'}
+       },
+        lineHeight: { value: '1', unit: 'px' },
+        borderColor:  { value: '#000000' },
+        bgColor:  { value: '#000000' },
+        // borderRadius: { value: '0', unit: 'px' },
+        borderOpacity: '1',
+        borderWeight: { value: '1', unit: 'px' },
+        separateBorders: []
+    };
+
+    // unitOptions = [
+    //   { label: 'px', value: 'px' },
+    //   { label: '%', value: '%' },
+    // ];
+
+    borderOptions = [
+      { label: 'Left Border', value: 'left' },
+      { label: 'Right Border', value: 'right' },
+      { label: 'Top Border', value: 'top' },
+      { label: 'Bottom Border', value: 'bottom' }
+    ];
+
+  handlePropertyChange(event, targetProperties) {
+    const { value, dataset, name, type } = event.target;
+    const propertyType = dataset.id;
+    let propName;
+    let targetObject;
+
+    if (propertyType.includes('Margin') || propertyType.includes('height')  || propertyType.includes('borderRadius') ||  propertyType.includes('borderWeight') || propertyType.includes('Padding')) {
+        propName = propertyType.replace('Val', '').replace('Unit', '');
+        if(propertyType.includes('Margin')){
+          targetObject = targetProperties.margins[propName];
+        }
+        else if(propertyType.includes('Padding')){
+          targetObject = targetProperties.paddings[propName];
+        }
+        else if(propertyType.includes('height') || propertyType.includes('borderRadius') || propertyType.includes('borderWeight') ){
+          targetObject = targetProperties[propName];
+        }
+    } else if (propertyType === 'lineHeight') {
+        targetObject = targetProperties.lineHeight;
+    } else if (propertyType === 'borderWeight') {
+        targetObject = targetProperties.borderWeight;
+    } else if (propertyType === 'borderColor') {
+        targetProperties.borderColor.value = value;
+        return;
+    } else if (propertyType === 'bgColor') {
+      targetProperties.bgColor.value = value;
+      return;
+    } else if (propertyType === 'borderOpacity') {
+        targetProperties.borderOpacity = parseFloat(value);
+        return;
+    } else {
+        propName = propertyType.toLowerCase();
+        targetObject = targetProperties[propName];
+    }
+
+    if (targetObject) {
+        if (name === 'unit') {
+            targetObject.unit = value;
+        } else if (name === 'value') {
+            targetObject.value = type === 'number' ? parseFloat(value) : value;
+        }
+    }
+
+    console.log(`${JSON.stringify(targetProperties, null, 2)}`);
+}
+
+handleFirstHeaderPropertiesChange(event) {
+    this.handlePropertyChange(event, this.firstHeaderProperties);
+    console.log('firstHeaderProperties --> ', this.firstHeaderProperties);
+}
+
+handleSecondHeaderPropertiesChange(event) {
+    this.handlePropertyChange(event, this.secondHeaderProperties);
+    console.log('secondHeaderProperties --> ', this.secondHeaderProperties);
+}
+  
+    handlePageTypeChange(event) {
+        this.pageType = event.detail.value;
+    }
+
+    handlePageOrientationChange(event) {
+        this.pageOrientation = event.detail.value;
+    }
+
+    handleMarginChange(event) {
+        const margin = event.target.dataset.margin;
+        this.pageMargins[margin].value = event.target.value;
+    }
+
+    handleMarginUnitChange(event) {
+        const margin = event.target.dataset.margin;
+        this.pageMargins[margin].unit = event.detail.value;
+    }
+
+    handleHeaderChange(event) {
+        const field = event.target.dataset.header;
+        const value = event.target.value;
+        if (field.startsWith('border')) {
+            this.headerProperties[field] = value;
+        } else if (field === 'border-color') {
+            this.headerProperties.borderColor = value;
+        } else if (field.includes('margin')) {
+            this.headerProperties.margins[field.replace('margin-', '')].value = value;
+        } else {
+            this.headerProperties[field].value = value;
+        }
+    }
+
+    handleHeaderUnitChange(event) {
+        const field = event.target.dataset.header;
+        this.headerProperties[field].unit = event.detail.value;
+    }
+
+    handleHeaderBorderChange(event) {
+        this.headerProperties.separateBorders = event.detail.value;
+    }
+
+    handleFooterChange(event) {
+        const field = event.target.dataset.footer;
+        const value = event.target.value;
+        if (field.startsWith('border')) {
+            this.footerProperties[field] = value;
+        } else if (field === 'border-color') {
+            this.footerProperties.borderColor = value;
+        } else if (field.includes('margin')) {
+            this.footerProperties.margins[field.replace('margin-', '')].value = value;
+        } else {
+            this.footerProperties[field].value = value;
+        }
+    }
+
+    handleFooterUnitChange(event) {
+        const field = event.target.dataset.footer;
+        this.footerProperties[field].unit = event.detail.value;
+    }
+
+    handleFooterBorderChange(event) {
+        this.footerProperties.separateBorders = event.detail.value;
+    }
+
+    combineValueAndUnit(valueObj) {
+        return valueObj.value !== undefined && valueObj.unit ? `${valueObj.value}${valueObj.unit}` : null;
+    }
+
+    handleSavePageProperties() {
+      console.log('edited values page --> ',this.pageType, this.pageOrientation, this.pageMargins);
+      console.log('this.firstheaderproperties --> ', this.firstHeaderProperties);
+      console.log('this.secondheaderproperties --> ', this.secondHeaderProperties);
+      console.log('this.footerproperties --> ', this.footerProperties);     
+      try {
+        savingPageProperties(this);
+
+      }
+      catch (error) {
+          console.log('error found in utils method >> ', error);
+      }   
+    }
+
+    //code added by Bhavya
+    handleFirstUniqueHeader(event){
+      console.log('has first header --> ', event.detail);
+      this.showFirstHeaderProperties = event.detail;  
+    }
+
+    handleCancelPageSettings(event){
+      this.showPageSettings = false;
+      this.template.querySelector('c-modal').hide();
     }
 
 }
