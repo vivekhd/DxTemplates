@@ -265,7 +265,7 @@
 					<span slot="header">Clone Template</span>
 					<div class="slds-modal__content slds-p-around_medium" style="min-height: 240px;">
 						<c-clone-document-cmp record-id={recordId} object-api-name="DxCPQ__Document_Template__c"
-							parent-template-related-to-type={relatedtoTypeObjName} ondoccreated={cloneTemplateHandler}>
+							parent-template-related-to-type={relatedtoTypeObjName} ondoccreated={cloneTemplateHandler} jsonstr = {jsonStr}>
 						</c-clone-document-cmp>
 					</div>
 				</template>

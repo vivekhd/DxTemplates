@@ -28,7 +28,7 @@ export function savingPageProperties(thisObj) {
           borderOpacity: tempThisObj.firstHeaderProperties.borderOpacity,
           borderWeight: tempThisObj.combineValueAndUnit(tempThisObj.firstHeaderProperties.borderWeight),
           separateBorders: tempThisObj.firstHeaderProperties.separateBorders,
-          borderBottom: `${tempThisObj.firstHeaderProperties.borderWeight.value}px solid ${tempThisObj.firstHeaderProperties.borderColor}`,
+          borderBottom: `${tempThisObj.firstHeaderProperties.borderWeight.value}px solid ${tempThisObj.firstHeaderProperties.borderColor.value}`,
           bgColor: tempThisObj.firstHeaderProperties.bgColor.value,
         },
         normalHeaders:{
@@ -46,7 +46,7 @@ export function savingPageProperties(thisObj) {
           borderOpacity: tempThisObj.secondHeaderProperties.borderOpacity,
           borderWeight: tempThisObj.combineValueAndUnit(tempThisObj.secondHeaderProperties.borderWeight),
           separateBorders: tempThisObj.secondHeaderProperties.separateBorders,
-          borderBottom: `${tempThisObj.secondHeaderProperties.borderWeight.value}px solid ${tempThisObj.secondHeaderProperties.borderColor}`,
+          borderBottom: `${tempThisObj.secondHeaderProperties.borderWeight.value}px solid ${tempThisObj.secondHeaderProperties.borderColor.value}`,
           bgColor: tempThisObj.secondHeaderProperties.bgColor.value,
         }
     };
@@ -262,10 +262,11 @@ export function savingPageProperties(thisObj) {
           borderOpacity: tempThisObj.footerProperties.borderOpacity,
           borderWeight: tempThisObj.combineValueAndUnit(tempThisObj.footerProperties.borderWeight),
           separateBorders: tempThisObj.footerProperties.separateBorders,
+          borderTop : `${tempThisObj.footerProperties.borderWeight.value}px solid ${tempThisObj.footerProperties.borderColor.value}`,
       };
       console.log('transformedFooterProperties --> ', transformedFooterProperties);
       let footerJSON = {
-        footer_left:`div.footer_left { 
+        footer_left:sanitizeCss(`div.footer_left { 
             position:running(footer_left); 
             top: 0; 
             left: 0; 
@@ -279,8 +280,8 @@ export function savingPageProperties(thisObj) {
             margin-bottom: ${transformedFooterProperties.marginbottom};
             width: 100%;
             border-top: ${transformedFooterProperties.borderTop};
-            }`,
-          footer_center:`div.footer_center { 
+            }`),
+          footer_center:sanitizeCss(`div.footer_center { 
             position:running(footer_center); 
             top: 0; 
             left: 0; 
@@ -294,8 +295,8 @@ export function savingPageProperties(thisObj) {
             margin-bottom: ${transformedFooterProperties.marginbottom};
             width: 100%; 
             border-top: ${transformedFooterProperties.borderTop};
-          }`,
-          footer_right:`div.footer_right { 
+          }`),
+          footer_right:sanitizeCss(`div.footer_right { 
             position:running(footer_right); 
             top: 0; 
             left: 0; 
@@ -309,7 +310,7 @@ export function savingPageProperties(thisObj) {
             margin-bottom: ${transformedFooterProperties.marginbottom};
             width: 100%; 
             border-top: ${transformedFooterProperties.borderTop};
-          }`
+          }`),
       }
 
       console.log('footerJSON --> ', footerJSON);
@@ -322,7 +323,7 @@ export function savingPageProperties(thisObj) {
       };
 
       const pageCSS = {
-        defaultPageCSS : `@page {
+        defaultPageCSS : sanitizeCss(`@page {
             size: A4; 
             margin-left: 0px; 
             margin-right: 0px;  
@@ -353,7 +354,7 @@ export function savingPageProperties(thisObj) {
                 @bottom-center { content:element(footer_center);}
                 @bottom-right { content:element(footer_right);}
             </apex:outputText>           
-      }`
+      }`)
       }
 
      // Save the properties as needed
@@ -366,6 +367,7 @@ export function savingPageProperties(thisObj) {
         footerJSONVal : footerJSON
     };
     console.log('templateData --> ', templateData); 
+    tempThisObj.jsonStr = templateData;
     saveTemplateData({ templateId: tempThisObj.recordId, jsonData: JSON.stringify(templateData) })
     .then(result => {
         if (result.startsWith('Success')) {

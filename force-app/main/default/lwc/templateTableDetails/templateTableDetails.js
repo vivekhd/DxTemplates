@@ -134,12 +134,10 @@ export default class TemplateTableDetails extends LightningElement {
                 console.error(error.body.message);
             });
         this.newfontsize();
+        if (this.documenttemplaterecord && this.documenttemplaterecord.DxCPQ__Previously_Active__c == true) {
+            this.handleActivateTemplate(true, this.selectedObjectName);
+        }
     }
- renderedCallback() {
-    if (this.documenttemplaterecord && this.documenttemplaterecord.DxCPQ__Previously_Active__c == true) {
-      this.handleActivateTemplate(true, this.selectedObjectName);
-    }
-  }
 
     @api documenttemplaterecordid;
     @api documenttemplaterecord;

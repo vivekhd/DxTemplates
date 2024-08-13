@@ -37,6 +37,7 @@ import { savingPageProperties , updatePropertiesFromJSON} from "./templateDesign
 
 export default class TemplateDesignerCMP extends NavigationMixin(LightningElement) {
   //variables added by Bhavya for page properties configuration
+  jsonStr = '';
   @track showPageProperties = false;
   @track showFirstHeaderProperties = false;
   //variables added by Bhavya for Import Translations
@@ -763,7 +764,11 @@ export default class TemplateDesignerCMP extends NavigationMixin(LightningElemen
       this.firstsectionrecord = '';
       getAllDocumentTemplateSections({ docTempId: this.documenttemplaterecordid })
         .then(result => {
+          //console.log('getAllDocumentTemplateSections result --> ', result);
           if (result != null) {
+            if(result.length > 0 ){
+              this.jsonStr = result[0].DxCPQ__Document_Template__r.DxCPQ__PDF_Page_Properties__c !== '' || result[0].DxCPQ__Document_Template__r.DxCPQ__PDF_Page_Properties__c !== null? result[0].DxCPQ__PDF_Page_Properties__c : '';
+            }
             this.sectionsData = result;
             this.isTemplateSectionsFetched = true;
             if (result.length > 0) {
@@ -2430,7 +2435,7 @@ createTranslatedRecords() {
             'Name': row[headerMap['Name']] ? row[headerMap['Name']].trim() : '',
             'DxCPQ__FieldValue__c': row[headerMap['DxCPQ__FieldValue__c']] ? row[headerMap['DxCPQ__FieldValue__c']].trim() : '',
             'DxCPQ__Translated_Value__c': row[headerMap['DxCPQ__Translated_Value__c']] ? row[headerMap['DxCPQ__Translated_Value__c']].trim() : '',
-            'DxCPQ__Language__c': row[headerMap['DxCPQ__Language__c']] ? row[headerMap['DxCPQ__Language__c']].trim() : '',
+            'DxCPQ__Language__c': row[headerMap['DxCPQ__Language__c']] ? this.getLanguageCode(row[headerMap['DxCPQ__Language__c']].trim()) : '',
             'DxCPQ__DocumentTemplate__c': this.recordId
         };
     });
@@ -2518,14 +2523,15 @@ createTranslatedRecords() {
 
     if (textsToTranslate.length > 0) {
 
-        translateTextBatchList({
-          textsToTranslate: textsToTranslate,
-          selectedLanguage: this.selectedLanguage,
-          templateId : this.documenttemplaterecordid
-        })
-          .then(result => {
-            this.showToast('Success', 'Translation is in progress. Please check back after some time', 'success');
-            this.template.querySelector('c-modal').hide();
+      translateTextBatchList({
+        textsToTranslate: textsToTranslate,
+        selectedLanguage: this.selectedLanguage,
+        templateId : this.documenttemplaterecordid
+      })
+        .then(result => {
+          this.showToast('Success', 'Translation is in progress. Please check back after some time', 'success');
+          this.template.querySelector('c-modal').hide();
+          this.template.querySelector('c-modal[data-id="translation"]').hide();
 
         })
         .catch(error => {
