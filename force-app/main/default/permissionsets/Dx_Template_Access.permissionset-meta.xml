@@ -281,6 +281,11 @@
     </fieldPermissions>
     <fieldPermissions>
         <editable>true</editable>
+        <field>Document_Template__c.PDF_Page_Properties__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>true</editable>
         <field>Document_Template__c.Parent_Template__c</field>
         <readable>true</readable>
     </fieldPermissions>
