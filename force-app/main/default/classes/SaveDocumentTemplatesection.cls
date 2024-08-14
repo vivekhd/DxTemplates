@@ -3,11 +3,7 @@ public with sharing class SaveDocumentTemplatesection {
     private static Savepoint sp1;
     @AuraEnabled
     public static List<Document_Template_Section__c> getAllDocumentTemplateSections(Id docTempId){
-        List<Document_Template_Section__c> allSections=new List<Document_Template_Section__c>([select id,Sequence__c,Section_Content__c,Name,DisplaySectionName__c,
-                                                                                               Document_Clause__c,Document_Template__c,IsActive__c,IsEditable__c,New_Page__c,Document_Template__r.Name,Section_Visibility_Rule__c,
-                                                                                               Type__c,Document_Template__r.Related_To_Type__c,Document_Template__r.Parent_Template__c,Document_Template__r.Previously_Active__c,Document_Template__r.IsActive__c,Document_Template__r.Version_Number__c
-                                                                                               from Document_Template_Section__c where Document_Template__c=:docTempId WITH SECURITY_ENFORCED
-                                                                                               order by Sequence__c asc limit 1000 ]);
+        List<Document_Template_Section__c> allSections=new List<Document_Template_Section__c>([select id,Sequence__c,Section_Content__c,Name,DisplaySectionName__c, Document_Clause__c,Document_Template__c,IsActive__c,IsEditable__c,New_Page__c, Document_Template__r.PDF_Page_Properties__c,Document_Template__r.Name,Section_Visibility_Rule__c, Type__c,Document_Template__r.Related_To_Type__c,Document_Template__r.Parent_Template__c,Document_Template__r.Previously_Active__c,Document_Template__r.IsActive__c,Document_Template__r.Version_Number__c from Document_Template_Section__c where Document_Template__c=:docTempId WITH SECURITY_ENFORCED order by Sequence__c asc limit 1000 ]);
         return allSections;
     }
     @AuraEnabled
@@ -317,4 +313,43 @@ public with sharing class SaveDocumentTemplatesection {
     
     public class SafeClassException extends Exception{     
     }  
+    
+    /**
+     * Save the template data to the DxCPQ__PDF_Page_Properties__c field on the DxCPQ__Document_Template__c object.
+     * 
+     * @param templateId The Id of the DxCPQ__Document_Template__c record.
+     * @param jsonData The JSON string representing the template data.
+     * @return A message indicating the success or failure of the operation.
+     */
+    @AuraEnabled
+    public static String saveTemplateData(Id templateId, String jsonData) {
+        if (String.isBlank(jsonData)) {
+            return 'Error: The JSON data is empty.';
+        }
+
+        Savepoint sp = null;
+        try {
+            sp = Database.setSavepoint();
+            Map<String, Object> templateData = (Map<String, Object>) JSON.deserializeUntyped(jsonData);
+            DxCPQ__Document_Template__c template = [SELECT Id, PDF_Page_Properties__c FROM Document_Template__c WHERE Id = :templateId WITH USER_MODE];
+            if (template == null) {
+                return 'Error: Template record not found.';
+            }
+            String serializedData = JSON.serialize(templateData);
+            template.DxCPQ__PDF_Page_Properties__c = serializedData;
+            Database.SaveResult[] updateResults = Database.update(new List<DxCPQ__Document_Template__c> { template }, false);
+            if (!updateResults[0].isSuccess()) {
+                Database.rollback(sp);
+                return 'Error: Failed to save the template data. ' + updateResults[0].getErrors()[0].getMessage();
+            }
+
+            return 'Success: Template data saved successfully.';
+        } catch (QueryException qe) {
+            if (sp != null) Database.rollback(sp);
+            return 'Error: Unable to find the template record. ' + qe.getMessage();
+        } catch (Exception e) {
+            if (sp != null) Database.rollback(sp);
+            return 'Error: An unexpected error occurred. ' + e.getMessage();
+        }
+    }
 }
