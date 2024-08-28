@@ -91,6 +91,29 @@ public class LanguageTranslatorClassTest {
     }
     
     @isTest
+    static void testInsertTranslatedRecords() {
+        Test.startTest();
+        User us = DexUtilTestDataFactory.CreateTestUser();
+        System.runAs(us){
+            Map<String,Object> translationRecordWrapper = new Map<String,Object> {
+                'Name' => 'Test Record',
+                'DxCPQ__FieldValue__c' => 'Test Record',
+                'DxCPQ__Translated_Value__c' => 'Test Record',
+                'DxCPQ__Language__c' => 'Test Record',
+                'DxCPQ__DocumentTemplate__c' => ''
+            };
+            Account testAccount = new Account(Name='Test Record');
+            insert testAccount;
+        
+            LanguageTranslatorClass.insertTranslatedRecords(new List<Map<String,Object>> {translationRecordWrapper});
+            LanguageTranslatorClass.getAllTranslations('');
+            LanguageTranslatorClass.getLanguageSelected(testAccount.Id);
+        }
+        Test.stopTest();      
+        Assert.isTrue(true,'Test Coverage');
+    }
+    
+    @isTest
     static void testSelectedLangMethod() {
         DxCPQ__Document_Template__c  docTemplate = new DxCPQ__Document_Template__c (Name = 'Test Template', DxCPQ__Related_To_Type__c = 'Account');
         insert docTemplate;

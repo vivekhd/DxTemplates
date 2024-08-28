@@ -28,8 +28,8 @@ import createUpdateMethod from '@salesforce/apex/LanguageTranslatorClass.createU
 import deleteMethod from '@salesforce/apex/LanguageTranslatorClass.deleteMethod';
 import selectedLangMethod from '@salesforce/apex/LanguageTranslatorClass.selectedLangMethod';
 import getAllUserLanguages from '@salesforce/apex/LanguageTranslatorClass.getAllUserLanguages';
-import getTranslatedText from '@salesforce/apex/LanguageTranslatorClass.translateText';
-import translateTextBatchList from '@salesforce/apex/LanguageTranslatorClass.translateTextBatchList';
+//import getTranslatedText from '@salesforce/apex/LanguageTranslatorClass.translateText';
+//import translateTextBatchList from '@salesforce/apex/LanguageTranslatorClass.translateTextBatchList';
 import currectUserLang from '@salesforce/apex/LanguageTranslatorClass.currectUserLang';
 
 import { savingPageProperties , updatePropertiesFromJSON} from "./templateDesignerCMPUtils";
@@ -1913,6 +1913,7 @@ this.resetImageWatermarkFields();
     this.callImage = 0;
     this.checkedValImage = false;
     this.imageUrl =  '';
+    this.showPageProperties = false;
   }
 
   /**
@@ -2456,92 +2457,92 @@ createTranslatedRecords() {
     this.dispatchEvent(event4);
   }
 
-    handleTextTranslateLanguage(event) {
-    let translationIndex = event.currentTarget.dataset.index;
-    // console.log('translationIndex ' + translationIndex);
-    // console.log(' this.translatedRecords[translationIndex] ' + this.translatedRecords[translationIndex].DxCPQ__FieldValue__c);
-    // console.log('selected lang ' + this.selectedLanguage);
+  //   handleTextTranslateLanguage(event) {
+  //   let translationIndex = event.currentTarget.dataset.index;
+  //   // console.log('translationIndex ' + translationIndex);
+  //   // console.log(' this.translatedRecords[translationIndex] ' + this.translatedRecords[translationIndex].DxCPQ__FieldValue__c);
+  //   // console.log('selected lang ' + this.selectedLanguage);
 
-    if (this.translatedRecords[translationIndex].DxCPQ__FieldValue__c) {
-      getTranslatedText({
-        textToTranslate: this.translatedRecords[translationIndex].DxCPQ__FieldValue__c,
-        targetLanguage: this.selectedLanguage
-      })
-        .then(result => {
-          //alert(result);
-          if (result != 'Error in getting Translated Text') {
-            let data = JSON.parse(result);
-            this.translatedRecords[translationIndex].DxCPQ__Translated_Value__c = data.translations[0].translatedText;
-          }
-        })
-        .catch(error => {
-          this.showToast('Error', 'An error occurred', 'error');
-          let errorMessage = error.message || 'Unknown error message';
-          let tempError = error.toString();
-          createLog({ recordId: '', className: 'TemplateDesigner LWC ', exceptionMessage: errorMessage, logData: tempError, logType: 'Exception' });
-        });
-    }
-    // else if(!(this.translatedRecords[translationIndex].Name.startsWith('{!').endsWith('}').includes('.'))) {
-    else if (this.translatedRecords[translationIndex].Name) {
+  //   if (this.translatedRecords[translationIndex].DxCPQ__FieldValue__c) {
+  //     getTranslatedText({
+  //       textToTranslate: this.translatedRecords[translationIndex].DxCPQ__FieldValue__c,
+  //       targetLanguage: this.selectedLanguage
+  //     })
+  //       .then(result => {
+  //         //alert(result);
+  //         if (result != 'Error in getting Translated Text') {
+  //           let data = JSON.parse(result);
+  //           this.translatedRecords[translationIndex].DxCPQ__Translated_Value__c = data.translations[0].translatedText;
+  //         }
+  //       })
+  //       .catch(error => {
+  //         this.showToast('Error', 'An error occurred', 'error');
+  //         let errorMessage = error.message || 'Unknown error message';
+  //         let tempError = error.toString();
+  //         createLog({ recordId: '', className: 'TemplateDesigner LWC ', exceptionMessage: errorMessage, logData: tempError, logType: 'Exception' });
+  //       });
+  //   }
+  //   // else if(!(this.translatedRecords[translationIndex].Name.startsWith('{!').endsWith('}').includes('.'))) {
+  //   else if (this.translatedRecords[translationIndex].Name) {
 
-      getTranslatedText({
-        textToTranslate: this.translatedRecords[translationIndex].Name,
-        targetLanguage: this.selectedLanguage
-      })
-        .then(result => {
-          if (result != 'Error in getting Translated Text') {
-            let data = JSON.parse(result);
-            console.log(data);
-            this.translatedRecords[translationIndex].DxCPQ__Translated_Value__c = data.translations[0].translatedText;
-          }
-          else {
-            alert('Error in getting Translalted text data');
-          }
-        })
-        .catch(error => {
-          this.showToast('Error', 'An error occurred', 'error');
-          let errorMessage = error.message || 'Unknown error message';
-          let tempError = error.toString();
-          createLog({ recordId: '', className: 'TemplateDesigner LWC ', exceptionMessage: errorMessage, logData: tempError, logType: 'Exception' });
-        });
-    }
+  //     getTranslatedText({
+  //       textToTranslate: this.translatedRecords[translationIndex].Name,
+  //       targetLanguage: this.selectedLanguage
+  //     })
+  //       .then(result => {
+  //         if (result != 'Error in getting Translated Text') {
+  //           let data = JSON.parse(result);
+  //           console.log(data);
+  //           this.translatedRecords[translationIndex].DxCPQ__Translated_Value__c = data.translations[0].translatedText;
+  //         }
+  //         else {
+  //           alert('Error in getting Translalted text data');
+  //         }
+  //       })
+  //       .catch(error => {
+  //         this.showToast('Error', 'An error occurred', 'error');
+  //         let errorMessage = error.message || 'Unknown error message';
+  //         let tempError = error.toString();
+  //         createLog({ recordId: '', className: 'TemplateDesigner LWC ', exceptionMessage: errorMessage, logData: tempError, logType: 'Exception' });
+  //       });
+  //   }
 
-  }
+  // }
 
 
-  handleTextListTranslateLanguage(event) {
-    let textsToTranslate = [];
-    this.translatedRecords.forEach(record => {
-      if (record.DxCPQ__FieldValue__c) {
-        textsToTranslate.push(record.DxCPQ__FieldValue__c);
-      } else if (record.Name) {
-        textsToTranslate.push(record.Name);
-      }
-    });
+  // handleTextListTranslateLanguage(event) {
+  //   let textsToTranslate = [];
+  //   this.translatedRecords.forEach(record => {
+  //     if (record.DxCPQ__FieldValue__c) {
+  //       textsToTranslate.push(record.DxCPQ__FieldValue__c);
+  //     } else if (record.Name) {
+  //       textsToTranslate.push(record.Name);
+  //     }
+  //   });
 
-    //console.log('texts to translate ' + textsToTranslate);
+  //   //console.log('texts to translate ' + textsToTranslate);
 
-    if (textsToTranslate.length > 0) {
+  //   if (textsToTranslate.length > 0) {
 
-      translateTextBatchList({
-        textsToTranslate: textsToTranslate,
-        selectedLanguage: this.selectedLanguage,
-        templateId : this.documenttemplaterecordid
-      })
-        .then(result => {
-          this.showToast('Success', 'Translation is in progress. Please check back after some time', 'success');
-          this.template.querySelector('c-modal').hide();
-          this.template.querySelector('c-modal[data-id="translation"]').hide();
+  //     translateTextBatchList({
+  //       textsToTranslate: textsToTranslate,
+  //       selectedLanguage: this.selectedLanguage,
+  //       templateId : this.documenttemplaterecordid
+  //     })
+  //       .then(result => {
+  //         this.showToast('Success', 'Translation is in progress. Please check back after some time', 'success');
+  //         this.template.querySelector('c-modal').hide();
+  //         this.template.querySelector('c-modal[data-id="translation"]').hide();
 
-        })
-        .catch(error => {
-          this.showToast('Error', 'An error occurred', 'error');
-          let errorMessage = error.message || 'Unknown error message';
-          let tempError = error.toString();
-          createLog({ recordId: '', className: 'TemplateDesignerDetails LWC ', exceptionMessage: errorMessage, logData: tempError, logType: 'Exception' });
-        });
-    }
-  }
+  //       })
+  //       .catch(error => {
+  //         this.showToast('Error', 'An error occurred', 'error');
+  //         let errorMessage = error.message || 'Unknown error message';
+  //         let tempError = error.toString();
+  //         createLog({ recordId: '', className: 'TemplateDesignerDetails LWC ', exceptionMessage: errorMessage, logData: tempError, logType: 'Exception' });
+  //       });
+  //   }
+  // }
 
   //code added by Bhavya for taking inputs from user for page, header & header properties
 
@@ -2900,7 +2901,7 @@ handleSecondHeaderPropertiesChange(event) {
     }
 
     handleCancelPageSettings(event){
-      this.showPageSettings = false;
+      this.showPageProperties = false;
       this.template.querySelector('c-modal').hide();
     }
 

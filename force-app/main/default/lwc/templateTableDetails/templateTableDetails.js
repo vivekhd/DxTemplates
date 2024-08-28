@@ -106,9 +106,9 @@ export default class TemplateTableDetails extends LightningElement {
     selectedHeader;
     selectedHFontColor;
     selectedBFontColor;
-    selectedHbgColor;
-    selectedBBgcolor;
-    @track selectedBDRbgcolor = "#000000";
+    selectedHbgColor = '#FFFFFF';
+    selectedBBgcolor = '#FFFFFF';
+    selectedBDRbgcolor = '#000000';
 
     popUpMessage;
 
@@ -761,7 +761,7 @@ export default class TemplateTableDetails extends LightningElement {
                 this.tablerows.push(myObj);
             }
             if (this.tablehasdata == false) {
-                this.unsavedChanges();
+                //this.unsavedChanges();
                 this.tablehasdata = true;
             }
         }

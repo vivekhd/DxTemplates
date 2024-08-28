@@ -8,7 +8,6 @@
 * enhancing the overall efficiency and user experience.
 */
 
-
 /**
 * @description Represents LanguageTranslatorClass, which is a class with sharing.
 *              class facilitates the conversion of content tokens into a user-selected language.
@@ -83,10 +82,10 @@ public with sharing class LanguageTranslatorClass {
     * @return         Boolean True if the operation was successful, false otherwise.
     */
     @AuraEnabled
-    public static Boolean createUpdateMethod(String jsonStringData, String language, Id sectionId){
+    public static Boolean createUpdateMethod(String jsonStringData, String language, Id docTemplateId){
         Boolean upsertSuccess = false;
         try{
-            Id docTemplateId = [Select id, DxCPQ__Document_Template__c from DxCPQ__Document_Template_Section__c where Id =: sectionId].DxCPQ__Document_Template__c;
+            //Id docTemplateId = [Select id, DxCPQ__Document_Template__c from DxCPQ__Document_Template_Section__c where Id =: sectionId].DxCPQ__Document_Template__c;
             List<wrapperData> wrapdata=(List<wrapperData>)JSON.deserialize(jsonStringData, List<wrapperData>.class);
             String regex = '^[a-zA-Z0-9_-]{18}$'; 
             List<DxCPQ__Translator__c> upsertTransLanguages = new List<DxCPQ__Translator__c>();
@@ -236,10 +235,7 @@ public with sharing class LanguageTranslatorClass {
     
     @AuraEnabled
     public static List<Translator__c> getAllTranslations(String docTempId) {
-        System.debug('docTempId -->> '+ docTempId);
-        List<Translator__c> transLst = [ SELECT Id, Name, DxCPQ__FieldValue__c, DxCPQ__Translated_Value__c, DxCPQ__Language__c, DxCPQ__DocumentTemplate__c FROM DxCPQ__Translator__c where DxCPQ__DocumentTemplate__c =:docTempId WITH USER_MODE ];
-    	System.debug('transLst --> '+ transLst);
+        List<Translator__c> transLst = [ SELECT Id, Name, FieldValue__c, Translated_Value__c, Language__c, DocumentTemplate__c FROM Translator__c where DocumentTemplate__c =:docTempId WITH USER_MODE ];
         return transLst;
-    }
-    
+    }    
 }

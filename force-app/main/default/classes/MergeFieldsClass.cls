@@ -43,10 +43,6 @@ public with sharing class MergeFieldsClass {
                 if (underscoreIndex != -1) {
                     language = userLanguage.substring(0, underscoreIndex);
                     locale = userLanguage.substring(underscoreIndex + 1);
-                    System.debug('language: ' + language);
-                    System.debug('locale: ' + locale);
-                } else {
-                    System.debug('The string does not contain an underscore.');
                 }
             }
             else{
@@ -57,10 +53,8 @@ public with sharing class MergeFieldsClass {
             }
             
             List<Translator__c> translatorList = [select id, DocumentTemplate__c, Name, DxCPQ__FieldValue__c, Translated_Value__c, Language__c  from Translator__c where Language__c =:locale and DocumentTemplate__c=:docTemplate WITH SECURITY_ENFORCED];
-            System.debug('translatorList --> '+ translatorList);
             for(Translator__c transRec: translatorList){
                 string value;
-                System.debug('transRec.Translated_Value__c --> '+ transRec.Translated_Value__c);
                 if(transRec.Translated_Value__c != null  && transRec.Translated_Value__c.contains('<') && transRec.Translated_Value__c.contains('>')){
                    value = transRec.Translated_Value__c.replaceAll('<[^>]+>', ''); 
                 }else{
@@ -72,10 +66,7 @@ public with sharing class MergeFieldsClass {
                 else{
                     nameTransValueMap.put(transRec.Name, value);
                 }
-                //nameTransValueMap.put(transRec.DxCPQ__FieldValue__c, value);
-                System.debug('nameTransValueMap 50--> '+ nameTransValueMap);
             }
-            System.debug('nameTransValueMap 52--> '+ nameTransValueMap);
             for (Document_Template_Section__c sec : selectedTemplateContents) {
                 String sectionContent = sec.Section_Content__c;
                 for(String str : nameTransValueMap.keySet()){

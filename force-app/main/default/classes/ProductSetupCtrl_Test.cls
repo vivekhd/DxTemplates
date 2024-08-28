@@ -88,8 +88,8 @@ private class ProductSetupCtrl_Test {
             SaveDocumentTemplatesection.getSobjectFields('Account');
             SaveDocumentTemplatesection.saveDocumentTemplateSectionSequences(docTemplateSections);
             SaveDocumentTemplatesection.saveDocumentTemplateSectionDetails(docTemplateSections[0]);
-            //FooterClass.getContentVersions();
-            //FooterClass.getSearchedContentVersions('searchlabel');
+            SaveDocumentTemplatesection.CloneTemplateSection(docTemplateSections[0]);
+            SaveDocumentTemplatesection.saveTemplateData(docTemplateSections[0].Id,JSON.serialize(docTemplateSections[0]));
             RelatedObjectsClass.getRelatedObjects('Product2');
             RelatedObjectsClass.getFields('Product2');
             RelatedObjectsClass.getGroupingValues('Product2');

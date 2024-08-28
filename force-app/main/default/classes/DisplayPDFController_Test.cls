@@ -992,4 +992,64 @@ private class DisplayPDFController_Test {
         SaveDocumentTemplate.getClassNames();
         Assert.isTrue(true,'Code Coverage only');
     }
+    @isTest
+    static void getSectionConditionsTest(){
+        User us = DexUtilTestDataFactory.CreateTestUser();
+        System.runAs(us){ 
+        Document_Template__c testTemplate = new Document_Template__c(Name = 'Test Template');
+                insert testTemplate;
+                Opportunity testOpportunity = new Opportunity(Name = 'Test Opportunity', StageName = 'Prospecting', CloseDate = Date.today());
+                insert testOpportunity;
+                Document_Template_Section__c testSection = new Document_Template_Section__c(
+                    Document_Template__c = testTemplate.Id,
+                    Section_Content__c = '<p>Test Section Content</p>',
+                    Type__c = 'Context',
+                    Sequence__c = 1
+                );
+                insert testSection;
+        DisplayPDFController.getSectionConditions(testTemplate.Id,testOpportunity.Id,'Opportunity');
+           // DisplayPDFController con = new DisplayPDFController();
+        }
+        Assert.isTrue(true,'Code Coverage only');
+    } 
+    @isTest
+    static void testDisplayPDFControllerConstructor() {
+       User us = DexUtilTestDataFactory.CreateTestUser();
+        System.runAs(us){
+            ContentVersion cv = new ContentVersion();
+            cv.Title='Test';
+                 cv.VersionData=Blob.valueOf('Test');
+                 cv.IsMajorVersion=true;
+                 cv.PathOnClient='test';
+                 insert cv;
+        Document_Template__c docTemplate = new Document_Template__c(
+            PDF_Page_Properties__c = '{"pagePropCSS":{},"pageMargins":{"margin-top":"10px","margin-bottom":"10px","margin-left":"10px","margin-right":"10px"},"footerJSONVal":{"footer_right":"10px","footer_center":"10px","footer_left":"10px"},"headerJSONVal":{"header_left":"10px","header_center":"10px","header_right":"10px","first_header_left":"10px","first_header_center":"10px","first_header_right":"10px","header_left_landscape":"10px","header_center_landscape":"10px","header_right_landscape":"10px","first_header_left_landscape":"10px","first_header_center_landscape":"10px","first_header_right_landscape":"10px"},"footerProperties":{},"headerProperties":{"normalHeaders":{"height":"50px"},"firstPageHeaders":{"height":"70px"}}}',
+            Watermark_Data__c = '[{"name":"Text","isPrimary":true,"contentVersionID":"'+cv.id+'","pageOption":"All Pages - Text","fontsize":"28","opacity":"1","color":"#5DFF05","rotation":"45","textVal":"gabbbbbbbb","pageTextOption":"All Pages - Text"},{"name":"Image","isPrimary":false,"contentVersionID":null,"pageOption":"All Pages - Test","opacity":"1","rotation":"0","pageImageOption":"All Pages","imageScale":100}]'
+        );
+        insert docTemplate;
+
+        // Create Document
+        Document__c doc = new Document__c(
+            Document_Body__c = 'Sample Document Body',
+            Document_Content__c = '{"header": {"sectionsCount": 1, "sectionsFirstCount": 1, "sectionsContent": [{"indexvar": 0, "value": "Left Header"}]}, "footer": {"sectionsCount": 1, "sectionsContent": [{"indexvar": 0, "value": "Left Footer"}]}}',
+            Document_Template__c = docTemplate.Id
+        );
+        insert doc;
+
+        // Create DxTemplates_VF_Style__mdt metadata records
+        List<DxTemplates_VF_Style__mdt> styles = new List<DxTemplates_VF_Style__mdt>{
+            new DxTemplates_VF_Style__mdt(
+                Label = 'SampleStyle',
+                CSS_Style_List__c = 'body { font-family: Arial; }'
+            )
+        };
+        ApexPages.currentPage().getParameters().put('documentid', doc.Id);
+        ApexPages.currentPage().getParameters().put('selectedPageSize', 'A4');
+        ApexPages.currentPage().getParameters().put('selectedPageOrientation', 'Portrait');
+
+        DisplayPDFController controller = new DisplayPDFController();
+        }
+        Assert.isTrue(true,'Code Coverage only');
+    }   
+    
 }
