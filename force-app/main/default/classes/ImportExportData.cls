@@ -34,7 +34,7 @@ public class ImportExportData {
         try{
             Map<String, Object> dTMap = new Map<String, Object>();
             Map<String,String> holdCVData = new Map<String,String>();
-            List<Document_Template__c> docTemp = [SELECT Name, isactive__c, Related_To_Type__c, Version_Number__c, Previously_Active__c, Parent_Template__c, Watermark_Data__c, External_Id__c FROM Document_Template__c WITH SECURITY_ENFORCED order by CreatedDate Desc limit 50000];
+            List<Document_Template__c> docTemp = [SELECT Name, Related_To_Type__c, Version_Number__c, Parent_Template__c, Watermark_Data__c, PDF_Page_Properties__c, External_Id__c FROM Document_Template__c WITH SECURITY_ENFORCED order by CreatedDate Desc limit 50000];
 
             //document template sections
             List<Document_Template_Section__c> dts = [select Name, DisplaySectionName__c, Document_Template__c, ChildObject__c,  Document_Clause__c, External_Document_Template__c, External_RuleID__c, Header_Content__c, IsActive__c, IsEditable__c, New_Page__c, Parent_Section__c, RuleId__c, Section_Content__c, Section_Details__c, Sequence__c, Type__c  from Document_Template_Section__c with USER_MODE LIMIT 50000];

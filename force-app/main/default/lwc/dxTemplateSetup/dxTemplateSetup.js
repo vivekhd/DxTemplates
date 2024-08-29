@@ -758,31 +758,37 @@ try{
         reader.readAsText(file);
     }
 
+    //Handles the json data pasted in text area
     pastedjson(event){
         let pasteddata = event.target.value;
         this.jsonData = pasteddata;
         this.createDisabledButton=this.jsonData !="" ? false : true;
     }
 
-    // checkForDuplicate() {
-    //     return templateExternalList()
-    //     .then(data => {
-    //         this.showDuplicate = data.some(item => {
-    //             let createImportedRecords = JSON.parse(this.jsonData);
-    //             let exterID = item.ExternalId;
-    //             return createImportedRecords.Templates.some(importTemplates => {
-    //                 return importTemplates.DxCPQ__External_Id__c === exterID;
-    //             });
-    //         });
-    //         return this.showDuplicate;
-    //     })
-    //     .catch(error => {
-    //         console.error('Error:', error);
-    //         return this.showDuplicate;
-    //     });
-    // }
+    //Checks if there are valid related to type in the json
+    checkValidRelatedType() {
+        let checkRelatedTypeJSON = JSON.parse(this.jsonData);
+        let invalidType;
+        let invalidTemplate;
+        let hasInvalidType = checkRelatedTypeJSON.Templates.some(item => {
+            let isValid = this.relatedTypeOptions.some(option => {
+                return option.value === item.DxCPQ__Related_To_Type__c;
+            });
+            if (!isValid) {
+                invalidType = item.DxCPQ__Related_To_Type__c;
+                invalidTemplate = item.Name;
+                return true;
+            }
+            return false;
+        });
+        if (hasInvalidType) {
+            this.errorMessage = `${invalidTemplate} has the "Related to Type" value- ${invalidType}. Please check if the value has been added in the picklist options.`;
+            return false;
+        }
+        return true;
+    }
 
-
+    //Checks if user pasted/inserted valid JSON data. We cant predict what the user can do ._.
     checkJsonInput(){
         try {
             let checkJSON = JSON.parse(this.jsonData);
@@ -799,19 +805,23 @@ try{
         }
     }
 
+    //Checks if duplicate template records are being uploaded
     checkForDuplicate() {
         let importedRecords  = this.checkJsonInput();
         if (!importedRecords) return;
+        let validTypes = this.checkValidRelatedType();
+        if (!validTypes) return;
         return templateExternalList()
         .then(data => {
             this.showDuplicate = data.some(item => {
-                //let createImportedRecords = JSON.parse(this.jsonData);
                 let exterID = item.ExternalId;
+                if (!exterID) {
+                    return false;
+                }
                 return importedRecords.Templates.some(importTemplates => {
-                    return importTemplates.DxCPQ__External_Id__c === exterID;
+                    return importTemplates.DxCPQ__External_ID__c === exterID;
                 });
             });
-            //this.errorMessage = 'Duplicates found. Please check your file and make sure to upload the correct data'
             return this.showDuplicate;
         })
         .catch(error => {
@@ -821,8 +831,7 @@ try{
     }
 
     //Create button clicked in Import functionality. Parses through the data to assign the related objects with one another
-    createTemplateData(){
-        //console.log('createTemplateData got triggered');
+    createTemplateData(){   
         this.showFirstImportScreen=false;
         this.showDuplicateTemplates = true;
         this.currentStep = "2";
@@ -838,8 +847,6 @@ try{
                 try{
                     let createImportedRecords = JSON.parse(this.jsonData);
                     createImportedRecords.Templates.forEach(importTemplates => {
-                        //importTemplates.DxCPQ__External_ID__c=importTemplates.Id;
-                        //let watermarkData= JSON.parse(importTemplates.DxCPQ__Watermark_Data__c);
                         importTemplates.Id= undefined;
                     });
                     let templatesjson = JSON.stringify(createImportedRecords.Templates);
@@ -856,28 +863,9 @@ try{
                                 }
                                 tempSecItem.Id=undefined;
                             })
-                            // 3.2 Template ID into Watermark
-                            //let watermarkjson = createImportedRecords.Watermark;
-                            // for (let watermarkId in createImportedRecords.Watermark){
-                            //     if (createImportedRecords.Watermark.hasOwnProperty(watermarkId)){
-                            //         let watermarkData = createImportedRecords.Watermark[watermarkId];
-                            //         if (watermarkData.ContentVersionData.FirstPublishLocationId == oldTempId){
-                            //             watermarkData.ContentVersionData.FirstPublishLocationId = newTempId;
-                            //             watermarkData.ContentVersionData.DxCPQ__External_Id__c= watermarkData.ContentVersionData.Id;
-                            //             watermarkData.ContentVersionData.Id = undefined;
-                            //         } 
-                            //     }
-                            // }
-                            // createImportedRecords.Watermark.forEach(waterdata=> {
-                            //     if (waterdata.ContentVersionData.FirstPublishLocationId == oldTempId){
-                            //         waterdata.ContentVersionData.FirstPublishLocationId = newTempId;
-                            //         waterdata.ContentVersionData.DxCPQ__External_Id__c= waterdata.ContentVersionData.Id;
-                            //         waterdata.ContentVersionData.Id = undefined;
-                            //     }
-                            // });
                         });
                         let watermarkjson = JSON.stringify(createImportedRecords.Watermark);
-                        // 4. Watermarks are created
+                        // 4. Watermarks are created. No data to return so we just wait for this to finish.
                         createImportedWatermark({watermarkLst:watermarkjson})
                         .then(data =>{
 

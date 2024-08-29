@@ -767,7 +767,7 @@ export default class TemplateDesignerCMP extends NavigationMixin(LightningElemen
           //console.log('getAllDocumentTemplateSections result --> ', result);
           if (result != null) {
             if(result.length > 0 ){
-              this.jsonStr = result[0].DxCPQ__Document_Template__r.DxCPQ__PDF_Page_Properties__c !== '' || result[0].DxCPQ__Document_Template__r.DxCPQ__PDF_Page_Properties__c !== null? result[0].DxCPQ__PDF_Page_Properties__c : '';
+              this.jsonStr = result[0].DxCPQ__Document_Template__r.DxCPQ__PDF_Page_Properties__c !== '' || result[0].DxCPQ__Document_Template__r.DxCPQ__PDF_Page_Properties__c !== null? result[0].DxCPQ__Document_Template__r.DxCPQ__PDF_Page_Properties__c : '';
             }
             this.sectionsData = result;
             this.isTemplateSectionsFetched = true;

@@ -151,7 +151,7 @@ export default class TemplateFooterType extends LightningElement {
         this.selectedimageurl = '/sfc/servlet.shepherd/version/download/' + this.selectedimageid;
         this.imagebuttonlabel = 'Change Image';
         this.showImage = true;
-        this.richtextVal = '<img src="' + this.selectedimageurl + '"/>';
+        this.richtextVal = this.richtextVal + '<img src="' + this.selectedimageurl + '"/>';
         this.template.querySelector('c-modal').hide();
         this.isModalOpen = false;
     }

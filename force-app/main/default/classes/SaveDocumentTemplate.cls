@@ -68,6 +68,16 @@ public with sharing class SaveDocumentTemplate {
                 for (Database.SaveResult sr : urListsave) {
                     if (sr.isSuccess()) {
                         docTemp.Id = sr.getId();
+                        docTemp.External_ID__c = docTemp.Id;
+                        docTempId = docTemp.Id;
+                        if (sp1 == null) sp1 = Database.setSavepoint();
+                        Database.UpsertResult[] urList2 = safe.doupsert(docTemp);
+                        List<String> errorList = Safely.safeClassExceptionHandlerUpsert(urList2);
+                        if(errorList.size()>0){
+                            Database.rollback(sp1);
+                            throw new SafeClassException(String.join( errorList, ', ' ));
+                        }
+
                     } else {
                         for(Database.Error err : sr.getErrors()) {
                             System.debug('The following error has occurred.');                    
