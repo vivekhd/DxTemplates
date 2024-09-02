@@ -1,4 +1,8 @@
 {
+  "name": "DxTemplates",
+  "namespace": "DxCPQ",
+  "sfdcLoginUrl": "https://login.salesforce.com",
+  "sourceApiVersion": "61.0",
   "packageDirectories": [
     {
       "path": "force-app",
@@ -41,13 +45,9 @@
       "default": true,
       "versionDescription": "",
       "postInstallScript": "PostInstallDataCreation",
-      "ancestorVersion": "NONE"
+      "ancestorVersion": "HIGHEST"
     }
   ],
-  "name": "DxTemplates",
-  "namespace": "DxCPQ",
-  "sfdcLoginUrl": "https://login.salesforce.com",
-  "sourceApiVersion": "58.0",
   "packageAliases": {
     "DxTemplates_Unlocked": "0HoQm00000000UfKAI",
     "DxTemplates_Unlocked@0.1.0-1": "04tQm000000NzVpIAK",
@@ -106,6 +106,17 @@
     "DxTemplates_Managed_v3@0.1.0-2": "04tQm000001KDYPIA4",
     "DxTemplates_Managed_v3@0.1.0-3": "04tQm000001Ko3JIAS",
     "DxTemplates_Managed_v3@0.1.0-4": "04tQm000001RNcfIAG",
-    "DxTemplates_Managed_v3@0.1.0-5": "04tQm000001S7pBIAS"
+    "DxTemplates_Managed_v3@0.1.0-5": "04tQm000001S7pBIAS",
+    "DxTemplates_Managed_v3@0.1.0-6": "04tQm000001TPqTIAW",
+    "DxTemplates_Managed_v3@0.1.0-7": "04tQm000001TqsHIAS",
+    "DxTemplates_Managed_v3@0.1.0-8": "04tQm000001TqttIAC",
+    "DxTemplates_Managed_v3@0.1.0-9": "04tQm000001eCedIAE",
+    "DxTemplates_Managed_v3@0.1.0-10": "04tQm000001j2wLIAQ",
+    "DxTemplates_Managed_v3@0.1.0-11": "04tQm000001j31BIAQ",
+    "DxTemplates_Managed_v3@0.1.0-12": "04tQm000001j32nIAA",
+    "DxTemplates_Managed_v3@0.1.0-13": "04tQm000001jawPIAQ",
+    "DxTemplates_Managed_v3@0.1.0-14": "04tQm000001k9ULIAY",
+    "DxTemplates_Managed_v3@0.1.0-15": "04tQm000001k9yzIAA",
+    "Dx_Templates@0.7.0-4": "04tQm000001kA5RIAU"
   }
 }
