@@ -23,22 +23,17 @@ public with sharing class MergeFieldsClass {
       
      public static List<Document_Template_Section__c> mergefieldsMethod(List<Document_Template_Section__c> selectedTemplateContents, Id recordId,Map<String,Object> replaceData) {   
         try{
-            System.debug('selectedTemplateContents --> '+ selectedTemplateContents);
-            System.debug('recordId --> '+ recordId);
-            System.debug('replaceData --> '+ replaceData);
             Id templateSectionId;
             String objectName = recordId.getSObjectType().getDescribe().getName();
             String mainstr;
             templateSectionId = selectedTemplateContents[0].Id;
             Id  docTemplate = [Select id,Document_Template__c from Document_Template_Section__c where Id =: templateSectionId].Document_Template__c;
-            System.debug('docTemplate --> '+ docTemplate);
             Map<String, String> nameTransValueMap = new map<String, String>();
-            // String userLanguage = [SELECT LanguageLocaleKey FROM User WHERE Id = : UserInfo.getUserId() WITH SECURITY_ENFORCED].LanguageLocaleKey;
             //getting Document Language from the Custom Metadata
             String userLanguage = LanguageTranslatorClass.getLanguageSelected(recordId);
             String language = '';
             String locale = '';
-            if(userLanguage != null){               
+            if(userLanguage != null){
                 Integer underscoreIndex = userLanguage.indexOf('_');
                 if (underscoreIndex != -1) {
                     language = userLanguage.substring(0, underscoreIndex);
@@ -56,7 +51,7 @@ public with sharing class MergeFieldsClass {
             for(Translator__c transRec: translatorList){
                 string value;
                 if(transRec.Translated_Value__c != null  && transRec.Translated_Value__c.contains('<') && transRec.Translated_Value__c.contains('>')){
-                   value = transRec.Translated_Value__c.replaceAll('<[^>]+>', ''); 
+                   value = transRec.Translated_Value__c.replaceAll('<[^>]+>', '');  
                 }else{
                     value = transRec.Translated_Value__c;
                 }
@@ -71,7 +66,6 @@ public with sharing class MergeFieldsClass {
                 String sectionContent = sec.Section_Content__c;
                 for(String str : nameTransValueMap.keySet()){
                     if(nameTransValueMap.get(str)!=null){
-                        System.debug('sectionContent --> '+ sectionContent);
                       sectionContent = sectionContent.replace('&lt;&lt;' + str + '&gt;&gt;', nameTransValueMap.get(str));  
                     }
                 }
@@ -85,15 +79,16 @@ public with sharing class MergeFieldsClass {
                 }
             }
             String mainObject=objectName;
-            /* <Checks if strig contains %% if yes then customLogic method is called> */
+            /* <Checks if string contains %% if yes then customLogic method is called> */
             if(mainstr.contains('%%') && replaceData.size()>0)
             {           
                 for(Document_Template_Section__c sec: selectedTemplateContents)
                 {
-                    String str=customLogic( replaceData,sec.Section_Content__c);
+                    String str =customLogic(replaceData,sec.Section_Content__c);
                     sec.Section_Content__c=sec.Section_Content__c.replace(sec.Section_Content__c, str);   
                 }
             }
+            
             Pattern p = Pattern.compile('\\{!.+?\\}');
             Matcher m = p.matcher(mainstr);
             String mainfields;
@@ -119,35 +114,24 @@ public with sharing class MergeFieldsClass {
                 string mainSOQL='Select '+String.escapeSingleQuotes(mainfields)+' from '+String.escapeSingleQuotes(mainObject)+' where Id= \'' + recordId + '\' WITH SECURITY_ENFORCED';
                 sObject qrec=Database.query(mainSOQL);
                 Map<String, Object> mainMap = (Map<String, Object>) JSON.deserializeUntyped(JSON.serialize(qrec));           
-                System.debug('mainMap inside mergefields ---> '+ mainMap);
                 for(Document_Template_Section__c sec: selectedTemplateContents) {
                     for(String str:mainfieldsList)  {
                         str = str.replaceAll('(\\s+)', '');
-                        system.debug('str--'+str);
                         if (mainMap.containsKey(str)) {
-                            system.debug('Inside if---');
                             String mergefieldsyntaxWithBrackets = '&lt;&lt;{!' + mainObject + '.' + str + '}&gt;&gt;';
                             String mergefieldsyntax = '{!' + mainObject + '.' + str + '}';
-                            system.debug('mergefieldsyntax inside if ---' + mergefieldsyntax);
                             String nameTransValue = String.valueOf(mainMap.get(str));
-                            system.debug('nameTransValue---' + nameTransValue);
-                            system.debug('nameTransValueMap---' + nameTransValueMap);
-                            
                             if (sec.Section_Content__c.contains(mergefieldsyntaxWithBrackets)) {
-                                System.debug('inside with brackets' + mergefieldsyntaxWithBrackets);
                                 sec.Section_Content__c = nameTransValueMap.get(nameTransValue) != null ? 
                                     sec.Section_Content__c.replace(mergefieldsyntaxWithBrackets, String.valueOf(nameTransValueMap.get(nameTransValue))) : 
                                     sec.Section_Content__c.replace(mergefieldsyntaxWithBrackets, nameTransValue);
                             } else if (sec.Section_Content__c.contains(mergefieldsyntax)) {
-                                System.debug('inside without brackets' + mergefieldsyntax);
-                                system.debug('nameTransValueMap.get(nameTransValue) ---' + nameTransValueMap.get(nameTransValue));
                                 sec.Section_Content__c = nameTransValueMap.get(nameTransValue) != null ? 
                                     sec.Section_Content__c.replace(mergefieldsyntax, String.valueOf(nameTransValueMap.get(nameTransValue))) : 
                                     sec.Section_Content__c.replace(mergefieldsyntax, nameTransValue);
                             }
                         }
                         else {
-                            system.debug('Inside else---');
                             String finalvalue;
                             if(str.contains('.')){
                                 List<String> strList = new List<string>();
@@ -165,7 +149,6 @@ public with sharing class MergeFieldsClass {
                                     }
                                 }
                             }
-                            System.debug('finalvalue ---> '+ finalvalue);
                             if(finalvalue!=null)  {
                                 string mergefieldsyntax='{!'+mainObject+'.'+str+'}';
                                 sec.Section_Content__c= nameTransValueMap.get(finalvalue) != null ? sec.Section_Content__c.replace(mergefieldsyntax, nameTransValueMap.get(finalvalue)): sec.Section_Content__c.replace(mergefieldsyntax, finalvalue); 
@@ -405,29 +388,144 @@ public with sharing class MergeFieldsClass {
     }
      /* <customLogic method is used to replace %%data%% with the respective value from the
          map mp which is constructed in the GenericController class as well as from the flow> */
-    public static string customLogic(map<string,object> mp,string mainstr) {      
-        Integer count=1;
-        boolean flag=false;
-        System.debug('mp inside customLogic --> '+ mp);
-        System.debug('mainstr inside customLogic --> '+ mainstr);
-        List<string> arr=mainstr.split('%');
-        for(Integer i=0;i<arr.size();i++) {
-            if(arr[i]=='') {
-                if( Math.mod(count,2) !=0){
-                    for(string s:mp.keySet()) {
-                        if(arr[i+1]==s) {
-                            arr[i+1]=(string)mp.get(s);
-                            flag=true;
-                        }                       
+        
+    public static String customLogic(Map<String, Object> mp, String mainstr) {
+        String result = '';
+        Pattern tokenPattern = Pattern.compile('%%(.*?)%%');
+        Matcher tokenMatcher = tokenPattern.matcher(mainstr);
+        List<String> tokens = new List<String>();
+        while (tokenMatcher.find()) {
+            tokens.add(tokenMatcher.group(1));
+        }
+        if (!tokens.isEmpty()) {
+            List<String> rows = new List<String>();
+            String trPatternStr = '<tr([^>]*)>([\\s\\S]*?)</tr>';
+            Pattern trPattern = Pattern.compile(trPatternStr);
+            Matcher trMatcher = trPattern.matcher(mainstr);
+            String trAttributes = '';
+            if (trMatcher.find()) {
+                trAttributes = trMatcher.group(1);
+            }
+            String tdPatternStr = '<td([^>]*)>([\\s\\S]*?)</td>';
+            Pattern tdPattern = Pattern.compile(tdPatternStr);
+            Matcher tdMatcher = tdPattern.matcher(mainstr);
+            List<String> tdAttributes = new List<String>();
+            List<String> tdContent = new List<String>();
+            while (tdMatcher.find()) {
+                tdAttributes.add(tdMatcher.group(1));
+                tdContent.add(tdMatcher.group(2));
+            }
+            List<Map<String, Object>> wrapperDataList = getDataFromMap(mp, tokens);
+            for (Map<String, Object> data : wrapperDataList) {
+                List<String> rowCells = new List<String>();
+                Integer index = 0;
+                for (String token : tokens) {
+                    String value = '';
+            
+                    if (token.contains('.')) {
+                        value = getTokenValue(data, token);
+                    } else {
+                        value = mp.containsKey(token) ? String.valueOf(mp.get(token)) : '';
                     }
-                    if(flag !=true) {
-                        arr[i+1]='%%'+arr[i+1]+'%%';
+                    String tdAttr = tdAttributes.size() > index ? tdAttributes[index] : '';
+                    String tdInnerContent = tdContent.size() > index ? tdContent[index] : '';
+                    if (String.isBlank(token)) {
+                        tdInnerContent = '';
+                    } else {
+                        tdInnerContent = tdInnerContent.replace('%%' + token + '%%', value != null ? value : '');
                     }
-                flag=false;           
+                    rowCells.add('<td' + tdAttr + '>' + tdInnerContent + '</td>');
+                    index++;
                 }
-                count=count+1;
+                while (index < tdContent.size()) {
+                    rowCells.add('<td' + (tdAttributes.size() > index ? tdAttributes[index] : '') + '></td>');
+                    index++;
+                }
+                String row = '<tr' + trAttributes + '>' + String.join(rowCells, '') + '</tr>';
+                rows.add(row);
+            }
+            String tableBody = String.join(rows, '');
+            result = mainstr.replaceAll('(<tbody[^>]*>).*?(</tbody>)', '$1' + tableBody + '$2');
+        } else {
+            result = mainstr;
+        }
+
+        result = result.trim();
+        return result;
+    }
+
+    // Recursive method to navigate through the map or list structure
+    private static Object getDataFromMap(Object current, List<String> path, Integer index) {
+        if (index >= path.size()) {
+            return null;
+        }
+        String keyOrIndex = path[index];
+        if (index == path.size() - 1) {
+            if (current instanceof Map<String, Object>) {
+                return ((Map<String, Object>) current).get(keyOrIndex);
+            } else {
+                return current;
             }
         }
-        return String.join( arr, ' ' );
-    } 
+
+        if (current instanceof Map<String, Object>) {
+            Map<String, Object> currentMap = (Map<String, Object>) current;
+            current = currentMap.get(keyOrIndex);
+            return getDataFromMap(current, path, index + 1);
+        }
+
+        if (current instanceof List<Object>) {
+            try {
+                Integer listIndex = Integer.valueOf(path[index + 1]);
+                List<Object> currentList = (List<Object>) current;
+                if (listIndex >= 0 && listIndex < currentList.size()) {
+                    current = currentList.get(listIndex);
+                    return getDataFromMap(current, path, index + 2);
+                } else {
+                    return null;
+                }
+            } catch (Exception e) {
+                return null;
+            }
+        }
+        return null;
+    }
+
+    // Method to retrieve data based on the token path
+    private static List<Map<String, Object>> getDataFromMap(Map<String, Object> mp, List<String> tokens) {
+    if (tokens.isEmpty()) {
+        return new List<Map<String, Object>>();
+    }
+    List<String> path = tokens[0].split('\\.');
+    Object result = getDataFromMap(mp, path, 0);
+
+    // Handle the result if it's a List<Object>
+    if (result instanceof List<Object>) {
+        List<Object> resultList = (List<Object>) result;
+        List<Map<String, Object>> finalResultList = new List<Map<String, Object>>();
+
+        // Loop through the list and cast each element to Map<String, Object>
+        for (Object item : resultList) {
+            if (item instanceof Map<String, Object>) {
+                finalResultList.add((Map<String, Object>) item);
+            } else {
+                System.debug('Item in list is not a Map<String, Object>: ' + item);
+            }
+        }
+
+        return finalResultList;
+    } else {
+        return new List<Map<String, Object>>();
+    }
+}
+
+
+    // Helper method to get the token value from the data map
+    private static String getTokenValue(Map<String, Object> data, String token) {
+        List<String> parts = token.split('\\.');
+        String lastPart = parts[parts.size() - 1]; 
+        return data.containsKey(lastPart) ? String.valueOf(data.get(lastPart)) : '';
+    }
+
+
 }

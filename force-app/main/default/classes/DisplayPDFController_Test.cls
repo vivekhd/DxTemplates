@@ -1051,5 +1051,92 @@ private class DisplayPDFController_Test {
         }
         Assert.isTrue(true,'Code Coverage only');
     }   
+
+        @IsTest 
+    static void testCustomLogic() {
+        Test.startTest();
+        User us = DexUtilTestDataFactory.CreateTestUser();
+        System.runAs(us){
+            try{
+                String mainstr = '<table xmlns="http://www.w3.org/1999/xhtml" dxcpq-templatetabledetails_templatetabledetails="" class="mytable" data-id="mytab" style="font-family: Verdana; font-size: large; table-layout: fixed; border: none;"><colgroup dxcpq-templatetabledetails_templatetabledetails=""><col dxcpq-templatetabledetails_templatetabledetails="" /><col dxcpq-templatetabledetails_templatetabledetails="" /><col dxcpq-templatetabledetails_templatetabledetails="" /></colgroup><thead dxcpq-templatetabledetails_templatetabledetails=""><tr dxcpq-templatetabledetails_templatetabledetails="" class="myclass1" style="font-size: 14px;"><th dxcpq-templatetabledetails_templatetabledetails="" scope="col" data-headercell="Header 1" style="font-size: 12px; background-color: rgb(216, 255, 255); border: 1px solid;"><div class="hiddencells" dxcpq-templatetabledetails_templatetabledetails="" data-id="Header 1" style="overflow-wrap: break-word;"><p>Name</p></div></th><th dxcpq-templatetabledetails_templatetabledetails="" scope="col" data-headercell="Header 2" style="font-size: 12px; background-color: rgb(216, 255, 255); border: 1px solid;"><div class="hiddencells" dxcpq-templatetabledetails_templatetabledetails="" data-id="Header 2" style="overflow-wrap: break-word;"><p><span style="color: rgb(255, 46, 200);">Quantity</span></p></div></th><th dxcpq-templatetabledetails_templatetabledetails="" scope="col" data-headercell="Header 3" style="font-size: 12px; background-color: rgb(216, 255, 255); border: 1px solid;"><div class="hiddencells" dxcpq-templatetabledetails_templatetabledetails="" data-id="Header 3" style="overflow-wrap: break-word;"><p><span style="color: rgb(6, 110, 180);">Description</span></p></div></th></tr></thead><tbody dxcpq-templatetabledetails_templatetabledetails=""><tr dxcpq-templatetabledetails_templatetabledetails="" data-rowvalue="1"><td dxcpq-templatetabledetails_templatetabledetails="" scope="col" data-bodycell="row1col1" style="font-size: 12px; border: 1px solid; background-color: rgb(255, 255, 255);"><div class="hiddencells" dxcpq-templatetabledetails_templatetabledetails="" data-id="row1col1div" style="overflow-wrap: break-word;"><p style="text-align: right;"><strong style="color: rgb(20, 5, 231);">%%data.wrapperInfo.name%%</strong></p></div></td><td dxcpq-templatetabledetails_templatetabledetails="" scope="col" data-bodycell="row1col2" style="font-size: 12px; border: 1px solid; background-color: rgb(255, 243, 81);"><div class="hiddencells" dxcpq-templatetabledetails_templatetabledetails="" data-id="row1col2div" style="overflow-wrap: break-word;"><p style="text-align: center;"><strong style="color: rgb(240, 30, 100);"><em><u>%%data.wrapperInfo.Quantity%%</u></em></strong></p></div></td><td dxcpq-templatetabledetails_templatetabledetails="" scope="col" data-bodycell="row1col3" style="font-size: 12px; border: 1px solid;"><div class="hiddencells" dxcpq-templatetabledetails_templatetabledetails="" data-id="row1col3div" style="overflow-wrap: break-word;"><p style="text-align: right;"><strong style="color: rgb(7, 111, 7);"><em><strike><u>%%productName%%</u></strike></em></strong></p></div></td></tr></tbody></table>';
+                Map<String, Object> mp = new Map<String, Object>();
+                Map<String, Object> dataMap = new Map<String, Object>();
+                List<Map<String, Object>> wrapperInfoList = new List<Map<String, Object>>();
+                wrapperInfoList.add(new Map<String, Object>{
+                    'Description' => 'Basic Description',
+                    'Quantity' => 2,
+                    'name' => 'Realme 150W'
+                });
+                wrapperInfoList.add(new Map<String, Object>{
+                    'Description' => 'Basic',
+                    'Quantity' => 5,
+                    'name' => 'Realme GT NEO 3 150W'
+                });
+                wrapperInfoList.add(new Map<String, Object>{
+                    'Description' => 'Basic Data',
+                    'Quantity' => 15,
+                    'name' => 'Realme Mobile'
+                });
+                dataMap.put('wrapperInfo', wrapperInfoList);
+                mp.put('data', dataMap);
+                mp.put('productName', 'Realme Mobile Product');
+				String outPutStr = MergeFieldsClass.customLogic(mp, mainstr);
+            } catch (exception ex){
+                System.assert(ex.getMessage().contains('Script-thrown exception'));
+            }
+        }
+        Test.stopTest();
+    }
+    
+    @IsTest 
+    static void testGetTemplateSectionsTranslatedValues() {
+        Test.startTest();
+        User us = DexUtilTestDataFactory.CreateTestUser();
+        System.runAs(us){
+            try{
+                Document_Template__c testTemplate = new Document_Template__c(Name = 'Test Template');
+                insert testTemplate;
+                Opportunity testOpportunity = new Opportunity(Name = 'Test Opportunity', StageName = 'Prospecting', CloseDate = Date.today());
+                insert testOpportunity;
+                Document_Template_Section__c testSection = new Document_Template_Section__c(
+                    Document_Template__c = testTemplate.Id,
+                    Section_Content__c = '<p>Test Section Content</p>',
+                    Type__c = 'Context',
+                    Sequence__c = 1
+                );
+                insert testSection;
+                
+                List<Translator__c> transList = new List<Translator__c>();
+                
+                Translator__c trs1 = new Translator__c(
+                	Name = 'Default',
+                    FieldValue__c = 'Default',
+                    Translated_Value__c = 'Default',
+                    Language__c = 'en_Us',
+                    DocumentTemplate__c = testTemplate.Id
+                );
+                
+                Translator__c trs2 = new Translator__c(
+                	Name = 'Some Value',
+                    FieldValue__c = 'Some Value',
+                    Translated_Value__c = 'Some Value',
+                    Language__c = 'en_Us',
+                    DocumentTemplate__c = testTemplate.Id
+                );
+                transList.add(trs1);
+                transList.add(trs2);
+                
+                insert transList;
+
+                Map<String,Object> result = DisplayPDFController.getTemplateSections(
+                    testTemplate.Id, testOpportunity.Id, 'Opportunity'
+                );
+                System.assertEquals(4, result.size(), 'Expected one section');
+            } catch (exception ex){
+                System.assert(ex.getMessage().contains('Script-thrown exception'));
+            }
+        }
+        Test.stopTest();
+    }
     
 }
