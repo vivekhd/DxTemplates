@@ -138,7 +138,15 @@
     </classAccesses>
     <customMetadataTypeAccesses>
         <enabled>true</enabled>
+        <name>ChartAutomationStyleResources__mdt</name>
+    </customMetadataTypeAccesses>
+    <customMetadataTypeAccesses>
+        <enabled>true</enabled>
         <name>DXTemplates_HandlerClass__mdt</name>
+    </customMetadataTypeAccesses>
+    <customMetadataTypeAccesses>
+        <enabled>true</enabled>
+        <name>Document_Translation__mdt</name>
     </customMetadataTypeAccesses>
     <customMetadataTypeAccesses>
         <enabled>true</enabled>
@@ -147,14 +155,6 @@
     <customMetadataTypeAccesses>
         <enabled>true</enabled>
         <name>DxTemplates_VF_Style__mdt</name>
-    </customMetadataTypeAccesses>
-    <customMetadataTypeAccesses>
-        <enabled>true</enabled>
-        <name>ChartAutomationStyleResources__mdt</name>
-    </customMetadataTypeAccesses>
-    <customMetadataTypeAccesses>
-        <enabled>true</enabled>
-        <name>Document_Translation__mdt</name>
     </customMetadataTypeAccesses>
     <fieldPermissions>
         <editable>true</editable>
@@ -209,6 +209,11 @@
     <fieldPermissions>
         <editable>false</editable>
         <field>Document_Template_Section__c.External_RuleID__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>false</editable>
+        <field>Document_Template_Section__c.External_SecVis_Rule_ID__c</field>
         <readable>true</readable>
     </fieldPermissions>
     <fieldPermissions>

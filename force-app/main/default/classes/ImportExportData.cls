@@ -17,6 +17,22 @@ public class ImportExportData {
     }
     
     @AuraEnabled
+    public static List<Map<String,String>> getAllRelatedToTypeOptions(){
+        Schema.SObjectType templateType = Schema.getGlobalDescribe().get('DxCPQ__Document_Template__c');
+        Schema.DescribeFieldResult fieldResult = templateType.getDescribe().fields.getMap().get('DxCPQ__Related_To_Type__c').getDescribe();
+        List<Schema.PicklistEntry> picklistEntries = fieldResult.getPicklistValues();
+        List<Map<String,String>> picklistOptions = new List<Map<String,String>>();
+        for (Schema.PicklistEntry entry : picklistEntries) {
+            map<string,string> option = new map<string,string>();
+            option.put('label', entry.getLabel());
+            option.put('value', entry.getValue());
+            picklistOptions.add(option);
+        }
+        System.debug('Picklist: '+ picklistOptions);
+        return picklistOptions;
+    }
+    
+    @AuraEnabled
     public static List<Map<String,String>> templateExternalList(){
 		List<Document_Template__c> docTemp = [SELECT Name, isactive__c, Related_To_Type__c, Version_Number__c, Previously_Active__c, Parent_Template__c, Watermark_Data__c, External_Id__c FROM Document_Template__c WITH SECURITY_ENFORCED order by CreatedDate Desc limit 50000];
         List<Map<String,String>> recordIds = new List<Map<String,String>>();
@@ -37,15 +53,19 @@ public class ImportExportData {
             List<Document_Template__c> docTemp = [SELECT Name, Related_To_Type__c, Version_Number__c, Parent_Template__c, Watermark_Data__c, PDF_Page_Properties__c, External_Id__c FROM Document_Template__c WITH SECURITY_ENFORCED order by CreatedDate Desc limit 50000];
 
             //document template sections
-            List<Document_Template_Section__c> dts = [select Name, DisplaySectionName__c, Document_Template__c, ChildObject__c,  Document_Clause__c, External_Document_Template__c, External_RuleID__c, Header_Content__c, IsActive__c, IsEditable__c, New_Page__c, Parent_Section__c, RuleId__c, Section_Content__c, Section_Details__c, Sequence__c, Type__c  from Document_Template_Section__c with USER_MODE LIMIT 50000];
+            List<Document_Template_Section__c> dts = [select Name, DisplaySectionName__c, Document_Template__c, ChildObject__c,  Document_Clause__c, External_Document_Template__c, External_RuleID__c, External_SecVis_Rule_ID__c, Header_Content__c, IsActive__c, IsEditable__c, New_Page__c, Parent_Section__c, RuleId__c, Section_Content__c, Section_Details__c, Section_Visibility_Rule__c,  Sequence__c, Type__c  from Document_Template_Section__c with USER_MODE LIMIT 50000];
+            List<Translator__c> translations = [Select Id, Name, DocumentTemplate__c, FieldValue__c, Language__c, Translated_Value__c from Translator__c];
             List<String> templatesectionclauses = new List<String>();
             List<String> templatesectionrules = new List<String>();
             for(Document_Template_Section__c dtSection : dts){
-                if (dtSection.DxCPQ__Document_Clause__c!=null){
-                	templatesectionclauses.add(dtSection.DxCPQ__Document_Clause__c);
+                if (dtSection.Document_Clause__c!=null){
+                	templatesectionclauses.add(dtSection.Document_Clause__c);
                 }
-                if(dtSection.DxCPQ__RuleId__c!=null){
-                    templatesectionrules.add(dtSection.DxCPQ__RuleId__c);
+                if(dtSection.RuleId__c!=null){
+                    templatesectionrules.add(dtSection.RuleId__c);
+                }
+                if(dtSection.Section_Visibility_Rule__c != null){
+                    templatesectionrules.add(dtSection.Section_Visibility_Rule__c);
                 }
             }
             //document clauses
@@ -62,6 +82,7 @@ public class ImportExportData {
             dTMap.put('Document Clauses', dc);
             dTMap.put('Rules',rules);
             dTMap.put('Rule Conditions',ruleConditions);
+            dTMap.put('Translations',translations);
             String finalMap = JSON.serialize(dTMap); 
             return finalMap;
         }
@@ -133,19 +154,32 @@ public class ImportExportData {
     @AuraEnabled
     public static List<Map<String,String>> createImportedClauses(String tempClausesLst){
         List<Map<String,String>> recordIds = new List<Map<String,String>>();
+        List<Document_Clause__c> existingClauses = [Select id,External_ID__c from Document_Clause__c WITH SECURITY_ENFORCED];
         List<Document_Clause__c> templateClausesLst = (List<Document_Clause__c>) JSON.deserialize(tempClausesLst, List<Document_Clause__c>.class);
         List<Document_Clause__c> createdRecords = new List<Document_Clause__c>();
+        List<Document_Clause__c> existingrecords = new List<Document_Clause__c>();
 		for (Document_Clause__c obj : templateClausesLst) {
-            createdRecords.add(obj);
+            Boolean checkIfExist = false;
+            for (Document_Clause__c existClause : existingClauses){
+                if (existClause.External_ID__c == obj.External_ID__c){
+                	existingrecords.add(existClause);
+                    checkIfExist = true;
+                    break;
+                }
+            }
+            if (checkIfExist == false){
+            	createdRecords.add(obj);
+            }
         }
 		insert createdRecords;
+        createdRecords.addAll(existingrecords);
 		for (Document_Clause__c obj : createdRecords) {
             map<String,String> newRecords = new Map<String,String>();
             newRecords.put('Id', String.valueOf(obj.Id));
             newRecords.put('ExternalId', obj.External_Id__c);
             recordIds.add(newRecords);
         }
-        return recordIds;       
+        return recordIds;     
     }
     
     @AuraEnabled

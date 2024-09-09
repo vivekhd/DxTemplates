@@ -512,9 +512,11 @@ export default class TemplateDesignerCMP extends NavigationMixin(LightningElemen
       if (str.indexOf('NotSaved') !== -1) {
         val.sectionNameEntered = event.detail.Name;
         val.Id = event.detail.Id;
+        val.visibility = event.detail.DxCPQ__Section_Visibility_Rule__c;
       }
       else if (str.indexOf(secrecordId) !== -1) {
         val.sectionNameEntered = event.detail.Name;
+        val.visibility = event.detail.DxCPQ__Section_Visibility_Rule__c;
       }
     });
     this.selectedSectionRecordID = secrecordId;

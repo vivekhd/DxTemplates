@@ -11,6 +11,7 @@ import createImportedRuleConditions from '@salesforce/apex/ImportExportData.crea
 import templateExternalList from '@salesforce/apex/ImportExportData.templateExternalList';
 import getWatermarkContent from '@salesforce/apex/ImportExportData.getWatermarkContent';
 import createImportedWatermark from '@salesforce/apex/ImportExportData.createImportedWatermark';
+import getAllRelatedToTypeOptions from '@salesforce/apex/ImportExportData.getAllRelatedToTypeOptions';
 
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 import getAllPopupMessages from '@salesforce/apex/PopUpMessageSelector.getAllConstants';
@@ -40,6 +41,7 @@ export default class DxTemplateSetup extends LightningElement {
   showTemplateMessage=false;
   showPreviewButton=false;
   allTemplates;
+  allRelatedTypeOptions;
   templatesOptions=[];
   previewLabel='Show Preview';
   createDisabledButton=true;
@@ -732,12 +734,13 @@ try{
         this.showImportTemplates=true;
         this.showAddNewTemplate=false;
         this.showFirstImportScreen=true;
-        getDocumentTemplates()
+        getAllRelatedToTypeOptions()
         .then(data => {
-            console.log('exportTemplate', data);
+            this.allRelatedTypeOptions = data;
+            //console.log('exportTemplate', data);
         })
         .catch(error => {
-            console.log('Error -> exportTemplate' + error);
+            //console.log('Error -> exportTemplate ' + error);
         })
         this.template.querySelector('c-modal').show();
     }
@@ -767,25 +770,18 @@ try{
 
     //Checks if there are valid related to type in the json
     checkValidRelatedType() {
-        let checkRelatedTypeJSON = JSON.parse(this.jsonData);
-        let invalidType;
-        let invalidTemplate;
-        let hasInvalidType = checkRelatedTypeJSON.Templates.some(item => {
-            let isValid = this.relatedTypeOptions.some(option => {
+        const checkRelatedTypeJSON = JSON.parse(this.jsonData);
+        const hasInvalidType = checkRelatedTypeJSON.Templates.some(item => {
+            const isValid = this.allRelatedTypeOptions.some(option => {
                 return option.value === item.DxCPQ__Related_To_Type__c;
-            });
+            })
             if (!isValid) {
-                invalidType = item.DxCPQ__Related_To_Type__c;
-                invalidTemplate = item.Name;
+                this.errorMessage = `${item.Name} has the "Related to Type" value - ${item.DxCPQ__Related_To_Type__c}. Please check if the value has been added in the picklist options.`;
                 return true;
             }
             return false;
         });
-        if (hasInvalidType) {
-            this.errorMessage = `${invalidTemplate} has the "Related to Type" value- ${invalidType}. Please check if the value has been added in the picklist options.`;
-            return false;
-        }
-        return true;
+        return !hasInvalidType;
     }
 
     //Checks if user pasted/inserted valid JSON data. We cant predict what the user can do ._.
@@ -887,6 +883,9 @@ try{
                                     if(tempSecItem.DxCPQ__External_RuleID__c == oldTempId){
                                         tempSecItem.DxCPQ__RuleId__c = newTempId;
                                     }
+                                    else if (tempSecItem.DxCPQ__External_SecVis_Rule_ID__c == oldTempId){
+                                        tempSecItem.DxCPQ__Section_Visibility_Rule__c = newTempId;
+                                    }
                                 })
                                 createImportedRecords['Rule Conditions'].forEach(importRuleConds => {
                                     if(importRuleConds.DxCPQ__External_Id__c == oldTempId){
@@ -906,7 +905,7 @@ try{
                     .then(()=>{
                         createImportedRecords['Document Clauses'].forEach(importClauses => {
                             importClauses.DxCPQ__External_Id__c= importClauses.Id;
-                            //importClauses.DxCPQ__External_Id__c= importClauses.DxCPQ__External_Id__c!=null? importClauses.DxCPQ__External_Id__c : importClauses.Id;
+                            //importClauses.DxCPQ__External_ID__c= importClauses.DxCPQ__External_ID__c!=null? importClauses.DxCPQ__External_ID__c : importClauses.Id;
                             importClauses.Id= undefined;
                         })
                         let clausesjson = JSON.stringify(createImportedRecords['Document Clauses']);
@@ -993,7 +992,7 @@ try{
         exportTmpList['Template Sections']= exportTmpList['Template Sections'].filter(item => this._selected.includes(item.DxCPQ__Document_Template__c));
         //exportTmpList.Rules=exportTmpList.Rules.filter(item=> exportTmpList['Template Sections'].includes(item.Id));
         exportTmpList.Rules = exportTmpList.Rules.filter(rule => {
-            return exportTmpList['Template Sections'].some(section => section.DxCPQ__RuleId__c === rule.Id);
+            return exportTmpList['Template Sections'].some(section => section.DxCPQ__RuleId__c === rule.Id || section.DxCPQ__Section_Visibility_Rule__c === rule.Id);
         });
         exportTmpList['Rule Conditions'] = exportTmpList['Rule Conditions'].filter(ruleCond => {
             return exportTmpList.Rules.some(rule => rule.Id === ruleCond.DxCPQ__Rule__c);
@@ -1032,7 +1031,12 @@ try{
         const element = document.createElement('a');
         const file = new Blob([this.exportList], {type: 'application/json'});
         element.href = URL.createObjectURL(file);
-        element.download = 'Templates Information.json';
+        const currentDate = new Date();
+        const day = currentDate.getDate();
+        const month = currentDate.getMonth() + 1;
+        const year = currentDate.getFullYear();
+        const formattedDate = `${day}_${month}_${year}`;
+        element.download = 'ExportedTemplates_'+formattedDate+'.json';
         document.body.appendChild(element);
         element.click();
         document.body.removeChild(element);

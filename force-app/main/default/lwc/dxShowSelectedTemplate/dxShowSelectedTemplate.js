@@ -61,12 +61,44 @@ export default class DxShowSelectedTemplate extends LightningElement {
         const record = this.modifiedJson.record[0];
         const conditions = expression.split(/\s*(?:\|\||&&)\s*/);
         for (let condition of conditions) {
-            const [field, value] = condition.split(/\s*==\s*/);
+            const [field, operator,value] = condition.split(/\s*(<=|>=|==|!=|<|>)\s*/);
             const apiName = Object.keys(record).find(key => key.toLowerCase() === field);
             //console.log('apiname value',apiName);
-            if (record[apiName] !== value) {
-                return false;
+            switch (operator){
+                case '==':
+                    if (record[apiName] !== value) {
+                        return false;
+                    }
+                    break;
+                case '!=': 
+                    if (record[apiName] == value) {
+                        return false;
+                    }
+                    break;
+                case '<': 
+                    if (record[apiName] >= value) {
+                        return false;
+                    }
+                    break;
+                case '<=':
+                    if (record[apiName] > value) {
+                        return false;
+                    }
+                    break;
+                case '>': 
+                    if (record[apiName] <= value) {
+                        return false;
+                    }
+                    break;
+                case '>=':
+                    if (record[apiName] < value) {
+                        return false;
+                    }
+                    break;
             }
+            // if (record[apiName] !== value) {
+            //     return false;
+            // }
         }
         return true;
     }
