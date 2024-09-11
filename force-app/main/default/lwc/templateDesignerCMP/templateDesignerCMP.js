@@ -2550,7 +2550,6 @@ createTranslatedRecords() {
 
   handlePageProperties(event){
     console.log('handlePageProperties clicked');
-    this.showPageProperties = true;
     this.previewModal =  false;
     this.showTemplate = false;
     this.showCloneTemplate = false;
@@ -2558,6 +2557,7 @@ createTranslatedRecords() {
     this.editTemplate = false;
     this.showwatermarkbtn = false;
     updatePropertiesFromJSON(this, this.sectionsData[0].DxCPQ__Document_Template__r.DxCPQ__PDF_Page_Properties__c);
+    this.showPageProperties = true;
     this.template.querySelector('c-modal').show();
   }
 

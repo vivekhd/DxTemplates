@@ -46,6 +46,9 @@ cloneTypeOptionSelectedByUser = 'New_Version';
         docTempObj.DxCPQ__Description__c = fields.DxCPQ__Description__c;
         docTempObj.DxCPQ__Parent_Template__c = fields.DxCPQ__Parent_Template__c;
         docTempObj.DxCPQ__Watermark_Data__c=fields.DxCPQ__Watermark_Data__c;
+        docTempObj.DxCPQ__FlowId__c=fields.DxCPQ__FlowId__c;
+        docTempObj.DxCPQ__ClassId__c=fields.DxCPQ__ClassId__c;
+        
         docTempObj.DxCPQ__PDF_Page_Properties__c= this.jsonstr;
         if(this.cloneTypeOptionSelectedByUser == 'New_Template') {
             docTempObj.DxCPQ__Parent_Template__c = this.recordId;
