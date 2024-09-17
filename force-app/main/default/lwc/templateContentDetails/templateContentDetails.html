@@ -57,7 +57,7 @@
 				<lightning-rich-text-toolbar-button-group slot="toolbar" aria-label="Template Button Group"
 					style="order: -9;float: left; display: inline-block;">
 					<!------------Code added by Bhavya to have custom font-family list---------------->
-					<select name="font" id="font" onchange={handleFontFamilySelection} style="width: 130px;border-radius: 4px;padding: 5px;">
+					<select name="font" id="font" onchange={handleFontFamilySelection} style="width: 130px;border-radius: 4px;padding: 5px;" disabled = {isDisabled}>
 						<template for:each={fontFamilies} for:item="item" for:index="index">
 							<option value={item.value} key={item.label}  >{item.label}</option>
 						</template>
