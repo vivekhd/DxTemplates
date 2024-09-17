@@ -5,7 +5,7 @@
 			<div class="slds-grid slds-wrap">
 				<div class="slds-col slds-text-align_left" style="padding-top:2px;">
 					<lightning-button-group>
-						<lightning-button label={activateTemplateLabel} onclick={handleAllButtonsClicked} disabled={isActivateTemplateDisabled}>
+						<lightning-button label={activateTemplateLabel} onclick={handleAllButtonsClicked} disabled={isActivateTemplateDisabled}  >
 						</lightning-button>
 						<lightning-button label="Clone Template" onclick={handleAllButtonsClicked}></lightning-button>
 						<lightning-button label="Delete Template" onclick={handleAllButtonsClicked}>
@@ -500,47 +500,47 @@
 									<div class="slds-col slds-size_1-of-2">
 										<div class="slds-grid">
 											<div class="">
-												<lightning-input label="Left Margin" type="number" value={pageMargins.leftMargin.value} onchange={handleUserInputChange} data-id="leftMarginVal" class="slds-m-top_xx-small"></lightning-input>
+												<lightning-input label="Left Margin" type="number" value={pageMargins.leftMargin.value} onchange={handleUserInputChange}  disabled={disableEditing}    data-id="leftMarginVal" class="slds-m-top_xx-small" ></lightning-input>
 											</div>
 											<div class="">
-												<lightning-combobox name="unit" value={pageMargins.leftMargin.unit} options={unitOptions} data-id="leftMarginUnit" onchange={handleUserInputChange} class="slds-m-top_large slds-m-left_xx-small"></lightning-combobox>
-											</div>
-										</div>
-									</div>
-									<div class="slds-col slds-size_1-of-2">
-										<div class="slds-grid">
-											<div class="">
-												<lightning-input label="Right Margin" type="number" value={pageMargins.rightMargin.value} onchange={handleUserInputChange} data-id="rightMarginVal"  class="slds-m-top_xx-small"></lightning-input>
-											</div>
-											<div class="">
-											<lightning-combobox name="unit" value={pageMargins.rightMargin.unit} options={unitOptions} data-id="rightMarginUnit" onchange={handleUserInputChange} class="slds-m-top_large slds-m-left_xx-small"></lightning-combobox>
+												<lightning-combobox name="unit" value={pageMargins.leftMargin.unit} options={unitOptions} data-id="leftMarginUnit" onchange={handleUserInputChange}  disabled={disableEditing}    class="slds-m-top_large slds-m-left_xx-small"></lightning-combobox>
 											</div>
 										</div>
 									</div>
 									<div class="slds-col slds-size_1-of-2">
 										<div class="slds-grid">
 											<div class="">
-												<lightning-input label="Top Margin" type="number" value={pageMargins.topMargin.value} onchange={handleUserInputChange} data-id="topMarginVal"  class="slds-m-top_xx-small"></lightning-input>
+												<lightning-input label="Right Margin" type="number" value={pageMargins.rightMargin.value} onchange={handleUserInputChange}  disabled={disableEditing}    data-id="rightMarginVal"  class="slds-m-top_xx-small"></lightning-input>
 											</div>
 											<div class="">
-												<lightning-combobox name="unit" value={pageMargins.topMargin.unit} options={unitOptions} data-id="topMarginUnit" onchange={handleUserInputChange} class="slds-m-top_large slds-m-left_xx-small"></lightning-combobox>
-											</div>
-										</div>
-									</div>
-									<div class="slds-col slds-size_1-of-2">
-										<div class="slds-grid">
-											<div class="">
-												<lightning-input label="Bottom Margin" type="number" value={pageMargins.bottomMargin.value} onchange={handleUserInputChange} data-id="bottomMarginVal"  class="slds-m-top_xx-small"></lightning-input>
-											</div>
-											<div class="">
-												<lightning-combobox name="unit" value={pageMargins.bottomMargin.unit} options={unitOptions} data-id="bottomMarginUnit" onchange={handleUserInputChange} class="slds-m-top_large slds-m-left_xx-small"></lightning-combobox>
+											<lightning-combobox name="unit" value={pageMargins.rightMargin.unit} options={unitOptions} data-id="rightMarginUnit" onchange={handleUserInputChange}  disabled={disableEditing}    class="slds-m-top_large slds-m-left_xx-small"></lightning-combobox>
 											</div>
 										</div>
 									</div>
 									<div class="slds-col slds-size_1-of-2">
 										<div class="slds-grid">
 											<div class="">
-												<lightning-input label="Line Height" type="number" value={pageMargins.lineheight.value} onchange={handleUserInputChange} data-id="lineheightVal"  class="slds-m-top_xx-small"></lightning-input>
+												<lightning-input label="Top Margin" type="number" value={pageMargins.topMargin.value} onchange={handleUserInputChange}  disabled={disableEditing}    data-id="topMarginVal"  class="slds-m-top_xx-small"></lightning-input>
+											</div>
+											<div class="">
+												<lightning-combobox name="unit" value={pageMargins.topMargin.unit} options={unitOptions} data-id="topMarginUnit" onchange={handleUserInputChange}  disabled={disableEditing}    class="slds-m-top_large slds-m-left_xx-small"></lightning-combobox>
+											</div>
+										</div>
+									</div>
+									<div class="slds-col slds-size_1-of-2">
+										<div class="slds-grid">
+											<div class="">
+												<lightning-input label="Bottom Margin" type="number" value={pageMargins.bottomMargin.value} onchange={handleUserInputChange}  disabled={disableEditing}    data-id="bottomMarginVal"  class="slds-m-top_xx-small"></lightning-input>
+											</div>
+											<div class="">
+												<lightning-combobox name="unit" value={pageMargins.bottomMargin.unit} options={unitOptions} data-id="bottomMarginUnit" onchange={handleUserInputChange}  disabled={disableEditing}    class="slds-m-top_large slds-m-left_xx-small"></lightning-combobox>
+											</div>
+										</div>
+									</div>
+									<div class="slds-col slds-size_1-of-2">
+										<div class="slds-grid">
+											<div class="">
+												<lightning-input label="Line Height" type="number" value={pageMargins.lineheight.value} onchange={handleUserInputChange}  disabled={disableEditing}    data-id="lineheightVal"  class="slds-m-top_xx-small"></lightning-input>
 											</div>
 										</div>
 									</div>
@@ -562,7 +562,7 @@
 															<lightning-input label="Header Height" type="number" name="value"
 																value={firstHeaderProperties.height.value} 
 																data-id="height" 
-																onchange={handleFirstHeaderPropertiesChange} 
+																onchange={handleFirstHeaderPropertiesChange}  disabled={disableEditing}    
 																class="slds-m-top_xx-small">
 															</lightning-input>
 														</div>
@@ -571,7 +571,7 @@
 																value={firstHeaderProperties.height.unit} 
 																options={unitOptions} 
 																data-id="heightUnit" 
-																onchange={handleFirstHeaderPropertiesChange} 
+																onchange={handleFirstHeaderPropertiesChange}  disabled={disableEditing}     
 																class="slds-m-top_large slds-m-left_xx-small">
 															</lightning-combobox>
 														</div>
@@ -583,7 +583,7 @@
 															<lightning-input label="Line Height" name="value" type="number" 
 																value={firstHeaderProperties.lineHeight.value} 
 																data-id="lineHeight" 
-																onchange={handleFirstHeaderPropertiesChange} 
+																onchange={handleFirstHeaderPropertiesChange}  disabled={disableEditing}    
 																class="slds-m-top_xx-small">
 															</lightning-input>
 														</div>
@@ -593,7 +593,7 @@
 													<lightning-input label="Background Color" type="color" 
 														value={firstHeaderProperties.bgColor.value} 
 														data-id="bgColor" 
-														onchange={handleFirstHeaderPropertiesChange}>
+														onchange={handleFirstHeaderPropertiesChange}  disabled={disableEditing}  >
 													</lightning-input>
 												</div>
 												<div class="slds-col slds-size_1-of-1 slds-text-align_center slds-m-vertical_small slds-p-vertical_small" style="border: 1px solid #333333;">
@@ -603,14 +603,14 @@
 															<lightning-input label="Border Color" type="color" 
 																value={firstHeaderProperties.borderColor.value} 
 																data-id="borderColorVal" 
-																onchange={handleFirstHeaderPropertiesChange}>
+																onchange={handleFirstHeaderPropertiesChange}  disabled={disableEditing}  >
 															</lightning-input>
 														</div>
 														<div class="slds-col slds-size_1-of-2">
 															<lightning-input label="Border Opacity" type="number" 
 																value={firstHeaderProperties.borderOpacity} 
 																data-id="borderOpacity" 
-																onchange={handleFirstHeaderPropertiesChange}>
+																onchange={handleFirstHeaderPropertiesChange}  disabled={disableEditing}  >
 															</lightning-input>
 														</div>
 														<div class="slds-col slds-size_1-of-2">
@@ -619,7 +619,7 @@
 																	<lightning-input label="Border Weight" type="number" name="value"
 																		value={firstHeaderProperties.borderWeight.value} 
 																		data-id="borderWeightVal" 
-																		onchange={handleFirstHeaderPropertiesChange} 
+																		onchange={handleFirstHeaderPropertiesChange}  disabled={disableEditing}    
 																		class="slds-m-top_xx-small" >
 																	</lightning-input>
 																</div>
@@ -628,7 +628,7 @@
 																		value={firstHeaderProperties.borderWeight.unit} 
 																		options={unitOptions} 
 																		data-id="borderWeightUnit" 
-																		onchange={handleFirstHeaderPropertiesChange} 
+																		onchange={handleFirstHeaderPropertiesChange}  
 																		class="slds-m-top_large slds-m-left_xx-small" disabled>
 																	</lightning-combobox>
 																</div>
@@ -646,7 +646,7 @@
 																	<lightning-input label="Left Margin" type="number" 
 																		value={firstHeaderProperties.margins.leftMargin.value} name="value"
 																		data-id="leftMarginVal" 
-																		onchange={handleFirstHeaderPropertiesChange} 
+																		onchange={handleFirstHeaderPropertiesChange}  disabled={disableEditing}    
 																		class="slds-m-top_xx-small">
 																	</lightning-input>
 																</div>
@@ -655,7 +655,7 @@
 																		value={firstHeaderProperties.margins.leftMargin.unit} 
 																		options={unitOptions} 
 																		data-id="leftMarginUnit" 
-																		onchange={handleFirstHeaderPropertiesChange} 
+																		onchange={handleFirstHeaderPropertiesChange}  disabled={disableEditing}    
 																		class="slds-m-top_large slds-m-left_xx-small">
 																	</lightning-combobox>
 																</div>
@@ -667,7 +667,7 @@
 																	<lightning-input label="Right Margin" type="number" 
 																		value={firstHeaderProperties.margins.rightMargin.value} name="value"
 																		data-id="rightMarginVal" 
-																		onchange={handleFirstHeaderPropertiesChange} 
+																		onchange={handleFirstHeaderPropertiesChange}  disabled={disableEditing}    
 																		class="slds-m-top_xx-small">
 																	</lightning-input>
 																</div>
@@ -676,7 +676,7 @@
 																		value={firstHeaderProperties.margins.rightMargin.unit} 
 																		options={unitOptions} 
 																		data-id="rightMarginUnit" 
-																		onchange={handleFirstHeaderPropertiesChange} 
+																		onchange={handleFirstHeaderPropertiesChange}  disabled={disableEditing}    
 																		class="slds-m-top_large slds-m-left_xx-small">
 																	</lightning-combobox>
 																</div>
@@ -688,7 +688,7 @@
 																	<lightning-input label="Top Margin" type="number" 
 																		value={firstHeaderProperties.margins.topMargin.value} name="value"
 																		data-id="topMarginVal" 
-																		onchange={handleFirstHeaderPropertiesChange} 
+																		onchange={handleFirstHeaderPropertiesChange}  disabled={disableEditing}    
 																		class="slds-m-top_xx-small">
 																	</lightning-input>
 																</div>
@@ -697,7 +697,7 @@
 																		value={firstHeaderProperties.margins.topMargin.unit} 
 																		options={unitOptions} 
 																		data-id="toptMarginUnit" 
-																		onchange={handleFirstHeaderPropertiesChange} 
+																		onchange={handleFirstHeaderPropertiesChange}  disabled={disableEditing}    
 																		class="slds-m-top_large slds-m-left_xx-small">
 																	</lightning-combobox>
 																</div>
@@ -709,7 +709,7 @@
 																	<lightning-input label="Bottom Margin" type="number" name="value"
 																		value={firstHeaderProperties.margins.bottomMargin.value} 
 																		data-id="bottomMarginVal" 
-																		onchange={handleFirstHeaderPropertiesChange} 
+																		onchange={handleFirstHeaderPropertiesChange}  disabled={disableEditing}    
 																		class="slds-m-top_xx-small">
 																	</lightning-input>
 																</div>
@@ -718,7 +718,7 @@
 																		value={firstHeaderProperties.margins.bottomMargin.unit} 
 																		options={unitOptions} 
 																		data-id="bottomMarginUnit" 
-																		onchange={handleFirstHeaderPropertiesChange} 
+																		onchange={handleFirstHeaderPropertiesChange}  disabled={disableEditing}    
 																		class="slds-m-top_large slds-m-left_xx-small">
 																	</lightning-combobox>
 																</div>
@@ -738,7 +738,7 @@
 																	<lightning-input label="Left Padding" type="number" 
 																		value={firstHeaderProperties.paddings.leftPadding.value} name="value"
 																		data-id="leftPaddingVal" 
-																		onchange={handleFirstHeaderPropertiesChange} 
+																		onchange={handleFirstHeaderPropertiesChange}  disabled={disableEditing}    
 																		class="slds-m-top_xx-small">
 																	</lightning-input>
 																</div>
@@ -747,7 +747,7 @@
 																		value={firstHeaderProperties.paddings.leftPadding.unit} 
 																		options={unitOptions} 
 																		data-id="leftPaddingUnit" 
-																		onchange={handleFirstHeaderPropertiesChange} 
+																		onchange={handleFirstHeaderPropertiesChange}  disabled={disableEditing}    
 																		class="slds-m-top_large slds-m-left_xx-small">
 																	</lightning-combobox>
 																</div>
@@ -759,7 +759,7 @@
 																	<lightning-input label="Right Padding" type="number" 
 																		value={firstHeaderProperties.paddings.rightPadding.value} name="value"
 																		data-id="rightPaddingVal" 
-																		onchange={handleFirstHeaderPropertiesChange} 
+																		onchange={handleFirstHeaderPropertiesChange}  disabled={disableEditing}    
 																		class="slds-m-top_xx-small">
 																	</lightning-input>
 																</div>
@@ -768,7 +768,7 @@
 																		value={firstHeaderProperties.paddings.rightPadding.unit} 
 																		options={unitOptions} 
 																		data-id="rightPaddingUnit" 
-																		onchange={handleFirstHeaderPropertiesChange} 
+																		onchange={handleFirstHeaderPropertiesChange}  disabled={disableEditing}    
 																		class="slds-m-top_large slds-m-left_xx-small">
 																	</lightning-combobox>
 																</div>
@@ -780,7 +780,7 @@
 																	<lightning-input label="Top Padding" type="number" 
 																		value={firstHeaderProperties.paddings.topPadding.value} name="value"
 																		data-id="topPaddingVal" 
-																		onchange={handleFirstHeaderPropertiesChange} 
+																		onchange={handleFirstHeaderPropertiesChange}  disabled={disableEditing}    
 																		class="slds-m-top_xx-small">
 																	</lightning-input>
 																</div>
@@ -789,7 +789,7 @@
 																		value={firstHeaderProperties.paddings.topPadding.unit} 
 																		options={unitOptions} 
 																		data-id="toptPaddingUnit" 
-																		onchange={handleFirstHeaderPropertiesChange} 
+																		onchange={handleFirstHeaderPropertiesChange}  disabled={disableEditing}    
 																		class="slds-m-top_large slds-m-left_xx-small">
 																	</lightning-combobox>
 																</div>
@@ -801,7 +801,7 @@
 																	<lightning-input label="Bottom Padding" type="number" name="value"
 																		value={firstHeaderProperties.paddings.bottomPadding.value} 
 																		data-id="bottomPaddingVal" 
-																		onchange={handleFirstHeaderPropertiesChange} 
+																		onchange={handleFirstHeaderPropertiesChange}  disabled={disableEditing}    
 																		class="slds-m-top_xx-small">
 																	</lightning-input>
 																</div>
@@ -810,7 +810,7 @@
 																		value={firstHeaderProperties.paddings.bottomPadding.unit} 
 																		options={unitOptions} 
 																		data-id="bottomPaddingUnit" 
-																		onchange={handleFirstHeaderPropertiesChange} 
+																		onchange={handleFirstHeaderPropertiesChange}  disabled={disableEditing}    
 																		class="slds-m-top_large slds-m-left_xx-small">
 																	</lightning-combobox>
 																</div>
@@ -832,7 +832,7 @@
 														<lightning-input label="Header Height" type="number" name="value"
 															value={secondHeaderProperties.height.value} 
 															data-id="height" 
-															onchange={handleSecondHeaderPropertiesChange} 
+															onchange={handleSecondHeaderPropertiesChange}  disabled={disableEditing}    
 															class="slds-m-top_xx-small">
 														</lightning-input>
 													</div>
@@ -841,7 +841,7 @@
 															value={secondHeaderProperties.height.unit} 
 															options={unitOptions} 
 															data-id="heightUnit" 
-															onchange={handleSecondHeaderPropertiesChange} 
+															onchange={handleSecondHeaderPropertiesChange}  disabled={disableEditing}    
 															class="slds-m-top_large slds-m-left_xx-small">
 														</lightning-combobox>
 													</div>
@@ -851,7 +851,7 @@
 												<lightning-input label="Background Color" type="color" 
 													value={secondHeaderProperties.bgColor.value} 
 													data-id="bgColor" 
-													onchange={handleSecondHeaderPropertiesChange}>
+													onchange={handleSecondHeaderPropertiesChange}  disabled={disableEditing}   >
 												</lightning-input>
 											</div>
 											<div class="slds-col slds-size_1-of-2">
@@ -860,7 +860,7 @@
 														<lightning-input label="Line Height" type="number" 
 															value={secondHeaderProperties.lineHeight.value} 
 															data-id="lineHeight" name="value"
-															onchange={handleSecondHeaderPropertiesChange} 
+															onchange={handleSecondHeaderPropertiesChange}  disabled={disableEditing}    
 															class="slds-m-top_xx-small">
 														</lightning-input>
 													</div>
@@ -873,14 +873,14 @@
 														<lightning-input label="Border Color" type="color" 
 															value={secondHeaderProperties.borderColor.value} 
 															data-id="borderColor" 
-															onchange={handleSecondHeaderPropertiesChange}>
+															onchange={handleSecondHeaderPropertiesChange}  disabled={disableEditing}   >
 														</lightning-input>
 													</div>
 													<div class="slds-col slds-size_1-of-2">
 														<lightning-input label="Border Opacity" type="number" 
 															value={secondHeaderProperties.borderOpacity} 
 															data-id="borderOpacity" 
-															onchange={handleSecondHeaderPropertiesChange}>
+															onchange={handleSecondHeaderPropertiesChange}  disabled={disableEditing}   >
 														</lightning-input>
 													</div>
 													<div class="slds-col slds-size_1-of-2">
@@ -889,7 +889,7 @@
 																<lightning-input label="Border Weight" type="number" name="value"
 																	value={secondHeaderProperties.borderWeight.value} 
 																	data-id="borderWeightVal" 
-																	onchange={handleSecondHeaderPropertiesChange} 
+																	onchange={handleSecondHeaderPropertiesChange}  disabled={disableEditing}    
 																	class="slds-m-top_xx-small" >
 																</lightning-input>
 															</div>
@@ -898,7 +898,7 @@
 																	value={secondHeaderProperties.borderWeight.unit} 
 																	options={unitOptions} 
 																	data-id="borderWeightUnit" 
-																	onchange={handleSecondHeaderPropertiesChange} 
+																	onchange={handleSecondHeaderPropertiesChange}  
 																	class="slds-m-top_large slds-m-left_xx-small" disabled>
 																</lightning-combobox>
 															</div>
@@ -916,7 +916,7 @@
 																<lightning-input label="Left Margin" type="number" 
 																	value={secondHeaderProperties.margins.leftMargin.value} name="value"
 																	data-id="leftMarginVal" 
-																	onchange={handleSecondHeaderPropertiesChange} 
+																	onchange={handleSecondHeaderPropertiesChange}  disabled={disableEditing}    
 																	class="slds-m-top_xx-small">
 																</lightning-input>
 															</div>
@@ -925,7 +925,7 @@
 																	value={secondHeaderProperties.margins.leftMargin.unit} 
 																	options={unitOptions} 
 																	data-id="leftMarginUnit" 
-																	onchange={handleSecondHeaderPropertiesChange} 
+																	onchange={handleSecondHeaderPropertiesChange}  disabled={disableEditing}    
 																	class="slds-m-top_large slds-m-left_xx-small">
 																</lightning-combobox>
 															</div>
@@ -937,7 +937,7 @@
 																<lightning-input label="Right Margin" type="number" 
 																	value={secondHeaderProperties.margins.rightMargin.value} name="value"
 																	data-id="rightMarginVal" 
-																	onchange={handleSecondHeaderPropertiesChange} 
+																	onchange={handleSecondHeaderPropertiesChange}  disabled={disableEditing}    
 																	class="slds-m-top_xx-small">
 																</lightning-input>
 															</div>
@@ -946,7 +946,7 @@
 																	value={secondHeaderProperties.margins.rightMargin.unit} 
 																	options={unitOptions} 
 																	data-id="rightMarginUnit" 
-																	onchange={handleSecondHeaderPropertiesChange} 
+																	onchange={handleSecondHeaderPropertiesChange}  disabled={disableEditing}    
 																	class="slds-m-top_large slds-m-left_xx-small">
 																</lightning-combobox>
 															</div>
@@ -958,7 +958,7 @@
 																<lightning-input label="Top Margin" type="number" 
 																	value={secondHeaderProperties.margins.topMargin.value} name="value"
 																	data-id="topMarginVal" 
-																	onchange={handleSecondHeaderPropertiesChange} 
+																	onchange={handleSecondHeaderPropertiesChange}  disabled={disableEditing}    
 																	class="slds-m-top_xx-small">
 																</lightning-input>
 															</div>
@@ -967,7 +967,7 @@
 																	value={secondHeaderProperties.margins.topMargin.unit} 
 																	options={unitOptions} 
 																	data-id="topMarginUnit" 
-																	onchange={handleSecondHeaderPropertiesChange} 
+																	onchange={handleSecondHeaderPropertiesChange}  disabled={disableEditing}    
 																	class="slds-m-top_large slds-m-left_xx-small">
 																</lightning-combobox>
 															</div>
@@ -979,7 +979,7 @@
 																<lightning-input label="Bottom Margin" type="number" name="value"
 																	value={secondHeaderProperties.margins.bottomMargin.value} 
 																	data-id="bottomMarginVal" 
-																	onchange={handleSecondHeaderPropertiesChange} 
+																	onchange={handleSecondHeaderPropertiesChange}  disabled={disableEditing}    
 																	class="slds-m-top_xx-small">
 																</lightning-input>
 															</div>
@@ -988,7 +988,7 @@
 																	value={secondHeaderProperties.margins.bottomMargin.unit} 
 																	options={unitOptions} 
 																	data-id="bottomMarginUnit" 
-																	onchange={handleSecondHeaderPropertiesChange} 
+																	onchange={handleSecondHeaderPropertiesChange}  disabled={disableEditing}    
 																	class="slds-m-top_large slds-m-left_xx-small">
 																</lightning-combobox>
 															</div>
@@ -1007,7 +1007,7 @@
 																<lightning-input label="Left Padding" type="number" 
 																	value={secondHeaderProperties.paddings.leftPadding.value} name="value"
 																	data-id="leftPaddingVal" 
-																	onchange={handleSecondHeaderPropertiesChange} 
+																	onchange={handleSecondHeaderPropertiesChange}  disabled={disableEditing}    
 																	class="slds-m-top_xx-small">
 																</lightning-input>
 															</div>
@@ -1016,7 +1016,7 @@
 																	value={secondHeaderProperties.paddings.leftPadding.unit} 
 																	options={unitOptions} 
 																	data-id="leftPaddingUnit" 
-																	onchange={handleSecondHeaderPropertiesChange} 
+																	onchange={handleSecondHeaderPropertiesChange}  disabled={disableEditing}    
 																	class="slds-m-top_large slds-m-left_xx-small">
 																</lightning-combobox>
 															</div>
@@ -1028,7 +1028,7 @@
 																<lightning-input label="Right Padding" type="number" 
 																	value={secondHeaderProperties.paddings.rightPadding.value} name="value"
 																	data-id="rightPaddingVal" 
-																	onchange={handleSecondHeaderPropertiesChange} 
+																	onchange={handleSecondHeaderPropertiesChange}  disabled={disableEditing}    
 																	class="slds-m-top_xx-small">
 																</lightning-input>
 															</div>
@@ -1037,7 +1037,7 @@
 																	value={secondHeaderProperties.paddings.rightPadding.unit} 
 																	options={unitOptions} 
 																	data-id="rightPaddingUnit" 
-																	onchange={handleSecondHeaderPropertiesChange} 
+																	onchange={handleSecondHeaderPropertiesChange}  disabled={disableEditing}    
 																	class="slds-m-top_large slds-m-left_xx-small">
 																</lightning-combobox>
 															</div>
@@ -1049,7 +1049,7 @@
 																<lightning-input label="Top Padding" type="number" 
 																	value={secondHeaderProperties.paddings.topPadding.value} name="value"
 																	data-id="topPaddingVal" 
-																	onchange={handleSecondHeaderPropertiesChange} 
+																	onchange={handleSecondHeaderPropertiesChange}  disabled={disableEditing}    
 																	class="slds-m-top_xx-small">
 																</lightning-input>
 															</div>
@@ -1058,7 +1058,7 @@
 																	value={secondHeaderProperties.paddings.topPadding.unit} 
 																	options={unitOptions} 
 																	data-id="topPaddingUnit" 
-																	onchange={handleSecondHeaderPropertiesChange} 
+																	onchange={handleSecondHeaderPropertiesChange}  disabled={disableEditing}    
 																	class="slds-m-top_large slds-m-left_xx-small">
 																</lightning-combobox>
 															</div>
@@ -1070,7 +1070,7 @@
 																<lightning-input label="Bottom Padding" type="number" name="value"
 																	value={secondHeaderProperties.paddings.bottomPadding.value} 
 																	data-id="bottomPaddingVal" 
-																	onchange={handleSecondHeaderPropertiesChange} 
+																	onchange={handleSecondHeaderPropertiesChange}  disabled={disableEditing}    
 																	class="slds-m-top_xx-small">
 																</lightning-input>
 															</div>
@@ -1079,7 +1079,7 @@
 																	value={secondHeaderProperties.paddings.bottomPadding.unit} 
 																	options={unitOptions} 
 																	data-id="bottomPaddingUnit" 
-																	onchange={handleSecondHeaderPropertiesChange} 
+																	onchange={handleSecondHeaderPropertiesChange}  disabled={disableEditing}    
 																	class="slds-m-top_large slds-m-left_xx-small">
 																</lightning-combobox>
 															</div>
@@ -1099,17 +1099,17 @@
 									<div class="slds-col slds-size_1-of-2">
 										<div class="slds-grid">
 											<div class="">
-												<lightning-input label="Footer Height" type="number" value={footerProperties.height.value} onchange={handleFooterInputChange} data-id="heightVal"  class="slds-m-top_xx-small"></lightning-input>
+												<lightning-input label="Footer Height" type="number" value={footerProperties.height.value} onchange={handleFooterInputChange} disabled={disableEditing}   data-id="heightVal"  class="slds-m-top_xx-small"></lightning-input>
 											</div>
 											<div class="">
-												<lightning-combobox name="unit" value={footerProperties.height.unit} options={unitOptions} data-id="heightUnit" onchange={handleFooterInputChange} class="slds-m-top_large slds-m-left_xx-small"></lightning-combobox>
+												<lightning-combobox name="unit" value={footerProperties.height.unit} options={unitOptions} data-id="heightUnit" onchange={handleFooterInputChange} disabled={disableEditing}   class="slds-m-top_large slds-m-left_xx-small"></lightning-combobox>
 											</div>
 										</div>
 									</div>
 									<div class="slds-col slds-size_1-of-2">
 										<div class="slds-grid">
 											<div class="">
-												<lightning-input label="Line Height" type="number" value={footerProperties.margins.lineHeight.value} onchange={handleFooterInputChange} data-id="lineHeightVal" step="0.01" class="slds-m-top_xx-small"></lightning-input>
+												<lightning-input label="Line Height" type="number" value={footerProperties.margins.lineHeight.value} onchange={handleFooterInputChange} disabled={disableEditing}   data-id="lineHeightVal" step="0.01" class="slds-m-top_xx-small"></lightning-input>
 											</div>
 										</div>
 									</div>
@@ -1118,18 +1118,18 @@
 										<label class="slds-text-align_center">Border Configurations</label>
 										<div class="slds-grid slds-wrap slds-gutters">
 											<div class="slds-col slds-size_1-of-2">
-												<lightning-input label="Border Color" type="color" value={footerProperties.borderColor.value} onchange={handleFooterInputChange} data-id="borderColor"></lightning-input>
+												<lightning-input label="Border Color" type="color" value={footerProperties.borderColor.value} onchange={handleFooterInputChange} disabled={disableEditing}   data-id="borderColor"></lightning-input>
 											</div>
 											<div class="slds-col slds-size_1-of-2">
-												<lightning-input label="Border Opacity" type="number" value={footerProperties.borderOpacity} onchange={handleFooterInputChange} data-id="borderOpacity"></lightning-input>
+												<lightning-input label="Border Opacity" type="number" value={footerProperties.borderOpacity} onchange={handleFooterInputChange} disabled={disableEditing}   data-id="borderOpacity"></lightning-input>
 											</div>
 											<div class="slds-col slds-size_1-of-2">
 												<div class="slds-grid">
 													<div class="">
-														<lightning-input label="Border Weight" type="number" value={footerProperties.borderWeight.value} onchange={handleFooterInputChange} data-id="borderWeightVal"  name="value" class="slds-m-top_xx-small"></lightning-input>
+														<lightning-input label="Border Weight" type="number" value={footerProperties.borderWeight.value} onchange={handleFooterInputChange} disabled={disableEditing}   data-id="borderWeightVal"  name="value" class="slds-m-top_xx-small"></lightning-input>
 													</div>
 													<div class="">
-														<lightning-combobox name="unit" value={footerProperties.borderWeight.unit} options={unitOptions} data-id="borderWeightUnit" onchange={handleFooterInputChange} class="slds-m-top_large slds-m-left_xx-small"></lightning-combobox>
+														<lightning-combobox name="unit" value={footerProperties.borderWeight.unit} options={unitOptions} data-id="borderWeightUnit" onchange={handleFooterInputChange} disabled={disableEditing}   class="slds-m-top_large slds-m-left_xx-small"></lightning-combobox>
 													</div>
 												</div>
 											</div>
@@ -1141,40 +1141,40 @@
 											<div class="slds-col slds-size_1-of-2">
 												<div class="slds-grid">
 													<div class="">
-														<lightning-input label="Left Margin" type="number" value={footerProperties.margins.leftMargin.value} onchange={handleFooterInputChange} data-id="leftMarginVal"  class="slds-m-top_xx-small"></lightning-input>
+														<lightning-input label="Left Margin" type="number" value={footerProperties.margins.leftMargin.value} onchange={handleFooterInputChange} disabled={disableEditing}   data-id="leftMarginVal"  class="slds-m-top_xx-small"></lightning-input>
 													</div>
 													<div class="">
-														<lightning-combobox name="unit" value={footerProperties.margins.leftMargin.unit} options={unitOptions} data-id="leftMarginUnit" onchange={handleFooterInputChange} class="slds-m-top_large slds-m-left_xx-small"></lightning-combobox>
-													</div>
-												</div>
-											</div>
-											<div class="slds-col slds-size_1-of-2">
-												<div class="slds-grid">
-													<div class="">
-														<lightning-input label="Right Margin" type="number" value={footerProperties.margins.rightMargin.value} onchange={handleFooterInputChange} data-id="rightMarginVal"  class="slds-m-top_xx-small"></lightning-input>
-													</div>
-													<div class="">
-														<lightning-combobox name="unit" value={footerProperties.margins.rightMargin.unit} options={unitOptions} data-id="rightMarginUnit" onchange={handleFooterInputChange} class="slds-m-top_large slds-m-left_xx-small"></lightning-combobox>
+														<lightning-combobox name="unit" value={footerProperties.margins.leftMargin.unit} options={unitOptions} data-id="leftMarginUnit" onchange={handleFooterInputChange} disabled={disableEditing}   class="slds-m-top_large slds-m-left_xx-small"></lightning-combobox>
 													</div>
 												</div>
 											</div>
 											<div class="slds-col slds-size_1-of-2">
 												<div class="slds-grid">
 													<div class="">
-														<lightning-input label="Top Margin" type="number" value={footerProperties.margins.topMargin.value} onchange={handleFooterInputChange} data-id="topMarginVal"  class="slds-m-top_xx-small"></lightning-input>
+														<lightning-input label="Right Margin" type="number" value={footerProperties.margins.rightMargin.value} onchange={handleFooterInputChange} disabled={disableEditing}   data-id="rightMarginVal"  class="slds-m-top_xx-small"></lightning-input>
 													</div>
 													<div class="">
-														<lightning-combobox name="unit" value={footerProperties.margins.topMargin.unit} options={unitOptions} data-id="topMarginUnit" onchange={handleFooterInputChange} class="slds-m-top_large slds-m-left_xx-small"></lightning-combobox>
+														<lightning-combobox name="unit" value={footerProperties.margins.rightMargin.unit} options={unitOptions} data-id="rightMarginUnit" onchange={handleFooterInputChange} disabled={disableEditing}   class="slds-m-top_large slds-m-left_xx-small"></lightning-combobox>
+													</div>
+												</div>
+											</div>
+											<div class="slds-col slds-size_1-of-2">
+												<div class="slds-grid">
+													<div class="">
+														<lightning-input label="Top Margin" type="number" value={footerProperties.margins.topMargin.value} onchange={handleFooterInputChange} disabled={disableEditing}   data-id="topMarginVal"  class="slds-m-top_xx-small"></lightning-input>
+													</div>
+													<div class="">
+														<lightning-combobox name="unit" value={footerProperties.margins.topMargin.unit} options={unitOptions} data-id="topMarginUnit" onchange={handleFooterInputChange} disabled={disableEditing}   class="slds-m-top_large slds-m-left_xx-small"></lightning-combobox>
 													</div>
 												</div>
 									</div>
 									<div class="slds-col slds-size_1-of-2">
 										<div class="slds-grid">
 											<div class="">
-												<lightning-input label="Bottom Margin" type="number" value={footerProperties.margins.bottomMargin.value} onchange={handleFooterInputChange} data-id="bottomMarginVal"  class="slds-m-top_xx-small"></lightning-input>
+												<lightning-input label="Bottom Margin" type="number" value={footerProperties.margins.bottomMargin.value} onchange={handleFooterInputChange} disabled={disableEditing}   data-id="bottomMarginVal"  class="slds-m-top_xx-small"></lightning-input>
 											</div>
 											<div class="">
-												<lightning-combobox name="unit" value={footerProperties.margins.bottomMargin.unit} options={unitOptions} data-id="bottomMarginVal" onchange={handleFooterInputChange} class="slds-m-top_large slds-m-left_xx-small"></lightning-combobox>
+												<lightning-combobox name="unit" value={footerProperties.margins.bottomMargin.unit} options={unitOptions} data-id="bottomMarginVal" onchange={handleFooterInputChange} disabled={disableEditing}   class="slds-m-top_large slds-m-left_xx-small"></lightning-combobox>
 											</div>
 										</div>
 									</div>
@@ -1183,7 +1183,7 @@
 									
 									
 									<!-- <div class="slds-col slds-size_1-of-1">
-										<lightning-checkbox-group label="Separate Borders" options={borderOptions} value={footerProperties.separateBorders} onchange={handleFooterInputChange}></lightning-checkbox-group>
+										<lightning-checkbox-group label="Separate Borders" options={borderOptions} value={footerProperties.separateBorders} onchange={handleFooterInputChange} disabled={disableEditing}  ></lightning-checkbox-group>
 									</div> -->
 								</div>
 							</lightning-tab>
@@ -1193,7 +1193,7 @@
 					</div>
 					<div class="slds-modal__footer">
 						<button class="slds-button slds-button_neutral" aria-label="Cancel and close" onclick={handleCancelPageSettings} >Cancel</button>
-						<lightning-button label="Save" class="slds-m-top_medium slds-m-left_x-small" onclick={handleSavePageProperties} variant="brand"></lightning-button>
+						<lightning-button label="Save" class="slds-m-top_medium slds-m-left_x-small" onclick={handleSavePageProperties} variant="brand" disabled={disableEditing}></lightning-button>
 					</div>
 				</template>
 				<!--Code added by Bhavya for selecting Page properties ends here -->

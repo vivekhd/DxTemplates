@@ -460,6 +460,8 @@ export default class TemplateDesignerCMP extends NavigationMixin(LightningElemen
     const selectedOption = 'Context';
     this.isconnectedcalledondeletion = false;
     this.handlechildcomponents(selectedOption, true, null);
+    const saveEvent = new CustomEvent('datasaved', {detail: false });
+    this.dispatchEvent(saveEvent);
   }
   /**
    * Method to add a new Related Objects section to the sections stack
@@ -472,6 +474,8 @@ export default class TemplateDesignerCMP extends NavigationMixin(LightningElemen
     const selectedOption = 'Related Objects';
     this.isconnectedcalledondeletion = false;
     this.handlechildcomponents(selectedOption, true, null);
+    const saveEvent = new CustomEvent('datasaved', {detail: false });
+    this.dispatchEvent(saveEvent);
   }
   /**
    * Method to add a new Clause section to the sections stack
@@ -482,6 +486,8 @@ export default class TemplateDesignerCMP extends NavigationMixin(LightningElemen
     const selectedOption = 'Clause';
     this.isconnectedcalledondeletion = false;
     this.handlechildcomponents(selectedOption, true, null);
+    const saveEvent = new CustomEvent('datasaved', {detail: false });
+    this.dispatchEvent(saveEvent);
   }
 
   /**
@@ -494,6 +500,8 @@ export default class TemplateDesignerCMP extends NavigationMixin(LightningElemen
     const selectedOption = 'Table';
     this.isconnectedcalledondeletion = false;
     this.handlechildcomponents(selectedOption, true, null);
+    const saveEvent = new CustomEvent('datasaved', {detail: false });
+    this.dispatchEvent(saveEvent);
   }
 
   /**

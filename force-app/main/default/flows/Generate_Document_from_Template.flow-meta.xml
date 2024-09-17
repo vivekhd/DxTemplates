@@ -10,9 +10,27 @@
         <actionType>apex</actionType>
         <flowTransactionModel>CurrentTransaction</flowTransactionModel>
         <inputParameters>
+            <name>docOrientation</name>
+            <value>
+                <elementReference>DXTemplates_Orientation</elementReference>
+            </value>
+        </inputParameters>
+        <inputParameters>
+            <name>docSize</name>
+            <value>
+                <elementReference>DXTemplates_Size</elementReference>
+            </value>
+        </inputParameters>
+        <inputParameters>
             <name>documentName</name>
             <value>
                 <elementReference>DXTemplates_DocumentName</elementReference>
+            </value>
+        </inputParameters>
+        <inputParameters>
+            <name>multiplePdf</name>
+            <value>
+                <elementReference>DXTemplates_MultiplePDFs</elementReference>
             </value>
         </inputParameters>
         <inputParameters>
@@ -28,6 +46,7 @@
             </value>
         </inputParameters>
         <nameSegment>documentAutomationController</nameSegment>
+        <offset>0</offset>
         <versionSegment>1</versionSegment>
     </actionCalls>
     <apiVersion>58.0</apiVersion>
@@ -70,8 +89,31 @@
         <isOutput>false</isOutput>
     </variables>
     <variables>
+        <name>DXTemplates_MultiplePDFs</name>
+        <dataType>Boolean</dataType>
+        <isCollection>false</isCollection>
+        <isInput>true</isInput>
+        <isOutput>false</isOutput>
+    </variables>
+    <variables>
+        <description>Orientation of the PDF. Pick between &quot;Portrait&quot; and &quot;Landscape&quot;.</description>
+        <name>DXTemplates_Orientation</name>
+        <dataType>String</dataType>
+        <isCollection>false</isCollection>
+        <isInput>true</isInput>
+        <isOutput>false</isOutput>
+    </variables>
+    <variables>
         <description>Id of the record for which the PDF needs to generated and be attached.</description>
         <name>DXTemplates_RecordId</name>
+        <dataType>String</dataType>
+        <isCollection>false</isCollection>
+        <isInput>true</isInput>
+        <isOutput>false</isOutput>
+    </variables>
+    <variables>
+        <description>PDF page size. Please pick between &quot;A4&quot;, &quot;A5&quot; and &quot;Letter&quot;.</description>
+        <name>DXTemplates_Size</name>
         <dataType>String</dataType>
         <isCollection>false</isCollection>
         <isInput>true</isInput>

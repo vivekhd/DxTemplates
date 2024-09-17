@@ -147,11 +147,28 @@ global with sharing class DisplayPDFController
             styleList = new Map<String,String>();
             showAllPages =  'All Pages';
             displaypagesequence = false;
+            Document__c docrec = new Document__c();
             String inputparam = ApexPages.currentPage().getParameters().get('documentid');
             inputparam = String.escapeSingleQuotes(inputparam);
-            Document__c docrec = [SELECT Id, Document_Body__c, Document_Content__c, Document_Template__r.Watermark_Data__c, Document_Template__r.PDF_Page_Properties__c      
+            if (inputparam.length()>20){
+                List<String> inputparamlist = inputparam.split(','); 
+                List<Document__c> docList= [SELECT Id, Document_Body__c, Document_Content__c, Document_Template__r.Watermark_Data__c, Document_Template__r.PDF_Page_Properties__c,Sequence__c      
+                                  			FROM Document__c WHERE Id IN :inputparamlist WITH SECURITY_ENFORCED ORDER BY Sequence__c ];
+                String contentData='';
+                for (Document__c eachDocList: docList){
+                    contentData += eachDocList.Document_Body__c;
+                }
+                docrec.Document_Body__c = contentData;
+                docrec.Document_Content__c = docList[0].Document_Content__c;
+                docrec.Document_Template__r = new Document_Template__c();
+                docrec.Document_Template__r.PDF_Page_Properties__c = docList[0].Document_Template__r.PDF_Page_Properties__c;
+                docrec.Document_Template__r.Watermark_Data__c = docList[0].Document_Template__r.Watermark_Data__c;
+            }
+            else {
+            docrec = [SELECT Id, Document_Body__c, Document_Content__c, Document_Template__r.Watermark_Data__c, Document_Template__r.PDF_Page_Properties__c      
                                   FROM Document__c 
                                   WHERE Id = :inputparam WITH SECURITY_ENFORCED];
+            }
             //System.debug('docrec -->'+ docrec);
             Map<String, Object> m =  (Map<String, Object>) JSON.deserializeUntyped(docrec.Document_Template__r.PDF_Page_Properties__c);
             Map<String,Object> m1 = (Map<String,Object>) JSON.deserializeUntyped(JSON.serialize(m.get('pagePropCSS')));
@@ -327,8 +344,7 @@ global with sharing class DisplayPDFController
             marPadList.put('First-Page-Margin-left', (String)pageProperries.get('margin-left'));
             marPadList.put('First-Page-Margin-right', (String)pageProperries.get('margin-right'));
         } catch(Exception ex) {
-             //LogHandler.createLog((Id) null,'DisplayPDFController.DisplayPDFController() - Constructor','Template Id-  '+ex.getLineNumber()+ex.getStackTraceString()+ex.getCause(),ex.getMessage(),'Exception');
-            throw new AuraHandledException(ex.getMessage());
+            LogHandler.createLog((Id) null,'DisplayPDFController.DisplayPDFController() - Constructor','Template Id-  '+ex.getLineNumber()+ex.getStackTraceString()+ex.getCause(),ex.getMessage(),'Exception');
         }
     }
 
@@ -640,6 +656,20 @@ global with sharing class DisplayPDFController
             List<Document_Template_Section__c> selectedTemplateContents=[select id,Section_Content__c, Type__c, New_Page__c, Sequence__c from Document_Template_Section__c where Document_Template__c=:templateId WITH SECURITY_ENFORCED ORDER BY Sequence__c ASC];
             selectedTemplateContents = MergeFieldsClass.mergefieldsMethodMultiple(selectedTemplateContents,recordIdLst);
             return selectedTemplateContents;
+        } catch (Exception ex) {
+            LogHandler.createLog((Id) null,'DisplayPDFController.getTemplateSections()','templateId ->  '+templateId+' '+ex.getLineNumber()+ex.getStackTraceString()+ex.getCause(),ex.getMessage(),'Exception');
+            throw new AuraHandledException(ex.getMessage());
+        }  
+    }
+    
+    //getting the template sections for the Multiple recordIds with multiple PDFs
+    @AuraEnabled
+    public static Map<Id,List<Document_Template_Section__c>> getTemplateSectionsMulRecordsPDFs(ID templateId, List<String> recordIdLst, String objectApiName){ 
+        try{
+            Map<Id,List<Document_Template_Section__c>> docsTempLstMap = new Map<Id,List<Document_Template_Section__c>>();
+            List<Document_Template_Section__c> selectedTemplateContents=[select id,Section_Content__c, Type__c, New_Page__c, Sequence__c from Document_Template_Section__c where Document_Template__c=:templateId WITH SECURITY_ENFORCED ORDER BY Sequence__c ASC];
+            docsTempLstMap = MergeFieldsClass.mergefieldsMethodMultiplePdf(selectedTemplateContents,recordIdLst);
+            return docsTempLstMap;
         } catch (Exception ex) {
             LogHandler.createLog((Id) null,'DisplayPDFController.getTemplateSections()','templateId ->  '+templateId+' '+ex.getLineNumber()+ex.getStackTraceString()+ex.getCause(),ex.getMessage(),'Exception');
             throw new AuraHandledException(ex.getMessage());

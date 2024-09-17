@@ -10,8 +10,10 @@ global class sendEmailAutomation implements Queueable,Database.AllowsCallouts{
     String attachmentName;
     Id attachmentParentId;
     String emailStructure;
+    String attachmentOrientation;
+    String attachmentPageSize;
     Boolean isSpecificToFox;
-    Id documentRecordInserted;
+    String documentRecordInserted;
     private static Savepoint sp1;
     Map<string,Object> inputMap;
     public static Safely safe = new Safely();
@@ -28,12 +30,24 @@ global class sendEmailAutomation implements Queueable,Database.AllowsCallouts{
     }
 
     /* Constructor used for the context of general Organizations. */
-    global sendEmailAutomation(Id docInserted, String attachmentName, Id attachmentParentId, String ignoreThisText) { 
-		this.documentRecordInserted = docInserted;
+    global sendEmailAutomation(Id docInserted, String attachmentName, Id attachmentParentId, String ignorethistext) { 
+		this.documentRecordInserted = (String) docInserted;
         this.attachmentName = attachmentName;
         this.attachmentParentId = attachmentParentId;
         this.isSpecificToFox = false;
         this.emailStructure = null;
+        this.attachmentOrientation = 'Potrait';
+        this.attachmentPageSize = 'A4';
+    }
+    
+    global sendEmailAutomation(Id docInserted, String attachmentName, Id attachmentParentId, String attachmentOrientation, String attachmentPageSize) { 
+		this.documentRecordInserted = (String) docInserted;
+        this.attachmentName = attachmentName;
+        this.attachmentParentId = attachmentParentId;
+        this.isSpecificToFox = false;
+        this.emailStructure = null;
+        this.attachmentOrientation = attachmentOrientation;
+        this.attachmentPageSize = attachmentPageSize;
     }
     
     /* Constructor used for the context of FOX Organization. */
@@ -48,8 +62,11 @@ global class sendEmailAutomation implements Queueable,Database.AllowsCallouts{
     global sendEmailAutomation(String methodName,Map<string,Object> inputMap) {
         this.inputMap = inputMap;
         this.isSpecificToFox = (boolean) (inputMap.containsKey('isSpecificToFox')?inputMap.get('isSpecificToFox'):false);
-        this.documentRecordInserted = (Id) (inputMap.containsKey('insertedDocumentId')?inputMap.get('insertedDocumentId'):null);
+        this.documentRecordInserted = (String) (inputMap.containsKey('insertedDocumentId')?inputMap.get('insertedDocumentId'):null);
         this.attachmentName = (String) (inputMap.containsKey('documentNameAfterGeneration')?inputMap.get('documentNameAfterGeneration'):null);
+        this.attachmentOrientation = (String) (inputMap.containsKey('orientation')?inputMap.get('orientation'):'Potrait');
+        this.attachmentPageSize = (String) (inputMap.containsKey('pageSize')?inputMap.get('pageSize'):'A4');
+        this.emailStructure = (String) (inputMap.containsKey('emailStructure')?inputMap.get('emailStructure'):null);
     }
 
     public void execute(QueueableContext context) {
@@ -61,6 +78,8 @@ global class sendEmailAutomation implements Queueable,Database.AllowsCallouts{
             /* .pdf version of the Document__c record Content */
             Pagereference pg = Page.renderAsPdfLWC;
             pg.getParameters().put('documentId',documentRecordInserted);
+            pg.getParameters().put('selectedPageSize',attachmentPageSize);
+            pg.getParameters().put('selectedPageOrientation',attachmentOrientation);
             
             /* Attachment Generation and Insertion of the generated Document to Parent Record */
             if(!isSpecificToFox && emailStructure==null){
@@ -98,6 +117,12 @@ global class sendEmailAutomation implements Queueable,Database.AllowsCallouts{
                 Map<String,Object> outputMap = new Map<String,Object>();
                 outputMap.put('PDFAttachment',documentAttachment);
                 outputMap.putAll(inputMap);
+                if (emailStructure == 'MultiRecordPDF'){
+                    ContentVersion cv = new ContentVersion();
+                    cv.VersionData = documentAttachment.Body;
+                    cv.PathOnClient = documentAttachment.Name;
+                    insert cv;
+                }
 
                 DXTemplates_HandlerClass__mdt metaDataContent = [SELECT Id,Label,HandlerClassName__c FROM DXTemplates_HandlerClass__mdt where Label = 'HandlerClass'];
                 if(metaDataContent != null) {

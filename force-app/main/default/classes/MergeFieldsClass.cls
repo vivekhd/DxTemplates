@@ -386,6 +386,110 @@ public with sharing class MergeFieldsClass {
         }        
         return selectedTemplateContents;
     }
+    
+    public static Map<Id,List<Document_Template_Section__c>> mergefieldsMethodMultiplePdf(List<Document_Template_Section__c> selectedTemplateContents, List<String> recordIds) {
+        Map<Id,List<Document_Template_Section__c>> docsTempLstMap = new Map<Id,List<Document_Template_Section__c>>();
+        try{
+            List<Document_Template_Section__c> docsTempLst = new List<Document_Template_Section__c>();
+            //List<Map<String,Object>> docsTempLstMap = new List<Map<String,Object>>();
+            String objectName = ((Id)recordIds[0]).getSObjectType().getDescribe().getName();
+            String mainstr;
+            for(Document_Template_Section__c sec: selectedTemplateContents) {
+                if(mainstr==null){
+                    mainstr=sec.Section_Content__c;
+                }else{
+                    mainstr=mainstr+sec.Section_Content__c;
+                }
+            }
+            String mainObject=objectName;
+            Pattern p = Pattern.compile('\\{!.+?\\}');
+            Matcher m = p.matcher(mainstr);
+            String mainfields;
+            Set<String> mainfieldsList = new Set<String>();
+            while(m.find()) {
+                String strReplace = '{!'+mainObject+'.';
+                String str = m.group(0).replace(strReplace,'').replace('}',', ');
+                String str1 = str.replace(',','');
+                mainfieldsList.add(str1);
+            }
+            for(String str : mainfieldsList){
+                if(mainfields==null){
+                    mainfields=str;
+                }else{
+                    mainfields = mainfields+', '+str;  
+                }
+            }
+            Integer executeHeadFoot = 0;
+            string mainSOQL='Select '+String.escapeSingleQuotes(mainfields)+' from '+String.escapeSingleQuotes(mainObject)+' where Id IN :recordIds WITH SECURITY_ENFORCED';
+            for(Sobject qrec : Database.query(mainSOQL)){
+                System.debug('qrec--+ '+qrec);
+                Boolean executeVar = false;
+                if(mainfields!=null) {
+                    mainfields = mainfields.removeEnd(', ');
+                    Map<String, Object> mainMap = (Map<String, Object>) JSON.deserializeUntyped(JSON.serialize(qrec));
+                    for(Document_Template_Section__c sec: selectedTemplateContents) {
+                        Document_Template_Section__c tempSec = (Document_Template_Section__c) JSON.deserialize(JSON.serialize(sec), Document_Template_Section__c.class);
+                        if(executeHeadFoot == 0){
+                            executeVar = true;
+                        } else{
+                            if(!tempSec.Type__c.equals('Header') && !tempSec.Type__c.equals('Footer')){
+                                executeVar = true;
+                            } else{
+                                executeVar = false;
+                            }
+                        }
+                        if(executeVar){
+                            for(String str:mainfieldsList)  {
+                                str = str.replaceAll('(\\s+)', '');
+                                if(mainMap.containskey(str)) {
+                                    string mergefieldsyntax='{!'+mainObject+'.'+str+'}';
+                                    tempSec.Section_Content__c=tempSec.Section_Content__c.replace(mergefieldsyntax, String.valueOf(mainMap.get(str)));
+                                } else {
+                                    String finalvalue;
+                                    if(str.contains('.')){
+                                        List<String> strList = new List<string>();
+                                        strList=str.split('\\.');
+                                        Map<String, Object> tempObj=new Map<String, Object>();
+                                        tempObj=mainMap;
+                                        String resVal; 
+                                        for(Integer j=0; j<strList.size(); j++) {
+                                            if(tempObj.containskey(strList[j]))  {
+                                                if(j==strList.size()-1)   {
+                                                    finalvalue=String.valueOf(tempObj.get(strList[j]));
+                                                }else  {
+                                                    tempObj=(Map<String, Object>)tempObj.get(strList[j]);                                            
+                                                }
+                                            }
+                                        }
+                                    }
+                                    if(finalvalue!=null)  {
+                                        string mergefieldsyntax='{!'+mainObject+'.'+str+'}';
+                                        tempSec.Section_Content__c=tempSec.Section_Content__c.replace(mergefieldsyntax, finalvalue); 
+                                    } else{
+                                        string mergefieldsyntax='{!'+mainObject+'.'+str+'}';
+                                        tempSec.Section_Content__c=tempSec.Section_Content__c.replace(mergefieldsyntax, ''); 
+                                    }
+                                }
+                            }
+                            docsTempLst.add(tempSec);
+                        }
+                        executeVar = false;
+                        
+                    }   
+                    
+                } 
+                //executeHeadFoot = executeHeadFoot + 1;
+                docsTempLstMap.put(qrec.Id,docsTempLst);
+                docsTempLst =  new List<Document_Template_Section__c>();
+            }
+            mainstr = '';
+            system.debug('docsTempLstMap '+docsTempLstMap);
+        } catch(Exception ex) {
+            LogHandler.createLog((Id) null,'MergeFieldsClass Error',ex.getLineNumber()+ex.getStackTraceString()+ex.getCause(),ex.getMessage(),'Exception');
+        }        
+        return docsTempLstMap;
+    }
+    
      /* <customLogic method is used to replace %%data%% with the respective value from the
          map mp which is constructed in the GenericController class as well as from the flow> */
         

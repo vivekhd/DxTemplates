@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
     <fullName>Related_To_Type__c</fullName>
-    <externalId>false</externalId>
+    <deprecated>false</deprecated>
     <label>Related To Type</label>
     <required>false</required>
     <trackTrending>false</trackTrending>
@@ -19,6 +19,26 @@
                 <fullName>Account</fullName>
                 <default>false</default>
                 <label>Account</label>
+            </value>
+            <value>
+                <fullName>Case</fullName>
+                <default>false</default>
+                <label>Case</label>
+            </value>
+            <value>
+                <fullName>Lead</fullName>
+                <default>false</default>
+                <label>Lead</label>
+            </value>
+            <value>
+                <fullName>Quote</fullName>
+                <default>false</default>
+                <label>Quote</label>
+            </value>
+            <value>
+                <fullName>Knowledge Article</fullName>
+                <default>false</default>
+                <label>Knowledge Article</label>
             </value>
             <value>
                 <fullName>Asset</fullName>
