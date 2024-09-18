@@ -64,6 +64,14 @@ global class PostInstallDataCreation implements InstallHandler {
     private Boolean createSampleTemplateAndTemplateSection(){
         Boolean hasRecordDataToLoad = false;
         List<StaticResource> templateRelatedData = [SELECT Id,Body from StaticResource WHERE Name = 'TemplatesAndSectionData' AND ContentType = 'application/json' LIMIT 1];
+		StaticResource logoImg = [SELECT Name, Body FROM StaticResource WHERE Name = 'DextaraDatamaticsLogo' LIMIT 1];
+		Blob imgBlob = logoImg.Body;
+        ContentVersion cv = new ContentVersion();
+        cv.Title = logoImg.Name;
+        cv.PathOnClient = logoImg.Name + '.png';
+        cv.VersionData = imgBlob;
+        insert cv;
+        
         if(templateRelatedData.size() == 1){
             hasRecordDataToLoad = true;
             String jsonContent = templateRelatedData[0]?.Body.toString();
@@ -84,6 +92,9 @@ global class PostInstallDataCreation implements InstallHandler {
                 for(Document_Template_Section__c eachDocTempSection : formattedDataMaping.Template_Sections){
                     if (eachDocTempSection.DxCPQ__External_Document_Template__c == tempIdEx.get('ExternalId')){
                         eachDocTempSection.Document_Template__c = tempIdEx.get('Id');
+                    }
+                    if (eachDocTempSection.Type__c == 'Header'){
+                        eachDocTempSection.Section_Content__c = eachDocTempSection.Section_Content__c.replace('068NS00000HRJETYA5',cv.id);
                     }
                 }
             }
