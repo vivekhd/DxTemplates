@@ -14,7 +14,7 @@ global class PostInstallDataCreation implements InstallHandler {
     global void onInstall(InstallContext context) {
         /* Org details for the mail body*/
         Organization orgInfo = [Select Id,Name,IsSandbox,OrganizationType from Organization WITH SECURITY_ENFORCED];
-        String orgDetails = ' in the org - ' + URL.getOrgDomainURL().toExternalForm() + '(' + orgInfo.Id + ' - ' + orgInfo.OrganizationType + ').';
+        String orgDetails = ' in the org - ' + URL.getOrgDomainURL().toExternalForm() + ' (' + orgInfo.Id + ' - ' + orgInfo.OrganizationType + '). ';
         
         try {
             if(!context.isUpgrade()) {
@@ -37,11 +37,11 @@ global class PostInstallDataCreation implements InstallHandler {
                 }
 
                 if (templateAndSectionDataCreatedFromStaticResource || sResult?.get(0).isSuccess()) {
-                    String successBody = 'Hello Team, DXTemplates Package Installation was successfull' + orgDetails +  'This mail is for the confirmation purpose.';
-                    statusOfTheInstallation('Post Install Script run was Successfull - DXTemplates Package',successBody,context.installerId());
-                }   else  {
+                    String successBody = 'Hello Team,\nDXTemplates Package Installation was successful' + orgDetails +  ' \nThis mail is for the confirmation purpose.';
+                    statusOfTheInstallation('Post Install Script run was Successful - DXTemplates Package',successBody,context.installerId());
+                }  else  {
                     String errorBody = 'Hello Team, an error occured when creating a Template record through Apex transaction' + orgDetails;
-                    statusOfTheInstallation('Template record creation was unsuccessfull, Please create it.',errorBody,context.installerId());
+                    statusOfTheInstallation('Post Install Script run was unsuccessful.',errorBody,context.installerId());
                 }
             }
         } catch(Exception error) {
@@ -70,6 +70,8 @@ global class PostInstallDataCreation implements InstallHandler {
             JSONDataForTemplateAndSections formattedDataMaping = (JSONDataForTemplateAndSections) JSON.deserialize(jsonContent, JSONDataForTemplateAndSections.class);
 
             List<Map<String,String>> templateClausesDataMapping  = ImportExportData.createImportedClauses(JSON.serialize(formattedDataMaping.Document_Clauses));
+            List<Map<String,String>> templateRecordsDataMapping =  ImportExportData.createImportedTemplates(JSON.serialize(formattedDataMaping.Templates));
+            
             for (Map<String,String> tempIdEx: templateClausesDataMapping){
                 for(Document_Template_Section__c eachDocTempSection : formattedDataMaping.Template_Sections){
                     if (eachDocTempSection.DxCPQ__Document_Clause__c == tempIdEx.get('ExternalId')){
@@ -77,9 +79,7 @@ global class PostInstallDataCreation implements InstallHandler {
                     }
                 }
             }
-
             
-            List<Map<String,String>> templateRecordsDataMapping =  ImportExportData.createImportedTemplates(JSON.serialize(formattedDataMaping.Templates));
             for (Map<String,String> tempIdEx: templateRecordsDataMapping){
                 for(Document_Template_Section__c eachDocTempSection : formattedDataMaping.Template_Sections){
                     if (eachDocTempSection.DxCPQ__External_Document_Template__c == tempIdEx.get('ExternalId')){
