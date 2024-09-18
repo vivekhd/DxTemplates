@@ -15,9 +15,11 @@ import createRuleCondition from '@salesforce/apex/RelatedObjectsClass.createRule
 import getConditions from '@salesforce/apex/RelatedObjectsClass.getExistingConditions';
 import { createRuleConditionHierarcy } from 'c/conditionUtil';
 import resetRulesForTemplate from '@salesforce/apex/RelatedObjectsClass.handleTemplateRuleResetCondition';
+import { NavigationMixin } from 'lightning/navigation';
 
-export default class TemplateTableDetails extends LightningElement {
+export default class TemplateTableDetails extends NavigationMixin(LightningElement) {
 
+    @api pdfLinks;
     @track tableOnLoad = true;
     @track tableDisplayed = false;
     @track selectedRow = '';
@@ -87,6 +89,7 @@ export default class TemplateTableDetails extends LightningElement {
     ];
 
     fontfamily = "Verdana";
+
     fontfamilyoptions = [
         { value: 'sans-serif', label: 'Arial' },
         { value: 'Verdana', label: 'Verdana' },
@@ -2175,6 +2178,19 @@ export default class TemplateTableDetails extends LightningElement {
     unsavedChanges() {
         let saveEvent = new CustomEvent('datasaved', { detail: false });
         this.dispatchEvent(saveEvent);
+    }
+
+    //code added by Bhavya to redirect to the help Document for Table Section
+    handlehelp(){
+        let relatedObjectsMap = this.pdfLinks.find(item => item.MasterLabel === 'Table');
+        let pdfUrl = relatedObjectsMap ? relatedObjectsMap.DxCPQ__Section_PDF_URL__c : null;
+        const config = {
+        type: 'standard__webPage',
+        attributes: {
+            url: pdfUrl
+            }
+        };
+        this[NavigationMixin.Navigate](config);
     }
 
 }
