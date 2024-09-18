@@ -36,9 +36,9 @@
                 <label>Quote</label>
             </value>
             <value>
-                <fullName>Knowledge Article</fullName>
+                <fullName>Knowledge__kav</fullName>
                 <default>false</default>
-                <label>Knowledge Article</label>
+                <label>Knowledge__kav</label>
             </value>
             <value>
                 <fullName>Asset</fullName>
