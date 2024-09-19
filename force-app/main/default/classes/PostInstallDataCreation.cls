@@ -65,6 +65,11 @@ global class PostInstallDataCreation implements InstallHandler {
         Boolean hasRecordDataToLoad = false;
         List<StaticResource> templateRelatedData = [SELECT Id,Body from StaticResource WHERE Name = 'TemplatesAndSectionData' AND ContentType = 'application/json' LIMIT 1];
 		StaticResource logoImg = [SELECT Name, Body FROM StaticResource WHERE Name = 'DextaraDatamaticsLogo' LIMIT 1];
+        List<EntityDefinition> objNames= [select id,QualifiedApiName from EntityDefinition where QualifiedApiName IN ('Quote','Case','Account','Opportunity','Lead','Knowledge__kav')];
+        List<String> validObjectNames = new List<String>();
+        for (EntityDefinition obj : objNames) {
+            validObjectNames.add(obj.QualifiedApiName);
+        }
 		Blob imgBlob = logoImg.Body;
         ContentVersion cv = new ContentVersion();
         cv.Title = logoImg.Name;
@@ -76,7 +81,13 @@ global class PostInstallDataCreation implements InstallHandler {
             hasRecordDataToLoad = true;
             String jsonContent = templateRelatedData[0]?.Body.toString();
             JSONDataForTemplateAndSections formattedDataMaping = (JSONDataForTemplateAndSections) JSON.deserialize(jsonContent, JSONDataForTemplateAndSections.class);
-
+			List<Document_Template__c> filteredTemplates = new List<Document_Template__c>();
+            for (Document_Template__c template : formattedDataMaping.Templates) {
+                if (validObjectNames.contains(template.DxCPQ__Related_to_Type__c)) {
+                    filteredTemplates.add(template);
+                }
+            }
+            formattedDataMaping.Templates = filteredTemplates;
             List<Map<String,String>> templateClausesDataMapping  = ImportExportData.createImportedClauses(JSON.serialize(formattedDataMaping.Document_Clauses));
             List<Map<String,String>> templateRecordsDataMapping =  ImportExportData.createImportedTemplates(JSON.serialize(formattedDataMaping.Templates));
             
@@ -87,17 +98,19 @@ global class PostInstallDataCreation implements InstallHandler {
                     }
                 }
             }
-            
+            List<Document_Template_Section__c> filteredTemplateSections = new List<Document_Template_Section__c>();
             for (Map<String,String> tempIdEx: templateRecordsDataMapping){
                 for(Document_Template_Section__c eachDocTempSection : formattedDataMaping.Template_Sections){
-                    if (eachDocTempSection.DxCPQ__External_Document_Template__c == tempIdEx.get('ExternalId')){
-                        eachDocTempSection.Document_Template__c = tempIdEx.get('Id');
-                    }
                     if (eachDocTempSection.Type__c == 'Header'){
                         eachDocTempSection.Section_Content__c = eachDocTempSection.Section_Content__c.replace('068NS00000HRJETYA5',cv.id);
                     }
+                    if (eachDocTempSection.DxCPQ__External_Document_Template__c == tempIdEx.get('ExternalId')){
+                        eachDocTempSection.Document_Template__c = tempIdEx.get('Id');
+                        filteredTemplateSections.add(eachDocTempSection);
+                    }
                 }
             }
+            formattedDataMaping.Template_Sections = filteredTemplateSections;
             List<String> sectionRecordsToInsert =  ImportExportData.createImportedTemplateSections(JSON.serialize(formattedDataMaping.Template_Sections));   
         }
         return hasRecordDataToLoad;
