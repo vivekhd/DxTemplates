@@ -188,7 +188,7 @@ export default class TemplateDesignerCMP extends NavigationMixin(LightningElemen
   selectedSectionRecordID = ''; // ID of the selected section record.
   isconnectedcalledonLoad = false; // Flag to indicate whether connected is called on load.
   showrelatedobjectdetails = false; // Flag to indicate whether to show related object details section.
-  activateTemplateLabel = 'Activate Template'; // Label for activating the template.
+  activateTemplateLabel = 'Activate'; // Label for activating the template.
   @track showPreview = false; // Flag to indicate whether to show/hide the preview.
   @track previewModal = false; // Flag to indicate whether to show/hide the preview modal.
   previewLabel = ''; // Label for the preview.
@@ -395,7 +395,7 @@ export default class TemplateDesignerCMP extends NavigationMixin(LightningElemen
 
   handleAllButtonsClicked(event){
     if (this.isSaved == true){
-      if (event.target.label == 'Activate Template' || event.target.label == 'Deactivate Template'){
+      if (event.target.label == 'Activate' || event.target.label == 'Deactivate'){
         this.handleActiveTemplate(event);
       }
       else if (event.target.label == 'Clone Template'){
@@ -422,7 +422,7 @@ export default class TemplateDesignerCMP extends NavigationMixin(LightningElemen
       else if (event.target.title == 'Section : Table'){
         this.handleNewTable(event);
       }
-      else if (event.target.title == 'Edit Template'){
+      else if (event.target.title == 'Edit Properties'){
         this.handleEditTemplate(event);
       }
       else if (event.currentTarget.dataset.sectiontype == 'Header'){
@@ -691,7 +691,7 @@ export default class TemplateDesignerCMP extends NavigationMixin(LightningElemen
     this.contentVersion = '';
     this.disableEditingHandler(this.disableEditing);
     this.readonlyVal = false;
-    this.activateTemplateLabel = 'Activate Template';
+    this.activateTemplateLabel = 'Activate';
     this.rowCount = -1;
     this.template.querySelector("c-template-content-details").resetvaluesonchildcmp();
     this.header = { Id: 'headerNotSaved', Type: 'Header', rowCount: this.rowCount, sectionNameEntered: 'Header' };
@@ -829,7 +829,7 @@ export default class TemplateDesignerCMP extends NavigationMixin(LightningElemen
                   this.doctemplatedetails.DxCPQ__Version_Number__c = val.DxCPQ__Document_Template__r.DxCPQ__Version_Number__c;
                   this.doctemplatedetails.DxCPQ__Parent_Template__c = val.DxCPQ__Document_Template__r.DxCPQ__Parent_Template__c;
                   if (this.doctemplatedetails.DxCPQ__IsActive__c == true) {
-                    this.activateTemplateLabel = 'Deactivate Template';
+                    this.activateTemplateLabel = 'Deactivate';
                     this.showPreview = true;
                   }
                 }
@@ -994,11 +994,11 @@ export default class TemplateDesignerCMP extends NavigationMixin(LightningElemen
   */
   handleActiveTemplate() {
     let isActive;
-    if (this.activateTemplateLabel == 'Activate Template') {
-      this.activateTemplateLabel = 'Deactivate Template';
+    if (this.activateTemplateLabel == 'Activate') {
+      this.activateTemplateLabel = 'Deactivate';
       isActive = true;
     } else {
-      this.activateTemplateLabel = 'Activate Template';
+      this.activateTemplateLabel = 'Activate';
       isActive = false;
     }
     if (this.disableEditing == false) {

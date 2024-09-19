@@ -5,17 +5,19 @@
 			<div class="slds-grid slds-wrap">
 				<div class="slds-col slds-text-align_left" style="padding-top:2px;">
 					<lightning-button-group>
-						<lightning-button label={activateTemplateLabel} onclick={handleAllButtonsClicked} disabled={isActivateTemplateDisabled}  >
+						<lightning-button label={activateTemplateLabel} onclick={handleAllButtonsClicked} disabled={isActivateTemplateDisabled}>
 						</lightning-button>
-						<lightning-button label="Clone Template" onclick={handleAllButtonsClicked}></lightning-button>
-						<lightning-button label="Delete Template" onclick={handleAllButtonsClicked}>
+						<lightning-button label="Clone" onclick={handleAllButtonsClicked}></lightning-button>
+						<lightning-button label="Delete" onclick={handleAllButtonsClicked}>
 						</lightning-button>
-						<lightning-button label="Refresh Template" onclick={handleAllButtonsClicked}>
+						<lightning-button label="Refresh" onclick={handleAllButtonsClicked}>
 						</lightning-button>
 						<template if:true={showPreview}>
-							<lightning-button label="Preview Template" onclick={handleAllButtonsClicked}>
+							<lightning-button label="Preview" onclick={handleAllButtonsClicked}>
 							</lightning-button>
 						</template>
+						<lightning-button label="Edit Properties" title="Edit Properties" onclick={handleAllButtonsClicked}>
+						</lightning-button>
 					</lightning-button-group>
 					<lightning-badge label={relatedtoTypeObjName} class="slds-badge_inverse slds-m-left_medium">
 					</lightning-badge>
@@ -27,7 +29,7 @@
 						<lightning-button-icon icon-name="utility:setup" onclick={handlePageProperties} alternative-text="Configure Page properties" title="Configure Page properties" class="slds-button_icon-help slds-m-right_small" size="medium" variant="bare" data-val="DxTemplates" style="padding-top:5px;"></lightning-button-icon>
 						<button class="slds-button las la-language slds-m-top_xxx-small" disabled={translateEnabled} title="Translate" onclick={handleTranslate} style="font-size: 30px;margin-top: -7px;color: rgb(116, 116, 116);padding-left: 5px;padding-right: 5px;padding-bottom: 0px;">
 						</button>
-						<lightning-button-icon icon-name="utility:help_doc_ext" onclick={handlehelp} alternative-text="Need Help?" title="Need Help?" class="slds-button_icon-help slds-m-right_small" size="medium" variant="bare" data-val="DxTemplates" style="padding-top:5px;"></lightning-button-icon>
+						
 						<lightning-button-group data-id='section menu items' class="slds-button-group" role="group">
 
 							<lightning-button-icon icon-name="utility:snippet" alternative-text="Section : Context"
@@ -43,9 +45,10 @@
 								title="Section : Table" onclick={handleAllButtonsClicked} disabled={disableEditing}>
 							</lightning-button-icon>
 							<span style="line-height:32px"> &nbsp; - &nbsp; </span>
-							<lightning-button-icon icon-name="utility:edit" alternative-text="Edit Template"
-								title="Edit Template" onclick={handleAllButtonsClicked}>
-							</lightning-button-icon>
+							<!-- <lightning-button-icon icon-name="utility:edit" alternative-text="Edit Template"
+								title="Edit Template" onclick={handleAllButtonsClicked}> 
+							</lightning-button-icon> -->
+							<lightning-button-icon icon-name="utility:help_doc_ext" onclick={handlehelp} alternative-text="Need Help?" title="Need Help?" size="medium" data-val="DxTemplates"></lightning-button-icon>
 						</lightning-button-group>
 					</lightning-layout>
 				</div>
@@ -82,7 +85,7 @@
 								rowcount={rowCount} sectiontype={SectionTypename}
 								onsavesectiondata={handlesavedsectiondata} ondeletesectiondata={handledeletesectiondata}
 								recordidtoedit={recordidtoedit} sectionrecordid={selectedSectionRecordID}
-								documenttemplaterecordid={doctemplatedetails.Id} pdf-links={pdfLinksData}
+								documenttemplaterecordid={doctemplatedetails.Id}
 								documenttemplaterecord={doctemplatedetails} ondatasaved={handleDataSaved}>
 							</c-template-table-details>
 

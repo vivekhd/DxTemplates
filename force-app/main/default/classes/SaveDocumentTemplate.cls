@@ -131,10 +131,10 @@ public with sharing class SaveDocumentTemplate {
     @AuraEnabled
     public static List<Document_Template__c> getDocumentTemplates(String filterValue){
         List<Document_Template__c> docTemp = [SELECT Id, Name,isactive__c, Related_To_Type__c, Version_Number__c, Previously_Active__c, Parent_Template__c FROM Document_Template__c WITH SECURITY_ENFORCED order by CreatedDate Desc limit 50000];
-        if(filterValue != null){
+        if(filterValue != null && filterValue != ''){
         	docTemp = [SELECT Id, Name,isactive__c, Related_To_Type__c, Version_Number__c, Previously_Active__c, Parent_Template__c FROM Document_Template__c WHERE Related_To_Type__c=:filterValue WITH SECURITY_ENFORCED order by CreatedDate Desc limit 50000];
         }
-                return docTemp;
+        return docTemp;
     }
     
     @AuraEnabled

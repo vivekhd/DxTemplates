@@ -195,6 +195,7 @@ export default class DxTemplateSetup extends LightningElement {
                     data.forEach(option => {
                         optionList.push({'label':option.DxCPQ__Related_To_Type__c,'value':option.DxCPQ__Related_To_Type__c});
                     })
+                    optionList.unshift({ 'label': 'All Templates','value': 'ALL'});
                     this.relatedTypeOptions = optionList ;
                    // alert('relatedTypeOptions >> ', this.relatedTypeOptions);
                 }
@@ -222,10 +223,10 @@ export default class DxTemplateSetup extends LightningElement {
                 this.showwatermarkbtn = false;
                 this.showUpdatedTemplate = true;
                 this.documentsExist = true;
-                if (this.templateRelatedTo != null) {
+                // if (this.templateRelatedTo != null) {
                     const tempEvent = {'detail':{'row':{'Name':this.selectedDocumentId}}};
                     this.handleTemplateSelection(tempEvent);
-                }
+                // }
             }
         })
         .catch(error => {
@@ -238,7 +239,7 @@ export default class DxTemplateSetup extends LightningElement {
     * @param {Object} event
     */
     handleFilterSelection(event) {
-        this.templateRelatedTo = event.detail.value;
+        this.templateRelatedTo = event.detail.value == 'ALL' ? '' : event.detail.value;
         this.connectedCallback();
     }
 
