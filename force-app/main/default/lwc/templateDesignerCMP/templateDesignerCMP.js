@@ -398,16 +398,16 @@ export default class TemplateDesignerCMP extends NavigationMixin(LightningElemen
       if (event.target.label == 'Activate' || event.target.label == 'Deactivate'){
         this.handleActiveTemplate(event);
       }
-      else if (event.target.label == 'Clone Template'){
+      else if (event.target.label == 'Clone'){
         this.handleCloneTemplate(event);
       }
-      else if (event.target.label == 'Delete Template'){
+      else if (event.target.label == 'Delete'){
         this.handleDeleteTemplateHandler(event);
       }
-      else if (event.target.label == 'Refresh Template'){
+      else if (event.target.label == 'Refresh'){
         this.handleRefreshTemplateHandler(event);
       }
-      else if (event.target.label == 'Preview Template'){
+      else if (event.target.label == 'Preview'){
         this.handlePreview(event);
       }
       else if (event.target.title == 'Section : Context'){
