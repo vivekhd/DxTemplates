@@ -8,14 +8,20 @@ on:
     inputs:
      scratch-org_name: 
       #friendly name to the scratch-org which needs to be created
-      default: 'scratch-org'
+      default: 'scratch-org-$(date +%Y%m%d%H%M%S)'
       required: true
      scratch-org_username:
-      default: 'username@dextara.com'
+      default: 'dxtemplates-dev-$(date +%Y%m%d%H%M%S)@dxt.dextara.com'
       required: true
      scratch-org_email:
-      default: 'personemail@dextara.com'
-      required: true
+        type: choice
+        description: Select the user email
+        options:
+        - vivekh@dextara.datamatics.com
+        - rahulb@dextara.datamatics.com
+        - sambeetp@dextara.datamatics.com
+        - kapiltejam@dextara.datamatics.com
+        - bhavyak@dextara.datamatics.com
 
 # Jobs to be executed
 
@@ -86,3 +92,7 @@ jobs:
       - name: Display user information
         id: display_user
         run: sfdx force:user:display --targetusername ${{github.event.inputs.scratch-org_username}} --json
+
+      - name: Deploy Source Code
+        id: souce code push
+        run: sf project deploy start --source-dir force-app --target-org ${{github.event.inputs.scratch-org_username}} --concise
