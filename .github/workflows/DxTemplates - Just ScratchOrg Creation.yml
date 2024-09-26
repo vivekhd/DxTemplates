@@ -94,5 +94,5 @@ jobs:
         run: sfdx force:user:display --targetusername ${{github.event.inputs.scratch-org_username}} --json
 
       - name: Deploy Source Code
-        id: souce code push
+        id: souce_code_push
         run: sf project deploy start --source-dir force-app --target-org ${{github.event.inputs.scratch-org_username}} --concise
