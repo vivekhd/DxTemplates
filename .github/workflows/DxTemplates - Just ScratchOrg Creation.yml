@@ -11,17 +11,17 @@ on:
       default: 'scratch-org-$(date +%Y%m%d%H%M%S)'
       required: true
      scratch-org_username:
-      default: 'dxtemplates-dev-$(date +%Y%m%d%H%M%S)@dxt.dextara.com'
+      default: 'dxtemplates-dev@dxt.dextara.com'
       required: true
      scratch-org_email:
         type: choice
         description: Select the user email
         options:
-        - vivekh@dextara.datamatics.com
         - rahulb@dextara.datamatics.com
         - sambeetp@dextara.datamatics.com
         - kapiltejam@dextara.datamatics.com
         - bhavyak@dextara.datamatics.com
+        - vivekh@dextara.datamatics.com
 
 # Jobs to be executed
 
