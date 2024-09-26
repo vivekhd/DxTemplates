@@ -2,13 +2,12 @@
 name: DxTemplates - Just ScratchOrg Creation
 
 # Definition when the workflow should run
-
 on:
   workflow_dispatch:
     inputs:
      scratch-org_name: 
       #friendly name to the scratch-org which needs to be created
-      default: 'scratch-org-$(date +%Y%m%d%H%M%S)'
+      default: 'DxTemplates-devscratch-org'
       required: true
      scratch-org_username:
       default: 'dxtemplates-dev@dxt.dextara.com'
@@ -26,14 +25,10 @@ on:
 # Jobs to be executed
 
 jobs:
-
- environment-setup:
-  
+ environment-setup:  
     name: environment-setup
-    runs-on: ubuntu-latest
-    
-    steps:
-    
+    runs-on: ubuntu-latest    
+    steps:    
       # Checkout the source code
       - name: 'Checkout source code'
         uses: actions/checkout@v2
@@ -60,7 +55,6 @@ jobs:
               sudo mkdir ~/sfdx-cli
               sudo tar xJf sfdx-linux-x64.tar.xz -C ~/sfdx-cli --strip-components 1
               export PATH=$PATH:~/sfdx-cli/bin
-              echo "~/sfdx-cli/bin" >> $GITHUB_PATH
               sudo chmod -R 777 ~/sfdx-cli
               sfdx --version
             
@@ -92,7 +86,3 @@ jobs:
       - name: Display user information
         id: display_user
         run: sfdx force:user:display --targetusername ${{github.event.inputs.scratch-org_username}} --json
-
-      - name: Deploy Source Code
-        id: souce_code_push
-        run: sf project deploy start --source-dir force-app --target-org ${{github.event.inputs.scratch-org_username}} --concise
