@@ -55,6 +55,7 @@ jobs:
               sudo mkdir ~/sfdx-cli
               sudo tar xJf sfdx-linux-x64.tar.xz -C ~/sfdx-cli --strip-components 1
               export PATH=$PATH:~/sfdx-cli/bin
+              echo "~/sfdx-cli/bin" >> $GITHUB_PATH
               sudo chmod -R 777 ~/sfdx-cli
               sfdx --version
             
