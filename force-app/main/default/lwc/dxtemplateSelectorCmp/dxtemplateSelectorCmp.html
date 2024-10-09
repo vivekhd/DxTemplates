@@ -7,7 +7,7 @@
 		<div class="slds-col slds-grid slds-grid_vertical">
 			<c-multi-lookup-component class='slds-col' lwc:if={showTemplateSelectionHolder} label-name="Search Template" object-api-name="Document_Template__c" field-api-names="Id,Name" 
 				filter-field-api-name="Name" icon-name="standard:account" onsinglepill={selectItemEventHandler} onremovepill={updateItemEventHandler} 
-				has-multi-select="false" where-clause={templateWhereClause} where-clause-two={templateWhereClause2}>
+				has-multi-select="false" where-clause={templateWhereClause} where-clause-two={templateWhereClause2} default-template-name = {defaultTemplateName}>
 			</c-multi-lookup-component>
 			<div lwc:if={isLoaded} class="slds-col slds-m-horizontal_large slds-is-relative">
 				<lightning-spinner alternative-text="Loading..." variant="brand"> </lightning-spinner>

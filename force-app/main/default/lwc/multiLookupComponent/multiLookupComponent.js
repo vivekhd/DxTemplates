@@ -3,6 +3,9 @@ import retrieveRecords from '@salesforce/apex/MultiSelectLookupController.retrie
 import createLog from '@salesforce/apex/LogHandler.createLog';
 
 export default class DxMultiLookupComponent extends LightningElement {
+    //code added by Bhavya for default template
+    @api defaultTemplateName;
+
     @api objectApiName;
     @api labelName;
     @api fieldApiNames;
@@ -33,8 +36,42 @@ export default class DxMultiLookupComponent extends LightningElement {
                 this.selectedRecord = JSON.parse(JSON.stringify(this.globalItems));
             }
         }
-        console.log('The multi select feature is: ' + this.hasMultiSelect);
+    
+        //console.log('The multi select feature is: ' + this.hasMultiSelect);
+    
+        if (this.defaultTemplateName !== '' && this.defaultTemplateName !== null) {
+            const customEvent = {
+                target: {
+                    value: this.defaultTemplateName,
+                }
+            };
+    
+            // Call handleKeyChange and wait for it to complete using .then()
+            Promise.resolve(this.handleKeyChange(customEvent))
+                .then(() => {
+                    // Now that lstResult is populated, call handleSelectedRecord for the first record
+                    if (this.lstResult && this.lstResult.length > 0) {
+                        const simulatedEvent = {
+                            target: {
+                                getAttribute: function(attr) {
+                                    if (attr === 'data-recid') {
+                                        return this.lstResult[0].recordId; // Get first record's id
+                                    }
+                                    return null;
+                                }.bind(this)
+                            }
+                        };
+                        
+                        // Call handleSelectedRecord with the simulated event
+                        this.handleSelectedRecord(simulatedEvent);
+                    }
+                })
+                .catch((error) => {
+                    console.error('Error in handleKeyChange: ', error);
+                });
+        }
     }
+    
 
     @api
     selectedRecordHandler(record) {
@@ -59,49 +96,59 @@ export default class DxMultiLookupComponent extends LightningElement {
 
     handleKeyChange(event) {
         this.searchInput = event.target.value;
-        if(this.isSectionClone) {
-           this.whereClauseTwo =  'Name Like \'%'+this.searchInput+ '%\' OR '+'DxCPQ__Document_Template__r.Name Like \'%'+this.searchInput+ '%\'';
-           this.filterFieldApiName = "";
+    
+        if (this.isSectionClone) {
+            this.whereClauseTwo = 'Name Like \'%' + this.searchInput + '%\' OR ' + 'DxCPQ__Document_Template__r.Name Like \'%' + this.searchInput + '%\'';
+            this.filterFieldApiName = "";
         }
+    
         this.lstResult = [];
         this.isDisplayErrorMessage = false;
-        if (this.searchInput.trim().length > 0) {
-            retrieveRecords({
-                objectName: this.objectApiName,
-                fieldAPINames: this.fieldApiNames,
-                filterFieldAPIName: this.filterFieldApiName,
-                strInput: this.searchInput,
-                whereClauseTwo: this.whereClauseTwo ? this.whereClauseTwo : "",
-                whereClause: this.whereClause ? this.whereClause : "",
-                isSectionClone : this.isSectionClone
-            })
-                .then(result => {
-                    if (result.length > 0) {
-                        if(this.isSectionClone) {
-                            this.lstResult = this.constructSectionLabel(result);
-                        }else {
-                            this.lstResult = result;
+    
+        return new Promise((resolve, reject) => {
+            if (this.searchInput.trim().length > 0) {
+                retrieveRecords({
+                    objectName: this.objectApiName,
+                    fieldAPINames: this.fieldApiNames,
+                    filterFieldAPIName: this.filterFieldApiName,
+                    strInput: this.searchInput,
+                    whereClauseTwo: this.whereClauseTwo ? this.whereClauseTwo : "",
+                    whereClause: this.whereClause ? this.whereClause : "",
+                    isSectionClone: this.isSectionClone
+                })
+                    .then(result => {
+                        if (result.length > 0) {
+                            this.lstResult = this.isSectionClone ? this.constructSectionLabel(result) : result;
+                            this.isDialogDisplay = true;
+                            this.isDisplayErrorMessage = false;
+                        } else {
+                            this.isDialogDisplay = false;
+                            this.isDisplayErrorMessage = true;
+                            this.lstResult = undefined;
                         }
-                        this.isDialogDisplay = true;
-                        this.isDisplayErrorMessage = false;
-                    }
-                    else {
-                        this.isDialogDisplay = false;
-                        this.isDisplayErrorMessage = true;
+                        resolve();  // Ensure promise resolves when done
+                    })
+                    .catch(error => {
+                        this.error = error;
                         this.lstResult = undefined;
-                    }
-                })
-                .catch(error => {
-                    this.error = error;
-                    this.lstResult = undefined;
-                    this.isDialogDisplay = false;
-                    createLog({ recordId: this.templatesectionid, className: 'multiLookupComponent LWC Component', exceptionMessage: error.body.message, LogData: error.body.exceptionType, logType: 'Exception' })
+                        this.isDialogDisplay = false;
+                        createLog({
+                            recordId: this.templatesectionid,
+                            className: 'multiLookupComponent LWC Component',
+                            exceptionMessage: error.body.message,
+                            LogData: error.body.exceptionType,
+                            logType: 'Exception'
+                        })
                         .then(result => { console.log('Log is generated'); })
-                        .catch(error => { console.log('Log is not generated ' + JSON.stringify(error)); })
-                })
-        } else {
-            this.isDialogDisplay = false;
-        }
+                        .catch(error => { console.log('Log is not generated ' + JSON.stringify(error)); });
+    
+                        reject(error);  // Ensure promise rejects if there is an error
+                    });
+            } else {
+                this.isDialogDisplay = false;
+                resolve();  // Resolve immediately if input is blank
+            }
+        });
     }
 
     constructSectionLabel(inputJson) {

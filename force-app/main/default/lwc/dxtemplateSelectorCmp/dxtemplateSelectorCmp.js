@@ -11,6 +11,9 @@ export default class DxtemplateSelectorCmp extends LightningElement {
     @api recordId;
     @api objectLabel;
     @api objectApiName;
+    @api defaultTemplateName;
+    @api defaultPageSize;
+    @api defaultPageOrientation;
 
     @track modifiedPDFName;
     @track pageSize = 'A4';
@@ -24,7 +27,7 @@ export default class DxtemplateSelectorCmp extends LightningElement {
     ];
     @track  pageOrientationOptions = [
         { label: 'Potrait', value: 'Potrait' },
-        { label: 'LandScape', value: 'LandScape' }
+        { label: 'Landscape', value: 'Landscape' }
     ];
   
     downloadURL;
@@ -50,6 +53,10 @@ export default class DxtemplateSelectorCmp extends LightningElement {
     }
 
     connectedCallbackHandler() {
+        this.pageSize =  this.defaultPageSize != '' || this.defaultPageSize != null ? this.defaultPageSize : 'A4';
+        this.pageOrientation =  this.defaultPageOrientation != '' || this.defaultPageOrientation != null ? this.defaultPageOrientation : 'Potrait';
+        this.pageProperties.pageSize = this.pageSize;
+        this.pageProperties.pageOrientation = this.pageOrientation;
         this.saveRecordToAttachmentLabel = `Save as Attachment`;
         this.templateWhereClause2 = ` Related_To_Type__c = \'${this.objectApiName}\'`;
         this.selectedTemplateId=undefined;
@@ -94,6 +101,9 @@ export default class DxtemplateSelectorCmp extends LightningElement {
         this.selectedTemplateId=undefined;
         this.showSaveAttachmentButton=false;
         this.pageOrientation = 'Potrait';
+        this.pageSize = 'A4';
+        this.pageProperties.pageSize = this.pageSize;
+        this.pageProperties.pageOrientation = this.pageOrientation;
 
         let dateKey = new Date().toLocaleString().split(', ');
         this.modifiedPDFName = this.recordName + '-' + dateKey[0].replaceAll('/','') + '-' + dateKey[1].split(' ')[0].replaceAll(':','');    
