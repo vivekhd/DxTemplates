@@ -8,7 +8,7 @@
       "path": "force-app",
       "package": "DxTemplates_Unlocked",
       "versionName": "ver 0.1",
-      "versionNumber": "0.2.0.NEXT",
+      "versionNumber": "0.3.0.NEXT",
       "default": false,
       "versionDescription": "",
       "apexTestAccess": {
@@ -21,7 +21,7 @@
       "path": "force-app",
       "package": "Dx_Templates",
       "versionName": "",
-      "versionNumber": "0.10.0.NEXT",
+      "versionNumber": "0.12.0.NEXT",
       "default": false,
       "versionDescription": "",
       "postInstallScript": "PostInstallDataCreation",
@@ -129,6 +129,13 @@
     "DxTemplates_Managed_v3@0.5.0-1": "04tQm000001q79jIAA",
     "DxTemplates_Managed_v3@0.5.0-2": "04tQm000001q7G9IAI",
     "DxTemplates_Managed_v3@0.6.0-1": "04tQm000001q7KzIAI",
-    "DxTemplates_Managed_v3@0.6.0-3": "04tQm000001q7ODIAY"
+    "DxTemplates_Managed_v3@0.6.0-3": "04tQm000001q7ODIAY",
+    "DxTemplates_Managed_v3@0.6.0-4": "04tQm000001q7PpIAI",
+    "DxTemplates_Managed_v3@0.6.0-5": "04tQm000001qSNpIAM",
+    "DxTemplates_Managed_v3@0.6.0-6": "04tQm000001qSPRIA2",
+    "Dx_Templates@0.11.0-1": "04tQm000001qWpsIAE",
+    "Dx_Templates@0.12.0-1": "04tQm000001rVhpIAE",
+    "DxTemplates_Unlocked@0.3.0-1": "04tQm000001t7OTIAY",
+    "DxTemplates_Managed_v3@0.6.0-7": "04tQm000001umKjIAI"
   }
 }
