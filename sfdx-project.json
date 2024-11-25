@@ -7,5 +7,5 @@
     { "path": "force-app", "default": true}, 
     { "path" : "unpackaged" }, 
     { "path" : "utils" } 
-  ],
+  ]
 }
