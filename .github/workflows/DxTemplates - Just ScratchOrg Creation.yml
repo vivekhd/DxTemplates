@@ -87,7 +87,3 @@ jobs:
       - name: Display user information
         id: display_user
         run: sfdx force:user:display --targetusername ${{github.event.inputs.scratch-org_username}} --json
-
-      - name: Deploy Source Code
-        id: display_branch_code
-        run: sf project deploy start --target-org ${{github.event.inputs.scratch-org_username}}
