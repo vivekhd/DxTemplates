@@ -57,25 +57,26 @@ export default class TemplateContentDetails extends NavigationMixin(LightningEle
     DxCPQ__Document_Clause__c: '',
     DxCPQ__Section_Visibility_Rule__c:''
   };
-    formats = [
-        'font',
-        'size',
-        'bold',
-        'italic',
-        'underline',
-        'strike',
-        'list',
-        'indent',
-        'align',
-        'link',
-        'image',
-        'table',
-        'header',
-        'color',
-        'code-block',
-        'script', 'direction'
-    ];
- //filter
+  formats = [
+      'font',
+      'size',
+      'bold',
+      'italic',
+      'underline',
+      'strike',
+      'list',
+      'indent',
+      'align',
+      'link',
+      'image',
+      'table',
+      'header',
+      'color',
+      'code-block',
+      'script', 'direction'
+  ];
+  
+  //filter
   @track ruleCondition;
   @track listOfExistingConditions = [];
   @track fieldWrapper;
@@ -113,14 +114,18 @@ export default class TemplateContentDetails extends NavigationMixin(LightningEle
     this.whereClause = this.whereCondition;
     console.log('sectionrecordid',this.sectionrecordid);
   }
-   handleFiltering() {
-      this.ruleCondition = true;
-      this.template.querySelector('[data-id="filter"]').show();
+
+  handleFiltering() {
+    this.ruleCondition = true;
+    this.template.querySelector('[data-id="filter"]').show();
   }
-   closePreviewModal() {
-      this.ruleCondition = false;
-      this.template.querySelector('[data-id="filter"]').hide();
+
+  closePreviewModal() {
+    this.ruleCondition = false;
+    this.template.querySelector('[data-id="filter"]')?.hide();
+    this.template.querySelector('[data-id="merge"]')?.hide();
   }
+
   handleRuleWrapperMaking() {
     if (this.selectedObjectName !== undefined) {
       getSObjectListFiltering({
@@ -134,162 +139,161 @@ export default class TemplateContentDetails extends NavigationMixin(LightningEle
       });
     }
   }
-     handleCreateRules(event) {
-      const conditionChild = this.template.querySelector('c-conditioncmp').getConditionDetails();
-      this.ruleExpression = conditionChild.expression;
-      this.createRuleConditionObjects(conditionChild.listOfConditions);
-      let listOfConditions = JSON.stringify(this.ruleConditions);
-      let deleteIds = null;
-      let ruleExp = JSON.stringify(this.ruleExpression);
-      createRuleCondition({
-              ruleConditions: listOfConditions,
-              ruleExpression: ruleExp,
-              deleteIds: deleteIds,
-              sectionrecordid: this.sectionrecordid
-          })
-          .then(result => {
-              this.ruleIdCreated = result;
-              this.ruleExists = true;
-              let event = new Object();
-              this.getExistingConditions(event);
-          })
-          .catch(error => {
-              console.log('Error -> createRuleCondition' + JSON.stringify(error));
-          });
-      this.template.querySelector('[data-id="filter"]').hide();
-  }
-   createRuleConditionObjects(arrayList) {
-      this.hasSpecialCharacter = false;
-      let regExpr = /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]+/;
-      arrayList.forEach(condition => {
-          let tempObj = {};
-          tempObj.Id = condition.Id;
-          tempObj.conditionName = condition.conditionName;
-          tempObj.dataType = condition.dataType;
-          if (condition.operator == '==') {
-              tempObj.operator = '==';
-          } else {
-              tempObj.operator = condition.operator;
-          }
-          tempObj.selectedObject = condition.selectedObject;
-          tempObj.selectedField = condition.selectedField;
-          tempObj.value = condition.value;
-          if (regExpr.test(tempObj.value)) {
-              this.hasSpecialCharacter = true;
-          }
-          tempObj.conditionIndex = condition._index;
-          this.ruleConditions.push(tempObj);
-          if (condition.children && condition.children.length > 0) {
-              condition.children.forEach(child => {
-                  if (child.group && child.group.length > 0) {
-                      this.createRuleConditionObjects(child.group);
-                  }
-              })
-          }
-      })
-  }
-   handleRuleUpdates(event) {
-      this.ruleConditions = [];
-      const conditionChild = this.template.querySelector('c-conditioncmp').getConditionDetails();
-      this.createRuleConditionObjects(conditionChild.listOfConditions);
-      let listOfConditions = JSON.stringify(this.ruleConditions);
-      let expression = JSON.stringify(conditionChild.expression);
-      let deleteIds = this.removeDeletedConditions(this.ruleConditions, this.conditionsArr);
-      if (!this.hasSpecialCharacter) {
-          createRuleCondition({
-                  ruleConditions: listOfConditions,
-                  ruleExpression: expression,
-                  deleteIds: deleteIds,
-                  sectionrecordid: this.sectionrecordid
-              })
-              .then(result => {
-                  this.ruleExists = true;
-                  this.ruleExpression = expression;
 
-                  let event = new Object();
-                  this.getExistingConditions(event);
-              })
-              .catch(error => {
-                  console.log('createRuleCondition error occurred' + JSON.stringify(error));
-              });
+  handleCreateRules(event) {
+    const conditionChild = this.template.querySelector('c-conditioncmp').getConditionDetails();
+    this.ruleExpression = conditionChild.expression;
+    this.createRuleConditionObjects(conditionChild.listOfConditions);
+    let listOfConditions = JSON.stringify(this.ruleConditions);
+    let deleteIds = null;
+    let ruleExp = JSON.stringify(this.ruleExpression);
+    createRuleCondition({
+      ruleConditions: listOfConditions,
+      ruleExpression: ruleExp,
+      deleteIds: deleteIds,
+      sectionrecordid: this.sectionrecordid
+    })
+    .then(result => {
+        this.ruleIdCreated = result;
+        this.ruleExists = true;
+        let event = new Object();
+        this.getExistingConditions(event);
+    })
+    .catch(error => {
+        console.log('Error -> createRuleCondition' + JSON.stringify(error));
+    });
+    this.template.querySelector('[data-id="filter"]').hide();
+  }
+
+  createRuleConditionObjects(arrayList) {
+    this.hasSpecialCharacter = false;
+    let regExpr = /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]+/;
+    arrayList.forEach(condition => {
+      let tempObj = {};
+      tempObj.Id = condition.Id;
+      tempObj.conditionName = condition.conditionName;
+      tempObj.dataType = condition.dataType;
+      if (condition.operator == '==') {
+        tempObj.operator = '==';
+      } else {
+        tempObj.operator = condition.operator;
       }
-      this.template.querySelector('[data-id="filter"]').hide();
-  }
-   getExistingConditions(event) {
-      this.mapOfRC = new Map();
-      this.conditionsArr = [];
-      this.conditionExists = false;
-      this.allConditions = [];
-      this.listOfExistingConditions = [];
-      getConditions({ ruleName: this.ruleIdCreated })
-        .then(result => {
-            if (result.length > 0) {
-                this.conditionsArr = JSON.parse(JSON.stringify(result));
-                this.lstofactualConditions = this.conditionsArr;
-                this.conditionsArr.forEach(con => {
-                    this.mapOfRC.set(con.Name, con);
-                });
-                if (this.fieldWrapper !== undefined) {
-                    let conditionResult = createRuleConditionHierarcy(this.ruleExpression, this.mapOfRC, this.fieldWrapper);
-                    this.listOfExistingConditions = conditionResult.listOfConditions;
-                    this.selectedGlobalValue = conditionResult.selectedGlobalValue;
-                    this.conditionExists = true;
-                }
-            }
-        })
-        .catch(error => {
-            console.log('Apex Call getExistingConditions Erroneous');
-            console.log(error);
-        })
-  }
-  removeDeletedConditions(listOfConditions, receivedConditions) {
-      let existingIds = [];
-      let receivedIds = [];
-      listOfConditions.forEach(con => {
-          if (con.Id) {
-              existingIds.push(con.Id);
+      tempObj.selectedObject = condition.selectedObject;
+      tempObj.selectedField = condition.selectedField;
+      tempObj.value = condition.value;
+      if (regExpr.test(tempObj.value)) {
+        this.hasSpecialCharacter = true;
+      }
+      tempObj.conditionIndex = condition._index;
+      this.ruleConditions.push(tempObj);
+      if (condition.children && condition.children.length > 0) {
+        condition.children.forEach(child => {
+          if (child.group && child.group.length > 0) {
+              this.createRuleConditionObjects(child.group);
           }
-      })
-      receivedConditions.forEach(con => {
-          receivedIds.push(con.Id);
-      })
-      receivedIds = receivedIds.filter(el => {
-          return !existingIds.includes(el);
-      });
-      return receivedIds;
+        })
+      }
+    })
   }
-    handleFilterRuleReset() {
 
-      resetRulesForTemplate({
-              templateRuleId: this.ruleIdCreated
-          })
-          .then(result => {
-              if (result == 'Success') {
+  handleRuleUpdates(event) {
+    this.ruleConditions = [];
+    const conditionChild = this.template.querySelector('c-conditioncmp').getConditionDetails();
+    this.createRuleConditionObjects(conditionChild.listOfConditions);
+    let listOfConditions = JSON.stringify(this.ruleConditions);
+    let expression = JSON.stringify(conditionChild.expression);
+    let deleteIds = this.removeDeletedConditions(this.ruleConditions, this.conditionsArr);
+    if (!this.hasSpecialCharacter) {
+      createRuleCondition({
+        ruleConditions: listOfConditions,
+        ruleExpression: expression,
+        deleteIds: deleteIds,
+        sectionrecordid: this.sectionrecordid
+      })
+      .then(result => {
+        this.ruleExists = true;
+        this.ruleExpression = expression;
+        let event = new Object();
+        this.getExistingConditions(event);
+      })
+      .catch(error => {
+        console.log('createRuleCondition error occurred' + JSON.stringify(error));
+      });
+    }
+    this.template.querySelector('[data-id="filter"]').hide();
+  }
 
-                  this.ruleIdCreated = null;
+  getExistingConditions(event) {
+    this.mapOfRC = new Map();
+    this.conditionsArr = [];
+    this.conditionExists = false;
+    this.allConditions = [];
+    this.listOfExistingConditions = [];
+    getConditions({ ruleName: this.ruleIdCreated })
+    .then(result => {
+      if (result.length > 0) {
+        this.conditionsArr = JSON.parse(JSON.stringify(result));
+        this.lstofactualConditions = this.conditionsArr;
+        this.conditionsArr.forEach(con => {
+          this.mapOfRC.set(con.Name, con);
+        });
+        if (this.fieldWrapper !== undefined) {
+          let conditionResult = createRuleConditionHierarcy(this.ruleExpression, this.mapOfRC, this.fieldWrapper);
+          this.listOfExistingConditions = conditionResult.listOfConditions;
+          this.selectedGlobalValue = conditionResult.selectedGlobalValue;
+          this.conditionExists = true;
+        }
+      }
+    })
+    .catch(error => {
+      console.log('Apex Call getExistingConditions Erroneous');
+      console.log(error);
+    })
+  }
 
-                  this.listOfExistingConditions = [];
-                  this.conditionsArr = [];
-                  this.ruleExists = false;
-                  this.filteringCondition = '';
-                  this.ruleConditions = [];
-                  this.ruleCondition = false;
+  removeDeletedConditions(listOfConditions, receivedConditions) {
+    let existingIds = [];
+    let receivedIds = [];
+    listOfConditions.forEach(con => {
+      if (con.Id) {
+        existingIds.push(con.Id);
+      }
+    })
+    receivedConditions.forEach(con => {
+        receivedIds.push(con.Id);
+    })
+    receivedIds = receivedIds.filter(el => {
+        return !existingIds.includes(el);
+    });
+    return receivedIds;
+  }
 
-                  this.handlesectionsave(null);
-              } else {
-                  const Errormsg = new ShowToastEvent({
-                      title: 'Error',
-                      message: 'Reset didn\'t work',
-                      variant: 'Error'
-                  });
-                  this.dispatchEvent(Errormsg);
-              }
-          })
-          .catch(error => {
-              console.log('reset Rules error occurred' + JSON.stringify(error));
-          });
-      this.ruleCondition = false;
-      this.template.querySelector('c-modal').hide();
+  handleFilterRuleReset() {
+    resetRulesForTemplate({ templateRuleId: this.ruleIdCreated })
+    .then(result => {
+      if (result == 'Success') {
+        this.ruleIdCreated = null;
+        this.listOfExistingConditions = [];
+        this.conditionsArr = [];
+        this.ruleExists = false;
+        this.filteringCondition = '';
+        this.ruleConditions = [];
+        this.ruleCondition = false;
+        this.handlesectionsave(null);
+      } else {
+        const Errormsg = new ShowToastEvent({
+          title: 'Error',
+          message: 'Reset didn\'t work',
+          variant: 'Error'
+        });
+        this.dispatchEvent(Errormsg);
+      }
+    })
+    .catch(error => {
+      console.log('reset Rules error occurred' + JSON.stringify(error));
+    });
+    this.ruleCondition = false;
+    this.template.querySelector('c-modal').hide();
   }
 
   /*filter*/
@@ -303,17 +307,17 @@ export default class TemplateContentDetails extends NavigationMixin(LightningEle
     this.clauseId = event.detail.value;
     const clauseIdstring = JSON.stringify(this.clauseId)
     ClauseBody({ inputparam: clauseIdstring })
-      .then(result => {
-        if (result != null) {
-          this.richtextVal = result.DxCPQ__Body__c;
-          this.Recorddetailsnew.Name = result.Name;
-        }
-      })
-      .catch(error => {
-        let errorMessage = error.message || 'Unknown error message';
-          let tempError = error.toString();
-          createLog({ recordId: '', className: 'TemplateContentDetails LWC Component - connectedCallback()', exceptionMessage: errorMessage, logData: tempError, logType: 'Exception' });
-        });
+    .then(result => {
+      if (result != null) {
+        this.richtextVal = result.DxCPQ__Body__c;
+        this.Recorddetailsnew.Name = result.Name;
+      }
+    })
+    .catch(error => {
+      let errorMessage = error.message || 'Unknown error message';
+        let tempError = error.toString();
+        createLog({ recordId: '', className: 'TemplateContentDetails LWC Component - connectedCallback()', exceptionMessage: errorMessage, logData: tempError, logType: 'Exception' });
+      });
   }
 
   @api handleObjectNameSelection(objName) {
@@ -446,14 +450,14 @@ export default class TemplateContentDetails extends NavigationMixin(LightningEle
 
   handlemergefieldadd() {
     this.isTranslateModalOpen = false;
-    this.template.querySelector('c-modal').show();
+    this.template.querySelector('c-modal[data-id="merge"]').show();
   }
 
   handlerowlevelmerge(event) {
     this.selectedRowIndex = event.currentTarget.dataset.index;
     this.isTranslateModalOpen = false;
     this.rowlevelmerge = true;
-    this.template.querySelector('c-modal').show();
+    this.template.querySelector('c-modal[data-id="merge"]').show();
   }
 
   getMergeFieldCopy() {
@@ -469,7 +473,7 @@ export default class TemplateContentDetails extends NavigationMixin(LightningEle
       document.getElementById('input_test_id').remove();
       this.selectedMergefields.push(this.mergefieldname);
     }
-    this.template.querySelector('c-modal').hide();
+    this.template.querySelector('c-modal[data-id="merge"]').hide();
   }
 
   getMergeField() {
@@ -477,20 +481,17 @@ export default class TemplateContentDetails extends NavigationMixin(LightningEle
     if (mergeField != undefined) {
       this.mergefieldname = '{!' + this.selectedObjectName + '.' + mergeField + '}';
       if(this.rowlevelmerge){
-        //let rowIndex = this.selectedRowIndex;
-            this.isTranslateModalOpen = true;
-            let updatedRecords = [...this.translatedRecords];
-                updatedRecords[this.selectedRowIndex] = {
-                    ...updatedRecords[this.selectedRowIndex],
-                    Name: this.mergefieldname
-                };
-                this.translatedRecords = updatedRecords;
-            //this.translatedRecords[this.selectedRowIndex].Name = this.mergefieldname; // Update the "Field Label" column
-            this.rowlevelmerge = false;
-      }
-      else{
+        this.isTranslateModalOpen = true;
+        let updatedRecords = [...this.translatedRecords];
+        updatedRecords[this.selectedRowIndex] = {
+          ...updatedRecords[this.selectedRowIndex],
+          Name: this.mergefieldname
+        };
+        this.translatedRecords = updatedRecords;
+        this.rowlevelmerge = false;
+      } else {
         this.richtextVal += this.mergefieldname;
-        this.template.querySelector('c-modal').hide();
+        this.template.querySelector('c-modal[data-id="merge"]').hide();
       }
       this.selectedMergefields.push(this.mergefieldname);
     }
