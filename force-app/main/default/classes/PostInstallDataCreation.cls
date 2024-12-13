@@ -102,7 +102,7 @@ global class PostInstallDataCreation implements InstallHandler {
             for (Map<String,String> tempIdEx: templateRecordsDataMapping){
                 for(Document_Template_Section__c eachDocTempSection : formattedDataMaping.Template_Sections){
                     if (eachDocTempSection.Type__c == 'Header'){
-                        eachDocTempSection.Section_Content__c = eachDocTempSection.Section_Content__c.replace('068NS00000HRJETYA5',cv.id);
+                        eachDocTempSection.Section_Content__c = eachDocTempSection.Section_Content__c.replace('<contentversionid>',cv.id);
                     }
                     if (eachDocTempSection.DxCPQ__External_Document_Template__c == tempIdEx.get('ExternalId')){
                         eachDocTempSection.Document_Template__c = tempIdEx.get('Id');
