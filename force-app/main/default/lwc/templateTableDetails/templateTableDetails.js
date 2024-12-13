@@ -1236,8 +1236,16 @@ export default class TemplateTableDetails extends NavigationMixin(LightningEleme
                     this.selectedBorderStyle = parsedJson.borderstyle;
                     this.tablehasdata = true;
                     this.newPage = parsedJson.newPage;
+                    // setTimeout(() => {
+                    //     this.template.querySelector('[data-id="newPageTable"]').checked = parsedJson.newPage;
+                    // });
                     setTimeout(() => {
-                        this.template.querySelector('[data-id="newPageTable"]').checked = parsedJson.newPage;
+                        try {
+                            this.template.querySelector('[data-id="newPageTable"]').checked = this.newpage;
+                        }
+                        catch (error) {
+                            console.log('error in setTimeout for checked error table >> ', error.message);
+                        }
                     });
                     if (result.DxCPQ__Section_Visibility_Rule__c != null && result.DxCPQ__Section_Visibility_Rule__c != '') {
                         this.Recorddetailsnew.DxCPQ__Section_Visibility_Rule__c = result.DxCPQ__Section_Visibility_Rule__c;
