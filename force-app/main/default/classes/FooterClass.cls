@@ -3,7 +3,7 @@ public with sharing class FooterClass {
     @AuraEnabled(cacheable = true)
     public static List<contentversion> getContentVersions(){
         List<contentversion> cvs = new List<contentversion>();
-        String query1= 'select id,FileExtension,title from contentversion where FileExtension in (\'jpg\', \'jpeg\', \'png\') WITH SECURITY_ENFORCED order by title asc';
+        String query1= 'select id,FileExtension,title from contentversion where FileExtension in (\'jpg\', \'jpeg\', \'png\') and publishstatus=\'R\' WITH SECURITY_ENFORCED order by title asc';
         try{
             if(Test.isRunningTest()){
                     query1 = query1 + '372';                
@@ -18,9 +18,9 @@ public with sharing class FooterClass {
     
     @AuraEnabled
     public static List<contentversion> getSearchedContentVersions(String searchlabel){
-        searchlabel = '%' + searchlabel + '%';
+        //searchlabel = '%' + searchlabel + '%';
         List<contentversion> cvs = new List<contentversion>();
-        String query = String.escapeSingleQuotes('select id,FileExtension,title from contentversion where FileExtension in (\'jpg\', \'jpeg\', \'png\') and title LIKE \'' + searchlabel + '\' WITH SECURITY_ENFORCED order by title asc');
+        String query = 'select id,FileExtension,title from contentversion where FileExtension in (\'jpg\', \'jpeg\', \'png\') and publishstatus=\'R\' and title LIKE \'%' + String.escapeSingleQuotes(searchlabel) + '%\' WITH SECURITY_ENFORCED order by title asc';
         System.debug(query);
         try{
             if(Test.isRunningTest()){

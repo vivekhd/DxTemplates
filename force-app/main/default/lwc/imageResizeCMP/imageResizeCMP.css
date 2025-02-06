@@ -1,0 +1,11 @@
+.modified-icon-tick {
+	position: relative;
+    left: -47px;
+    top: -155px;
+}
+
+.modified-icon-cross {
+	position: relative;
+    right: -47px;
+    top: -155px;
+}

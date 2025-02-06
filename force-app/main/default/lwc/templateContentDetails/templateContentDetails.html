@@ -36,6 +36,7 @@
 			<div class="slds-col slds-size_1-of-1 slds-medium-size_2-of-12 slds-large-size_2-of-12 slds-text-align_right">
 				<div>
 					<lightning-button-group>
+						<lightning-button-icon class="slds-m-top_x-small slds-p-top_xx-small" icon-name="utility:insert_tag_field"  alternative-text="Custom CSS for Context Section" title="Custom Section CSS" label="Custom Section CSS"  size="large"  onclick={handleSectionCss}></lightning-button-icon>
 						<lightning-button-icon class="slds-m-top_x-small slds-p-top_xx-small" icon-name="utility:filter_criteria_rule"  alternative-text="Settings" title="Apply Filter(s)" label="Apply Filter(s)"  size="large"  onclick={handleFiltering}></lightning-button-icon>
 						<lightning-button-icon icon-name="utility:help_doc_ext" onclick={handlehelp}
 							alternative-text="Need Help?" title="Need Help?" size="medium" 
@@ -52,8 +53,7 @@
 			</div>
 		</div>
 		<div class="slds-col slds-size_12-of-12">
-			<lightning-input-rich-text value={richtextVal} formats={formats} onchange={handleRichTextArea}
-				aria-placeholder="Enter Text here" disabled={isDisabled}>
+			<lightning-input-rich-text value={richtextVal} class='imageUpdateCheck'  data-id="dev-richtext" id={key} formats={formats} lwc:if={reload}  onchange={handleRichTextArea} onmouseup={handleMouseUp} onfocus={handleRTAClick} onkeyup={handleKeyUp} aria-placeholder="Enter Text here" disabled={isDisabled}>
 				<lightning-rich-text-toolbar-button-group slot="toolbar" aria-label="Template Button Group"
 					style="order: -9;float: left; display: inline-block;">
 					<!------------Code added by Bhavya to have custom font-family list---------------->
@@ -67,8 +67,15 @@
 					<lightning-rich-text-toolbar-button icon-name="utility:merge"
 						icon-alternative-text="Add Merge Field" onclick={handlemergefieldadd} disabled={isDisabled}>
 					</lightning-rich-text-toolbar-button>
+					<!-----Code added by Bhavya starts here------>
+					<lightning-rich-text-toolbar-button icon-name="utility:image" icon-alternative-text="Add Image" onclick={handleAddImage} disabled={isDisabled}></lightning-rich-text-toolbar-button>
+					<!-- UNCOMMENT THIS LINE FOR IMAGE RESIZING <lightning-rich-text-toolbar-button icon-name="utility:image" icon-alternative-text="Resize Image" onclick={handleResizeImage} disabled={isDisabled}></lightning-rich-text-toolbar-button> -->
+					<!-- <lightning-rich-text-toolbar-button icon-name="utility:activity" icon-alternative-text="POC" onclick={handleResizeImage} disabled={isDisabled}></lightning-rich-text-toolbar-button>
+					<lightning-rich-text-toolbar-button icon-name="utility:favorite" icon-alternative-text="CROP POC" onclick={handleCropImage} disabled={isDisabled}></lightning-rich-text-toolbar-button> -->
+					<!-----Code added by Bhavya ends here-------->
 				</lightning-rich-text-toolbar-button-group>
 			</lightning-input-rich-text>
+			
 		</div>
 		<div class="slds-col slds-size_12-of-12 slds-text-align_right slds-p-top_small">
 			<lightning-button class="slds-m-left_small" disabled={disabledeleteButton} variant="neutral" label="Delete"
@@ -78,21 +85,160 @@
 				onclick={handlesectionsave}>
 			</lightning-button>
 		</div>
-
-		<c-modal data-id="merge" onclosedialog = {closePreviewModal}>
-			<span slot="header">Merge Field(s)</span>
-			<div class="slds-modal__content slds-p-around_medium" style="min-height: 240px;">
-				<c-dx-lookup-fields-displaycmp selection-object={selectedObjectName}></c-dx-lookup-fields-displaycmp>
-			</div>
-
-			<footer class="slds-modal__footer">
-				<div class="slds-text-align_right">
-					<lightning-button variant="brand" label="insert" title="insert" onclick={getMergeField}> </lightning-button>
-					<lightning-button variant="brand" label="CopyToClipboard" title="insert" onclick={getMergeFieldCopy}> </lightning-button>
+		<!--code added by Bhavya Starts here-->
+	<c-modal onclosedialog = {handlecloseModal}>
+			<template if:true={showMergeField}>
+				<span slot="header">Merge Field(s)</span>
+				<div class="slds-modal__content slds-p-around_medium" style="min-height: 240px;">
+					<c-dx-lookup-fields-displaycmp selection-object={selectedObjectName}></c-dx-lookup-fields-displaycmp>
 				</div>
-			</footer>
+
+				<footer class="slds-modal__footer">
+					<div class="slds-text-align_right">
+						<lightning-button variant="brand" label="insert" title="insert" onclick={getMergeField}>
+						</lightning-button>
+						<lightning-button variant="brand" label="CopyToClipboard" title="insert"
+							onclick={getMergeFieldCopy}></lightning-button>
+					</div>
+				</footer>
+			</template>
+
+			<!---Code added by Bhavya Starts here-->
+			<template if:true={isModalOpen}>
+				<span slot="header">Select Image</span>
+				<div class="slds-modal__content slds-p-around_small dx-lrf-std-cstm-1" style="min-height: 240px;">
+					<template if:true={showimages}>
+						<template if:true={imagesfound}>
+							<div class="slds-grid slds-wrap slds-p-around_xx-small slds-border_bottom"
+								style="border: 1px solid rgb(229, 229, 229); border-radius: 5px; background: rgb(243, 243, 243);">
+								<div
+									class="slds-col slds-size_1-of-1 slds-medium-size_4-of-12 slds-large-size_4-of-12 slds-m-bottom_xx-small">
+									<lightning-input if:true={showimages} name="enter-search" label="Search" type="search"
+										onchange={handleSearch}></lightning-input>
+								</div>
+							</div>
+						</template>
+						<div class="slds-grid slds-gutters_xx-small slds-wrap slds-p-top_small">
+							<template if:true={imagesfound}>
+								<template for:each={imageUrls} for:item="image" for:index="index">
+
+									<div class="slds-col slds-size_1-of-1 slds-large-size_3-of-12 slds-text-align_center"
+										key={image.Id}>
+										<div class="slds-box slds-box_small  slds-m-bottom_small" key={image.Id}
+											data-id={image.Id} onclick={handleselectedImage} disabled={isDisabled}>
+
+											<img key={image.Id} data-id={image.Id} src={image.URL} onload={handleImageLoad} alt="User Image" style="max-height:100px; max-width:100px; min-height:100px;" />
+											<br key={image.Id}/>
+											<br key={image.Id}/>
+											<lightning-formatted-text value={image.title} key={image.Id}
+												disabled={isDisabled}></lightning-formatted-text>
+
+										</div>
+										<!--<lightning-button key={image.Id} data-id={image.Id} variant="brand" label="Select" title="titleName" 
+							onclick={handleselectedImage} disabled={isDisabled}></lightning-button>-->
+									</div>
+
+								</template>
+							</template>
+						</div>
+						<template if:false={imagesfound}>
+							<p>No Images found, Please upload the images under Files & try again</p>
+						</template>
+					</template>
+
+				</div>
+				<footer class="slds-modal__footer"></footer>
+			</template>
+
+			<template if:true={showAddedImages}>
+				<span slot="header">Resize Image</span>
+				<div class="slds-modal__content slds-p-around_small dx-lrf-std-cstm-1" style="min-height: 240px;">
+					<template if:true={srcs}>
+						 <template if:true={showAddedImages}>
+							<div class="slds-grid slds-wrap slds-p-around_xx-small slds-border_bottom"
+								style="border: 1px solid rgb(229, 229, 229); border-radius: 5px; background: rgb(243, 243, 243);">
+								<div
+									class="slds-col slds-size_1-of-1 slds-medium-size_4-of-12 slds-large-size_4-of-12 slds-m-bottom_xx-small">
+									<lightning-input if:true={showAddedImages} name="enter-search" label="Search" type="search"
+										onchange={handleSearch}></lightning-input>
+								</div>
+							</div>
+						</template> 
+						<div class="slds-grid slds-gutters_xx-small slds-wrap slds-p-top_small">
+							<!---Show following only when SRCS have some images in that list-->
+							<template if:false={showNoImgErr}>
+								<template for:each={srcs} for:item="image" for:index="index">
+
+									<div class="slds-col slds-size_1-of-1 slds-large-size_3-of-12 slds-text-align_center"
+										key={image.Id}>
+										<div class="slds-box slds-box_small  slds-m-bottom_small" key={image.Id}
+											data-id={image.Id} disabled={isDisabled}>
+
+											<img key={image.Id} src={image.URL} alt="User Image"  style="max-height:100px; max-width:100px; min-height:100px;"/>
+											<canvas id="outputCanvas" class="canvasText" width="150px"
+													height="150px"></canvas>
+											<br key={image.Id}/>
+											<br key={image.Id}/>
+											<!-- <lightning-formatted-text value={image.title} key={image.Id}
+												disabled={isDisabled}></lightning-formatted-text> -->
+											<!-----------Code added by Bhavya---------------->
+											<div class="slds-grid slds-gutters_xxx-small" key={image.Id}>
+												<div class="slds-col slds-size_1-of-1 slds-medium-size_4-of-12 slds-large-size_6-of-12">
+													<div class="slds-grid slds-grid_vertical">
+														<div class="slds-col">
+															<span>Width</span>
+														</div>
+														<div class="slds-col">
+																<input type="number" label="" data-label="width" min="0" variant="label-hidden" oninput={handleImageProperties} value={image.width} data-id={image.Id} data-url ={image.URL} style="width:100%;"></input>
+														</div>
+													</div>
+												</div>												
+												<div class="slds-col slds-size_1-of-1 slds-medium-size_4-of-12 slds-large-size_6-of-12">													
+													<div class="slds-grid slds-grid_vertical">
+														<div class="slds-col">
+															<span>Height</span>
+														</div>
+														<div class="slds-col">
+																<input type="number" label="" data-label="height" variant="label-hidden" oninput={handleImageProperties} min="0" value={image.height} data-id={image.Id} data-url ={image.URL} style="width:100%;"></input>
+														</div>
+													</div>
+												</div>
+											</div>
+
+										</div>
+
+									</div>
+									
+								</template>
+								<template if:true={showPreview}>
+									<!-- <lightning-input-rich-text value={updatedRichTextVal} formats={formats} onclick={handleRichTextClicks} disabled></lightning-input-rich-text> -->
+									<h2> Preview </h2>
+									<div style="border: 1px solid #333333;border-radius:3px;width:100%;padding:20px;">
+										<lightning-formatted-rich-text value={updatedRichTextVal}></lightning-formatted-rich-text>
+									</div>
+									<textarea rows="5" cols="200">{updatedRichTextVal}</textarea>
+								</template>
+							</template>
+							<!---Show following when SRCS doesn't have images in that list-->
+							<template if:true={showNoImgErr}>
+								<div>
+									No Images added to Context. Please add Images to Context before you click this modal.
+								</div>
+							</template>
+						</div>
+						
+					</template>
+
+				</div>
+				<footer class="slds-modal__footer">
+					<lightning-button disabled={disableButton} variant="brand" label="Update"
+					onclick={handleResizeUpdate}>
+				</lightning-button>
+				</footer>
+			</template>
+			<!--Code added by Bhavya Ends here -->
 		</c-modal>
-		
+	<!--code added by Bhavya ends here-->
 		<c-modal data-id="filter">
 			<template if:true={ruleCondition}>
 				<span slot="header">Apply Visibility Filter(s)</span>
@@ -117,6 +263,77 @@
 							<lightning-button class="slds-p-right_x-small" variant="brand" label="Create Rule" disabled={isDisabled}
 								title="Create" onclick={handleCreateRules}></lightning-button>
 						</template>
+					</div>
+				</footer>
+			</template>
+		</c-modal>
+
+		<c-modal data-id="poc" onclosedialog = {handleCVIds}>
+			<template lwc:if={showResizeModal}>
+				<c-image-resize-c-m-p images ={srcs} onclosemodal={handleModalClose}></c-image-resize-c-m-p>
+			</template>
+			<template lwc:else>
+				<p>There are no Images in the Selected Context. Please add images to section and come back again.<br/>
+				Thank You</p>
+			</template>
+			
+		</c-modal> 
+		<c-modal data-id="images">
+			<template if:true={isModalOpen}>
+			<span slot="header">Select Image</span>
+			<div class="slds-modal__content slds-p-around_small dx-lrf-std-cstm-1" style="min-height: 240px;">
+			<template if:true={showimages}>
+				<template if:true={imagesfound}>
+					<div class="slds-grid slds-wrap slds-p-around_xx-small slds-border_bottom"
+						style="border: 1px solid rgb(229, 229, 229); border-radius: 5px; background: rgb(243, 243, 243);">
+						<div
+							class="slds-col slds-size_1-of-1 slds-medium-size_4-of-12 slds-large-size_4-of-12 slds-m-bottom_xx-small">
+							<lightning-input if:true={showimages} name="enter-search" label="Search" type="search"
+								onchange={handleSearch}></lightning-input>
+						</div>
+					</div>
+				</template>
+				<div class="slds-grid slds-wrap slds-p-top_small">
+					<template if:true={imagesfound}>
+						<template for:each={imageUrls} for:item="image" for:index="index">
+
+							<div class="slds-col slds-size_1-of-1 slds-large-size_3-of-12 slds-text-align_center"
+								key={image.Id}>
+								<div class="slds-box slds-box_small  slds-m-bottom_small" key={image.Id}
+									data-id={image.Id} onclick={handleselectedImage} disabled={isDisabled}>
+
+									<img key={image.Id} src={image.URL} alt="User Image" height="100px" width="100px"/>
+									<br key={image.Id}/>
+									<br key={image.Id}/>
+									<lightning-formatted-text value={image.title} key={image.Id}
+										disabled={isDisabled}></lightning-formatted-text>
+
+								</div>
+								<!--<lightning-button key={image.Id} data-id={image.Id} variant="brand" label="Select" title="titleName" 
+					onclick={handleselectedImage} disabled={isDisabled}></lightning-button>-->
+							</div>
+
+						</template>
+					</template>
+				</div>
+				<template if:false={imagesfound}>
+					<p>No Images found, Please upload the images under Files & try again</p>
+				</template>
+			</template>
+
+			</div>
+			<footer class="slds-modal__footer"></footer>
+			</template>
+
+			<template lwc:if={showSectionCss}>
+				<span slot="header">Section Custom CSS</span>
+				<lightning-textarea name="input1" label="Section CSS" value={sectioncssval} onchange={handleSectionCSSInput}></lightning-textarea>
+				<footer class="slds-modal__footer">
+					<div class="slds-text-align_right">
+						<lightning-button variant="base" label="Cancel" title="cancel" onclick={handleSecCSSCancel}>
+						</lightning-button>
+						<lightning-button variant="brand" label="Save" title="Save" onclick={handleSecCSSSave}>
+						</lightning-button>
 					</div>
 				</footer>
 			</template>
